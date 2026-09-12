@@ -3,12 +3,12 @@
 CLI entry point for the Omega Hive Appliance.
 
 Usage:
-    python -m cli observe       Run all collectors and store events
-    python -m cli profile       Discover and save hive profile
-    python -m cli incidents      List open incidents
-    python -m cli state          Show current state snapshot
-    python -m cli events         List recent events
-    python -m cli run-plan FILE  Execute a plan from JSON file
+    python cli.py observe       Run all collectors and store events
+    python cli.py profile       Discover and save hive profile
+    python cli.py incidents      List open incidents
+    python cli.py state          Show current state snapshot
+    python cli.py events         List recent events
+    python cli.py run-plan FILE  Execute a plan from JSON file
 """
 from __future__ import annotations
 
@@ -128,7 +128,8 @@ def main():
     elif args.cmd == "state":
         cmd_state(args)
     elif args.cmd == "events":
-        cmd_events    elif args.cmd == "run-plan":
+        cmd_events(args)
+    elif args.cmd == "run-plan":
         cmd_run_plan(args)
     else:
         parser.print_help()

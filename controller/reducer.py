@@ -28,6 +28,10 @@ class Reducer:
         elif event.kind == EventKind.RECEIPT:
             self._handle_receipt(event)
 
+        # Store new incidents in self.incidents
+        for inc in new_incidents:
+            self.incidents.append(inc)
+
         # Update state with latest observation
         if event.subject:
             self.state.setdefault(event.subject, {})
