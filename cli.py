@@ -3,12 +3,14 @@
 CLI entry point for the Omega Hive Appliance.
 
 Usage:
-    python cli.py observe       Run all collectors and store events
-    python cli.py profile       Discover and save hive profile
-    python cli.py incidents      List open incidents
-    python cli.py state          Show current state snapshot
-    python cli.py events         List recent events
-    python cli.py run-plan FILE  Execute a plan from JSON file
+    python cli.py observe              Run all collectors and store events
+    python cli.py profile              Discover and save hive profile
+    python cli.py incidents            List open incidents
+    python cli.py state                Show current state snapshot
+    python cli.py events               List recent events
+    python cli.py repair               Repair all open incidents
+    python cli.py repair --dry-run     Preview repair plans without executing
+    python cli.py run-plan FILE        Execute a plan from JSON file
 """
 from __future__ import annotations
 
@@ -23,11 +25,25 @@ from collectors.file_collector import FileCollector
 from profiles.manager import ProfileManager
 
 
-def cmd_observe(args):
-    app = Appliance(args.store)
+def _build_appliance(store_path: str, dry_run: bool = False) -> Appliance:
+    """Build a fully wired appliance with all M1 components."""
+    from reasoning.planner import SimplePlanner
+    from executor.shell_executor import ShellExecutor
+    from executor.noop_executor import NoopExecutor
+    from verifier.exit_code_verifier import ExitCodeVerifier
+
+    app = Appliance(store_path)
     app.add_collector(HostCollector())
     app.add_collector(ServiceCollector())
     app.add_collector(FileCollector())
+    app.set_planner(SimplePlanner())
+    app.set_executor(NoopExecutor() if dry_run else ShellExecutor())
+    app.set_verifier(ExitCodeVerifier())
+    return app
+
+
+def cmd_observe(args):
+    app = _build_appliance(args.store)
     events = app.observe()
     print(f"Collected {len(events)} events")
     for e in events[-5:]:
@@ -76,6 +92,45 @@ def cmd_events(args):
     app.close()
 
 
+def cmd_repair(args):
+    app = _build_appliance(args.store, dry_run=args.dry_run)
+    # Observe first to detect incidents
+    app.observe()
+    incidents = app.open_incidents()
+    if not incidents:
+        print("No open incidents to repair.")
+        app.close()
+        return
+
+    mode = "DRY-RUN" if args.dry_run else "LIVE"
+    print(f"Repairing {len(incidents)} incident(s) [{mode}]")
+    print()
+
+    results = app.repair_all(dry_run=args.dry_run)
+    for inc_id, receipts in results.items():
+        inc = next((i for i in incidents if i.id == inc_id), None)
+        if inc:
+            print(f"Incident {inc_id}: [{inc.severity.value}] {inc.component} - {inc.symptom}")
+        else:
+            print(f"Incident {inc_id}:")
+        for r in receipts:
+            status = "VERIFIED" if r.verified else "FAILED"
+            print(f"  Step {r.step_index}: {r.verb} -> exit={r.exit_code} [{status}]")
+            if r.stdout:
+                print(f"    stdout: {r.stdout[:200]}")
+            if r.stderr:
+                print(f"    stderr: {r.stderr[:200]}")
+        print()
+
+    # Summary
+    total = sum(len(v) for v in results.values())
+    verified = sum(1 for v in results.values() for r in v if r.verified)
+    print(f"Total steps: {total}, Verified: {verified}, Failed: {total - verified}")
+    remaining = app.open_incidents()
+    print(f"Remaining open incidents: {len(remaining)}")
+    app.close()
+
+
 def cmd_run_plan(args):
     from executor.shell_executor import ShellExecutor
     from verifier.exit_code_verifier import ExitCodeVerifier
@@ -114,8 +169,12 @@ def main():
     ev = sub.add_parser("events", help="List recent events")
     ev.add_argument("--limit", type=int, default=20)
 
-    rp = sub.add_parser("run-plan", help="Execute a plan from JSON")
-    rp.add_argument("file", help="Path to plan JSON file")
+    rp = sub.add_parser("repair", help="Repair all open incidents")
+    rp.add_argument("--dry-run", action="store_true",
+                    help="Preview repair plans without executing commands")
+
+    rp2 = sub.add_parser("run-plan", help="Execute a plan from JSON")
+    rp2.add_argument("file", help="Path to plan JSON file")
 
     args = parser.parse_args()
 
@@ -129,6 +188,8 @@ def main():
         cmd_state(args)
     elif args.cmd == "events":
         cmd_events(args)
+    elif args.cmd == "repair":
+        cmd_repair(args)
     elif args.cmd == "run-plan":
         cmd_run_plan(args)
     else:

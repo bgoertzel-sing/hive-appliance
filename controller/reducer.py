@@ -2,6 +2,7 @@
 Controller reducer: processes events and produces state updates and incidents.
 
 C01 work package — typed records and event store integration.
+C07 work package — service_down incident detection.
 """
 from __future__ import annotations
 
@@ -48,6 +49,17 @@ class Reducer:
                 severity=Severity.WARN,
                 component=event.subject,
                 symptom="file_missing",
+                evidence=[event.to_dict()],
+            ))
+
+        # Check for service down (from ServiceCollector)
+        payload = event.payload
+        if (payload.get("active") in ("inactive", "failed") 
+                and payload.get("exists", False)):
+            incidents.append(IncidentReport(
+                severity=Severity.ERROR,
+                component=event.payload.get("service", event.subject),
+                symptom="service_down",
                 evidence=[event.to_dict()],
             ))
 

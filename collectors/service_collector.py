@@ -1,7 +1,7 @@
 """
-Service-level collector: discovers running services and their health.
+Service-level collector: discovers systemd services and their status.
 
-C00 work package — profile discovery.
+C00/C02 work package — service observation with health detection.
 """
 from __future__ import annotations
 
@@ -9,64 +9,69 @@ import subprocess
 from typing import Any
 
 from collectors.base import BaseCollector
-from schemas.types import Event, Severity, Resource, ResourceKind
+from schemas.types import Event, Severity
 
 
 class ServiceCollector(BaseCollector):
-    """Collects information about running services."""
+    """Collects systemd service status information.
+
+    Monitors a configurable list of services and emits WARN events
+    for services that are inactive or failed.
+    """
 
     name = "service_collector"
 
+    def __init__(self, services: list[str] | None = None):
+        self.services = services or [
+            "ssh",
+            "cron",
+            "rsyslog",
+            "systemd-journald",
+        ]
+
     def collect(self) -> list[Event]:
         events: list[Event] = []
-        services = self._list_services()
-        for svc in services:
-            events.append(self.emit(
-                svc["name"],
-                {"state": svc.get("state", "unknown"),
-                 "type": svc.get("type", "unknown")},
-                severity=Severity.INFO,
-            ))
+        for svc in self.services:
+            status = self._query_service(svc)
+            severity = Severity.INFO
+            if status.get("active") == "inactive" or status.get("active") == "failed":
+                severity = Severity.WARN
+            events.append(self.emit(svc, status, severity=severity))
         return events
 
-    def _list_services(self) -> list[dict[str, Any]]:
-        services: list[dict[str, Any]] = []
-        # Try systemctl
+    def _query_service(self, svc: str) -> dict[str, Any]:
+        """Query a single systemd service."""
+        payload: dict[str, Any] = {"service": svc, "exists": False}
+
+        # Check if systemd is available
         try:
             result = subprocess.run(
-                ["systemctl", "list-units", "--type=service",
-                 "--no-legend", "--no-pager"],
+                ["systemctl", "is-active", svc],
                 capture_output=True, text=True, timeout=5
             )
-            if result.returncode == 0:
-                for line in result.stdout.strip().splitlines():
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        services.append({
-                            "name": parts[0],
-                            "load": parts[1],
-                            "active": parts[2],
-                            "sub": parts[3],
-                            "state": parts[3],
-                            "type": "systemd",
-                        })
-        except Exception:
-            pass
-        # Fallback: ps
-        if not services:
-            try:
-                result = subprocess.run(
-                    ["ps", "aux"], capture_output=True, text=True, timeout=5
-                )
-                if result.returncode == 0:
-                    for line in result.stdout.strip().splitlines()[1:]:
-                        parts = line.split(None, 10)
-                        if len(parts) >= 11:
-                            services.append({
-                                "name": parts[10][:60],
-                                "state": "running",
-                                "type": "process",
-                            })
-            except Exception:
-                pass
-        return services
+            active_state = result.stdout.strip()
+            payload["active"] = active_state
+            payload["exists"] = True
+
+            if result.returncode != 0 and active_state not in ("active",):
+                payload["down"] = True
+
+            # Also get the full status for richer info
+            result2 = subprocess.run(
+                ["systemctl", "is-enabled", svc],
+                capture_output=True, text=True, timeout=5
+            )
+            payload["enabled"] = result2.stdout.strip()
+
+        except FileNotFoundError:
+            # systemctl not available (non-systemd environment)
+            payload["error"] = "systemctl not found"
+            payload["exists"] = False
+        except subprocess.TimeoutExpired:
+            payload["error"] = f"timeout querying {svc}"
+            payload["exists"] = True
+        except Exception as e:
+            payload["error"] = str(e)
+            payload["exists"] = False
+
+        return payload

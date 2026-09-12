@@ -18,6 +18,14 @@ A managed hive appliance for OpenClaw/OmegaClaw environments with:
 - **M3**: State recovery and controlled upgrades (C09–C10)
 - **M4**: NixOS VM backend (C12)
 
+## Status
+
+- **M0** ✅ Complete — Observe one existing hive (C00–C03): collectors, event store, reducer, profiles
+- **M1** ✅ Complete — Execute controlled repairs (C04–C07): planner, executor, verifier, repair loop, dry-run mode
+- **M2** 🔲 Reproducible packaging (C08)
+- **M3** 🔲 State recovery and controlled upgrades (C09–C10)
+- **M4** 🔲 NixOS VM backend (C12)
+
 ## Structure
 
 ```
