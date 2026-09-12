@@ -5,6 +5,9 @@ import os
 import importlib
 import traceback
 
+# Ensure pytest shim is loaded before any test module imports pytest
+import conftest  # noqa: F401
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class TestRunner:
