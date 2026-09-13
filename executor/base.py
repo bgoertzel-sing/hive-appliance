@@ -1,64 +1,80 @@
 """
-Base executor interface for controlled repair actions.
+Executor interface and base implementation.
 
-C03 work package — controlled repair executor.
+P0 fixes:
+  F6: Executor no longer sets verified; only returns raw execution results.
 """
 from __future__ import annotations
 
-import abc
 import subprocess
 import time
 from typing import Any
 
-from schemas.types import Receipt, Plan
+from schemas.types import Receipt, Plan, ALLOWED_VERBS
 
 
-class BaseExecutor(abc.ABC):
-    """Abstract base for all executors."""
+class BaseExecutor:
+    """Base class for executors that run repair steps."""
 
-    name: str = "base"
+    def execute_step(self, step: dict[str, Any], plan: Plan,
+                     index: int) -> Receipt:
+        """Execute a single step and return a Receipt.
 
-    @abc.abstractmethod
-    def execute_step(self, step: dict[str, Any], plan: Plan, step_index: int) -> Receipt:
-        """Execute a single plan step and return a receipt."""
-        ...
+        F6: The receipt.verified field is NOT set here.
+        Only the independent verifier should set verified.
+        """
+        raise NotImplementedError
 
-    def _run_command(self, command: list[str], timeout: int = 30) -> Receipt:
-        """Helper to run a shell command and build a receipt."""
+    def execute(self, plan: Plan) -> list[Receipt]:
+        """Execute all steps in a plan."""
+        receipts: list[Receipt] = []
+        for i, step in enumerate(plan.steps):
+            receipt = self.execute_step(step, plan, i)
+            receipts.append(receipt)
+        return receipts
+
+
+class ShellExecutor(BaseExecutor):
+    """Executes shell commands for repair steps."""
+
+    def execute_step(self, step: dict[str, Any], plan: Plan,
+                     index: int) -> Receipt:
+        verb = step.get("verb", "")
+        command = step.get("command", "")
+        target = step.get("target", "")
+        timeout = step.get("timeout", 30)
+
         start = time.time()
         try:
             result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
             )
-            elapsed = (time.time() - start) * 1000
+            duration_ms = (time.time() - start) * 1000
             return Receipt(
-                verb=command[0] if command else "",
-                target=" ".join(command[1:]) if len(command) > 1 else "",
+                plan_id=plan.id,
+                step_index=index,
+                verb=verb,
+                target=target,
                 exit_code=result.returncode,
                 stdout=result.stdout,
                 stderr=result.stderr,
-                duration_ms=elapsed,
-                verified=(result.returncode == 0),
+                duration_ms=duration_ms,
+                verified=False,  # F6: NOT set by executor
             )
-        except subprocess.TimeoutExpired:
-            elapsed = (time.time() - start) * 1000
+        except subprocess.TimeoutExpired as e:
+            duration_ms = (time.time() - start) * 1000
             return Receipt(
-                verb=command[0] if command else "",
-                target=" ".join(command[1:]) if len(command) > 1 else "",
+                plan_id=plan.id,
+                step_index=index,
+                verb=verb,
+                target=target,
                 exit_code=-1,
-                stdout="",
-                stderr=f"Timeout after {timeout}s",
-                duration_ms=elapsed,
-                verified=False,
-            )
-        except Exception as e:
-            elapsed = (time.time() - start) * 1000
-            return Receipt(
-                verb=command[0] if command else "",
-                target=" ".join(command[1:]) if len(command) > 1 else "",
-                exit_code=-2,
-                stdout="",
-                stderr=str(e),
-                duration_ms=elapsed,
+                stdout=e.stdout.decode() if e.stdout else "",
+                stderr=e.stderr.decode() if e.stderr else str(e),
+                duration_ms=duration_ms,
                 verified=False,
             )

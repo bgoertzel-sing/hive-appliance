@@ -1,34 +1,37 @@
 """
-Noop executor: simulates repair steps without running commands.
+No-op executor for dry-run / simulation mode.
 
-C04 work package — dry-run safety control.
+P0 fixes:
+  F5: NoOpExecutor returns simulated receipts that are NOT verified.
+  F6: Does not set verified=True.
 """
 from __future__ import annotations
 
 from typing import Any
 
-from executor.base import BaseExecutor
 from schemas.types import Receipt, Plan
 
 
-class NoopExecutor(BaseExecutor):
-    """Executes no commands — records what would be done.
+class NoopExecutor:
+    """Executor that does nothing but records simulated receipts."""
 
-    Used in dry-run mode to preview repair plans without side effects.
-    """
-
-    name = "noop_executor"
-
-    def execute_step(self, step: dict[str, Any], plan: Plan, step_index: int) -> Receipt:
-        command_str = step.get("command", "")
+    def execute_step(self, step: dict[str, Any], plan: Plan,
+                     index: int) -> Receipt:
         return Receipt(
             plan_id=plan.id,
-            step_index=step_index,
-            verb=step.get("verb", "noop"),
-            target=command_str,
+            step_index=index,
+            verb=step.get("verb", ""),
+            target=step.get("target", ""),
             exit_code=0,
-            stdout=f"[dry-run] would execute: {command_str}",
+            stdout="[noop]",
             stderr="",
             duration_ms=0.0,
-            verified=True,  # Always verified in dry-run (no actual execution)
+            verified=False,  # F5/F6: NOT verified
+            simulated=True,
         )
+
+    def execute(self, plan: Plan) -> list[Receipt]:
+        receipts: list[Receipt] = []
+        for i, step in enumerate(plan.steps):
+            receipts.append(self.execute_step(step, plan, i))
+        return receipts

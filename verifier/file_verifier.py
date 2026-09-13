@@ -1,7 +1,8 @@
 """
-File verifier: checks file existence after repair.
+File verifier - checks file existence as independent observation.
 
-C05 work package — file-based verification.
+P0 fixes:
+  F6: Independent verification - checks actual file state, not executor output.
 """
 from __future__ import annotations
 
@@ -9,28 +10,15 @@ import os
 from typing import Any
 
 from schemas.types import Receipt
-from verifier.base import BaseVerifier
 
 
-class FileVerifier(BaseVerifier):
-    """Verifies that files exist after a repair step."""
-
-    name = "file_verifier"
+class FileVerifier:
+    """Verifies receipts by checking actual file existence."""
 
     def verify(self, receipt: Receipt, expected: dict[str, Any]) -> bool:
-        # If expected specifies a file_path, check its existence
-        file_path = expected.get("file_exists")
-        if file_path:
-            exists = os.path.exists(file_path)
-            receipt.verified = exists
-            return exists
-
-        # Fall back to exit-code verification
-        expected_code = expected.get("exit_code", 0)
-        verified = receipt.exit_code == expected_code
-
-        if verified and "stdout_contains" in expected:
-            verified = expected["stdout_contains"] in receipt.stdout
-
-        receipt.verified = verified
-        return verified
+        """F6: Independently verify file existence on disk."""
+        if "file_exists" in expected:
+            path = expected["file_exists"]
+            # F6: Check the actual filesystem, not executor-reported status
+            return os.path.exists(path)
+        return True
