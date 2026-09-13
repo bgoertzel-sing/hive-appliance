@@ -2,7 +2,7 @@
 CLI interface for the Omega Hive Appliance.
 
 P0 fixes:
-  F1: Removed run-plan bypass command; all dispatch goes through appliance.
+  F1: All dispatch goes through the appliance repair() method.
   F3: Requires --recovery-ready for live repairs.
 """
 from __future__ import annotations
