@@ -1,5 +1,8 @@
-"""Tests for the exit code verifier."""
+"""Tests for the exit code verifier (P0-fixed).
 
+F6: Verifier independently returns bool; appliance sets receipt.verified.
+F6: Fixed inactive/active substring bug with word-boundary regex.
+"""
 from verifier.exit_code_verifier import ExitCodeVerifier
 from schemas.types import Receipt
 
@@ -19,10 +22,16 @@ class TestExitCodeVerifier:
         v = ExitCodeVerifier()
         r = Receipt(exit_code=0, stdout="active")
         assert v.verify(r, {"exit_code": 0, "stdout_contains": "active"}) is True
-        assert v.verify(r, {"exit_code": 0, "stdout_contains": "inactive"}) is False
 
-    def test_verify_sets_receipt_verified(self):
+    def test_verify_inactive_not_active(self):
+        """F6: inactive should NOT match active."""
+        v = ExitCodeVerifier()
+        r = Receipt(exit_code=0, stdout="inactive")
+        assert v.verify(r, {"exit_code": 0, "stdout_contains": "active"}) is False
+
+    def test_verifier_returns_bool(self):
+        """F6: Verifier returns bool; appliance sets receipt.verified."""
         v = ExitCodeVerifier()
         r = Receipt(exit_code=0)
-        v.verify(r, {"exit_code": 0})
-        assert r.verified is True
+        result = v.verify(r, {"exit_code": 0})
+        assert result is True

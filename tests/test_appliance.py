@@ -1,5 +1,4 @@
-"""Tests for the appliance controller."""
-
+"""Tests for the appliance controller (P0-fixed)."""
 from controller.appliance import Appliance
 from schemas.types import Event, EventKind, Severity, IncidentReport
 
@@ -22,6 +21,7 @@ class TestAppliance:
         app.close()
 
     def test_record_incident(self):
+        """F10: Appliance can record incidents directly."""
         app = Appliance(":memory:")
         inc = IncidentReport(component="disk", symptom="full")
         app.record_incident(inc)
@@ -32,4 +32,19 @@ class TestAppliance:
         app = Appliance(":memory:")
         snap = app.state_snapshot()
         assert "state" in snap
+        app.close()
+
+    def test_replay_on_startup(self):
+        """F10: Appliance replays events from store on startup."""
+        from schemas.event_store import EventStore
+        s = EventStore()
+        s.append(Event(kind=EventKind.OBSERVATION, source="file_collector",
+                       subject="/etc/missing",
+                       payload={"exists": False, "path": "/etc/missing"}))
+        from controller.appliance import Appliance as App
+        import controller.appliance as appmod
+        with __import__('unittest.mock').mock.patch.object(appmod, 'EventStore', return_value=s):
+            app = App(":memory:")
+        # F10: Should have replayed the event and found the incident
+        assert len(app.open_incidents()) == 1
         app.close()

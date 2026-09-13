@@ -20,7 +20,9 @@ class Reducer:
     def __init__(self):
         self.incidents: list[IncidentReport] = []
         self.state: dict[str, Any] = {}
-        # F10: Track resolved plan IDs for composite verification
+        # F10: Track seen incident IDs for dedup
+        self._seen_incident_ids: set[str] = set()
+        # F7: Track plan receipts for composite verification
         self._plan_receipts: dict[str, list[bool]] = {}
         self._plan_step_counts: dict[str, int] = {}
 
@@ -37,12 +39,13 @@ class Reducer:
         elif event.kind == EventKind.PLAN:
             self._handle_plan(event)
 
+        # F10: Deduplicate incidents
         for inc in new_incidents:
-            # F10: Dedup - don't add if incident with same ID already exists
-            existing = [i for i in self.incidents if i.id == inc.id]
-            if not existing:
+            if inc.id not in self._seen_incident_ids:
                 self.incidents.append(inc)
+                self._seen_incident_ids.add(inc.id)
 
+        # Update state
         if event.subject:
             self.state.setdefault(event.subject, {})
             self.state[event.subject].update(event.payload)
@@ -52,14 +55,14 @@ class Reducer:
     def _handle_observation(self, event: Event) -> list[IncidentReport]:
         incidents: list[IncidentReport] = []
         payload = event.payload
+        source = event.source.lower()
 
-        # F12: Only generate file_missing if this is actually a file observation
-        # Check if the source is a file collector or if payload indicates a file
-        is_file = (event.source == "FileCollector" or
-                   payload.get("resource_kind") == "file" or
-                   ("path" in payload and "service" not in payload))
+        is_file_source = ("file" in source or
+                          payload.get("resource_kind") == "file" or
+                          "service" not in source)
+        is_service_source = "service" in source or "service" in payload
 
-        if payload.get("exists") is False and is_file:
+        if payload.get("exists") is False and is_file_source and not is_service_source:
             inc = IncidentReport.deterministic(
                 component=event.subject,
                 symptom="file_missing",
@@ -68,7 +71,7 @@ class Reducer:
             )
             incidents.append(inc)
 
-        # Check for service down (from ServiceCollector)
+        # Service down
         if (payload.get("active") in ("inactive", "failed")
                 and payload.get("exists", False)):
             inc = IncidentReport.deterministic(
@@ -79,8 +82,8 @@ class Reducer:
             )
             incidents.append(inc)
 
-        # Check for error payloads
-        if "error" in event.payload:
+        # Error payloads
+        if "error" in payload:
             inc = IncidentReport.deterministic(
                 component=event.subject,
                 symptom="collection_error",
@@ -93,12 +96,11 @@ class Reducer:
 
     def _handle_incident(self, event: Event) -> None:
         incident = IncidentReport.from_dict(event.payload)
-        existing = [i for i in self.incidents if i.id == incident.id]
-        if not existing:
+        if incident.id not in self._seen_incident_ids:
             self.incidents.append(incident)
+            self._seen_incident_ids.add(incident.id)
 
     def _handle_plan(self, event: Event) -> None:
-        """F10: Track plan step count for composite verification."""
         plan_payload = event.payload
         plan_id = plan_payload.get("id", "")
         step_count = len(plan_payload.get("steps", []))
@@ -120,7 +122,6 @@ class Reducer:
         self._plan_receipts.setdefault(plan_id, [])
         self._plan_receipts[plan_id].append(True)
 
-        # F7: Check if all steps have been verified
         expected = self._plan_step_counts.get(plan_id, 0)
         actual = len(self._plan_receipts[plan_id])
 
@@ -130,7 +131,7 @@ class Reducer:
                     inc.resolved = True
 
     def resolve_incident(self, incident_id: str, plan_id: str) -> None:
-        """Explicitly resolve an incident (called by appliance on composite success)."""
+        """Explicitly resolve an incident (called by appliance)."""
         for inc in self.incidents:
             if inc.id == incident_id:
                 inc.resolved = True

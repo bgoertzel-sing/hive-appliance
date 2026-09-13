@@ -7,16 +7,19 @@ P0 fixes:
 """
 from __future__ import annotations
 
-from typing import Any
-
 from schemas.types import Receipt, Plan
 
 
 class NoopExecutor:
-    """Executor that does nothing but records simulated receipts."""
+    """Executor that does nothing but records simulated receipts.
 
-    def execute_step(self, step: dict[str, Any], plan: Plan,
-                     index: int) -> Receipt:
+    F5: In dry-run mode, receipts are simulated and NOT verified.
+    F6: Does not set verified=True (verifier does that independently).
+    """
+
+    name = "noop_executor"
+
+    def execute_step(self, step: dict, plan: Plan, index: int) -> Receipt:
         return Receipt(
             plan_id=plan.id,
             step_index=index,

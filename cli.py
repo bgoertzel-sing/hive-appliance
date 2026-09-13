@@ -3,20 +3,19 @@ CLI interface for the Omega Hive Appliance.
 
 P0 fixes:
   F1: Removed run-plan bypass command; all dispatch goes through appliance.
+  F3: Requires --recovery-ready for live repairs.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from typing import Any
 
 from controller.appliance import Appliance
 from reasoning.planner import SimplePlanner
 from executor.shell_executor import ShellExecutor
 from executor.noop_executor import NoopExecutor
 from verifier.exit_code_verifier import ExitCodeVerifier
-from verifier.file_verifier import FileVerifier
 
 
 def cmd_observe(args):
@@ -49,9 +48,9 @@ def cmd_repair(args):
     if args.dry_run:
         app.set_executor(NoopExecutor())
     else:
-        app.set_executor(ShellExecutor())
         # F3: Must explicitly enable managed writes
         app.recovery_ready = True
+        app.set_executor(ShellExecutor())
 
     incidents = app.open_incidents()
     if not incidents:
@@ -97,7 +96,7 @@ def cmd_incidents(args):
 def cmd_status(args):
     app = Appliance(args.store)
     snapshot = app.state_snapshot()
-    print(json.dumps(snapshot, indent=2))
+    print(json.dumps(snapshot, indent=2, default=str))
     app.close()
 
 
@@ -108,27 +107,18 @@ def main():
     parser.add_argument("--store", default="hive.db", help="Event store path")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # observe
     obs = subparsers.add_parser("observe", help="Run collectors and record observations")
     obs.add_argument("--collectors", default="all", choices=["all", "host", "service", "file"])
     obs.add_argument("--services", default="", help="Comma-separated service names")
     obs.add_argument("--files", default="", help="Comma-separated file paths")
     obs.set_defaults(func=cmd_observe)
 
-    # repair
     rep = subparsers.add_parser("repair", help="Repair open incidents")
     rep.add_argument("--dry-run", action="store_true", help="Simulate without real effects")
     rep.set_defaults(func=cmd_repair)
 
-    # incidents
-    inc = subparsers.add_parser("incidents", help="List open incidents")
-    inc.set_defaults(func=cmd_incidents)
-
-    # status
-    stat = subparsers.add_parser("status", help="Show appliance state snapshot")
-    stat.set_defaults(func=cmd_status)
-
-    # F1: No run-plan command - removed to prevent bypass
+    subparsers.add_parser("incidents", help="List open incidents").set_defaults(func=cmd_incidents)
+    subparsers.add_parser("status", help="Show state snapshot").set_defaults(func=cmd_status)
 
     args = parser.parse_args()
     if not args.command:

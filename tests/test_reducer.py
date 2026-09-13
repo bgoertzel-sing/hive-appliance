@@ -1,5 +1,9 @@
-"""Tests for the controller reducer."""
+"""Tests for the controller reducer.
 
+P0 fix: F7 - Individual receipts no longer resolve incidents.
+         Only composite (all steps verified) resolves.
+         F10: Deterministic incident IDs for stable replay.
+"""
 from controller.reducer import Reducer
 from schemas.types import Event, EventKind, Severity, IncidentReport
 
@@ -34,22 +38,34 @@ class TestReducer:
 
     def test_open_incidents(self):
         r = Reducer()
-        e = Event(kind=EventKind.OBSERVATION, source="f",
+        e = Event(kind=EventKind.OBSERVATION, source="file_collector",
                   subject="/missing", payload={"exists": False})
         r.reduce(e)
         assert len(r.open_incidents()) == 1
 
-    def test_receipt_resolves_incident(self):
+    def test_receipt_does_not_resolve_incident(self):
+        """F7: Individual receipts should NOT resolve incidents.
+        Only the appliance's composite success check resolves.
+        """
         r = Reducer()
         inc = IncidentReport(component="/etc/test", symptom="file_missing",
                              plan_id="plan_123")
         r.incidents.append(inc)
         assert len(r.open_incidents()) == 1
 
-        # Simulate a verified receipt
+        # Simulate a single verified receipt - should NOT resolve
         e = Event(kind=EventKind.RECEIPT, source="verifier",
                   subject="/etc/test", payload={"plan_id": "plan_123", "verified": True})
         r.reduce(e)
+        assert len(r.open_incidents()) == 1  # F7: still open
+
+    def test_resolve_incident_explicit(self):
+        """F7: Explicit resolution via resolve_incident works."""
+        r = Reducer()
+        inc = IncidentReport(component="/etc/test", symptom="file_missing",
+                             plan_id="plan_123")
+        r.incidents.append(inc)
+        r.resolve_incident(inc.id, "plan_123")
         assert len(r.open_incidents()) == 0
 
     def test_snapshot(self):
