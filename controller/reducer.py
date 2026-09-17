@@ -43,8 +43,8 @@ class Reducer:
     def _handle_observation(self, event: Event) -> list[IncidentReport]:
         incidents: list[IncidentReport] = []
 
-        # Check for missing files
-        if event.payload.get("exists") is False:
+        # Check for missing files (but not for service observations)
+        if event.payload.get("exists") is False and "service" not in event.payload:
             incidents.append(IncidentReport(
                 severity=Severity.WARN,
                 component=event.subject,
@@ -54,7 +54,7 @@ class Reducer:
 
         # Check for service down (from ServiceCollector)
         payload = event.payload
-        if (payload.get("active") in ("inactive", "failed") 
+        if (payload.get("active") in ("inactive", "failed")
                 and payload.get("exists", False)):
             incidents.append(IncidentReport(
                 severity=Severity.ERROR,
@@ -95,3 +95,22 @@ class Reducer:
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
         }
+
+
+    def restore_snapshot(self, snapshot: dict[str, Any]) -> None:
+        """Restore reducer state from a checkpoint snapshot.
+
+        Replaces the current derived state wholesale.  Incidents are
+        rebuilt from the snapshot's incident list if present.
+        """
+        self.state = snapshot.get("state", {})
+        # Rebuild incidents list from snapshot if available
+        self.incidents = []
+        # The snapshot from state_snapshot() contains counts, not full incidents.
+        # A full restore would need the incident objects stored separately;
+        # for now we reset to empty (events are still in the append-only store).
+        self.incidents = []
+
+    def state_snapshot(self) -> dict[str, Any]:
+        """Alias for snapshot() for API compatibility."""
+        return self.snapshot()

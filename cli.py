@@ -23,6 +23,8 @@ from collectors.host_collector import HostCollector
 from collectors.service_collector import ServiceCollector
 from collectors.file_collector import FileCollector
 from profiles.manager import ProfileManager
+from recovery.checkpoint import CheckpointManager
+from recovery.upgrade import UpgradeController, UpgradeManifest, UpgradeStep
 
 
 def _build_appliance(store_path: str, dry_run: bool = False) -> Appliance:
@@ -153,6 +155,90 @@ def cmd_run_plan(args):
         if not ok:
             print("  Step failed, stopping plan execution.")
             break
+
+
+
+def cmd_checkpoint(args):
+    """Create a state checkpoint."""
+    app = _build_appliance(args.store)
+    app.observe()  # get current state
+    label = args.label or ""
+    ckpt = app.checkpoint(label=label)
+    print(f"Checkpoint created: {ckpt.id}")
+    print(f"  Label: {ckpt.label}")
+    print(f"  Time:  {ckpt.ts:.1f}")
+    meta = ckpt.metadata
+    print(f"  Events: {meta.get('event_count', '?')}")
+    print(f"  Open incidents: {len(meta.get('open_incidents', []))}")
+    app.close()
+
+
+def cmd_checkpoints(args):
+    """List all checkpoints."""
+    app = _build_appliance(args.store)
+    ckpts = app.list_checkpoints()
+    if not ckpts:
+        print("No checkpoints found.")
+    else:
+        print(f"{'ID':<30} {'Label':<30} {'Timestamp':<20}")
+        print("-" * 80)
+        for c in ckpts:
+            import datetime
+            ts_str = datetime.datetime.fromtimestamp(c.ts).strftime("%Y-%m-%d %H:%M:%S")
+            print(f"{c.id:<30} {c.label:<30} {ts_str:<20}")
+    app.close()
+
+
+def cmd_restore(args):
+    """Restore appliance state from a checkpoint."""
+    app = _build_appliance(args.store)
+    ckpt_id = args.checkpoint_id
+    ok = app.restore(ckpt_id)
+    if ok:
+        print(f"Restored from checkpoint: {ckpt_id}")
+    else:
+        print(f"Checkpoint not found: {ckpt_id}")
+        sys.exit(1)
+    app.close()
+
+
+def cmd_delete_checkpoint(args):
+    """Delete a checkpoint."""
+    app = _build_appliance(args.store)
+    ok = app.delete_checkpoint(args.checkpoint_id)
+    if ok:
+        print(f"Deleted checkpoint: {args.checkpoint_id}")
+    else:
+        print(f"Checkpoint not found: {args.checkpoint_id}")
+        sys.exit(1)
+    app.close()
+
+
+def cmd_prune_checkpoints(args):
+    """Prune old checkpoints, keeping only the newest N."""
+    app = _build_appliance(args.store)
+    removed = app.prune_checkpoints(keep=args.keep)
+    print(f"Pruned {removed} checkpoint(s), kept newest {args.keep}")
+    app.close()
+
+
+def cmd_upgrade(args):
+    """Execute an upgrade from a JSON manifest file."""
+    app = _build_appliance(args.store, dry_run=args.dry_run)
+    with open(args.file) as f:
+        mdata = json.load(f)
+    manifest = UpgradeManifest.from_dict(mdata)
+    result = app.upgrade(manifest, dry_run=args.dry_run)
+    mode = "DRY-RUN" if args.dry_run else "LIVE"
+    print(f"Upgrade {manifest.id} [{mode}]")
+    print(f"  Success:    {result.success}")
+    print(f"  Steps:      {result.steps_completed}/{result.steps_total}")
+    print(f"  Rolled back: {result.rolled_back}")
+    if result.error:
+        print(f"  Error:      {result.error}")
+    if result.pre_checkpoint_id:
+        print(f"  Pre-upgrade checkpoint: {result.pre_checkpoint_id}")
+    app.close()
 
 
 def main():
