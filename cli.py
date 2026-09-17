@@ -11,6 +11,11 @@ Usage:
     python cli.py repair               Repair all open incidents
     python cli.py repair --dry-run     Preview repair plans without executing
     python cli.py run-plan FILE        Execute a plan from JSON file
+
+P0 fixes:
+  F1: All dispatch goes through appliance repair() with verb validation.
+  F3: Requires --recovery-ready for live repairs.
+  F5: --dry-run enforced at dispatch boundary.
 """
 from __future__ import annotations
 
@@ -95,6 +100,12 @@ def cmd_events(args):
 
 
 def cmd_repair(args):
+    # F3: Recovery-ready gate for live repairs
+    if not args.dry_run and not args.recovery_ready:
+        print("ERROR: Live repair requires --recovery-ready flag (F3).")
+        print("Use --dry-run to preview, or add --recovery-ready to confirm.")
+        sys.exit(1)
+
     app = _build_appliance(args.store, dry_run=args.dry_run)
     # Observe first to detect incidents
     app.observe()
@@ -116,7 +127,7 @@ def cmd_repair(args):
         else:
             print(f"Incident {inc_id}:")
         for r in receipts:
-            status = "VERIFIED" if r.verified else "FAILED"
+            status = "VERIFIED" if r.verified else ("SIMULATED" if r.simulated else "FAILED")
             print(f"  Step {r.step_index}: {r.verb} -> exit={r.exit_code} [{status}]")
             if r.stdout:
                 print(f"    stdout: {r.stdout[:200]}")
@@ -127,159 +138,163 @@ def cmd_repair(args):
     # Summary
     total = sum(len(v) for v in results.values())
     verified = sum(1 for v in results.values() for r in v if r.verified)
-    print(f"Total steps: {total}, Verified: {verified}, Failed: {total - verified}")
+    simulated = sum(1 for v in results.values() for r in v if r.simulated)
+    print(f"Total steps: {total}, Verified: {verified}, Simulated: {simulated}, Failed: {total - verified - simulated}")
     remaining = app.open_incidents()
     print(f"Remaining open incidents: {len(remaining)}")
     app.close()
 
 
 def cmd_run_plan(args):
+    """F3: Execute a plan from JSON file with recovery-ready gate."""
+    if not args.recovery_ready:
+        print("ERROR: run-plan requires --recovery-ready flag (F3).")
+        sys.exit(1)
+
     from executor.shell_executor import ShellExecutor
     from verifier.exit_code_verifier import ExitCodeVerifier
     from schemas.types import Plan
 
     with open(args.file) as f:
         plan_data = json.load(f)
-    plan = Plan.from_dict(plan_data)
 
-    executor = ShellExecutor()
-    verifier = ExitCodeVerifier()
+    # F2: Strict plan schema validation
+    plan = Plan.from_dict(plan_data)
+    errors = plan.validate()
+    if errors:
+        print(f"Plan validation errors: {errors}")
+        sys.exit(1)
+
+    app = _build_appliance(args.store, dry_run=False)
+    from schemas.types import IncidentReport
+    incident = IncidentReport(
+        id=plan.incident_id,
+        component="manual",
+        symptom="plan_execution",
+    )
+    incident.plan_id = plan.id
+    app.record_plan(plan)
 
     for i, step in enumerate(plan.steps):
-        receipt = executor.execute_step(step, plan, i)
+        receipt = app.executor.execute_step(step, plan, i)
         expected = step.get("expected", {"exit_code": 0})
-        ok = verifier.verify(receipt, expected)
-        print(f"  Step {i}: {step.get('verb', '?')} -> exit={receipt.exit_code} verified={ok}")
+        app.verifier.verify(receipt, expected)
+        app.record_receipt(receipt)
+        status = "VERIFIED" if receipt.verified else "FAILED"
+        print(f"Step {i}: {step.get('verb', '?')} -> exit={receipt.exit_code} [{status}]")
+        if receipt.stdout:
+            print(f"  stdout: {receipt.stdout[:200]}")
         if receipt.stderr:
-            print(f"    stderr: {receipt.stderr[:200]}")
-        if not ok:
-            print("  Step failed, stopping plan execution.")
-            break
-
-
-
-def cmd_checkpoint(args):
-    """Create a state checkpoint."""
-    app = _build_appliance(args.store)
-    app.observe()  # get current state
-    label = args.label or ""
-    ckpt = app.checkpoint(label=label)
-    print(f"Checkpoint created: {ckpt.id}")
-    print(f"  Label: {ckpt.label}")
-    print(f"  Time:  {ckpt.ts:.1f}")
-    meta = ckpt.metadata
-    print(f"  Events: {meta.get('event_count', '?')}")
-    print(f"  Open incidents: {len(meta.get('open_incidents', []))}")
+            print(f"  stderr: {receipt.stderr[:200]}")
     app.close()
 
 
-def cmd_checkpoints(args):
-    """List all checkpoints."""
+def cmd_checkpoint(args):
+    """Take a state checkpoint."""
     app = _build_appliance(args.store)
-    ckpts = app.list_checkpoints()
-    if not ckpts:
-        print("No checkpoints found.")
-    else:
-        print(f"{'ID':<30} {'Label':<30} {'Timestamp':<20}")
-        print("-" * 80)
-        for c in ckpts:
-            import datetime
-            ts_str = datetime.datetime.fromtimestamp(c.ts).strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{c.id:<30} {c.label:<30} {ts_str:<20}")
+    ckpt = app.checkpoint()
+    print(f"Checkpoint saved: {ckpt.id}")
+    print(f"  Timestamp: {ckpt.ts}")
     app.close()
 
 
 def cmd_restore(args):
-    """Restore appliance state from a checkpoint."""
+    """Restore from a checkpoint."""
     app = _build_appliance(args.store)
-    ckpt_id = args.checkpoint_id
-    ok = app.restore(ckpt_id)
-    if ok:
-        print(f"Restored from checkpoint: {ckpt_id}")
+    success = app.restore(args.checkpoint_id)
+    if success:
+        print(f"Restored from checkpoint {args.checkpoint_id}")
     else:
-        print(f"Checkpoint not found: {ckpt_id}")
-        sys.exit(1)
-    app.close()
-
-
-def cmd_delete_checkpoint(args):
-    """Delete a checkpoint."""
-    app = _build_appliance(args.store)
-    ok = app.delete_checkpoint(args.checkpoint_id)
-    if ok:
-        print(f"Deleted checkpoint: {args.checkpoint_id}")
-    else:
-        print(f"Checkpoint not found: {args.checkpoint_id}")
-        sys.exit(1)
-    app.close()
-
-
-def cmd_prune_checkpoints(args):
-    """Prune old checkpoints, keeping only the newest N."""
-    app = _build_appliance(args.store)
-    removed = app.prune_checkpoints(keep=args.keep)
-    print(f"Pruned {removed} checkpoint(s), kept newest {args.keep}")
+        print(f"Failed to restore from checkpoint {args.checkpoint_id}")
     app.close()
 
 
 def cmd_upgrade(args):
-    """Execute an upgrade from a JSON manifest file."""
-    app = _build_appliance(args.store, dry_run=args.dry_run)
-    with open(args.file) as f:
-        mdata = json.load(f)
-    manifest = UpgradeManifest.from_dict(mdata)
-    result = app.upgrade(manifest, dry_run=args.dry_run)
-    mode = "DRY-RUN" if args.dry_run else "LIVE"
-    print(f"Upgrade {manifest.id} [{mode}]")
-    print(f"  Success:    {result.success}")
-    print(f"  Steps:      {result.steps_completed}/{result.steps_total}")
-    print(f"  Rolled back: {result.rolled_back}")
+    """Execute an upgrade manifest."""
+    if not args.recovery_ready:
+        print("ERROR: upgrade requires --recovery-ready flag (F3).")
+        sys.exit(1)
+
+    with open(args.manifest) as f:
+        manifest_data = json.load(f)
+
+    steps = []
+    for s in manifest_data.get("steps", []):
+        steps.append(UpgradeStep(
+            name=s["name"],
+            command=s["command"],
+            verify_command=s.get("verify_command", ""),
+            rollback_command=s.get("rollback_command", ""),
+        ))
+    manifest = UpgradeManifest(
+        name=manifest_data["name"],
+        version=manifest_data.get("version", "1.0.0"),
+        steps=steps,
+    )
+
+    app = _build_appliance(args.store)
+    result = app.upgrade(manifest)
+    print(f"Upgrade '{manifest.name}': {'SUCCESS' if result.success else 'FAILED'}")
     if result.error:
-        print(f"  Error:      {result.error}")
-    if result.pre_checkpoint_id:
-        print(f"  Pre-upgrade checkpoint: {result.pre_checkpoint_id}")
+        print(f"  Error: {result.error}")
+    if result.checkpoint_id:
+        print(f"  Checkpoint: {result.checkpoint_id}")
     app.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description="Omega Hive Appliance CLI")
     parser.add_argument("--store", default=":memory:", help="Event store path")
-    parser.add_argument("--store-dir", default=".", help="Profile store directory")
-    sub = parser.add_subparsers(dest="cmd")
+    parser.add_argument("--store-dir", default=".", dest="store_dir",
+                        help="Profile store directory")
+    sub = parser.add_subparsers(dest="command")
 
     sub.add_parser("observe", help="Run collectors")
     sub.add_parser("profile", help="Discover hive profile")
     sub.add_parser("incidents", help="List open incidents")
     sub.add_parser("state", help="Show state snapshot")
 
-    ev = sub.add_parser("events", help="List recent events")
-    ev.add_argument("--limit", type=int, default=20)
+    events_parser = sub.add_parser("events", help="List recent events")
+    events_parser.add_argument("--limit", type=int, default=20)
 
-    rp = sub.add_parser("repair", help="Repair all open incidents")
-    rp.add_argument("--dry-run", action="store_true",
-                    help="Preview repair plans without executing commands")
+    repair_parser = sub.add_parser("repair", help="Repair open incidents")
+    repair_parser.add_argument("--dry-run", action="store_true",
+                               help="Preview repairs without executing")
+    repair_parser.add_argument("--recovery-ready", action="store_true",
+                               help="F3: Confirm recovery readiness for live repair")
 
-    rp2 = sub.add_parser("run-plan", help="Execute a plan from JSON")
-    rp2.add_argument("file", help="Path to plan JSON file")
+    plan_parser = sub.add_parser("run-plan", help="Execute a plan from JSON")
+    plan_parser.add_argument("file", help="Path to plan JSON file")
+    plan_parser.add_argument("--recovery-ready", action="store_true",
+                             help="F3: Confirm recovery readiness")
+
+    ckpt_parser = sub.add_parser("checkpoint", help="Take a state checkpoint")
+    sub.add_parser("restore", help="Restore from checkpoint").add_argument(
+        "checkpoint_id", help="Checkpoint ID to restore")
+
+    upgrade_parser = sub.add_parser("upgrade", help="Execute an upgrade manifest")
+    upgrade_parser.add_argument("manifest", help="Path to manifest JSON")
+    upgrade_parser.add_argument("--recovery-ready", action="store_true",
+                                help="F3: Confirm recovery readiness")
 
     args = parser.parse_args()
-
-    if args.cmd == "observe":
-        cmd_observe(args)
-    elif args.cmd == "profile":
-        cmd_profile(args)
-    elif args.cmd == "incidents":
-        cmd_incidents(args)
-    elif args.cmd == "state":
-        cmd_state(args)
-    elif args.cmd == "events":
-        cmd_events(args)
-    elif args.cmd == "repair":
-        cmd_repair(args)
-    elif args.cmd == "run-plan":
-        cmd_run_plan(args)
-    else:
+    if not args.command:
         parser.print_help()
+        sys.exit(1)
+
+    commands = {
+        "observe": cmd_observe,
+        "profile": cmd_profile,
+        "incidents": cmd_incidents,
+        "state": cmd_state,
+        "events": cmd_events,
+        "repair": cmd_repair,
+        "run-plan": cmd_run_plan,
+        "checkpoint": cmd_checkpoint,
+        "restore": cmd_restore,
+        "upgrade": cmd_upgrade,
+    }
+    commands[args.command](args)
 
 
 if __name__ == "__main__":

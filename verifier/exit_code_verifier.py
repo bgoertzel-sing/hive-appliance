@@ -2,6 +2,9 @@
 Exit-code verifier: checks that command exit codes match expectations.
 
 C04 work package — verifier.
+
+P0 fixes:
+  F6: Simulated receipts never pass verification.
 """
 from __future__ import annotations
 
@@ -17,6 +20,15 @@ class ExitCodeVerifier(BaseVerifier):
     name = "exit_code_verifier"
 
     def verify(self, receipt: Receipt, expected: dict[str, Any]) -> bool:
+        """Verify receipt against expected outcomes.
+
+        F6: Simulated receipts are never verified as true.
+        """
+        # F6: Simulated (dry-run) receipts cannot be verified
+        if receipt.simulated:
+            receipt.verified = False
+            return False
+
         expected_code = expected.get("exit_code", 0)
         actual_code = receipt.exit_code
         verified = (actual_code == expected_code)
