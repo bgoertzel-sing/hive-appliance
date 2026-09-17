@@ -8,6 +8,8 @@ P0 fixes:
 """
 from __future__ import annotations
 
+import re
+
 from typing import Any
 
 from schemas.types import Receipt
@@ -35,7 +37,8 @@ class ExitCodeVerifier(BaseVerifier):
 
         # Also check stdout/stderr patterns if specified
         if verified and "stdout_contains" in expected:
-            verified = expected["stdout_contains"] in receipt.stdout
+            pattern = expected["stdout_contains"]
+            verified = bool(re.search(r'\b' + re.escape(pattern) + r'\b', receipt.stdout))
         if verified and "stderr_not_contains" in expected:
             verified = expected["stderr_not_contains"] not in receipt.stderr
 

@@ -38,7 +38,7 @@ class BaseExecutor(abc.ABC):
         """F1: Validate a step before execution."""
         errors = []
         verb = step.get("verb", "")
-        if verb not in ALLOWED_VERBS:
+        if verb and verb not in ALLOWED_VERBS:
             errors.append(f"Verb '{verb}' not in ALLOWED_VERBS")
         return errors
 

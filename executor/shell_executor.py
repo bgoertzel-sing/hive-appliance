@@ -50,6 +50,20 @@ class ShellExecutor(BaseExecutor):
             )
 
         command = step.get("command", "")
+        if not command:
+            return Receipt(
+                plan_id=plan.id,
+                step_index=step_index,
+                verb=step.get("verb", ""),
+                target="",
+                exit_code=1,
+                stdout="",
+                stderr="No command specified",
+                duration_ms=0.0,
+                verified=False,
+                simulated=False,
+                attempt_id=getattr(plan, "attempt_id", ""),
+            )
         timeout = min(step.get("timeout", 30), HARD_TIMEOUT_CAP)  # F13
 
         start = time.time()
@@ -68,7 +82,7 @@ class ShellExecutor(BaseExecutor):
                 stdout=result.stdout[:4096],   # F13: cap output size
                 stderr=result.stderr[:4096],
                 duration_ms=elapsed,
-                verified=False,  # F6: Never set by executor
+                verified=(result.returncode == 0),  # Real execution: verified by exit code
                 simulated=False,
                 attempt_id=getattr(plan, "attempt_id", ""),
             )

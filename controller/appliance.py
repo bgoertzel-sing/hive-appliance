@@ -26,6 +26,7 @@ from schemas.types import (
 )
 from schemas.event_store import EventStore
 from controller.reducer import Reducer
+import os
 import tempfile
 from recovery.checkpoint import CheckpointManager, StateCheckpoint
 from recovery.upgrade import UpgradeController, UpgradeManifest, UpgradeResult
@@ -43,11 +44,16 @@ class Appliance:
         self.verifier: Optional[Any] = None
         self.max_steps: int = 20
         self._active_repairs: set[str] = set()  # F8: track active repairs
+        self._completed_repairs: set[str] = set()  # F8: track completed repairs
 
         # M3: Recovery — checkpoint & upgrade support
-        self._checkpoint_mgr = CheckpointManager(
-            store_path if store_path != ":memory:" else tempfile.mkdtemp(prefix="hive-ckpt-")
-        )
+        if store_path == ":memory:":
+            _ckpt_dir = tempfile.mkdtemp(prefix="hive-ckpt-")
+        elif os.path.isfile(store_path) or store_path.endswith(".db"):
+            _ckpt_dir = os.path.dirname(os.path.abspath(store_path))
+        else:
+            _ckpt_dir = store_path
+        self._checkpoint_mgr = CheckpointManager(_ckpt_dir)
         self._upgrade_ctrl = UpgradeController(
             self._checkpoint_mgr, self.executor, self.verifier
         )
@@ -157,16 +163,28 @@ class Appliance:
         - F8: Dedup by incident id
         - F13: Step count and timeout limits
         """
-        if not self.planner or not self.executor or not self.verifier:
-            return []
+        missing = []
+        if not self.planner:
+            missing.append("planner")
+        if not self.executor:
+            missing.append("executor")
+        if not self.verifier:
+            missing.append("verifier")
+        if missing:
+            raise RuntimeError(f"Repair requires: {', '.join(missing)}")
 
-        # F8: Deduplication — skip if already repairing this incident
+        # F8: Deduplication — skip if already repaired or currently repairing
+        if incident.id in self._completed_repairs:
+            return []
         if incident.id in self._active_repairs:
             return []
         self._active_repairs.add(incident.id)
 
         try:
-            return self._do_repair(incident, dry_run)
+            result = self._do_repair(incident, dry_run)
+            if result:  # Non-empty = repair was attempted
+                self._completed_repairs.add(incident.id)
+            return result
         finally:
             self._active_repairs.discard(incident.id)
 
@@ -189,9 +207,11 @@ class Appliance:
             self.record_plan(plan)
             return []
 
-        # F13: Enforce max steps
+        # F13: Enforce max steps — reject over-budget plans
         if len(plan.steps) > self.max_steps:
-            plan.steps = plan.steps[:self.max_steps]
+            plan.status = "rejected_over_budget"
+            self.record_plan(plan)
+            return []
 
         # Link plan to incident
         incident.plan_id = plan.id
@@ -236,6 +256,10 @@ class Appliance:
                 if not receipt.simulated:
                     break
 
+        # F7: Mark incident resolved when ALL steps verified
+        if all_verified and not dry_run:
+            incident.resolved = True
+
         # F3: Rollback on failure (non-dry-run only)
         if not dry_run and not all_verified and checkpoint:
             try:
@@ -261,15 +285,31 @@ class Appliance:
     def state_snapshot(self) -> dict[str, Any]:
         return self.reducer.state_snapshot()
 
+    def event_count(self) -> int:
+        """Return the number of events in the store."""
+        return self.store.count()
+
     def close(self) -> None:
         self.store.close()
 
     # ── M3 Recovery API ──────────────────────────────────
 
-    def checkpoint(self) -> StateCheckpoint:
+    def checkpoint(self, label: str = "") -> StateCheckpoint:
         """Take a state checkpoint for recovery."""
         state = self.reducer.state_snapshot()
-        return self._checkpoint_mgr.create(state)
+        return self._checkpoint_mgr.create(state, label=label)
+
+    def list_checkpoints(self) -> list[StateCheckpoint]:
+        """List all checkpoints."""
+        return self._checkpoint_mgr.list()
+
+    def delete_checkpoint(self, checkpoint_id: str) -> bool:
+        """Delete a checkpoint by id."""
+        return self._checkpoint_mgr.delete(checkpoint_id)
+
+    def prune_checkpoints(self, keep: int = 5) -> int:
+        """Prune old checkpoints, keeping only the newest *keep*."""
+        return self._checkpoint_mgr.prune(keep=keep)
 
     def restore(self, checkpoint_id: str) -> bool:
         """Restore state from a checkpoint."""
@@ -279,7 +319,7 @@ class Appliance:
             return True
         return False
 
-    def upgrade(self, manifest: UpgradeManifest) -> UpgradeResult:
+    def upgrade(self, manifest: UpgradeManifest, dry_run: bool = False) -> UpgradeResult:
         """Execute an upgrade with automatic rollback on failure."""
         state = self.reducer.state_snapshot()
-        return self._upgrade_ctrl.execute(manifest, state)
+        return self._upgrade_ctrl.execute(manifest, state, dry_run=dry_run)

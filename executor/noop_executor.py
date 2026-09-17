@@ -18,7 +18,7 @@ from executor.base import BaseExecutor
 class NoopExecutor(BaseExecutor):
     """Simulates execution without side effects."""
 
-    name = "noop"
+    name = "noop_executor"
     is_simulation = True  # F5/F6: Signals dry-run mode
 
     def execute_step(self, step: dict[str, Any], plan: Plan, step_index: int) -> Receipt:
@@ -50,7 +50,7 @@ class NoopExecutor(BaseExecutor):
             verb=step.get("verb", "noop"),
             target=step.get("command", ""),
             exit_code=0,
-            stdout="[simulated]",
+            stdout=f"[dry-run] {step.get('verb', 'noop')}: {step.get('command', '')}",
             stderr="",
             duration_ms=0.0,
             verified=False,  # F6: Never set by executor
