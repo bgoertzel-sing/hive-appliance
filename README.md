@@ -24,7 +24,7 @@ A managed hive appliance for OpenClaw/OmegaClaw environments with:
 - **M1** ✅ Complete — Execute controlled repairs (C04–C07): planner, executor, verifier, repair loop, dry-run mode
 - **M2** ✅ Complete — Reproducible packaging (C08): pyproject.toml, Dockerfile, Makefile, wheel build, entry point
 - **M3** ✅ Complete — State recovery and controlled upgrades (C09–C10): checkpoint/restore, upgrade controller with pre-flight/rollback, CLI commands
-- **M4** 🔲 NixOS VM backend (C12)
+- **M4** ✅ Complete — NixOS VM backend (C12): config generator, VM manager, Nix builder, service mapper, adapter, executor
 
 ## Structure
 
@@ -35,7 +35,7 @@ controller/  — policy, reducer, orchestration, evidence API
 executor/    — narrow host verbs and resource registry
 verifier/    — fixed probes and authenticated receipts
 collectors/  — application and host observation adapters
-adapters/    — fake, Ubuntu/OCI, later NixOS
+adapters/    — fake, Ubuntu/OCI, NixOS VM backend
 reasoning/   — runbooks, optional LLM/PLN projections
 recovery/    — checkpoint manager, upgrade controller
 profiles/    — versioned supported hive configurations
