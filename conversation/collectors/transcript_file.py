@@ -14,7 +14,11 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional
 
+import logging
+
 from conversation.types import ContentType, Message, VenueType
+
+logger = logging.getLogger(__name__)
 
 # ── line parser ──────────────────────────────────────────
 
@@ -134,7 +138,11 @@ class TranscriptFileCollector:
                 try:
                     ts = _parse_timestamp(ts_str)
                 except ValueError:
-                    ts = 0.0
+                    logger.warning(
+                        "Invalid timestamp at line %d: %r — skipping entry",
+                        i, ts_str,
+                    )
+                    continue  # CS14: skip entries with unparseable timestamps
                 current = _RawEntry(
                     timestamp=ts,
                     sender_name=sender.strip(),
@@ -146,10 +154,16 @@ class TranscriptFileCollector:
                 current.content += "\n" + line_stripped
             # else: orphan line before first timestamped entry — skip
 
-        # Don't forget the last entry
+        # Finalize last entry only if file ends with a newline (complete record).
+        # CS09: an unterminated tail may be mid-write; omit it to prevent
+        # freezing partial content that can't be updated due to ID dedup.
         if current is not None:
             current.content = current.content.rstrip("\n")
-            entries.append(current)
+            if lines and lines[-1].endswith("\n"):
+                entries.append(current)
+            else:
+                # Actively written file — last entry may be incomplete
+                pass
 
         return entries
 

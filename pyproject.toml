@@ -26,8 +26,12 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
+semantic = [
+    "chromadb>=1.0",
+]
 dev = [
     "pytest>=7.0",
+    "chromadb>=1.0",
     "build>=1.0",
 ]
 
@@ -41,8 +45,10 @@ py-modules = ["cli", "conftest", "run_tests"]
 include = [
     "adapters*",
     "collectors*",
+    "conversation*",
     "controller*",
     "executor*",
+    "hive*",
     "profiles*",
     "reasoning*",
     "schemas*",

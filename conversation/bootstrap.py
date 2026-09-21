@@ -173,11 +173,20 @@ def bootstrap_from_transcripts(
     if agent_map:
         effective_agent_map.update(agent_map)
 
-    # Discover transcripts
+    # CS05: explicit list means exactly that list; auto-discovery only when None.
     if transcript_paths is None:
         paths = discover_transcripts()
     else:
-        paths = discover_transcripts(extra_paths=transcript_paths)
+        # Validate and resolve explicit paths only — no glob expansion
+        paths = []
+        for p in transcript_paths:
+            import os
+            real = os.path.realpath(p)
+            if os.path.isfile(real):
+                paths.append(real)
+            else:
+                logger.warning("Transcript path not found: %s", p)
+        paths = sorted(set(paths))
 
     stats.files_found = len(paths)
     logger.info("Found %d transcript files", stats.files_found)
@@ -196,15 +205,31 @@ def bootstrap_from_transcripts(
     for path in paths:
         venue_id = _venue_id_from_path(path)
 
-        # Skip if already populated
+        # CS04: skip only if file was fully ingested (compare expected vs stored count).
+        # A single stored message no longer causes the entire file to be skipped.
         if skip_existing:
-            existing = len(store.query(venue_id=venue_id, limit=1))
-            if existing > 0:
-                logger.info(
-                    "Skipping %s — already has %d messages", path, existing
+            try:
+                collector_check = TranscriptFileCollector(
+                    path=path,
+                    venue_id=venue_id,
+                    agent_map=effective_agent_map,
                 )
-                stats.files_skipped += 1
-                continue
+                expected_count = len(collector_check.poll())
+                existing_count = store.count(venue_id=venue_id)
+                if existing_count >= expected_count and expected_count > 0:
+                    logger.info(
+                        "Skipping %s — fully ingested (%d/%d messages)",
+                        path, existing_count, expected_count,
+                    )
+                    stats.files_skipped += 1
+                    continue
+                elif existing_count > 0:
+                    logger.info(
+                        "Resuming %s — partial (%d/%d messages)",
+                        path, existing_count, expected_count,
+                    )
+            except Exception as e:
+                logger.warning("Could not check %s: %s — proceeding", path, e)
 
         logger.info("Processing %s as venue_id=%s", path, venue_id)
 

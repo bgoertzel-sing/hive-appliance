@@ -130,11 +130,24 @@ class ThreadAssembler:
         # Sort by timestamp
         sorted_msgs = sorted(messages, key=lambda m: m.timestamp)
 
-        # Phase 1: Build reply chains
-        reply_chains = self._build_reply_chains(sorted_msgs)
+        # Phase 0: CS13 — group by native thread_id first
+        native_threads: dict[str, list[Message]] = {}
+        non_threaded: list[Message] = []
+        for msg in sorted_msgs:
+            if msg.thread_id:
+                native_threads.setdefault(msg.thread_id, []).append(msg)
+            else:
+                non_threaded.append(msg)
+
+        # Phase 1: Build reply chains from non-natively-threaded messages
+        reply_chains = self._build_reply_chains(non_threaded)
 
         # Phase 2: Group remaining by temporal proximity
-        assigned_ids = set()
+        assigned_ids: set[str] = set()
+        # Mark native-threaded messages as assigned
+        for chain in native_threads.values():
+            for msg in chain:
+                assigned_ids.add(msg.id)
         for chain in reply_chains.values():
             for msg in chain:
                 assigned_ids.add(msg.id)
@@ -142,16 +155,22 @@ class ThreadAssembler:
         unassigned = [m for m in sorted_msgs if m.id not in assigned_ids]
 
         # Group unassigned by venue_id, then by temporal gap
-        venue_groups: dict[str, list[Message]] = {}
+        # CS10: composite key prevents cross-venue mixing
+        venue_groups: dict[tuple[str, str], list[Message]] = {}
         for msg in unassigned:
-            venue_groups.setdefault(msg.venue_id, []).append(msg)
+            venue_groups.setdefault((msg.venue, msg.venue_id), []).append(msg)
 
         temporal_threads: list[list[Message]] = []
-        for _vid, msgs in venue_groups.items():
+        for (_venue, _vid), msgs in venue_groups.items():
             temporal_threads.extend(self._split_by_gap(msgs))
 
         # Phase 3: Build Thread objects
         threads: list[Thread] = []
+
+        # From native thread_ids (CS13)
+        for tid, native_msgs in native_threads.items():
+            thread = self._make_thread(native_msgs, thread_id_seed=tid)
+            threads.append(thread)
 
         # From reply chains
         for root_id, chain_msgs in reply_chains.items():
@@ -200,13 +219,16 @@ class ThreadAssembler:
                     parent_of[msg.id] = msg.reply_to_id
 
         # Find roots
-        def find_root(msg_id: str, visited: set) -> str:
-            if msg_id in visited:
-                return msg_id  # cycle
-            visited.add(msg_id)
-            if msg_id in parent_of:
-                return find_root(parent_of[msg_id], visited)
-            return msg_id
+        def find_root(msg_id: str, _visited: set = None) -> str:
+            """CS13: iterative root-finding with cycle detection."""
+            seen: set[str] = set()
+            current = msg_id
+            while current in parent_of:
+                if current in seen:
+                    return current  # cycle
+                seen.add(current)
+                current = parent_of[current]
+            return current
 
         # Group by root
         chains: dict[str, list[Message]] = {}
@@ -269,10 +291,10 @@ class ThreadAssembler:
         if not threads or self.min_thread_messages <= 1:
             return threads
 
-        # Separate by venue_id
-        venue_threads: dict[str, list[Thread]] = {}
+        # CS10: separate by composite (venue, venue_id)
+        venue_threads: dict[tuple[str, str], list[Thread]] = {}
         for t in threads:
-            venue_threads.setdefault(t.venue_id, []).append(t)
+            venue_threads.setdefault((t.venue, t.venue_id), []).append(t)
 
         result: list[Thread] = []
         for _vid, vthreads in venue_threads.items():
@@ -280,7 +302,30 @@ class ThreadAssembler:
             merged = self._merge_small_in_venue(vthreads)
             result.extend(merged)
 
-        return result
+        # CS13: enforce max_thread_messages after all merges
+        final: list[Thread] = []
+        for t in result:
+            if t.message_count > self.max_thread_messages:
+                final.extend(self._split_oversized(t))
+            else:
+                final.append(t)
+        return final
+
+    def _split_oversized(self, thread: Thread) -> list[Thread]:
+        """Split a thread that exceeds max_thread_messages into chunks."""
+        thread.sort_messages()
+        chunks: list[Thread] = []
+        for i in range(0, len(thread.messages), self.max_thread_messages):
+            batch = thread.messages[i : i + self.max_thread_messages]
+            t = Thread(
+                id=f"{thread.id}_p{i // self.max_thread_messages}",
+                venue=thread.venue,
+                venue_id=thread.venue_id,
+            )
+            for msg in batch:
+                t.add_message(msg)
+            chunks.append(t)
+        return chunks
 
     def _merge_small_in_venue(self, threads: list[Thread]) -> list[Thread]:
         """Merge small threads within a single venue."""

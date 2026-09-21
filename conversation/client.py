@@ -28,9 +28,15 @@ DEFAULT_CHROMA_COLLECTION = "hive_conversations"
 
 
 def _dict_to_message(d: dict) -> Message:
-    """Convert a SemanticIndex result dict back into a Message."""
+    """Convert a SemanticIndex result dict back into a Message.
+
+    Preserves the canonical message ID from the index (which is the same
+    deterministic ID used in MessageStore). Restores all venue coordinates
+    and provenance from stored metadata.
+    """
     meta = d.get("metadata", {})
     return Message(
+        id=d.get("id", ""),  # CS02: preserve canonical ID
         venue=meta.get("venue", ""),
         venue_id=meta.get("venue_id", ""),
         venue_message_id=meta.get("venue_message_id", ""),
@@ -40,6 +46,7 @@ def _dict_to_message(d: dict) -> Message:
         timestamp=meta.get("timestamp", 0.0),
         content=d.get("content", ""),
         content_type=meta.get("content_type", "text"),
+        thread_id=meta.get("thread_id") or None,
         reply_to_id=meta.get("reply_to_id") or None,
     )
 
