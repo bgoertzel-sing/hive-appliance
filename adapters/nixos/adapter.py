@@ -8,17 +8,14 @@ C12.4 work package.
 """
 from __future__ import annotations
 
-import json
-import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from schemas.types import Resource, ResourceKind, ProfileTier
 from adapters.nixos.config_generator import ConfigGenerator
-from adapters.nixos.vm_manager import VMManager, VMConfig, VMState
 from adapters.nixos.nix_builder import NixBuilder
 from adapters.nixos.service_module import ServiceMapper
-
+from adapters.nixos.vm_manager import VMConfig, VMManager, VMState
+from schemas.types import ProfileTier, Resource
 
 # Verbs supported by NixOSAdapter
 ALLOWED_VERBS = frozenset({

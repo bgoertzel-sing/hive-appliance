@@ -11,10 +11,12 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from executor.base import BaseExecutor, HARD_TIMEOUT_CAP
-from schemas.types import Receipt, Plan, ALLOWED_VERBS
-from adapters.nixos.config_generator import ConfigGenerator, NixServiceDef, NixPackageDef, NixFileDef
+from adapters.nixos.config_generator import (
+    NixServiceDef,
+)
 from adapters.nixos.nix_builder import NixBuilder
+from executor.base import BaseExecutor
+from schemas.types import Plan, Receipt
 
 
 class NixOSExecutor(BaseExecutor):

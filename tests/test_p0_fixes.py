@@ -13,19 +13,23 @@ F12: Typed diagnosis (service_down != file_missing)
 F13: Resource limits (max steps, timeout caps)
 """
 import pytest
-from schemas.types import (
-    Plan, Receipt, IncidentReport, Severity, ALLOWED_VERBS,
-    _deterministic_id, _PLAN_KNOWN_FIELDS,
-)
+
+from controller.appliance import Appliance
 from controller.reducer import Reducer
-from reasoning.planner import SimplePlanner, MAX_PLAN_STEPS, MAX_STEP_TIMEOUT
+from executor.base import HARD_TIMEOUT_CAP
 from executor.noop_executor import NoopExecutor
 from executor.shell_executor import ShellExecutor
-from executor.base import HARD_TIMEOUT_CAP
+from reasoning.planner import MAX_PLAN_STEPS, MAX_STEP_TIMEOUT, SimplePlanner
+from schemas.types import (
+    ALLOWED_VERBS,
+    Event,
+    EventKind,
+    IncidentReport,
+    Plan,
+    Receipt,
+    _deterministic_id,
+)
 from verifier.exit_code_verifier import ExitCodeVerifier
-from controller.appliance import Appliance
-from schemas.types import Event, EventKind
-
 
 # ── F1: Allowed verbs only ──────────────────────────────
 
@@ -269,8 +273,8 @@ class TestF10DeterministicIDs:
             subject="nginx",
             payload={"active": "inactive", "exists": True, "service": "nginx"},
         )
-        inc1 = reducer.reduce(event1)
-        inc2 = reducer.reduce(event2)
+        _inc1 = _ = reducer.reduce(event1)
+        _inc2 = _ = reducer.reduce(event2)
         # Second reduce should not create a new incident (dedup)
         assert len(reducer.incidents) == 1
 
@@ -345,8 +349,8 @@ class TestF1LocalAdapter:
 class TestIntegrationRepairCycle:
     def test_dry_run_repair_no_real_side_effects(self):
         app = Appliance(":memory:")
-        from reasoning.planner import SimplePlanner
         from executor.noop_executor import NoopExecutor
+        from reasoning.planner import SimplePlanner
         from verifier.exit_code_verifier import ExitCodeVerifier
 
         app.set_planner(SimplePlanner())
@@ -365,8 +369,8 @@ class TestIntegrationRepairCycle:
 
     def test_dedup_prevents_double_repair(self):
         app = Appliance(":memory:")
-        from reasoning.planner import SimplePlanner
         from executor.noop_executor import NoopExecutor
+        from reasoning.planner import SimplePlanner
         from verifier.exit_code_verifier import ExitCodeVerifier
 
         app.set_planner(SimplePlanner())

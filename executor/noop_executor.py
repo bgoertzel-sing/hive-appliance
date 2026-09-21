@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from schemas.types import Receipt, Plan
 from executor.base import BaseExecutor
+from schemas.types import Plan, Receipt
 
 
 class NoopExecutor(BaseExecutor):

@@ -63,7 +63,7 @@ class VMConfig:
         }
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "VMConfig":
+    def from_dict(cls, d: dict[str, Any]) -> VMConfig:
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 

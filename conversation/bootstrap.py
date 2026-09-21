@@ -20,12 +20,10 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
-from conversation.types import Message
-from conversation.store import MessageStore, DEFAULT_DB_PATH
-from conversation.semantic import SemanticIndex
 from conversation.collectors.transcript_file import TranscriptFileCollector
+from conversation.semantic import SemanticIndex
+from conversation.store import DEFAULT_DB_PATH, MessageStore
 
 logger = logging.getLogger(__name__)
 

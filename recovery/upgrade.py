@@ -10,7 +10,7 @@ rolled back to that checkpoint.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Optional
 
 from recovery.checkpoint import CheckpointManager, StateCheckpoint
@@ -29,7 +29,7 @@ class UpgradeStep:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "UpgradeStep":
+    def from_dict(cls, d: dict[str, Any]) -> UpgradeStep:
         return cls(
             verb=d.get("verb", ""),
             command=d.get("command", ""),
@@ -55,7 +55,7 @@ class UpgradeManifest:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "UpgradeManifest":
+    def from_dict(cls, d: dict[str, Any]) -> UpgradeManifest:
         return cls(
             id=d.get("id", ""),
             ts=d.get("ts", 0.0),

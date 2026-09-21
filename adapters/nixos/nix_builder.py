@@ -11,10 +11,8 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Optional
-
+from dataclasses import dataclass
+from typing import Any
 
 HARD_TIMEOUT = 300  # Nix builds can be slow
 

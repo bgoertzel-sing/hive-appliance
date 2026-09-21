@@ -11,15 +11,17 @@ Two implementations:
 from __future__ import annotations
 
 import time
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from hive.types import (
-    AgentIdentity, AgentHealthSummary, AgentHealth,
-    HiveAction, HiveActionResult,
+    AgentHealth,
+    AgentHealthSummary,
+    AgentIdentity,
+    HiveAction,
+    HiveActionResult,
 )
-from schemas.types import Event
 from recovery.checkpoint import StateCheckpoint
-
+from schemas.types import Event
 
 # ── Protocol ─────────────────────────────────────────────
 

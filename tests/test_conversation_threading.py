@@ -1,11 +1,8 @@
 """Tests for conversation threading / ThreadAssembler."""
 from __future__ import annotations
 
-import pytest
-
-from conversation.types import Message, VenueType, ContentType
 from conversation.threading import Thread, ThreadAssembler
-
+from conversation.types import ContentType, Message, VenueType
 
 # ── helpers ──────────────────────────────────────────────
 

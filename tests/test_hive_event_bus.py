@@ -1,10 +1,11 @@
 """Tests for hive.event_bus — HiveEventBus."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
-from hive.event_bus import HiveEventBus
 from hive.adapter import StubAgentAdapter
+from hive.event_bus import HiveEventBus
 from hive.types import HiveEvent
 from schemas.types import Event, EventKind
 
@@ -29,7 +30,7 @@ def test_register_unregister():
 
 
 def test_poll_empty():
-    bus, adapters = _make_bus_with_agents("a1")
+    bus, _adapters = _make_bus_with_agents("a1")
     events = bus.poll_all()
     assert events == []
     assert bus.event_count == 0
@@ -88,7 +89,8 @@ def test_subscriber_called():
 def test_remove_subscriber():
     bus, adapters = _make_bus_with_agents("a1")
     received = []
-    cb = lambda e: received.append(e)
+    def cb(e):
+        return received.append(e)
     bus.add_subscriber(cb)
     bus.remove_subscriber(cb)
 

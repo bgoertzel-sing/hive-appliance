@@ -8,12 +8,10 @@ C12.1 work package (supplementary).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Any, Optional
 
+from adapters.nixos.config_generator import NixPackageDef, NixServiceDef
 from schemas.types import Resource, ResourceKind
-from adapters.nixos.config_generator import NixServiceDef, NixPackageDef
-
 
 # Well-known service templates
 _TEMPLATES: dict[str, dict[str, Any]] = {

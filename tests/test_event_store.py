@@ -1,8 +1,10 @@
 """Tests for the SQLite event store."""
 
-import tempfile
 import os
+import tempfile
+
 import pytest
+
 from schemas.event_store import EventStore
 from schemas.types import Event, EventKind, Severity
 

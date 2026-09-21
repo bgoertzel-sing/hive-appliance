@@ -1,7 +1,7 @@
 """Tests for the exit code verifier."""
 
-from verifier.exit_code_verifier import ExitCodeVerifier
 from schemas.types import Receipt
+from verifier.exit_code_verifier import ExitCodeVerifier
 
 
 class TestExitCodeVerifier:

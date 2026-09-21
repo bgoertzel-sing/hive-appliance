@@ -1,12 +1,12 @@
 """Tests for hive.adapter — AgentApplianceAdapter implementations."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
-from hive.adapter import StubAgentAdapter, AgentApplianceAdapter
+from hive.adapter import AgentApplianceAdapter, StubAgentAdapter
 from hive.types import AgentHealth, HiveAction, HiveActionKind
 from schemas.types import Event, EventKind
-
 
 # ── StubAgentAdapter ─────────────────────────────────────
 

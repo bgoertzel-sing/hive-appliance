@@ -1,14 +1,16 @@
 """Tests for hive.reducer — HiveReducer."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
 from hive.reducer import HiveReducer
 from hive.types import (
-    HiveEvent, HiveState, HiveIncident, AgentHealthSummary,
-    AgentHealth, HiveResourceState,
+    AgentHealth,
+    AgentHealthSummary,
+    HiveEvent,
 )
-from schemas.types import Event, EventKind, Severity
+from schemas.types import Event, EventKind
 
 
 def _make_incident_event(symptom, severity="warn", incident_id="inc_1"):

@@ -9,7 +9,6 @@ P0 fixes:
 from __future__ import annotations
 
 import re
-
 from typing import Any
 
 from schemas.types import Receipt

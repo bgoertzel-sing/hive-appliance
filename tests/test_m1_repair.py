@@ -8,16 +8,16 @@ Updated for P0 safety fixes from Astra review:
 - F10: events replayed from store on construction
 """
 
-import tempfile
 import os
+import tempfile
 
 from controller.appliance import Appliance
-from reasoning.planner import SimplePlanner
-from executor.shell_executor import ShellExecutor
 from executor.noop_executor import NoopExecutor
+from executor.shell_executor import ShellExecutor
+from reasoning.planner import SimplePlanner
+from schemas.types import Event, EventKind, IncidentReport, Plan, Receipt, Severity
 from verifier.exit_code_verifier import ExitCodeVerifier
 from verifier.file_verifier import FileVerifier
-from schemas.types import Event, EventKind, Severity, IncidentReport, Plan, Receipt
 
 
 class TestApplianceRepairSetup:
@@ -182,7 +182,7 @@ class TestRepairSafety:
         inc = IncidentReport(component="/tmp/x", symptom="file_missing")
         try:
             app.repair(inc)
-            assert False, "Should have raised"
+            raise AssertionError("Should have raised")
         except RuntimeError as e:
             assert "planner" in str(e).lower()
         app.close()
@@ -194,7 +194,7 @@ class TestRepairSafety:
         inc = IncidentReport(component="/tmp/x", symptom="file_missing")
         try:
             app.repair(inc)
-            assert False, "Should have raised"
+            raise AssertionError("Should have raised")
         except RuntimeError as e:
             assert "executor" in str(e).lower()
         app.close()
@@ -206,7 +206,7 @@ class TestRepairSafety:
         inc = IncidentReport(component="/tmp/x", symptom="file_missing")
         try:
             app.repair(inc)
-            assert False, "Should have raised"
+            raise AssertionError("Should have raised")
         except RuntimeError as e:
             assert "verifier" in str(e).lower()
         app.close()
@@ -243,7 +243,7 @@ class TestRepairAll:
                 app.reducer.incidents.append(inc)
             results = app.repair_all()
             assert len(results) == 3
-            for inc_id, receipts in results.items():
+            for _inc_id, receipts in results.items():
                 assert len(receipts) == 2
                 assert all(r.verified for r in receipts)
             assert len(app.open_incidents()) == 0
@@ -299,7 +299,6 @@ class TestNoopExecutor:
         assert executor.name == "noop_executor"
 
     def test_noop_always_exit_zero(self):
-        from schemas.types import Plan
         executor = NoopExecutor()
         plan = Plan(steps=[{"verb": "touch", "command": "touch /tmp/x"}])
         receipt = executor.execute_step(plan.steps[0], plan, 0)

@@ -1,15 +1,24 @@
 """Tests for hive.types — M5 typed records."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
 from hive.types import (
-    AgentIdentity, HiveEvent, AgentHealthSummary, AgentHealth,
-    HiveIncident, HiveResourceState, HiveState, HiveAction,
-    HiveActionKind, HiveActionResult, _uid, _deterministic_id,
+    AgentHealth,
+    AgentHealthSummary,
+    AgentIdentity,
+    HiveAction,
+    HiveActionKind,
+    HiveActionResult,
+    HiveEvent,
+    HiveIncident,
+    HiveResourceState,
+    HiveState,
+    _deterministic_id,
+    _uid,
 )
 from schemas.types import Event, EventKind, Severity
-
 
 # ── AgentIdentity ────────────────────────────────────────
 

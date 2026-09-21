@@ -14,7 +14,6 @@ from typing import Optional
 
 from .types import Message
 
-
 # ── defaults ─────────────────────────────────────────────
 
 DEFAULT_DB_PATH = "/hive/shared/conversation-store/messages.db"

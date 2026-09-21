@@ -15,11 +15,10 @@ import time
 from typing import Any
 
 from hive.types import (
-    HiveState, HiveAction, HiveActionKind, HiveIncident,
-    AgentHealth, HiveResourceState,
+    HiveAction,
+    HiveActionKind,
+    HiveState,
 )
-from schemas.types import Severity
-
 
 # ── Configuration ────────────────────────────────────────
 

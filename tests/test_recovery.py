@@ -3,18 +3,15 @@ Tests for M3 — State Recovery (C09) and Controlled Upgrades (C10).
 """
 from __future__ import annotations
 
-import json
-import os
 import tempfile
-import time
 import unittest
 
 from recovery.checkpoint import CheckpointManager, StateCheckpoint
 from recovery.upgrade import (
     UpgradeController,
     UpgradeManifest,
-    UpgradeStep,
     UpgradeResult,
+    UpgradeStep,
 )
 
 
@@ -69,7 +66,7 @@ class TestCheckpointManager(unittest.TestCase):
 
     def test_list_ordering(self):
         c1 = self.mgr.create({"n": 1}, label="a")
-        c2 = self.mgr.create({"n": 2}, label="b")
+        _c2 = _ = self.mgr.create({"n": 2}, label="b")
         c3 = self.mgr.create({"n": 3}, label="c")
         ckpts = self.mgr.list()
         self.assertEqual(len(ckpts), 3)

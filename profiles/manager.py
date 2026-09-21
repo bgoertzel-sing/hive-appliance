@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
 
-from schemas.types import HiveProfile, ProfileTier, Resource, ResourceKind
 from collectors.host_collector import HostCollector
+from schemas.types import HiveProfile
 
 
 class ProfileManager:

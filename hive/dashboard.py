@@ -10,8 +10,8 @@ import time
 from typing import Any, Optional
 
 from hive.types import (
-    HiveState, HiveIncident, AgentHealth, AgentHealthSummary,
-    HiveResourceState,
+    AgentHealth,
+    HiveState,
 )
 
 

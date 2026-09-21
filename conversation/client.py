@@ -13,14 +13,13 @@ Usage:
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
-from conversation.types import Message
-from conversation.store import MessageStore, DEFAULT_DB_PATH
 from conversation.semantic import SemanticIndex
+from conversation.store import MessageStore
 from conversation.threading import Thread, ThreadAssembler
-
+from conversation.types import Message
 
 # ── defaults ─────────────────────────────────────────────
 

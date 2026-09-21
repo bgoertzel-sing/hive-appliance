@@ -120,7 +120,7 @@ class SharedStoreAdapter:
 
     def agents_with_events(self) -> list[str]:
         """Return list of agent IDs that have events in the store."""
-        return list(set(e.source_agent for e in self._hive_events))
+        return list({e.source_agent for e in self._hive_events})
 
     @property
     def total_events(self) -> int:

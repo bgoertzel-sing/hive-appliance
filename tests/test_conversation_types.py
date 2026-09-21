@@ -1,6 +1,5 @@
 """Tests for conversation.types module."""
-import time
-from conversation.types import Message, Thread, ContentType, VenueType, _message_id
+from conversation.types import ContentType, Message, Thread, VenueType, _message_id
 
 
 class TestMessageId:

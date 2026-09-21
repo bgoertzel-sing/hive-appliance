@@ -2,17 +2,14 @@
 from __future__ import annotations
 
 import os
-import time
-import tempfile
 
 import pytest
 
-from conversation.types import Message, VenueType, ContentType
-from conversation.store import MessageStore
-from conversation.semantic import SemanticIndex
-from conversation.threading import ThreadAssembler
 from conversation.client import ConversationStoreClient
-
+from conversation.semantic import SemanticIndex
+from conversation.store import MessageStore
+from conversation.threading import ThreadAssembler
+from conversation.types import ContentType, Message, VenueType
 
 # ── helpers ──────────────────────────────────────────────
 

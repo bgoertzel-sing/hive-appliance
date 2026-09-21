@@ -17,7 +17,6 @@ from typing import Optional
 
 from conversation.types import Message
 
-
 # ── Thread dataclass ─────────────────────────────────────
 
 @dataclass
@@ -148,7 +147,7 @@ class ThreadAssembler:
             venue_groups.setdefault(msg.venue_id, []).append(msg)
 
         temporal_threads: list[list[Message]] = []
-        for vid, msgs in venue_groups.items():
+        for _vid, msgs in venue_groups.items():
             temporal_threads.extend(self._split_by_gap(msgs))
 
         # Phase 3: Build Thread objects
@@ -276,7 +275,7 @@ class ThreadAssembler:
             venue_threads.setdefault(t.venue_id, []).append(t)
 
         result: list[Thread] = []
-        for vid, vthreads in venue_threads.items():
+        for _vid, vthreads in venue_threads.items():
             vthreads.sort(key=lambda t: t.started_at)
             merged = self._merge_small_in_venue(vthreads)
             result.extend(merged)

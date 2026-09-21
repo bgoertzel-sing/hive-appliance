@@ -1,15 +1,17 @@
 """Tests for hive.appliance — HiveAppliance orchestrator (M5 integration)."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
-from hive.appliance import HiveAppliance
 from hive.adapter import StubAgentAdapter
+from hive.appliance import HiveAppliance
 from hive.types import (
-    HiveAction, HiveActionKind, AgentHealth, HiveIncident,
+    AgentHealth,
+    HiveAction,
+    HiveActionKind,
 )
-from schemas.types import Event, EventKind, Severity
-
+from schemas.types import Event, EventKind
 
 # ── Registration ─────────────────────────────────────────
 
@@ -279,7 +281,7 @@ def test_full_cycle_three_agents():
     assert len(hive.state.open_incidents) >= 1
 
     # Tick 3: gamma still healthy, should see proposed actions
-    r3 = hive.tick()
+    _r3 = _ = hive.tick()
     # Actions should still be proposed for open incident
     assert hive.tick_count == 3
 

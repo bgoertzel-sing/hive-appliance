@@ -10,11 +10,13 @@ import time
 from typing import Any
 
 from hive.types import (
-    HiveEvent, HiveState, HiveIncident, HiveResourceState,
-    AgentHealthSummary, AgentHealth,
+    AgentHealth,
+    AgentHealthSummary,
+    HiveEvent,
+    HiveIncident,
+    HiveState,
 )
 from schemas.types import EventKind, Severity
-
 
 # ── Correlation config ───────────────────────────────────
 

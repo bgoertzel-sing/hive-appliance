@@ -1,8 +1,7 @@
 """Tests for collectors."""
 
-from collectors.host_collector import HostCollector
 from collectors.file_collector import FileCollector
-from schemas.types import EventKind
+from collectors.host_collector import HostCollector
 
 
 class TestHostCollector:

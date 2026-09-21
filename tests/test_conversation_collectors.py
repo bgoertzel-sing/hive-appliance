@@ -1,16 +1,11 @@
 """Tests for conversation venue collectors."""
 from __future__ import annotations
 
-import os
-import tempfile
-import time
-
 import pytest
 
-from conversation.types import Message, VenueType, ContentType
 from conversation.collectors.base import VenueCollector
 from conversation.collectors.transcript_file import TranscriptFileCollector
-
+from conversation.types import ContentType, VenueType
 
 # ── fixtures ─────────────────────────────────────────────
 
@@ -32,7 +27,7 @@ EDGE_CASE_TRANSCRIPT = """\
 [2026-09-18 08:01:00] User With Spaces: message content here
 [2026-09-18 08:02:00] Bot: Hello! Here's a link: https://example.com/path?q=1&r=2
 [2026-09-18 08:03:00] Unicode™User: Héllo wörld 🌍
-[2026-09-18 08:04:00] Empty: 
+[2026-09-18 08:04:00] Empty:
 """
 
 EMPTY_FILE = ""

@@ -1,7 +1,7 @@
 """Tests for the controller reducer."""
 
 from controller.reducer import Reducer
-from schemas.types import Event, EventKind, Severity, IncidentReport
+from schemas.types import Event, EventKind, IncidentReport, Severity
 
 
 class TestReducer:

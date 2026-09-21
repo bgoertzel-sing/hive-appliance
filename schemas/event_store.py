@@ -12,7 +12,6 @@ from typing import Any, Optional
 
 from schemas.types import Event, EventKind, Severity
 
-
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS events (
     id          TEXT PRIMARY KEY,
@@ -67,7 +66,7 @@ class EventStore:
             )
             self._conn.commit()
         except sqlite3.IntegrityError:
-            raise ValueError(f"Event id {d['id']} already exists")
+            raise ValueError(f"Event id {d['id']} already exists") from None
         return event
 
     def get(self, event_id: str) -> Optional[Event]:

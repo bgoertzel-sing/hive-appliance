@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Any, Optional
-
 
 # ── helpers ──────────────────────────────────────────────
 
@@ -78,7 +77,7 @@ class Message:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Message":
+    def from_dict(cls, d: dict[str, Any]) -> Message:
         return cls(
             id=d.get("id", ""),
             venue=d.get("venue", ""),

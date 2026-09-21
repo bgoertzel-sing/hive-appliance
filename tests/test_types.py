@@ -1,8 +1,16 @@
 """Tests for core typed records."""
 
 from schemas.types import (
-    Event, EventKind, Severity, Resource, ResourceKind,
-    Plan, Receipt, IncidentReport, HiveProfile, ProfileTier,
+    Event,
+    EventKind,
+    HiveProfile,
+    IncidentReport,
+    Plan,
+    ProfileTier,
+    Receipt,
+    Resource,
+    ResourceKind,
+    Severity,
 )
 
 

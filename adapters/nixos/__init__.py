@@ -14,16 +14,16 @@ The adapter follows the same verb-dispatch pattern as LocalAdapter.
 
 from adapters.nixos.adapter import NixOSAdapter
 from adapters.nixos.config_generator import ConfigGenerator
-from adapters.nixos.vm_manager import VMManager, VMState
 from adapters.nixos.nix_builder import NixBuilder, NixBuildResult
 from adapters.nixos.service_module import ServiceMapper
+from adapters.nixos.vm_manager import VMManager, VMState
 
 __all__ = [
-    "NixOSAdapter",
     "ConfigGenerator",
+    "NixBuildResult",
+    "NixBuilder",
+    "NixOSAdapter",
+    "ServiceMapper",
     "VMManager",
     "VMState",
-    "NixBuilder",
-    "NixBuildResult",
-    "ServiceMapper",
 ]

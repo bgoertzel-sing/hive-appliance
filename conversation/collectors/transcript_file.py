@@ -14,15 +14,14 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional
 
-from conversation.types import Message, VenueType, ContentType
-
+from conversation.types import ContentType, Message, VenueType
 
 # ── line parser ──────────────────────────────────────────
 
 # Matches: [2026-09-18 14:30:05] sender_name: content
 _LINE_RE = re.compile(
     r"^\[(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})\]\s+"  # timestamp
-    r"(.+?):\s+"                                           # sender name
+    r"(.+?):\s*"                                           # sender name
     r"(.*)$"                                               # content (may be empty)
 )
 
@@ -109,7 +108,7 @@ class TranscriptFileCollector:
 
     def _parse_file(self) -> list[_RawEntry]:
         """Parse the transcript file into raw entries."""
-        with open(self.path, "r", encoding="utf-8", errors="replace") as f:
+        with open(self.path, encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
 
         entries: list[_RawEntry] = []

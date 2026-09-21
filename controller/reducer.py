@@ -13,8 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from schemas.types import Event, EventKind, Severity, IncidentReport
-from schemas.types import _deterministic_id
+from schemas.types import Event, EventKind, IncidentReport, Severity
 
 
 class Reducer:

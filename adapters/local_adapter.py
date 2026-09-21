@@ -57,8 +57,7 @@ class LocalAdapter:
         try:
             result = subprocess.run(
                 ["stat", target] if target else ["uname", "-a"],
-                capture_output=True, text=True, timeout=10
-            )
+                capture_output=True, text=True, timeout=10, check=False)
             return {"exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr, "success": result.returncode == 0}
         except Exception as e:
             return {"exit_code": -1, "stdout": "", "stderr": str(e), "success": False}
@@ -67,8 +66,7 @@ class LocalAdapter:
         try:
             result = subprocess.run(
                 ["systemctl", "restart", target],
-                capture_output=True, text=True, timeout=30
-            )
+                capture_output=True, text=True, timeout=30, check=False)
             return {"exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr, "success": result.returncode == 0}
         except Exception as e:
             return {"exit_code": -1, "stdout": "", "stderr": str(e), "success": False}

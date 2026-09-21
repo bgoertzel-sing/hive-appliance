@@ -47,8 +47,7 @@ class ServiceCollector(BaseCollector):
         try:
             result = subprocess.run(
                 ["systemctl", "is-active", svc],
-                capture_output=True, text=True, timeout=5
-            )
+                capture_output=True, text=True, timeout=5, check=False)
             active_state = result.stdout.strip()
             payload["active"] = active_state
             payload["exists"] = True
@@ -59,8 +58,7 @@ class ServiceCollector(BaseCollector):
             # Also get the full status for richer info
             result2 = subprocess.run(
                 ["systemctl", "is-enabled", svc],
-                capture_output=True, text=True, timeout=5
-            )
+                capture_output=True, text=True, timeout=5, check=False)
             payload["enabled"] = result2.stdout.strip()
 
         except FileNotFoundError:

@@ -1,12 +1,10 @@
 """Tests for conversation.store module (MessageStore with SQLite + FTS5)."""
-import os
-import tempfile
 import time
 
 import pytest
 
-from conversation.types import Message, VenueType, ContentType
 from conversation.store import MessageStore
+from conversation.types import ContentType, Message, VenueType
 
 
 @pytest.fixture
@@ -20,15 +18,15 @@ def tmp_db(tmp_path):
 
 def _msg(venue_msg_id: str, content: str = "hello", **kw) -> Message:
     """Helper to build a Message with minimal required fields."""
-    defaults = dict(
-        venue=VenueType.TELEGRAM_GROUP,
-        venue_id="group1",
-        venue_message_id=venue_msg_id,
-        sender_id="user1",
-        sender_name="Alice",
-        timestamp=time.time(),
-        content=content,
-    )
+    defaults = {
+        "venue": VenueType.TELEGRAM_GROUP,
+        "venue_id": "group1",
+        "venue_message_id": venue_msg_id,
+        "sender_id": "user1",
+        "sender_name": "Alice",
+        "timestamp": time.time(),
+        "content": content,
+    }
     defaults.update(kw)
     return Message(**defaults)
 

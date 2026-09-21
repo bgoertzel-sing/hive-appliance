@@ -8,10 +8,9 @@ C12.1 work package.
 """
 from __future__ import annotations
 
-import json
 import textwrap
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from schemas.types import Resource, ResourceKind
 
@@ -224,7 +223,7 @@ class ConfigGenerator:
 
         # Extra modules
         for mod in self._extra_modules:
-            sections.append(f"  # Extra module")
+            sections.append("  # Extra module")
             sections.append(f"  {mod}")
             sections.append("")
 

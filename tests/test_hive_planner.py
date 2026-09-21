@@ -1,12 +1,20 @@
 """Tests for hive.planner — HivePlanner."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import time
+
 from hive.planner import HivePlanner
 from hive.types import (
-    HiveState, HiveAction, HiveActionKind, HiveIncident,
-    AgentHealthSummary, AgentHealth, HiveResourceState,
+    AgentHealth,
+    AgentHealthSummary,
+    HiveAction,
+    HiveActionKind,
+    HiveIncident,
+    HiveResourceState,
+    HiveState,
 )
 from schemas.types import Severity
 

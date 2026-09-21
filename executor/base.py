@@ -16,8 +16,7 @@ import subprocess
 import time
 from typing import Any
 
-from schemas.types import Receipt, Plan, ALLOWED_VERBS
-
+from schemas.types import ALLOWED_VERBS, Plan, Receipt
 
 # F13: Hard maximum timeout
 HARD_TIMEOUT_CAP = 120
@@ -52,8 +51,7 @@ class BaseExecutor(abc.ABC):
         start = time.time()
         try:
             result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout
-            )
+                command, capture_output=True, text=True, timeout=timeout, check=False)
             elapsed = (time.time() - start) * 1000
             return Receipt(
                 verb=command[0] if command else "",

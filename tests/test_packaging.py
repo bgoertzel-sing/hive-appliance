@@ -2,7 +2,6 @@
 
 Verify the project can be built, installed, and the entry point resolves.
 """
-import importlib
 import subprocess
 import sys
 from pathlib import Path
@@ -29,7 +28,12 @@ def test_import_schemas():
 
 def test_import_collectors():
     """All collector modules are importable."""
-    from collectors import base, file_collector, host_collector, service_collector  # noqa: F401
+    from collectors import (  # noqa: F401
+        base,
+        file_collector,
+        host_collector,
+        service_collector,
+    )
 
 
 def test_import_adapters():
@@ -39,7 +43,7 @@ def test_import_adapters():
 
 def test_import_executor():
     """executor modules are importable."""
-    from executor import base, shell_executor, noop_executor  # noqa: F401
+    from executor import base, noop_executor, shell_executor  # noqa: F401
 
 
 def test_import_verifier():
@@ -99,6 +103,7 @@ def test_wheel_build():
         capture_output=True,
         text=True,
         timeout=120,
+        check=False,
     )
     assert result.returncode == 0, f"Build failed:\n{result.stderr}"
     wheels = list((ROOT / "dist").glob("hive_appliance-*.whl"))

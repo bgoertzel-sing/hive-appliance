@@ -7,16 +7,15 @@ HiveResourceState, HiveAction, HiveActionResult.
 """
 from __future__ import annotations
 
+import hashlib
 import time
 import uuid
-import hashlib
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Optional
 
 # Re-export base types used by hive layer
-from schemas.types import Event, EventKind, Severity, Plan, Receipt
-
+from schemas.types import Event, Severity
 
 # ── helpers ──────────────────────────────────────────────
 
@@ -65,7 +64,7 @@ class AgentIdentity:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "AgentIdentity":
+    def from_dict(cls, d: dict[str, Any]) -> AgentIdentity:
         return cls(
             agent_id=d["agent_id"],
             display_name=d.get("display_name", ""),
@@ -89,7 +88,7 @@ class HiveEvent:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "HiveEvent":
+    def from_dict(cls, d: dict[str, Any]) -> HiveEvent:
         orig = None
         if d.get("original_event"):
             orig = Event.from_dict(d["original_event"])
@@ -121,7 +120,7 @@ class AgentHealthSummary:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "AgentHealthSummary":
+    def from_dict(cls, d: dict[str, Any]) -> AgentHealthSummary:
         return cls(
             agent_id=d["agent_id"],
             health=AgentHealth(d.get("health", "unknown")),
@@ -154,7 +153,7 @@ class HiveIncident:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "HiveIncident":
+    def from_dict(cls, d: dict[str, Any]) -> HiveIncident:
         return cls(
             id=d.get("id", _uid("hinc_")),
             symptom=d.get("symptom", ""),
@@ -169,7 +168,7 @@ class HiveIncident:
 
     @classmethod
     def deterministic(cls, symptom: str, affected_agents: list[str],
-                      **kwargs) -> "HiveIncident":
+                      **kwargs) -> HiveIncident:
         """Create with deterministic ID from symptom + sorted agents."""
         agents_key = ",".join(sorted(affected_agents))
         inc_id = _deterministic_id("hinc_", symptom, agents_key)
@@ -222,7 +221,7 @@ class HiveResourceState:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "HiveResourceState":
+    def from_dict(cls, d: dict[str, Any]) -> HiveResourceState:
         return cls(**{k: d[k] for k in d if k in cls.__dataclass_fields__})
 
 

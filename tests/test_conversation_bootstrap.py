@@ -2,21 +2,18 @@
 from __future__ import annotations
 
 import os
-import tempfile
 
 import pytest
 
-from conversation.types import Message, VenueType
-from conversation.store import MessageStore
-from conversation.semantic import SemanticIndex
 from conversation.bootstrap import (
     BootstrapStats,
-    discover_transcripts,
+    _venue_id_from_path,
     bootstrap_from_transcripts,
     bootstrap_single_transcript,
-    _venue_id_from_path,
+    discover_transcripts,
 )
-
+from conversation.semantic import SemanticIndex
+from conversation.store import MessageStore
 
 # ── helpers ──────────────────────────────────────────────
 
@@ -285,7 +282,7 @@ class TestBootstrapSingleTranscript:
             collection_name="test_single_venue",
         )
 
-        added, indexed = bootstrap_single_transcript(
+        added, _indexed = bootstrap_single_transcript(
             path=t1,
             venue_id="custom_venue",
             store=store,

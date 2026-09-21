@@ -5,14 +5,21 @@ C00 work package — profile discovery.
 """
 from __future__ import annotations
 
+import json
 import os
 import platform
 import subprocess
-import json
 from typing import Any
 
 from collectors.base import BaseCollector
-from schemas.types import Event, EventKind, Severity, Resource, ResourceKind, HiveProfile, ProfileTier
+from schemas.types import (
+    Event,
+    HiveProfile,
+    ProfileTier,
+    Resource,
+    ResourceKind,
+    Severity,
+)
 
 
 class HostCollector(BaseCollector):
@@ -71,7 +78,7 @@ class HostCollector(BaseCollector):
         # Disk
         try:
             result = subprocess.run(["df", "-h", "/"],
-                capture_output=True, text=True, timeout=5)
+                capture_output=True, text=True, timeout=5, check=False)
             if result.returncode == 0:
                 resources.append({"kind": "volume", "name": "root",
                                   "attributes": {"df": result.stdout.strip()}})
@@ -81,7 +88,7 @@ class HostCollector(BaseCollector):
         # Network
         try:
             result = subprocess.run(["ip", "-j", "addr"],
-                capture_output=True, text=True, timeout=5)
+                capture_output=True, text=True, timeout=5, check=False)
             if result.returncode == 0:
                 interfaces = json.loads(result.stdout)
                 for iface in interfaces:

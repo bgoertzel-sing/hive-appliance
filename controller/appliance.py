@@ -17,19 +17,22 @@ P0 fixes (Astra review):
 """
 from __future__ import annotations
 
-import time
-import uuid
-from typing import Any, Optional
-
-from schemas.types import (
-    Event, EventKind, Severity, IncidentReport, Plan, Receipt, ALLOWED_VERBS,
-)
-from schemas.event_store import EventStore
-from controller.reducer import Reducer
 import os
 import tempfile
+from typing import Any, Optional
+
+from controller.reducer import Reducer
 from recovery.checkpoint import CheckpointManager, StateCheckpoint
 from recovery.upgrade import UpgradeController, UpgradeManifest, UpgradeResult
+from schemas.event_store import EventStore
+from schemas.types import (
+    Event,
+    EventKind,
+    IncidentReport,
+    Plan,
+    Receipt,
+    Severity,
+)
 
 
 class Appliance:

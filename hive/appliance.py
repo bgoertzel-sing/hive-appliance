@@ -13,18 +13,20 @@ Usage:
 """
 from __future__ import annotations
 
-import time
 import threading
-from typing import Any, Optional
+import time
+from typing import Any
 
-from hive.types import (
-    HiveState, HiveAction, HiveActionResult, HiveIncident,
-)
-from hive.event_bus import HiveEventBus
-from hive.reducer import HiveReducer
-from hive.planner import HivePlanner
-from hive.shared_store import SharedStoreAdapter
 from hive.dashboard import HealthDashboard
+from hive.event_bus import HiveEventBus
+from hive.planner import HivePlanner
+from hive.reducer import HiveReducer
+from hive.shared_store import SharedStoreAdapter
+from hive.types import (
+    HiveAction,
+    HiveActionResult,
+    HiveState,
+)
 
 
 class HiveAppliance:
@@ -179,7 +181,7 @@ class HiveAppliance:
     def _on_hive_event(self, hive_event) -> None:
         """Subscriber callback: feed events to reducer and shared store."""
         self._store.ingest(hive_event)
-        new_incidents = self._reducer.reduce(hive_event)
+        self._reducer.reduce(hive_event)
         # Incidents are added to state inside reducer.reduce()
 
     # ── Action execution ─────────────────────────────────

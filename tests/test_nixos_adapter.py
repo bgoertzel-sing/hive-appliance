@@ -11,36 +11,39 @@ Tests cover:
 """
 from __future__ import annotations
 
-import json
 import os
-import tempfile
-import textwrap
-from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch, PropertyMock
-
-import pytest
 
 # ── Ensure project root is importable ──
 import sys
+from unittest.mock import MagicMock
+
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from schemas.types import Resource, ResourceKind, ProfileTier
-
+from adapters.nixos.adapter import NixOSAdapter
 from adapters.nixos.config_generator import (
-    ConfigGenerator, NixServiceDef, NixPackageDef, NixFileDef,
-    NixNetworkDef, _nix_escape,
+    ConfigGenerator,
+    NixFileDef,
+    NixNetworkDef,
+    NixPackageDef,
+    NixServiceDef,
+    _nix_escape,
 )
-from adapters.nixos.vm_manager import (
-    VMManager, VMConfig, VMState, VMInfo,
-    _validate_config, _process_alive, MAX_MEMORY_MB, MAX_VCPUS, MAX_DISK_GB,
-)
+from adapters.nixos.executor import NixOSExecutor
 from adapters.nixos.nix_builder import NixBuilder, NixBuildResult, NixEvalResult
 from adapters.nixos.service_module import ServiceMapper
-from adapters.nixos.adapter import NixOSAdapter, ALLOWED_VERBS
-from adapters.nixos.executor import NixOSExecutor
-from schemas.types import Plan, Receipt
-
+from adapters.nixos.vm_manager import (
+    MAX_DISK_GB,
+    MAX_MEMORY_MB,
+    MAX_VCPUS,
+    VMConfig,
+    VMInfo,
+    VMManager,
+    VMState,
+    _validate_config,
+)
+from schemas.types import Plan, ProfileTier, Resource, ResourceKind
 
 # ════════════════════════════════════════════════════════════════════
 # ConfigGenerator tests

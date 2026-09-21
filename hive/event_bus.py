@@ -9,12 +9,11 @@ Initially poll-based with configurable interval.
 """
 from __future__ import annotations
 
-import time
 import threading
-from typing import Any, Callable, Optional
+import time
+from typing import Any, Callable
 
 from hive.types import HiveEvent
-from schemas.types import Event
 
 
 class HiveEventBus:

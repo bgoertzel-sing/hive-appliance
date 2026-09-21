@@ -1,12 +1,13 @@
 """Tests for hive.shared_store — SharedStoreAdapter."""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import time
-from hive.shared_store import SharedStoreAdapter
 from hive.adapter import StubAgentAdapter
+from hive.shared_store import SharedStoreAdapter
 from hive.types import HiveEvent
-from schemas.types import Event, EventKind, Severity
+from schemas.types import Event, EventKind
 
 
 def _make_hive_event(agent_id, kind=EventKind.OBSERVATION, payload=None):

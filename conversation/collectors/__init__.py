@@ -3,4 +3,4 @@
 from .base import VenueCollector
 from .transcript_file import TranscriptFileCollector
 
-__all__ = ["VenueCollector", "TranscriptFileCollector"]
+__all__ = ["TranscriptFileCollector", "VenueCollector"]

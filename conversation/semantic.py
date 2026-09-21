@@ -8,6 +8,10 @@ from __future__ import annotations
 
 import logging
 from typing import Optional
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import chromadb
 
 from .types import Message
 
@@ -34,7 +38,7 @@ class SemanticIndex:
         self,
         collection_name: str = DEFAULT_COLLECTION,
         persist_directory: str = "/hive/shared/conversation-store/chroma",
-        client: "chromadb.ClientAPI | None" = None,
+        client: chromadb.ClientAPI | None = None,
     ):
         import chromadb
 

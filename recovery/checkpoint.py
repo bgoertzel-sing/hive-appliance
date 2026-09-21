@@ -6,12 +6,11 @@ profile, and incidents that can be restored later.
 """
 from __future__ import annotations
 
-import json
 import glob
+import json
 import os
-import shutil
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from typing import Any, Optional
 
 
@@ -29,7 +28,7 @@ class StateCheckpoint:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "StateCheckpoint":
+    def from_dict(cls, d: dict[str, Any]) -> StateCheckpoint:
         return cls(
             id=d.get("id", ""),
             ts=d.get("ts", 0.0),

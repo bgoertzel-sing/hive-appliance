@@ -11,13 +11,11 @@ from __future__ import annotations
 
 import hashlib
 import json
-import uuid
 import time
-import dataclasses
-from dataclasses import dataclass, field, asdict
+import uuid
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Any, Optional
-
+from typing import Any
 
 # ── helpers ──────────────────────────────────────────────
 
@@ -106,7 +104,7 @@ class Resource:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Resource":
+    def from_dict(cls, d: dict[str, Any]) -> Resource:
         return cls(
             kind=ResourceKind(d["kind"]),
             name=d["name"],
@@ -134,7 +132,7 @@ class Event:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Event":
+    def from_dict(cls, d: dict[str, Any]) -> Event:
         return cls(
             id=d.get("id", _uid("evt_")),
             kind=EventKind(d.get("kind", "observation")),
@@ -170,7 +168,7 @@ class Plan:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Plan":
+    def from_dict(cls, d: dict[str, Any]) -> Plan:
         # F2: reject unknown fields
         unknown = set(d.keys()) - _PLAN_KNOWN_FIELDS
         if unknown:
@@ -238,7 +236,7 @@ class Receipt:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Receipt":
+    def from_dict(cls, d: dict[str, Any]) -> Receipt:
         return cls(
             id=d.get("id", _uid("rcpt_")),
             ts=d.get("ts", _now()),
@@ -276,7 +274,7 @@ class IncidentReport:
     @classmethod
     def deterministic(cls, component: str, symptom: str,
                       severity: Severity = Severity.WARN,
-                      evidence: list[dict[str, Any]] | None = None) -> "IncidentReport":
+                      evidence: list[dict[str, Any]] | None = None) -> IncidentReport:
         """F10: Create an incident with a deterministic ID."""
         det_id = _deterministic_id("inc_", component, symptom)
         return cls(
@@ -293,7 +291,7 @@ class IncidentReport:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "IncidentReport":
+    def from_dict(cls, d: dict[str, Any]) -> IncidentReport:
         return cls(
             id=d.get("id", _uid("inc_")),
             ts=d.get("ts", _now()),
@@ -327,7 +325,7 @@ class HiveProfile:
         return d
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "HiveProfile":
+    def from_dict(cls, d: dict[str, Any]) -> HiveProfile:
         resources = [Resource.from_dict(r) if isinstance(r, dict) else r for r in d.get("resources", [])]
         return cls(
             id=d.get("id", _uid("prof_")),

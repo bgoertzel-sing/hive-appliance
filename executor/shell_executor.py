@@ -15,8 +15,8 @@ import subprocess
 import time
 from typing import Any
 
-from schemas.types import Receipt, Plan, ALLOWED_VERBS
-from executor.base import BaseExecutor, HARD_TIMEOUT_CAP
+from executor.base import HARD_TIMEOUT_CAP, BaseExecutor
+from schemas.types import Plan, Receipt
 
 
 class ShellExecutor(BaseExecutor):
@@ -70,8 +70,7 @@ class ShellExecutor(BaseExecutor):
         try:
             result = subprocess.run(
                 command, shell=True,
-                capture_output=True, text=True, timeout=timeout,
-            )
+                capture_output=True, text=True, timeout=timeout, check=False)
             elapsed = (time.time() - start) * 1000
             return Receipt(
                 plan_id=plan.id,

@@ -1,7 +1,7 @@
 """Tests for the appliance controller."""
 
 from controller.appliance import Appliance
-from schemas.types import Event, EventKind, Severity, IncidentReport
+from schemas.types import IncidentReport
 
 
 class TestAppliance:

@@ -13,8 +13,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from schemas.types import IncidentReport, Plan, Severity, ALLOWED_VERBS
-
+from schemas.types import ALLOWED_VERBS, IncidentReport, Plan
 
 # F13: Resource limits
 MAX_PLAN_STEPS = 10

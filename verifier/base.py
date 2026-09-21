@@ -11,7 +11,7 @@ from __future__ import annotations
 import abc
 from typing import Any
 
-from schemas.types import Receipt, Event, EventKind, Severity
+from schemas.types import Event, EventKind, Receipt, Severity
 
 
 class BaseVerifier(abc.ABC):

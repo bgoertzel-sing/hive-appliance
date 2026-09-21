@@ -19,24 +19,23 @@ P0 fixes:
 """
 from __future__ import annotations
 
-import sys
-import json
 import argparse
+import json
+import sys
 
-from controller.appliance import Appliance
+from collectors.file_collector import FileCollector
 from collectors.host_collector import HostCollector
 from collectors.service_collector import ServiceCollector
-from collectors.file_collector import FileCollector
+from controller.appliance import Appliance
 from profiles.manager import ProfileManager
-from recovery.checkpoint import CheckpointManager
-from recovery.upgrade import UpgradeController, UpgradeManifest, UpgradeStep
+from recovery.upgrade import UpgradeManifest, UpgradeStep
 
 
 def _build_appliance(store_path: str, dry_run: bool = False) -> Appliance:
     """Build a fully wired appliance with all M1 components."""
-    from reasoning.planner import SimplePlanner
-    from executor.shell_executor import ShellExecutor
     from executor.noop_executor import NoopExecutor
+    from executor.shell_executor import ShellExecutor
+    from reasoning.planner import SimplePlanner
     from verifier.exit_code_verifier import ExitCodeVerifier
 
     app = Appliance(store_path)
@@ -151,8 +150,6 @@ def cmd_run_plan(args):
         print("ERROR: run-plan requires --recovery-ready flag (F3).")
         sys.exit(1)
 
-    from executor.shell_executor import ShellExecutor
-    from verifier.exit_code_verifier import ExitCodeVerifier
     from schemas.types import Plan
 
     with open(args.file) as f:
@@ -268,7 +265,7 @@ def main():
     plan_parser.add_argument("--recovery-ready", action="store_true",
                              help="F3: Confirm recovery readiness")
 
-    ckpt_parser = sub.add_parser("checkpoint", help="Take a state checkpoint")
+    sub.add_parser("checkpoint", help="Take a state checkpoint")
     sub.add_parser("restore", help="Restore from checkpoint").add_argument(
         "checkpoint_id", help="Checkpoint ID to restore")
 

@@ -1,7 +1,7 @@
 """Base VenueCollector protocol and helpers."""
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable, Optional
+from typing import Optional, Protocol, runtime_checkable
 
 from conversation.types import Message
 
