@@ -6,6 +6,7 @@ rollup, resource aggregation, and drift detection.
 """
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
@@ -18,10 +19,14 @@ from hive.types import (
 )
 from schemas.types import EventKind, Severity
 
+logger = logging.getLogger(__name__)
+
 # ── Correlation config ───────────────────────────────────
 
 DEFAULT_CORRELATION_WINDOW = 300.0  # seconds
 DEFAULT_CORRELATION_THRESHOLD = 2   # min agents for cross-agent incident
+MAX_AGENT_INCIDENTS = 500           # per-agent incident history cap
+MAX_HIVE_INCIDENTS = 1000           # total hive-level incident cap
 
 
 class HiveReducer:
@@ -86,11 +91,13 @@ class HiveReducer:
         if agent_id not in self._state.agents:
             self._state.agents[agent_id] = AgentHealthSummary(agent_id=agent_id)
             self._agent_incidents[agent_id] = []
+            logger.info("Registered agent %s in reducer", agent_id)
 
     def unregister_agent(self, agent_id: str) -> None:
         """Remove an agent from hive state."""
         self._state.agents.pop(agent_id, None)
         self._agent_incidents.pop(agent_id, None)
+        logger.info("Unregistered agent %s from reducer", agent_id)
 
     def update_resources(self, agent_id: str,
                          disk_total: int = 0, disk_used: int = 0,
@@ -125,24 +132,27 @@ class HiveReducer:
 
         return res.alerts()
 
+    # ── private handlers ──────────────────────────────────
+
     def _handle_incident(self, agent_id: str, event: Any) -> list[HiveIncident]:
-        """Process an incident event, attempt cross-agent correlation."""
+        """Handle an incident event from an agent."""
         new_incidents: list[HiveIncident] = []
         payload = event.payload
-        symptom = payload.get("symptom", "")
-        incident_id = payload.get("id", "")
+        symptom = payload.get("symptom", payload.get("message", "unknown"))
 
-        if not symptom:
-            return new_incidents
-
-        # Record this agent's incident
-        self._agent_incidents.setdefault(agent_id, [])
-        self._agent_incidents[agent_id].append({
-            "symptom": symptom,
-            "incident_id": incident_id,
+        # Track per-agent incident with cap
+        if agent_id not in self._agent_incidents:
+            self._agent_incidents[agent_id] = []
+        incidents_list = self._agent_incidents[agent_id]
+        incidents_list.append({
+            "incident_id": event.id,
             "ts": event.ts,
+            "symptom": symptom,
             "severity": payload.get("severity", "warn"),
         })
+        # Prune old entries beyond cap
+        if len(incidents_list) > MAX_AGENT_INCIDENTS:
+            self._agent_incidents[agent_id] = incidents_list[-MAX_AGENT_INCIDENTS:]
 
         # Update agent health
         if agent_id in self._state.agents:
@@ -158,6 +168,9 @@ class HiveReducer:
         if correlated:
             new_incidents.append(correlated)
 
+        logger.debug(
+            "Handled incident from agent %s: symptom=%s", agent_id, symptom
+        )
         return new_incidents
 
     def _correlate_incidents(self, symptom: str, ts: float) -> HiveIncident | None:
@@ -184,6 +197,16 @@ class HiveReducer:
             if hinc.id not in self._seen_hive_incidents:
                 self._seen_hive_incidents.add(hinc.id)
                 self._state.incidents.append(hinc)
+                # Cap hive incidents list
+                if len(self._state.incidents) > MAX_HIVE_INCIDENTS:
+                    # Keep only resolved + most recent unresolved
+                    resolved = [i for i in self._state.incidents if i.resolved]
+                    unresolved = [i for i in self._state.incidents if not i.resolved]
+                    self._state.incidents = resolved[-MAX_HIVE_INCIDENTS // 2:] + unresolved[-MAX_HIVE_INCIDENTS // 2:]
+                logger.info(
+                    "Correlated hive incident %s: symptom=%s, agents=%s",
+                    hinc.id, symptom, affected_agents,
+                )
                 return hinc
 
         return None
@@ -209,6 +232,9 @@ class HiveReducer:
                 summary.open_incidents = max(0, summary.open_incidents - 1)
                 if summary.open_incidents == 0:
                     summary.health = AgentHealth.HEALTHY
+                logger.info(
+                    "Agent %s incident resolved (verified receipt)", agent_id,
+                )
 
     def resolve_hive_incident(self, incident_id: str) -> bool:
         """Mark a hive-level incident as resolved."""
@@ -216,6 +242,7 @@ class HiveReducer:
             if inc.id == incident_id and not inc.resolved:
                 inc.resolved = True
                 inc.resolution_ts = time.time()
+                logger.info("Resolved hive incident %s", incident_id)
                 return True
         return False
 

@@ -6,6 +6,7 @@ data suitable for rendering as text, JSON, or HTML.
 """
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any, Optional
 
@@ -13,6 +14,8 @@ from hive.types import (
     AgentHealth,
     HiveState,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class HealthDashboard:
@@ -99,6 +102,14 @@ class HealthDashboard:
 
     def text_report(self) -> str:
         """Generate a human-readable text health report."""
+        try:
+            return self._generate_text_report()
+        except Exception:
+            logger.exception("Error generating text report")
+            return "ERROR: Could not generate health report"
+
+    def _generate_text_report(self) -> str:
+        """Internal text report generation."""
         s = self._state
         lines: list[str] = []
 
@@ -117,53 +128,57 @@ class HealthDashboard:
         lines.append("  " + "-" * 56)
         for agent_id, summary in sorted(s.agents.items()):
             health_icon = {
-                AgentHealth.HEALTHY: "✓",
-                AgentHealth.DEGRADED: "⚠",
-                AgentHealth.FAILED: "✗",
-                AgentHealth.UNKNOWN: "?",
-            }.get(summary.health, "?")
-            lines.append(f"  {health_icon} {agent_id}: {summary.health.value}"
-                         f" ({summary.open_incidents} open incidents)")
+                AgentHealth.HEALTHY: "✅",
+                AgentHealth.DEGRADED: "⚠️",
+                AgentHealth.FAILED: "❌",
+                AgentHealth.UNKNOWN: "❓",
+            }.get(summary.health, "❓")
+            lines.append(
+                f"  {health_icon} {agent_id:<20} "
+                f"health={summary.health.value:<10} "
+                f"incidents={summary.open_incidents}"
+            )
             if summary.services:
                 for svc, status in sorted(summary.services.items()):
-                    lines.append(f"      {svc}: {status}")
+                    lines.append(f"      └─ {svc}: {status}")
+        lines.append("")
 
         # Incidents
-        open_incs = s.open_incidents
-        if open_incs:
-            lines.append("")
-            lines.append("  OPEN HIVE INCIDENTS:")
+        open_inc = s.open_incidents
+        if open_inc:
+            lines.append(f"  OPEN INCIDENTS ({len(open_inc)}):")
             lines.append("  " + "-" * 56)
-            for inc in open_incs:
-                lines.append(f"  [{inc.severity.value.upper()}] {inc.symptom}")
-                lines.append(f"    Affected: {', '.join(inc.affected_agents)}")
-                lines.append(f"    ID: {inc.id}")
+            for inc in open_inc:
+                lines.append(
+                    f"  🔴 [{inc.severity.value.upper()}] {inc.symptom}"
+                )
+                lines.append(
+                    f"      Agents: {', '.join(inc.affected_agents)}"
+                )
+        else:
+            lines.append("  INCIDENTS: None open")
+        lines.append("")
 
         # Resources
         res = s.resources
         alerts = res.alerts()
-        if res.total_disk_bytes > 0 or alerts:
-            lines.append("")
-            lines.append("  RESOURCES:")
-            lines.append("  " + "-" * 56)
-            if res.total_disk_bytes > 0:
-                lines.append(f"  Disk: {res.disk_usage_ratio:.1%}")
-            if res.total_memory_bytes > 0:
-                lines.append(f"  Memory: {res.memory_usage_ratio:.1%}")
-            if res.total_cpu_percent > 0:
-                lines.append(f"  CPU: {res.total_cpu_percent:.1f}%")
+        lines.append("  RESOURCES:")
+        lines.append("  " + "-" * 56)
+        lines.append(f"  Disk:   {res.disk_usage_ratio:.1%}")
+        lines.append(f"  Memory: {res.memory_usage_ratio:.1%}")
+        lines.append(f"  CPU:    {res.total_cpu_percent:.1f}%")
+        if alerts:
             for alert in alerts:
-                lines.append(f"  ⚠ {alert}")
-
+                lines.append(f"  ⚠️  {alert}")
         lines.append("")
         lines.append("=" * 60)
+
         return "\n".join(lines)
+
+    @property
+    def snapshot_count(self) -> int:
+        return len(self._snapshots)
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:
         return list(self._snapshots)
-
-    def trend(self, metric: str = "healthy_count", last_n: int = 10) -> list[Any]:
-        """Return recent trend for a metric from snapshots."""
-        recent = self._snapshots[-last_n:]
-        return [snap.get(metric) for snap in recent]

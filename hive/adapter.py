@@ -10,6 +10,7 @@ Two implementations:
 """
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any, Protocol, runtime_checkable
 
@@ -22,6 +23,8 @@ from hive.types import (
 )
 from recovery.checkpoint import StateCheckpoint
 from schemas.types import Event
+
+logger = logging.getLogger(__name__)
 
 # ── Protocol ─────────────────────────────────────────────
 
@@ -83,11 +86,25 @@ class LocalAgentAdapter:
         """Poll events from the appliance's event store since cursor.
 
         Cursor is an event count offset (stringified int).
+        Uses cursor-based pagination to avoid re-reading all events.
         """
         offset = int(cursor) if cursor else 0
-        all_events = self._appliance.store.query(limit=10000)
-        new_events = all_events[offset:]
-        new_cursor = str(len(all_events))
+        store = self._appliance.store
+
+        # Use paginated query if available, otherwise fall back to bounded fetch
+        if hasattr(store, 'query_since_offset'):
+            new_events = store.query_since_offset(offset, limit=500)
+            new_cursor = str(offset + len(new_events))
+        else:
+            all_events = store.query(limit=10000)
+            new_events = all_events[offset:]
+            new_cursor = str(len(all_events))
+
+        if new_events:
+            logger.debug(
+                "Agent %s: %d new events since cursor %s",
+                self._identity.agent_id, len(new_events), cursor,
+            )
         return new_events, new_cursor
 
     def state_snapshot(self) -> dict[str, Any]:
@@ -122,105 +139,92 @@ class LocalAgentAdapter:
         For now, supports delegate_repair by forwarding to the agent's
         repair_incident method if available.
         """
+        agent_id = self._identity.agent_id
         try:
             if hasattr(self._appliance, 'repair_incident'):
-                # Try to repair via the agent's own appliance
-                result = self._appliance.repair_incident(
-                    action.parameters.get("incident_id", "")
+                result = self._appliance.repair_incident(action.params)
+                logger.info(
+                    "Agent %s executed action %s: success=%s",
+                    agent_id, action.kind.value, result,
                 )
                 return HiveActionResult(
                     action_id=action.id,
                     success=bool(result),
-                    agent_results={self._identity.agent_id: {"result": str(result)}},
+                    output=str(result),
                 )
-            return HiveActionResult(
-                action_id=action.id,
-                success=False,
-                error="Agent appliance has no repair_incident method",
+            logger.warning(
+                "Agent %s has no repair_incident method for action %s",
+                agent_id, action.kind.value,
             )
-        except Exception as e:
             return HiveActionResult(
                 action_id=action.id,
                 success=False,
-                error=str(e),
+                output="Agent appliance does not support this action",
+            )
+        except Exception:
+            logger.exception(
+                "Agent %s action %s failed", agent_id, action.kind.value,
+            )
+            return HiveActionResult(
+                action_id=action.id,
+                success=False,
+                output="Exception during action execution",
             )
 
     def checkpoint(self, label: str) -> StateCheckpoint:
-        if hasattr(self._appliance, 'create_checkpoint'):
-            return self._appliance.create_checkpoint(label)
-        # Fallback: create a basic checkpoint from state snapshot
-        return StateCheckpoint(
-            id=f"ckpt_{self._identity.agent_id}_{int(time.time())}",
-            label=label,
-            appliance_state=self.state_snapshot(),
-        )
+        if hasattr(self._appliance, 'checkpoint'):
+            return self._appliance.checkpoint(label)
+        return StateCheckpoint(label=label)
 
     def restore(self, checkpoint_id: str) -> bool:
-        if hasattr(self._appliance, 'restore_checkpoint'):
-            return self._appliance.restore_checkpoint(checkpoint_id)
+        if hasattr(self._appliance, 'restore'):
+            return self._appliance.restore(checkpoint_id)
+        logger.warning("Agent %s does not support restore", self._identity.agent_id)
         return False
 
 
 # ── Stub for testing ─────────────────────────────────────
 
 class StubAgentAdapter:
-    """In-memory stub adapter for testing the hive layer."""
+    """Test adapter that serves canned events and health."""
 
-    def __init__(self, agent_id: str, display_name: str = ""):
-        self._identity = AgentIdentity(
-            agent_id=agent_id,
-            display_name=display_name or agent_id,
-        )
-        self._events: list[Event] = []
-        self._state: dict[str, Any] = {}
-        self._health = AgentHealth.HEALTHY
-        self._open_incidents: int = 0
-        self._checkpoints: dict[str, StateCheckpoint] = {}
+    def __init__(self, agent_id: str, events: list[Event] | None = None,
+                 health: AgentHealth = AgentHealth.HEALTHY):
+        self._identity = AgentIdentity(agent_id=agent_id, display_name=agent_id)
+        self._events = list(events or [])
+        self._health = health
+        self._executed: list[HiveAction] = []
 
     @property
     def identity(self) -> AgentIdentity:
         return self._identity
 
-    def inject_event(self, event: Event) -> None:
-        """Test helper: inject an event."""
-        self._events.append(event)
-
-    def set_health(self, health: AgentHealth, open_incidents: int = 0) -> None:
-        """Test helper: set health status."""
-        self._health = health
-        self._open_incidents = open_incidents
-
     def events_since(self, cursor: str | None) -> tuple[list[Event], str]:
         offset = int(cursor) if cursor else 0
-        new_events = self._events[offset:]
-        return new_events, str(len(self._events))
+        new = self._events[offset:]
+        return new, str(len(self._events))
 
     def state_snapshot(self) -> dict[str, Any]:
-        return dict(self._state)
+        return {"state": {}, "incidents": [], "event_count": len(self._events)}
 
     def health_summary(self) -> AgentHealthSummary:
         return AgentHealthSummary(
             agent_id=self._identity.agent_id,
             health=self._health,
-            open_incidents=self._open_incidents,
+            open_incidents=0,
             last_event_ts=time.time(),
         )
 
     def execute(self, action: HiveAction) -> HiveActionResult:
-        return HiveActionResult(
-            action_id=action.id,
-            success=True,
-            agent_results={self._identity.agent_id: {"stub": True}},
-        )
+        self._executed.append(action)
+        return HiveActionResult(action_id=action.id, success=True, output="stub")
 
     def checkpoint(self, label: str) -> StateCheckpoint:
-        ckpt = StateCheckpoint(
-            id=f"ckpt_{self._identity.agent_id}_{int(time.time())}",
-            label=label,
-            appliance_state=self.state_snapshot(),
-        )
-        self._checkpoints[ckpt.id] = ckpt
-        return ckpt
+        return StateCheckpoint(label=label)
 
     def restore(self, checkpoint_id: str) -> bool:
-        return checkpoint_id in self._checkpoints
+        return True
+
+    def add_events(self, events: list[Event]) -> None:
+        """Add events for testing."""
+        self._events.extend(events)

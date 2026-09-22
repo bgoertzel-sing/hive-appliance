@@ -7,246 +7,249 @@ coherent control loop.
 
 Usage:
     hive = HiveAppliance()
-    hive.register_agent(adapter)
-    new_incidents = hive.tick()   # poll → reduce → plan
-    report = hive.dashboard.text_report()
+    hive.register_agent("proto2", adapter)
+    hive.tick()   # one iteration of the control loop
+    hive.run()    # continuous loop in background thread
 """
 from __future__ import annotations
 
+import logging
 import threading
 import time
-from typing import Any
+from typing import Any, Optional
 
+from hive.adapter import AgentApplianceAdapter
 from hive.dashboard import HealthDashboard
 from hive.event_bus import HiveEventBus
 from hive.planner import HivePlanner
 from hive.reducer import HiveReducer
 from hive.shared_store import SharedStoreAdapter
-from hive.types import (
-    HiveAction,
-    HiveActionResult,
-    HiveState,
-)
+from hive.types import HiveActionResult, HiveEvent, HiveIncident
+
+logger = logging.getLogger(__name__)
 
 
 class HiveAppliance:
-    """Top-level M5 Hive Appliance orchestrator.
+    """Top-level M5 Hive-Level Appliance.
 
-    Lifecycle:
-    1. Register agent adapters via register_agent()
-    2. Call tick() periodically (or run_loop() for continuous)
-    3. Each tick: polls events → reduces state → plans actions
-    4. Optionally execute proposed actions
-    5. Query dashboard for reports
+    Orchestrates:
+    1. Event polling from all agent adapters (via HiveEventBus)
+    2. State reduction (via HiveReducer)
+    3. Action planning (via HivePlanner)
+    4. Action execution (delegated back to adapters)
+    5. Health dashboard updates
     """
 
     def __init__(
         self,
-        correlation_window: float = 300.0,
-        correlation_threshold: int = 2,
-        auto_execute: bool = False,
+        poll_interval: float = 5.0,
+        health_poll_interval: float = 30.0,
     ):
-        self._bus = HiveEventBus()
-        self._reducer = HiveReducer(
-            correlation_window=correlation_window,
-            correlation_threshold=correlation_threshold,
-        )
-        self._planner = HivePlanner()
-        self._store = SharedStoreAdapter()
-        self._dashboard = HealthDashboard()
-        self._adapters: dict[str, Any] = {}
-        self._auto_execute = auto_execute
-        self._tick_count: int = 0
+        self.bus = HiveEventBus()
+        self.reducer = HiveReducer()
+        self.planner = HivePlanner()
+        self.shared_store = SharedStoreAdapter()
+        self.dashboard = HealthDashboard()
+
+        self._adapters: dict[str, AgentApplianceAdapter] = {}
+        self._poll_interval = poll_interval
+        self._health_poll_interval = health_poll_interval
+        self._last_health_poll: float = 0.0
+
         self._running = False
-        self._lock = threading.Lock()
-        self._action_history: list[dict[str, Any]] = []
+        self._thread: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
 
-        # Wire bus subscriber to reducer + shared store
-        self._bus.add_subscriber(self._on_hive_event)
+        # Tick metrics
+        self._tick_count: int = 0
+        self._total_events: int = 0
+        self._total_incidents: int = 0
+        self._action_results: list[HiveActionResult] = []
+        self._max_action_results: int = 500
 
-    # ── Properties ───────────────────────────────────────
+    # ── Agent registration ───────────────────────────────
 
-    @property
-    def bus(self) -> HiveEventBus:
-        return self._bus
-
-    @property
-    def reducer(self) -> HiveReducer:
-        return self._reducer
-
-    @property
-    def planner(self) -> HivePlanner:
-        return self._planner
-
-    @property
-    def shared_store(self) -> SharedStoreAdapter:
-        return self._store
-
-    @property
-    def dashboard(self) -> HealthDashboard:
-        return self._dashboard
-
-    @property
-    def state(self) -> HiveState:
-        return self._reducer.state
-
-    @property
-    def tick_count(self) -> int:
-        return self._tick_count
-
-    @property
-    def registered_agents(self) -> list[str]:
-        return list(self._adapters.keys())
-
-    # ── Registration ─────────────────────────────────────
-
-    def register_agent(self, adapter: Any) -> None:
-        """Register an agent adapter with all subsystems."""
-        agent_id = adapter.identity.agent_id
-        with self._lock:
-            self._adapters[agent_id] = adapter
-            self._bus.register_adapter(adapter)
-            self._store.register_adapter(adapter)
-            self._reducer.register_agent(agent_id)
+    def register_agent(self, agent_id: str, adapter: AgentApplianceAdapter) -> None:
+        """Register an agent adapter with all hive components."""
+        self._adapters[agent_id] = adapter
+        self.bus.register_adapter(agent_id, adapter)
+        self.reducer.register_agent(agent_id)
+        self.shared_store.register_adapter(agent_id, adapter)
+        logger.info("Registered agent %s in HiveAppliance", agent_id)
 
     def unregister_agent(self, agent_id: str) -> None:
-        """Remove an agent from all subsystems."""
-        with self._lock:
-            self._adapters.pop(agent_id, None)
-            self._bus.unregister_adapter(agent_id)
-            self._store.unregister_adapter(agent_id)
-            self._reducer.unregister_agent(agent_id)
+        """Unregister an agent from all hive components."""
+        self._adapters.pop(agent_id, None)
+        self.bus.unregister_adapter(agent_id)
+        self.reducer.unregister_agent(agent_id)
+        self.shared_store.unregister_adapter(agent_id)
+        logger.info("Unregistered agent %s from HiveAppliance", agent_id)
 
-    # ── Core loop ────────────────────────────────────────
+    # ── Control loop ─────────────────────────────────────
 
     def tick(self) -> dict[str, Any]:
-        """Execute one hive control cycle.
+        """One iteration of the hive control loop.
 
-        Returns a summary dict:
-        {
-            "tick": int,
-            "events_polled": int,
-            "new_incidents": [...],
-            "proposed_actions": [...],
-            "executed_results": [...],
-        }
+        Returns a summary dict of what happened.
         """
         self._tick_count += 1
         result: dict[str, Any] = {
             "tick": self._tick_count,
-            "events_polled": 0,
-            "new_incidents": [],
-            "proposed_actions": [],
-            "executed_results": [],
+            "events": 0,
+            "incidents": [],
+            "actions": [],
+            "errors": [],
         }
 
-        # 1. Poll events from all agents
-        events = self._bus.poll_all()
-        result["events_polled"] = len(events)
+        # 1. Poll events
+        try:
+            events = self.bus.poll_all()
+            result["events"] = len(events)
+            self._total_events += len(events)
+        except Exception:
+            logger.exception("Error during event polling")
+            result["errors"].append("event_poll_failed")
+            events = []
 
-        # 2. Update agent health summaries
-        self._poll_health()
+        # 2. Reduce events into state
+        new_incidents: list[HiveIncident] = []
+        for hevt in events:
+            try:
+                incidents = self.reducer.reduce(hevt)
+                new_incidents.extend(incidents)
+            except Exception:
+                logger.exception("Error reducing event %s", hevt.id)
+                result["errors"].append(f"reduce_failed:{hevt.id}")
 
-        # 3. Collect new incidents (already processed via subscriber)
-        # The reducer processes events via _on_hive_event callback.
-        # Gather the open incidents that are new this tick.
-        result["new_incidents"] = [
-            inc.to_dict() for inc in self._reducer.state.open_incidents
-        ]
+        result["incidents"] = [i.id for i in new_incidents]
+        self._total_incidents += len(new_incidents)
+
+        # 3. Periodic health polling
+        now = time.time()
+        if now - self._last_health_poll >= self._health_poll_interval:
+            self._poll_health(result)
+            self._last_health_poll = now
 
         # 4. Plan actions
-        proposed = self._planner.plan(self._reducer.state)
-        result["proposed_actions"] = [a.to_dict() for a in proposed]
+        try:
+            actions = self.planner.plan(self.reducer.state)
+            result["actions"] = [a.id for a in actions]
+        except Exception:
+            logger.exception("Error during action planning")
+            result["errors"].append("planning_failed")
+            actions = []
 
-        # 5. Optionally execute
-        if self._auto_execute and proposed:
-            for action in proposed:
-                exec_result = self.execute_action(action)
-                result["executed_results"].append(exec_result.to_dict())
+        # 5. Execute actions
+        for action in actions:
+            self._execute_action(action, result)
 
-        # 6. Update dashboard
-        self._dashboard.update_state(self._reducer.state)
+        # 6. Store hive events
+        for hevt in events:
+            self.shared_store.ingest(hevt)
+
+        # 7. Update dashboard
+        self.dashboard.update_state(self.reducer.state)
 
         return result
 
-    def _poll_health(self) -> None:
-        """Poll health summaries from all adapters."""
-        for agent_id, adapter in list(self._adapters.items()):
+    def _poll_health(self, result: dict[str, Any]) -> None:
+        """Poll health from all adapters and update reducer."""
+        for agent_id, adapter in self._adapters.items():
             try:
                 summary = adapter.health_summary()
-                self._reducer.update_agent_health(agent_id, summary)
+                self.reducer.update_agent_health(agent_id, summary)
             except Exception:
-                pass  # Don't let one broken adapter stop health polling
+                logger.exception("Error polling health from agent %s", agent_id)
+                result.setdefault("errors", []).append(
+                    f"health_poll_failed:{agent_id}"
+                )
 
-    def _on_hive_event(self, hive_event) -> None:
-        """Subscriber callback: feed events to reducer and shared store."""
-        self._store.ingest(hive_event)
-        self._reducer.reduce(hive_event)
-        # Incidents are added to state inside reducer.reduce()
+    def _execute_action(self, action: Any, result: dict[str, Any]) -> None:
+        """Execute a planned action via the target adapter."""
+        target = action.target_agent
+        adapter = self._adapters.get(target)
+        if adapter is None:
+            logger.warning(
+                "No adapter for action target %s (action %s)", target, action.id
+            )
+            result.setdefault("errors", []).append(
+                f"no_adapter:{target}"
+            )
+            return
 
-    # ── Action execution ─────────────────────────────────
+        try:
+            action_result = adapter.execute(action)
+            self._action_results.append(action_result)
+            # Cap action results history
+            if len(self._action_results) > self._max_action_results:
+                self._action_results = self._action_results[-self._max_action_results:]
+            self.planner.record_result(action_result)
+            logger.info(
+                "Action %s on %s: success=%s",
+                action.id, target, action_result.success,
+            )
+        except Exception:
+            logger.exception(
+                "Error executing action %s on agent %s", action.id, target
+            )
+            result.setdefault("errors", []).append(
+                f"action_failed:{action.id}"
+            )
 
-    def execute_action(self, action: HiveAction) -> HiveActionResult:
-        """Execute a proposed HiveAction by delegating to target agents."""
-        results: dict[str, dict[str, Any]] = {}
-        overall_success = True
+    # ── Background run ───────────────────────────────────
 
-        for agent_id in action.target_agents:
-            adapter = self._adapters.get(agent_id)
-            if adapter is None:
-                results[agent_id] = {"error": "agent not registered"}
-                overall_success = False
-                continue
+    def run(self) -> None:
+        """Start the hive control loop in a background thread."""
+        if self._running:
+            logger.warning("HiveAppliance already running")
+            return
+        self._running = True
+        self._stop_event.clear()
+        self._thread = threading.Thread(
+            target=self._run_loop, name="hive-appliance", daemon=True,
+        )
+        self._thread.start()
+        logger.info("HiveAppliance started (poll_interval=%.1fs)", self._poll_interval)
+
+    def stop(self, timeout: float = 10.0) -> None:
+        """Stop the background control loop gracefully."""
+        if not self._running:
+            return
+        self._running = False
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join(timeout=timeout)
+            if self._thread.is_alive():
+                logger.warning("HiveAppliance thread did not stop within %.1fs", timeout)
+            self._thread = None
+        logger.info("HiveAppliance stopped")
+
+    def _run_loop(self) -> None:
+        """Internal loop for the background thread."""
+        logger.info("Hive control loop started")
+        while self._running:
             try:
-                agent_result = adapter.execute(action)
-                results[agent_id] = agent_result.to_dict()
-                if not agent_result.success:
-                    overall_success = False
-            except Exception as e:
-                results[agent_id] = {"error": str(e)}
-                overall_success = False
+                self.tick()
+            except Exception:
+                logger.exception("Unexpected error in hive tick")
+            # Use stop_event.wait for interruptible sleep
+            if self._stop_event.wait(timeout=self._poll_interval):
+                break
+        logger.info("Hive control loop exited")
 
-        result = HiveActionResult(
-            action_id=action.id,
-            success=overall_success,
-            agent_results=results,
-        )
-        action.status = "executed"
-        self._action_history.append({
-            "action": action.to_dict(),
-            "result": result.to_dict(),
-            "ts": time.time(),
-        })
-        return result
-
-    # ── Convenience ──────────────────────────────────────
-
-    def report(self) -> str:
-        """Generate a text health report."""
-        self._dashboard.update_state(self._reducer.state)
-        return self._dashboard.text_report()
-
-    def summary(self) -> dict[str, Any]:
-        """Return structured dashboard summary."""
-        self._dashboard.update_state(self._reducer.state)
-        return self._dashboard.summary()
-
-    def resolve_incident(self, incident_id: str) -> bool:
-        """Resolve a hive-level incident."""
-        return self._reducer.resolve_hive_incident(incident_id)
-
-    def update_agent_resources(
-        self, agent_id: str,
-        disk_total: int = 0, disk_used: int = 0,
-        memory_total: int = 0, memory_used: int = 0,
-        cpu_percent: float = 0.0,
-    ) -> list[str]:
-        """Update resource metrics for an agent. Returns alerts."""
-        return self._reducer.update_resources(
-            agent_id, disk_total, disk_used,
-            memory_total, memory_used, cpu_percent,
-        )
+    # ── Status / introspection ───────────────────────────
 
     @property
-    def action_history(self) -> list[dict[str, Any]]:
-        return list(self._action_history)
+    def is_running(self) -> bool:
+        return self._running
+
+    def status(self) -> dict[str, Any]:
+        """Return current hive appliance status."""
+        return {
+            "running": self._running,
+            "tick_count": self._tick_count,
+            "total_events": self._total_events,
+            "total_incidents": self._total_incidents,
+            "agents": list(self._adapters.keys()),
+            "dashboard": self.dashboard.summary(),
+        }
