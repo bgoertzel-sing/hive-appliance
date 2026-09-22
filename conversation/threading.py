@@ -85,6 +85,11 @@ class Thread:
             self.last_activity = self.messages[-1].timestamp
 
 
+# One canonical public thread record; aliases above remain source-compatible
+# documentation while all assembly/runtime instances use conversation.types.Thread.
+from conversation.types import Thread as Thread
+
+
 # ── ThreadAssembler ──────────────────────────────────────
 
 @dataclass

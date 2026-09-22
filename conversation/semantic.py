@@ -7,6 +7,7 @@ Provides vector similarity search over message content, enabling
 from __future__ import annotations
 
 import logging
+import json
 from typing import Optional
 from typing import TYPE_CHECKING
 
@@ -87,6 +88,10 @@ class SemanticIndex:
                     "timestamp": m.timestamp,
                     "content_type": m.content_type,
                     "thread_id": m.thread_id or "",
+                    "venue_message_id": m.venue_message_id,
+                    "reply_to_id": m.reply_to_id or "",
+                    "has_attachments": m.has_attachments,
+                    "attachment_ids": json.dumps(m.attachment_ids),
                 }
                 for m in batch
             ]

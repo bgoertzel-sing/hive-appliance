@@ -34,10 +34,13 @@ class HiveEventBus:
         self._subscribers: list[SubscriberFn] = []
         self._lock = threading.Lock()
         self._event_log: list[HiveEvent] = []
-        self._max_event_log: int = 10_000
+        self._max_log_size: int = 10_000
 
-    def register_adapter(self, agent_id: str, adapter: Any) -> None:
+    def register_adapter(self, agent_id: str | Any, adapter: Any = None) -> None:
         """Register an agent adapter for polling."""
+        if adapter is None:
+            adapter = agent_id
+            agent_id = adapter.identity.agent_id
         with self._lock:
             self._adapters[agent_id] = adapter
             self._cursors[agent_id] = None
@@ -55,10 +58,14 @@ class HiveEventBus:
         with self._lock:
             self._subscribers.append(fn)
 
+    add_subscriber = subscribe
+
     def unsubscribe(self, fn: SubscriberFn) -> None:
         """Remove an event subscriber."""
         with self._lock:
             self._subscribers = [s for s in self._subscribers if s is not fn]
+
+    remove_subscriber = unsubscribe
 
     def poll_agent(self, agent_id: str) -> list[HiveEvent]:
         """Poll one agent for new events."""
@@ -99,8 +106,8 @@ class HiveEventBus:
 
         # Append to event log with cap
         self._event_log.extend(all_events)
-        if len(self._event_log) > self._max_event_log:
-            self._event_log = self._event_log[-self._max_event_log:]
+        if len(self._event_log) > self._max_log_size:
+            self._event_log = self._event_log[-self._max_log_size:]
 
         # Notify subscribers
         with self._lock:
@@ -121,10 +128,19 @@ class HiveEventBus:
         """Return event count."""
         return len(self._event_log)
 
+    def recent_events(self, seconds: float = 60.0) -> list[HiveEvent]:
+        cutoff = __import__("time").time() - seconds
+        return [event for event in self._event_log if event.hive_received_at > cutoff]
+
+    def events_since(self, offset: int) -> list[HiveEvent]:
+        return self._event_log[offset:]
+
+    def clear(self) -> None:
+        self._event_log.clear()
+
     @property
-    def recent_events(self) -> list[HiveEvent]:
-        """Return last 100 events."""
-        return self._event_log[-100:]
+    def registered_agents(self) -> list[str]:
+        return list(self._adapters)
 
     @property
     def adapters(self) -> dict[str, Any]:

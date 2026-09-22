@@ -146,7 +146,7 @@ class HealthDashboard:
         # Incidents
         open_inc = s.open_incidents
         if open_inc:
-            lines.append(f"  OPEN INCIDENTS ({len(open_inc)}):")
+            lines.append(f"  OPEN HIVE INCIDENTS ({len(open_inc)}):")
             lines.append("  " + "-" * 56)
             for inc in open_inc:
                 lines.append(
@@ -184,3 +184,6 @@ class HealthDashboard:
     def snapshots(self) -> list[dict[str, Any]]:
         """Return snapshots."""
         return list(self._snapshots)
+
+    def trend(self, metric: str, last_n: int = 10) -> list[Any]:
+        return [snapshot.get(metric) for snapshot in self._snapshots[-last_n:]]

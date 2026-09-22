@@ -193,12 +193,15 @@ class LocalAgentAdapter:
 class StubAgentAdapter:
     """Test adapter that serves canned events and health."""
 
-    def __init__(self, agent_id: str, events: list[Event] | None = None,
+    def __init__(self, agent_id: str, display_name: str = "",
+                 events: list[Event] | None = None,
                  health: AgentHealth = AgentHealth.HEALTHY):
-        self._identity = AgentIdentity(agent_id=agent_id, display_name=agent_id)
+        self._identity = AgentIdentity(agent_id=agent_id, display_name=display_name or agent_id)
         self._events = list(events or [])
         self._health = health
+        self._open_incidents = 0
         self._executed: list[HiveAction] = []
+        self._checkpoints: dict[str, StateCheckpoint] = {}
 
     @property
     def identity(self) -> AgentIdentity:
@@ -220,23 +223,35 @@ class StubAgentAdapter:
         return AgentHealthSummary(
             agent_id=self._identity.agent_id,
             health=self._health,
-            open_incidents=0,
+            open_incidents=self._open_incidents,
             last_event_ts=time.time(),
         )
 
     def execute(self, action: HiveAction) -> HiveActionResult:
         """Execute execute operation."""
         self._executed.append(action)
-        return HiveActionResult(action_id=action.id, success=True, output="stub")
+        return HiveActionResult(
+            action_id=action.id, success=True, output="stub",
+            agent_results={self.identity.agent_id: {"success": True, "output": "stub"}},
+        )
 
     def checkpoint(self, label: str) -> StateCheckpoint:
         """Execute checkpoint operation."""
-        return StateCheckpoint(label=label)
+        checkpoint = StateCheckpoint(id=f"stub-{len(self._checkpoints) + 1}", label=label)
+        self._checkpoints[checkpoint.id] = checkpoint
+        return checkpoint
 
     def restore(self, checkpoint_id: str) -> bool:
         """Execute restore operation."""
-        return True
+        return checkpoint_id in self._checkpoints
 
     def add_events(self, events: list[Event]) -> None:
         """Add events for testing."""
         self._events.extend(events)
+
+    def inject_event(self, event: Event) -> None:
+        self._events.append(event)
+
+    def set_health(self, health: AgentHealth, open_incidents: int = 0) -> None:
+        self._health = health
+        self._open_incidents = open_incidents

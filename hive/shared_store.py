@@ -27,12 +27,16 @@ class SharedStoreAdapter:
     - Per-agent event access
     """
 
-    def __init__(self) -> None:
+    def __init__(self, max_events: int = MAX_HIVE_EVENTS) -> None:
         self._adapters: dict[str, Any] = {}
         self._hive_events: list[HiveEvent] = []
+        self._max_events = max_events
 
-    def register_adapter(self, agent_id: str, adapter: Any) -> None:
+    def register_adapter(self, agent_id: str | Any, adapter: Any = None) -> None:
         """Register an agent adapter for cross-agent queries."""
+        if adapter is None:
+            adapter = agent_id
+            agent_id = adapter.identity.agent_id
         self._adapters[agent_id] = adapter
         logger.info("SharedStore registered adapter for %s", agent_id)
 
@@ -45,8 +49,8 @@ class SharedStoreAdapter:
         """Ingest a hive event into the shared store."""
         self._hive_events.append(hive_event)
         # Cap event list to prevent unbounded growth
-        if len(self._hive_events) > MAX_HIVE_EVENTS:
-            self._hive_events = self._hive_events[-MAX_HIVE_EVENTS:]
+        if len(self._hive_events) > self._max_events:
+            self._hive_events = self._hive_events[-self._max_events:]
 
     def query(
         self,
@@ -97,9 +101,13 @@ class SharedStoreAdapter:
             logger.exception("Error querying agent %s store", agent_id)
             return []
 
+    def event_count(self, agent_id: str | None = None) -> int:
+        if agent_id is None:
+            return len(self._hive_events)
+        return sum(event.source_agent == agent_id for event in self._hive_events)
+
     @property
-    def event_count(self) -> int:
-        """Return event count."""
+    def total_events(self) -> int:
         return len(self._hive_events)
 
     @property
@@ -110,3 +118,26 @@ class SharedStoreAdapter:
     def recent_events(self, n: int = 50) -> list[HiveEvent]:
         """Return the N most recent hive events."""
         return self._hive_events[-n:]
+
+    def agents_with_events(self) -> list[str]:
+        return sorted({event.source_agent for event in self._hive_events})
+
+    def cross_agent_incidents(self, symptom: str, window_seconds: float = 300.0) -> dict[str, list[HiveEvent]]:
+        if not self._hive_events:
+            return {}
+        newest = max(event.hive_received_at for event in self._hive_events)
+        cutoff = newest - window_seconds
+        matches: dict[str, list[HiveEvent]] = {}
+        for event in self._hive_events:
+            original = event.original_event
+            if (event.hive_received_at >= cutoff and original
+                    and original.kind == EventKind.INCIDENT
+                    and original.payload.get("symptom") == symptom):
+                matches.setdefault(event.source_agent, []).append(event)
+        return matches
+
+    def summary(self) -> dict[str, Any]:
+        return {"total_events": len(self._hive_events), "agents": self.agents_with_events()}
+
+    def clear(self) -> None:
+        self._hive_events.clear()

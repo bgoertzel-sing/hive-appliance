@@ -289,6 +289,14 @@ class HiveAction:
     incident_id: str = ""
     status: str = "proposed"
 
+    @property
+    def target_agent(self) -> str:
+        return self.target_agents[0] if self.target_agents else ""
+
+    @property
+    def params(self) -> dict[str, Any]:
+        return self.parameters
+
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""
         d = asdict(self)
@@ -303,6 +311,7 @@ class HiveActionResult:
     success: bool = False
     agent_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     error: str = ""
+    output: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""

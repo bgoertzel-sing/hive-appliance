@@ -2,5 +2,6 @@
 
 from .base import VenueCollector
 from .transcript_file import TranscriptFileCollector
+from .telegram import TelegramEventCollector
 
-__all__ = ["TranscriptFileCollector", "VenueCollector"]
+__all__ = ["TelegramEventCollector", "TranscriptFileCollector", "VenueCollector"]

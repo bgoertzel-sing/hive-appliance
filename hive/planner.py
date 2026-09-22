@@ -38,11 +38,14 @@ class HivePlanner:
     Custom rules can be registered via add_rule().
     """
 
-    def __init__(self) -> None:
+    def __init__(self, disk_critical: float = 0.95,
+                 agent_stale_seconds: float = 300.0) -> None:
         self._rules: list[RuleFn] = []
         self._action_log: list[dict[str, Any]] = []
         self._cooldowns: dict[str, float] = {}  # action_key -> last_fired_ts
         self._cooldown_period: float = 60.0  # seconds between same action
+        self._disk_critical = disk_critical
+        self._agent_stale_seconds = agent_stale_seconds
 
     def add_rule(self, rule: RuleFn) -> None:
         """Register a custom planning rule."""
@@ -56,6 +59,8 @@ class HivePlanner:
         actions.extend(self._rule_restart_failed(state))
         actions.extend(self._rule_delegate_repair(state))
         actions.extend(self._rule_resource_rebalance(state))
+        actions.extend(self._rule_checkpoint_failed(state))
+        actions.extend(self._rule_stale_agents(state))
 
         # Custom rules
         for rule in self._rules:
@@ -68,7 +73,7 @@ class HivePlanner:
         filtered: list[HiveAction] = []
         now = time.time()
         for action in actions:
-            key = f"{action.kind.value}:{action.target_agent}"
+            key = f"{action.kind.value}:{','.join(action.target_agents)}"
             last = self._cooldowns.get(key, 0.0)
             if now - last >= self._cooldown_period:
                 filtered.append(action)
@@ -79,7 +84,7 @@ class HivePlanner:
             self._action_log.append({
                 "id": action.id,
                 "kind": action.kind.value,
-                "target": action.target_agent,
+                "target": action.target_agents,
                 "ts": now,
             })
 
@@ -108,9 +113,8 @@ class HivePlanner:
         for agent_id in state.failed_agents:
             actions.append(HiveAction(
                 kind=HiveActionKind.RESTART_AGENT,
-                target_agent=agent_id,
-                reason=f"Agent {agent_id} health=FAILED",
-                params={"agent_id": agent_id},
+                target_agents=[agent_id],
+                parameters={"agent_id": agent_id, "reason": "agent_failed"},
             ))
         return actions
 
@@ -122,9 +126,9 @@ class HivePlanner:
                 primary = incident.affected_agents[0]
                 actions.append(HiveAction(
                     kind=HiveActionKind.DELEGATE_REPAIR,
-                    target_agent=primary,
-                    reason=f"Correlated incident: {incident.symptom}",
-                    params={
+                    target_agents=list(incident.affected_agents),
+                    parameters={
+                        "reason": "correlated_incident",
                         "incident_id": incident.id,
                         "symptom": incident.symptom,
                         "affected_agents": incident.affected_agents,
@@ -134,25 +138,31 @@ class HivePlanner:
 
     def _rule_resource_rebalance(self, state: HiveState) -> list[HiveAction]:
         """Generate rebalance actions when resource alerts fire."""
-        alerts = state.resources.alerts()
-        if not alerts:
+        if state.resources.disk_usage_ratio < self._disk_critical:
             return []
-        # Find agent with highest resource usage
-        max_agent = ""
-        max_usage = 0.0
-        for agent_id, res in state.resources.agent_resources.items():
-            usage = res.get("cpu_percent", 0.0) + res.get("disk_used", 0) / max(res.get("disk_total", 1), 1)
-            if usage > max_usage:
-                max_usage = usage
-                max_agent = agent_id
-        if max_agent:
-            return [HiveAction(
-                kind=HiveActionKind.REBALANCE,
-                target_agent=max_agent,
-                reason=f"Resource alerts: {', '.join(alerts)}",
-                params={"alerts": alerts},
-            )]
-        return []
+        return [HiveAction(kind=HiveActionKind.COORDINATE,
+                           target_agents=list(state.agents),
+                           parameters={"reason": "disk_critical"})]
+
+    def _rule_checkpoint_failed(self, state: HiveState) -> list[HiveAction]:
+        if not state.failed_agents:
+            return []
+        healthy = [agent for agent in state.agents if agent not in state.failed_agents]
+        if not healthy:
+            return []
+        return [HiveAction(kind=HiveActionKind.CHECKPOINT_ALL,
+                           target_agents=healthy,
+                           parameters={"reason": "agent_failed"})]
+
+    def _rule_stale_agents(self, state: HiveState) -> list[HiveAction]:
+        now = time.time()
+        stale = [agent for agent, summary in state.agents.items()
+                 if summary.last_event_ts and now - summary.last_event_ts > self._agent_stale_seconds]
+        if not stale:
+            return []
+        return [HiveAction(kind=HiveActionKind.COORDINATE,
+                           target_agents=stale,
+                           parameters={"reason": "stale_agent"})]
 
     @property
     def action_log(self) -> list[dict[str, Any]]:
