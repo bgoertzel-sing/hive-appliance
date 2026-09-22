@@ -30,6 +30,7 @@ class ServiceCollector(BaseCollector):
         ]
 
     def collect(self) -> list[Event]:
+        """Execute collect operation."""
         events: list[Event] = []
         for svc in self.services:
             status = self._query_service(svc)

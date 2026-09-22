@@ -38,6 +38,7 @@ def _deterministic_id(prefix: str, *parts: str) -> str:
 # ── enums ────────────────────────────────────────────────
 
 class Severity(str, Enum):
+    """Severity class."""
     INFO = "info"
     WARN = "warn"
     ERROR = "error"
@@ -45,6 +46,7 @@ class Severity(str, Enum):
 
 
 class EventKind(str, Enum):
+    """EventKind class."""
     OBSERVATION = "observation"
     INCIDENT = "incident"
     ACTION = "action"
@@ -55,6 +57,7 @@ class EventKind(str, Enum):
 
 
 class ResourceKind(str, Enum):
+    """ResourceKind class."""
     SERVICE = "service"
     FILE = "file"
     PACKAGE = "package"
@@ -99,12 +102,14 @@ class Resource:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["kind"] = self.kind.value
         return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Resource:
+        """Execute from dict operation."""
         return cls(
             kind=ResourceKind(d["kind"]),
             name=d["name"],
@@ -126,6 +131,7 @@ class Event:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["kind"] = self.kind.value
         d["severity"] = self.severity.value
@@ -133,6 +139,7 @@ class Event:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Event:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", _uid("evt_")),
             kind=EventKind(d.get("kind", "observation")),
@@ -165,11 +172,13 @@ class Plan:
     schema_version: str = "2"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Plan:
         # F2: reject unknown fields
+        """Execute from dict operation."""
         unknown = set(d.keys()) - _PLAN_KNOWN_FIELDS
         if unknown:
             raise ValueError(f"Unknown plan fields: {unknown}")
@@ -233,10 +242,12 @@ class Receipt:
     schema_version: str = "2"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Receipt:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", _uid("rcpt_")),
             ts=d.get("ts", _now()),
@@ -286,12 +297,14 @@ class IncidentReport:
         )
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["severity"] = self.severity.value
         return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> IncidentReport:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", _uid("inc_")),
             ts=d.get("ts", _now()),
@@ -319,6 +332,7 @@ class HiveProfile:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["tier"] = self.tier.value
         d["resources"] = [r.to_dict() if isinstance(r, Resource) else r for r in self.resources]
@@ -326,6 +340,7 @@ class HiveProfile:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> HiveProfile:
+        """Execute from dict operation."""
         resources = [Resource.from_dict(r) if isinstance(r, dict) else r for r in d.get("resources", [])]
         return cls(
             id=d.get("id", _uid("prof_")),

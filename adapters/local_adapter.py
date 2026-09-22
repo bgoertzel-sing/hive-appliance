@@ -46,7 +46,8 @@ class LocalAdapter:
     def _handle_touch(self, target: str, **kw) -> dict[str, Any]:
         if not target:
             raise ValueError("touch requires a target path")
-        open(target, "a").close()
+        with open(target, "a"):
+            pass
         return {"exit_code": 0, "stdout": "", "stderr": "", "success": True}
 
     def _handle_verify(self, target: str, **kw) -> dict[str, Any]:

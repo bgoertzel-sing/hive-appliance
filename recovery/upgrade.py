@@ -26,10 +26,12 @@ class UpgradeStep:
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> UpgradeStep:
+        """Execute from dict operation."""
         return cls(
             verb=d.get("verb", ""),
             command=d.get("command", ""),
@@ -50,12 +52,14 @@ class UpgradeManifest:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["steps"] = [s.to_dict() for s in self.steps]
         return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> UpgradeManifest:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", ""),
             ts=d.get("ts", 0.0),
@@ -79,6 +83,7 @@ class UpgradeResult:
     step_results: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
 

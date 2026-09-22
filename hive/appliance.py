@@ -241,6 +241,7 @@ class HiveAppliance:
 
     @property
     def is_running(self) -> bool:
+        """Return is running."""
         return self._running
 
     def status(self) -> dict[str, Any]:

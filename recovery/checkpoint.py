@@ -25,10 +25,12 @@ class StateCheckpoint:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> StateCheckpoint:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", ""),
             ts=d.get("ts", 0.0),

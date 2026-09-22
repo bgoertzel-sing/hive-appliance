@@ -28,6 +28,7 @@ class HostCollector(BaseCollector):
     name = "host_collector"
 
     def collect(self) -> list[Event]:
+        """Execute collect operation."""
         events: list[Event] = []
         info = self._gather()
         events.append(self.emit("system", info, severity=Severity.INFO))

@@ -138,6 +138,7 @@ class Reducer:
                         inc.resolved = True
 
     def open_incidents(self) -> list[IncidentReport]:
+        """Execute open incidents operation."""
         return [i for i in self.incidents if not i.resolved]
 
     def snapshot(self) -> dict[str, Any]:

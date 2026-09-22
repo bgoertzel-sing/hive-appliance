@@ -86,22 +86,27 @@ class NixOSAdapter:
 
     @property
     def allowed_verbs(self) -> frozenset[str]:
+        """Return allowed verbs."""
         return ALLOWED_VERBS
 
     @property
     def config_generator(self) -> ConfigGenerator:
+        """Return config generator."""
         return self._config_gen
 
     @property
     def vm_manager(self) -> VMManager:
+        """Return vm manager."""
         return self._vm_manager
 
     @property
     def nix_builder(self) -> NixBuilder:
+        """Return nix builder."""
         return self._nix_builder
 
     @property
     def service_mapper(self) -> ServiceMapper:
+        """Return service mapper."""
         return self._service_mapper
 
     def dispatch(self, verb: str, **kwargs: Any) -> dict[str, Any]:

@@ -177,8 +177,10 @@ class HealthDashboard:
 
     @property
     def snapshot_count(self) -> int:
+        """Return snapshot count."""
         return len(self._snapshots)
 
     @property
     def snapshots(self) -> list[dict[str, Any]]:
+        """Return snapshots."""
         return list(self._snapshots)

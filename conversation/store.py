@@ -406,6 +406,7 @@ class MessageStore:
         return Message.from_dict(d)
 
     def close(self) -> None:
+        """Execute close operation."""
         conn = getattr(self._local, "conn", None)
         if conn:
             conn.close()

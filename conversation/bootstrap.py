@@ -64,6 +64,7 @@ class BootstrapStats:
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
+        """Execute to dict operation."""
         return {
             "files_found": self.files_found,
             "files_processed": self.files_processed,

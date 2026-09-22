@@ -49,6 +49,7 @@ def _build_appliance(store_path: str, dry_run: bool = False) -> Appliance:
 
 
 def cmd_observe(args):
+    """Execute cmd observe operation."""
     app = _build_appliance(args.store)
     events = app.observe()
     print(f"Collected {len(events)} events")
@@ -63,6 +64,7 @@ def cmd_observe(args):
 
 
 def cmd_profile(args):
+    """Execute cmd profile operation."""
     pm = ProfileManager(args.store_dir)
     profile = pm.discover()
     path = pm.save(profile)
@@ -74,6 +76,7 @@ def cmd_profile(args):
 
 
 def cmd_incidents(args):
+    """Execute cmd incidents operation."""
     app = Appliance(args.store)
     incidents = app.open_incidents()
     if not incidents:
@@ -84,6 +87,7 @@ def cmd_incidents(args):
 
 
 def cmd_state(args):
+    """Execute cmd state operation."""
     app = Appliance(args.store)
     snap = app.state_snapshot()
     print(json.dumps(snap, indent=2, default=str))
@@ -91,6 +95,7 @@ def cmd_state(args):
 
 
 def cmd_events(args):
+    """Execute cmd events operation."""
     app = Appliance(args.store)
     events = app.store.query(limit=args.limit)
     for e in events:
@@ -100,6 +105,7 @@ def cmd_events(args):
 
 def cmd_repair(args):
     # F3: Recovery-ready gate for live repairs
+    """Execute cmd repair operation."""
     if not args.dry_run and not args.recovery_ready:
         print("ERROR: Live repair requires --recovery-ready flag (F3).")
         print("Use --dry-run to preview, or add --recovery-ready to confirm.")
@@ -240,6 +246,7 @@ def cmd_upgrade(args):
 
 
 def main():
+    """Execute main operation."""
     parser = argparse.ArgumentParser(description="Omega Hive Appliance CLI")
     parser.add_argument("--store", default=":memory:", help="Event store path")
     parser.add_argument("--store-dir", default=".", dest="store_dir",

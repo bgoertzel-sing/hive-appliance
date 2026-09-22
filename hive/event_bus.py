@@ -118,6 +118,7 @@ class HiveEventBus:
 
     @property
     def event_count(self) -> int:
+        """Return event count."""
         return len(self._event_log)
 
     @property
@@ -127,5 +128,6 @@ class HiveEventBus:
 
     @property
     def adapters(self) -> dict[str, Any]:
+        """Return adapters."""
         with self._lock:
             return dict(self._adapters)

@@ -54,6 +54,7 @@ class HiveReducer:
 
     @property
     def state(self) -> HiveState:
+        """Return state."""
         return self._state
 
     def reduce(self, hive_event: HiveEvent) -> list[HiveIncident]:

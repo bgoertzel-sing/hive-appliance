@@ -72,6 +72,7 @@ class NixPackageDef:
     nixpkgs_attr: str = ""  # e.g. "pkgs.nginx", defaults to "pkgs.<name>"
 
     def to_nix(self) -> str:
+        """Execute to nix operation."""
         attr = self.nixpkgs_attr or f"pkgs.{self.name}"
         return f"    {attr}"
 
@@ -87,6 +88,7 @@ class NixFileDef:
     group: str = "root"
 
     def to_nix(self) -> str:
+        """Execute to nix operation."""
         lines = []
         safe_name = self.dest_path.replace("/", "-").replace(".", "-")
         lines.append(f'  environment.etc."{safe_name}" = {{')
@@ -113,6 +115,7 @@ class NixNetworkDef:
     interfaces: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def to_nix(self) -> str:
+        """Execute to nix operation."""
         lines = []
         if self.hostname:
             lines.append(f'  networking.hostName = "{_nix_escape(self.hostname)}";')

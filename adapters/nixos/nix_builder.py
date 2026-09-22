@@ -28,6 +28,7 @@ class NixBuildResult:
     duration_ms: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return {
             "success": self.success,
             "out_path": self.out_path,
@@ -47,6 +48,7 @@ class NixEvalResult:
     stderr: str = ""
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return {
             "success": self.success,
             "value": self.value,

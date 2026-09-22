@@ -36,6 +36,7 @@ def _deterministic_id(prefix: str, *parts: str) -> str:
 # ── enums ────────────────────────────────────────────────
 
 class AgentHealth(str, Enum):
+    """AgentHealth class."""
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     FAILED = "failed"
@@ -43,6 +44,7 @@ class AgentHealth(str, Enum):
 
 
 class HiveActionKind(str, Enum):
+    """HiveActionKind class."""
     RESTART_AGENT = "restart_agent"
     CHECKPOINT_ALL = "checkpoint_all"
     ROLLING_UPGRADE = "rolling_upgrade"
@@ -61,10 +63,12 @@ class AgentIdentity:
     appliance_path: str = ""   # e.g. "/hive/protomega2/work/hive-appliance"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> AgentIdentity:
+        """Execute from dict operation."""
         return cls(
             agent_id=d["agent_id"],
             display_name=d.get("display_name", ""),
@@ -82,6 +86,7 @@ class HiveEvent:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         if self.original_event:
             d["original_event"] = self.original_event.to_dict()
@@ -89,6 +94,7 @@ class HiveEvent:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> HiveEvent:
+        """Execute from dict operation."""
         orig = None
         if d.get("original_event"):
             orig = Event.from_dict(d["original_event"])
@@ -115,12 +121,14 @@ class AgentHealthSummary:
     last_updated: float = field(default_factory=_now)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["health"] = self.health.value
         return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> AgentHealthSummary:
+        """Execute from dict operation."""
         return cls(
             agent_id=d["agent_id"],
             health=AgentHealth(d.get("health", "unknown")),
@@ -148,12 +156,14 @@ class HiveIncident:
     evidence: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["severity"] = self.severity.value
         return d
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> HiveIncident:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", _uid("hinc_")),
             symptom=d.get("symptom", ""),
@@ -194,12 +204,14 @@ class HiveResourceState:
 
     @property
     def disk_usage_ratio(self) -> float:
+        """Return disk usage ratio."""
         if self.total_disk_bytes == 0:
             return 0.0
         return self.used_disk_bytes / self.total_disk_bytes
 
     @property
     def memory_usage_ratio(self) -> float:
+        """Return memory usage ratio."""
         if self.total_memory_bytes == 0:
             return 0.0
         return self.used_memory_bytes / self.total_memory_bytes
@@ -218,10 +230,12 @@ class HiveResourceState:
         return alerts
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> HiveResourceState:
+        """Execute from dict operation."""
         return cls(**{k: d[k] for k in d if k in cls.__dataclass_fields__})
 
 
@@ -235,6 +249,7 @@ class HiveState:
     schema_version: str = "1"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return {
             "agents": {k: v.to_dict() for k, v in self.agents.items()},
             "incidents": [i.to_dict() for i in self.incidents],
@@ -245,18 +260,22 @@ class HiveState:
 
     @property
     def healthy_agents(self) -> list[str]:
+        """Return healthy agents."""
         return [k for k, v in self.agents.items() if v.health == AgentHealth.HEALTHY]
 
     @property
     def degraded_agents(self) -> list[str]:
+        """Return degraded agents."""
         return [k for k, v in self.agents.items() if v.health == AgentHealth.DEGRADED]
 
     @property
     def failed_agents(self) -> list[str]:
+        """Return failed agents."""
         return [k for k, v in self.agents.items() if v.health == AgentHealth.FAILED]
 
     @property
     def open_incidents(self) -> list[HiveIncident]:
+        """Return open incidents."""
         return [i for i in self.incidents if not i.resolved]
 
 
@@ -271,6 +290,7 @@ class HiveAction:
     status: str = "proposed"
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["kind"] = self.kind.value
         return d
@@ -285,4 +305,5 @@ class HiveActionResult:
     error: str = ""
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)

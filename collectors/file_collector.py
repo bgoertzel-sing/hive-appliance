@@ -27,6 +27,7 @@ class FileCollector(BaseCollector):
         ]
 
     def collect(self) -> list[Event]:
+        """Execute collect operation."""
         events: list[Event] = []
         for path in self.paths:
             exists = os.path.exists(path)

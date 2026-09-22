@@ -67,12 +67,15 @@ class Appliance:
             self.reducer.reduce(event)
 
     def add_collector(self, collector: Any) -> None:
+        """Execute add collector operation."""
         self.collectors.append(collector)
 
     def set_planner(self, planner: Any) -> None:
+        """Execute set planner operation."""
         self.planner = planner
 
     def set_executor(self, executor: Any) -> None:
+        """Execute set executor operation."""
         self.executor = executor
         # Update upgrade controller reference
         self._upgrade_ctrl = UpgradeController(
@@ -80,12 +83,14 @@ class Appliance:
         )
 
     def set_verifier(self, verifier: Any) -> None:
+        """Execute set verifier operation."""
         self.verifier = verifier
         self._upgrade_ctrl = UpgradeController(
             self._checkpoint_mgr, self.executor, self.verifier
         )
 
     def observe(self) -> list[Event]:
+        """Execute observe operation."""
         all_events: list[Event] = []
         for collector in self.collectors:
             try:
@@ -108,6 +113,7 @@ class Appliance:
         return all_events
 
     def record_incident(self, incident: IncidentReport) -> None:
+        """Execute record incident operation."""
         event = Event(
             kind=EventKind.INCIDENT,
             source="reducer",
@@ -119,6 +125,7 @@ class Appliance:
         self.reducer.reduce(event)
 
     def record_plan(self, plan: Plan) -> None:
+        """Execute record plan operation."""
         event = Event(
             kind=EventKind.PLAN,
             source="planner",
@@ -130,6 +137,7 @@ class Appliance:
         self.reducer.reduce(event)  # F7: reducer tracks plan step count
 
     def record_receipt(self, receipt: Receipt) -> None:
+        """Execute record receipt operation."""
         kind = EventKind.SIMULATED if receipt.simulated else EventKind.RECEIPT
         event = Event(
             kind=kind,
@@ -283,9 +291,11 @@ class Appliance:
         return results
 
     def open_incidents(self) -> list[IncidentReport]:
+        """Execute open incidents operation."""
         return self.reducer.open_incidents()
 
     def state_snapshot(self) -> dict[str, Any]:
+        """Execute state snapshot operation."""
         return self.reducer.state_snapshot()
 
     def event_count(self) -> int:
@@ -293,6 +303,7 @@ class Appliance:
         return self.store.count()
 
     def close(self) -> None:
+        """Execute close operation."""
         self.store.close()
 
     # ── M3 Recovery API ──────────────────────────────────

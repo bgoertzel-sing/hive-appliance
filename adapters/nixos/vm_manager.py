@@ -47,6 +47,7 @@ class VMConfig:
     ssh_port_forward: int = 0       # host port for SSH forwarding (user mode)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return {
             "name": self.name,
             "memory_mb": self.memory_mb,
@@ -64,6 +65,7 @@ class VMConfig:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VMConfig:
+        """Execute from dict operation."""
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
 
@@ -78,6 +80,7 @@ class VMInfo:
     snapshots: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return {
             "name": self.name,
             "state": self.state.value,
@@ -109,6 +112,7 @@ class VMManager:
 
     @property
     def state_dir(self) -> Path:
+        """Return state dir."""
         return self._state_dir
 
     def _vm_dir(self, name: str) -> Path:

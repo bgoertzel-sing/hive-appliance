@@ -56,10 +56,12 @@ class Thread:
 
     @property
     def message_count(self) -> int:
+        """Return message count."""
         return len(self.messages)
 
     @property
     def duration_seconds(self) -> float:
+        """Return duration seconds."""
         if not self.messages:
             return 0.0
         return self.last_activity - self.started_at

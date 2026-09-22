@@ -129,6 +129,7 @@ class Attachment:
 
     @property
     def is_downloaded(self) -> bool:
+        """Return is downloaded."""
         return self.download_status == DownloadStatus.COMPLETED
 
     @property
@@ -145,10 +146,12 @@ class Attachment:
         return mime_ext.get(self.mime_type, "bin")
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Attachment:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", ""),
             message_id=d.get("message_id", ""),
@@ -238,10 +241,12 @@ class Message:
         return errors
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Message:
+        """Execute from dict operation."""
         return cls(
             id=d.get("id", ""),
             venue=d.get("venue", ""),
@@ -306,6 +311,7 @@ class Thread:
         return any(m.has_attachments for m in self.messages)
 
     def to_dict(self) -> dict[str, Any]:
+        """Execute to dict operation."""
         d = asdict(self)
         d["participant_ids"] = list(self.participant_ids)
         d["agent_participant_ids"] = list(self.agent_participant_ids)

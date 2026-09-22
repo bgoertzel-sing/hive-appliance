@@ -70,6 +70,7 @@ class EventStore:
         return event
 
     def get(self, event_id: str) -> Optional[Event]:
+        """Execute get operation."""
         row = self._conn.execute("SELECT * FROM events WHERE id = ?", (event_id,)).fetchone()
         if row is None:
             return None
@@ -86,6 +87,7 @@ class EventStore:
         until: float | None = None,
         limit: int = 100,
     ) -> list[Event]:
+        """Execute query operation."""
         sql = "SELECT * FROM events WHERE 1=1"
         params: list[Any] = []
         if kind is not None:
@@ -112,21 +114,25 @@ class EventStore:
         return [self._row_to_event(r) for r in rows]
 
     def count(self) -> int:
+        """Execute count operation."""
         return self._conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
 
     def set_kv(self, key: str, value: str) -> None:
+        """Execute set kv operation."""
         self._conn.execute(
             "INSERT OR REPLACE INTO kv (key, value) VALUES (?, ?)", (key, value)
         )
         self._conn.commit()
 
     def get_kv(self, key: str, default: str | None = None) -> str | None:
+        """Execute get kv operation."""
         row = self._conn.execute("SELECT value FROM kv WHERE key = ?", (key,)).fetchone()
         if row is None:
             return default
         return row["value"]
 
     def close(self) -> None:
+        """Execute close operation."""
         if self._conn:
             self._conn.close()
             self._conn = None

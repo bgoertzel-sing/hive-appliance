@@ -54,6 +54,7 @@ class SemanticIndex:
 
     @property
     def collection_name(self) -> str:
+        """Return collection name."""
         return self._collection.name
 
     # ── write ────────────────────────────────────────────

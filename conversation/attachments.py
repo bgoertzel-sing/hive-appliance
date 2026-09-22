@@ -70,6 +70,7 @@ class SharedFolderManager:
 
     @property
     def base_dir(self) -> Path:
+        """Return base dir."""
         return self._base_dir
 
     def resolve_path(self, attachment: Attachment) -> str:
@@ -464,7 +465,8 @@ class AttachmentDownloadManager:
 
     def _download_one(self, attachment: Attachment) -> dict[str, Any]:
         """Download a single attachment."""
-        assert self._downloader is not None
+        if self._downloader is None:
+            raise RuntimeError("No downloader configured")
         att_id = attachment.id
 
         # Resolve path if not set

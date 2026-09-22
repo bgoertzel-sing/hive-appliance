@@ -76,6 +76,7 @@ class TranscriptFileCollector:
 
     @property
     def venue_type(self) -> str:
+        """Return venue type."""
         return VenueType.TRANSCRIPT_FILE
 
     # ── polling ──────────────────────────────────────────

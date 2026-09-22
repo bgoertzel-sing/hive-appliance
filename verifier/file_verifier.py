@@ -19,6 +19,7 @@ class FileVerifier(BaseVerifier):
 
     def verify(self, receipt: Receipt, expected: dict[str, Any]) -> bool:
         # If expected specifies a file_path, check its existence
+        """Execute verify operation."""
         file_path = expected.get("file_exists")
         if file_path:
             exists = os.path.exists(file_path)

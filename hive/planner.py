@@ -156,4 +156,5 @@ class HivePlanner:
 
     @property
     def action_log(self) -> list[dict[str, Any]]:
+        """Return action log."""
         return list(self._action_log)

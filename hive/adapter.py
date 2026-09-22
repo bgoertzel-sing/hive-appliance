@@ -80,6 +80,7 @@ class LocalAgentAdapter:
 
     @property
     def identity(self) -> AgentIdentity:
+        """Return identity."""
         return self._identity
 
     def events_since(self, cursor: str | None) -> tuple[list[Event], str]:
@@ -108,11 +109,13 @@ class LocalAgentAdapter:
         return new_events, new_cursor
 
     def state_snapshot(self) -> dict[str, Any]:
+        """Execute state snapshot operation."""
         if hasattr(self._appliance, 'state_snapshot'):
             return self._appliance.state_snapshot()
         return {"state": {}, "incidents": [], "event_count": 0}
 
     def health_summary(self) -> AgentHealthSummary:
+        """Execute health summary operation."""
         snap = self.state_snapshot()
         incidents = snap.get("incidents", [])
         open_count = len([i for i in incidents if not i.get("resolved", False)])
@@ -172,11 +175,13 @@ class LocalAgentAdapter:
             )
 
     def checkpoint(self, label: str) -> StateCheckpoint:
+        """Execute checkpoint operation."""
         if hasattr(self._appliance, 'checkpoint'):
             return self._appliance.checkpoint(label)
         return StateCheckpoint(label=label)
 
     def restore(self, checkpoint_id: str) -> bool:
+        """Execute restore operation."""
         if hasattr(self._appliance, 'restore'):
             return self._appliance.restore(checkpoint_id)
         logger.warning("Agent %s does not support restore", self._identity.agent_id)
@@ -197,17 +202,21 @@ class StubAgentAdapter:
 
     @property
     def identity(self) -> AgentIdentity:
+        """Return identity."""
         return self._identity
 
     def events_since(self, cursor: str | None) -> tuple[list[Event], str]:
+        """Execute events since operation."""
         offset = int(cursor) if cursor else 0
         new = self._events[offset:]
         return new, str(len(self._events))
 
     def state_snapshot(self) -> dict[str, Any]:
+        """Execute state snapshot operation."""
         return {"state": {}, "incidents": [], "event_count": len(self._events)}
 
     def health_summary(self) -> AgentHealthSummary:
+        """Execute health summary operation."""
         return AgentHealthSummary(
             agent_id=self._identity.agent_id,
             health=self._health,
@@ -216,13 +225,16 @@ class StubAgentAdapter:
         )
 
     def execute(self, action: HiveAction) -> HiveActionResult:
+        """Execute execute operation."""
         self._executed.append(action)
         return HiveActionResult(action_id=action.id, success=True, output="stub")
 
     def checkpoint(self, label: str) -> StateCheckpoint:
+        """Execute checkpoint operation."""
         return StateCheckpoint(label=label)
 
     def restore(self, checkpoint_id: str) -> bool:
+        """Execute restore operation."""
         return True
 
     def add_events(self, events: list[Event]) -> None:

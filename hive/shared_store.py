@@ -99,10 +99,12 @@ class SharedStoreAdapter:
 
     @property
     def event_count(self) -> int:
+        """Return event count."""
         return len(self._hive_events)
 
     @property
     def agents(self) -> list[str]:
+        """Return agents."""
         return list(self._adapters.keys())
 
     def recent_events(self, n: int = 50) -> list[HiveEvent]:
