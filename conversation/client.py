@@ -16,10 +16,15 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 
+from conversation.attachments import (
+    AttachmentDownloadManager,
+    AttachmentStore,
+    SharedFolderManager,
+)
 from conversation.semantic import SemanticIndex
 from conversation.store import MessageStore
 from conversation.threading import Thread, ThreadAssembler
-from conversation.types import Message
+from conversation.types import Attachment, Message
 
 # ── defaults ─────────────────────────────────────────────
 
@@ -70,6 +75,9 @@ class ConversationStoreClient:
     store: Optional[MessageStore] = None
     index: Optional[SemanticIndex] = None
     assembler: Optional[ThreadAssembler] = None
+    attachment_store: Optional[AttachmentStore] = None
+    folder_manager: Optional[SharedFolderManager] = None
+    download_manager: Optional[AttachmentDownloadManager] = None
 
     def __post_init__(self):
         if self.store is None:
@@ -81,6 +89,15 @@ class ConversationStoreClient:
             )
         if self.assembler is None:
             self.assembler = ThreadAssembler()
+        if self.attachment_store is None:
+            self.attachment_store = AttachmentStore()
+        if self.folder_manager is None:
+            self.folder_manager = SharedFolderManager()
+        if self.download_manager is None:
+            self.download_manager = AttachmentDownloadManager(
+                self.attachment_store,
+                self.folder_manager,
+            )
 
     # ── primary query methods ────────────────────────────
 
@@ -354,6 +371,106 @@ class ConversationStoreClient:
         self.index.index(messages)
         return count
 
+    # ── attachment methods ────────────────────────────────
+
+    def ingest_attachment(self, attachment: Attachment) -> bool:
+        """Register an attachment for download.
+
+        Parameters
+        ----------
+        attachment:
+            Attachment metadata to store and optionally download.
+
+        Returns
+        -------
+        bool
+            True if enqueued successfully.
+        """
+        return self.download_manager.enqueue(attachment)
+
+    def ingest_attachments(self, attachments: list[Attachment]) -> int:
+        """Register multiple attachments for download.
+
+        Returns count successfully enqueued.
+        """
+        count = 0
+        for att in attachments:
+            if self.download_manager.enqueue(att):
+                count += 1
+        return count
+
+    def attachments_for_message(self, message_id: str) -> list[Attachment]:
+        """Get all attachments for a message.
+
+        Parameters
+        ----------
+        message_id:
+            The message ID to look up attachments for.
+
+        Returns
+        -------
+        list[Attachment]
+        """
+        return self.attachment_store.by_message(message_id)
+
+    def attachments_for_venue(
+        self,
+        venue: str = "",
+        venue_id: str = "",
+        attachment_type: str = "",
+        limit: int = 100,
+    ) -> list[Attachment]:
+        """Query attachments by venue, optionally filtered by type.
+
+        Parameters
+        ----------
+        venue:
+            Filter by venue type (e.g. "telegram_group").
+        venue_id:
+            Filter by specific venue/chat ID.
+        attachment_type:
+            Filter by AttachmentType (e.g. "photo", "document").
+        limit:
+            Maximum results.
+
+        Returns
+        -------
+        list[Attachment]
+        """
+        return self.attachment_store.by_venue(
+            venue=venue,
+            venue_id=venue_id,
+            limit=limit,
+            attachment_type=attachment_type,
+        )
+
+    def process_pending_downloads(self, batch_size: int = 10) -> list[dict]:
+        """Process pending attachment downloads.
+
+        Returns a list of result dicts with 'id', 'success', and
+        'path' or 'error' keys.
+        """
+        return self.download_manager.process_pending(batch_size=batch_size)
+
+    def retry_failed_downloads(self, batch_size: int = 10) -> list[dict]:
+        """Retry previously failed attachment downloads."""
+        return self.download_manager.retry_failed(batch_size=batch_size)
+
+    def attachment_stats(self) -> dict:
+        """Return attachment statistics.
+
+        Returns
+        -------
+        dict
+            Keys: total, completed, pending, failed, skipped,
+            downloaded_bytes, downloaded_mb.
+        """
+        return self.attachment_store.stats()
+
+    def folder_disk_usage(self) -> dict:
+        """Return disk usage of the shared attachments folder."""
+        return self.folder_manager.disk_usage()
+
     # ── stats ────────────────────────────────────────────
 
     def stats(self) -> dict:
@@ -364,7 +481,12 @@ class ConversationStoreClient:
         dict
             Keys: message_count, index_count.
         """
-        return {
+        result = {
             "message_count": self.store.count(),
             "index_count": self.index.count(),
         }
+        try:
+            result["attachments"] = self.attachment_store.stats()
+        except Exception:
+            result["attachments"] = {"error": "unavailable"}
+        return result
