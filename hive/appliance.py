@@ -66,6 +66,7 @@ class HiveAppliance:
         self._total_incidents: int = 0
         self._action_results: list[HiveActionResult] = []
         self._max_action_results: int = 500
+        self._seen_event_ids: set[str] = set()  # GF01: dedup polling
 
     # ── Agent registration ───────────────────────────────
 
@@ -101,9 +102,15 @@ class HiveAppliance:
             "errors": [],
         }
 
-        # 1. Poll events
+        # 1. Poll events (GF01: dedup via seen set)
         try:
-            events = self.bus.poll_all()
+            raw_events = self.bus.poll_all()
+            events = [e for e in raw_events if e.id not in self._seen_event_ids]
+            for e in events:
+                self._seen_event_ids.add(e.id)
+            # Cap seen set to prevent unbounded growth
+            if len(self._seen_event_ids) > 10000:
+                self._seen_event_ids = set(list(self._seen_event_ids)[-5000:])
             result["events"] = len(events)
             self._total_events += len(events)
         except Exception:
@@ -153,10 +160,24 @@ class HiveAppliance:
         return result
 
     def _poll_health(self, result: dict[str, Any]) -> None:
-        """Poll health from all adapters and update reducer."""
+        """Poll health from all adapters and update reducer.
+
+        GF01: A critical unresolved incident forces health to DEGRADED
+        even if the adapter self-reports healthy.
+        """
         for agent_id, adapter in self._adapters.items():
             try:
                 summary = adapter.health_summary()
+                # GF01: override if agent has critical unresolved incidents
+                agent_state = self.reducer.state.agents.get(agent_id)
+                if agent_state:
+                    has_critical = any(
+                        inc.severity == "critical" and inc.status == "open"
+                        for inc in agent_state.incidents
+                    )
+                    if has_critical and summary.get("status") == "healthy":
+                        summary["status"] = "degraded"
+                        summary["reason"] = "critical unresolved incident"
                 self.reducer.update_agent_health(agent_id, summary)
             except Exception:
                 logger.exception("Error polling health from agent %s", agent_id)
@@ -169,12 +190,20 @@ class HiveAppliance:
         target = action.target_agent
         adapter = self._adapters.get(target)
         if adapter is None:
-            logger.warning(
-                "No adapter for action target %s (action %s)", target, action.id
+            # GF01: observation-only — log the action without dispatching
+            logger.info(
+                "Observation-only: no adapter for target %s (action %s, kind=%s). "
+                "Recording without dispatch.",
+                target, action.id, action.kind,
             )
-            result.setdefault("errors", []).append(
-                f"no_adapter:{target}"
+            obs_result = HiveActionResult(
+                action_id=action.id,
+                success=False,
+                output=f"observation-only: no adapter for {target}",
+                error=f"no_adapter:{target}",
             )
+            self._action_results.append(obs_result)
+            self.planner.record_result(obs_result)
             return
 
         try:

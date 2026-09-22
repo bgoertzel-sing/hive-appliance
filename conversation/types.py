@@ -296,7 +296,14 @@ class Thread:
             self.started_at = msg.timestamp
         if not self.ended_at or msg.timestamp > self.ended_at:
             self.ended_at = msg.timestamp
-        self.message_count = len(self.messages)
+        # message_count is now a live property
+
+    @property
+    def last_activity(self) -> float:
+        """Timestamp of the most recent message (AF13: compatibility alias)."""
+        if self.messages:
+            return max(m.timestamp for m in self.messages)
+        return self.ended_at or self.started_at or 0.0
 
     @property
     def duration(self) -> float:
@@ -311,8 +318,11 @@ class Thread:
         return any(m.has_attachments for m in self.messages)
 
     def to_dict(self) -> dict[str, Any]:
-        """Execute to dict operation."""
+        """Serialize to dict (AF13: uses live counts)."""
         d = asdict(self)
         d["participant_ids"] = list(self.participant_ids)
         d["agent_participant_ids"] = list(self.agent_participant_ids)
+        d["message_count"] = len(self.messages)
+        d["last_activity"] = self.last_activity
+        d["has_attachments"] = self.has_attachments
         return d

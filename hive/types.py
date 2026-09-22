@@ -284,7 +284,10 @@ class HiveAction:
     """An action the HivePlanner wants to execute across agents."""
     id: str = field(default_factory=lambda: _uid("hact_"))
     kind: HiveActionKind = HiveActionKind.DELEGATE_REPAIR
+    target_agent: str = ""
     target_agents: list[str] = field(default_factory=list)
+    reason: str = ""
+    params: dict[str, Any] = field(default_factory=dict)
     parameters: dict[str, Any] = field(default_factory=dict)
     incident_id: str = ""
     status: str = "proposed"
@@ -301,6 +304,7 @@ class HiveActionResult:
     """Result of executing a HiveAction."""
     action_id: str = ""
     success: bool = False
+    output: str = ""
     agent_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     error: str = ""
 
