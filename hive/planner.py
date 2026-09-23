@@ -9,152 +9,111 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from hive.types import (
     AgentHealth,
     HiveAction,
     HiveActionKind,
-    HiveActionResult,
     HiveState,
 )
 
 logger = logging.getLogger(__name__)
 
-# Type alias for custom rule functions
-RuleFn = Callable[[HiveState], list[HiveAction]]
-
-MAX_ACTION_LOG = 500
+PlanRule = Callable[[HiveState], list[HiveAction]]
 
 
 class HivePlanner:
-    """Plans hive-level actions from HiveState.
+    """Generate hive-level actions from current HiveState.
 
-    Built-in rules:
-    - Restart failed agents
-    - Delegate repair for correlated incidents
-    - Resource rebalance when thresholds exceeded
-
-    Custom rules can be registered via add_rule().
+    Inspects open incidents, resource thresholds, checkpoint needs,
+    and produces ordered HiveAction list for the orchestrator.
     """
 
-    def __init__(self) -> None:
-        self._rules: list[RuleFn] = []
-        self._action_log: list[dict[str, Any]] = []
-        self._cooldowns: dict[str, float] = {}  # action_key -> last_fired_ts
-        self._cooldown_period: float = 60.0  # seconds between same action
+    def __init__(
+        self,
+        correlation_threshold: int = 2,
+        disk_threshold_pct: float = 0.90,
+        disk_critical: float | None = None,
+        agent_stale_seconds: float = 300.0,
+    ) -> None:
+        self._correlation_threshold = correlation_threshold
+        self._disk_threshold = disk_critical if disk_critical is not None else disk_threshold_pct
+        self._agent_stale_seconds = agent_stale_seconds
+        self._custom_rules: list[PlanRule] = []
+        self.action_log: list[HiveAction] = []
 
-    def add_rule(self, rule: RuleFn) -> None:
+    def add_rule(self, rule: PlanRule) -> None:
         """Register a custom planning rule."""
-        self._rules.append(rule)
+        self._custom_rules.append(rule)
 
     def plan(self, state: HiveState) -> list[HiveAction]:
-        """Generate actions from current state. Returns de-duped actions."""
+        """Produce an ordered list of HiveActions from current state.
+
+        Priority order:
+        1. Correlated incidents → delegate repair to affected agents
+        2. Resource alerts → coordinate / rebalance
+        3. Failed agents → checkpoint healthy ones
+        4. Stale agents → restart
+        5. Custom rules
+        """
         actions: list[HiveAction] = []
 
-        # Built-in rules
-        actions.extend(self._rule_restart_failed(state))
-        actions.extend(self._rule_delegate_repair(state))
-        actions.extend(self._rule_resource_rebalance(state))
-
-        # Custom rules
-        for rule in self._rules:
-            try:
-                actions.extend(rule(state))
-            except Exception:
-                logger.exception("Custom planning rule %s failed", rule)
-
-        # Deduplicate and cooldown filter
-        filtered: list[HiveAction] = []
-        now = time.time()
-        for action in actions:
-            key = f"{action.kind.value}:{action.target_agent}"
-            last = self._cooldowns.get(key, 0.0)
-            if now - last >= self._cooldown_period:
-                filtered.append(action)
-                self._cooldowns[key] = now
-
-        # Log planned actions
-        for action in filtered:
-            self._action_log.append({
-                "id": action.id,
-                "kind": action.kind.value,
-                "target": action.target_agent,
-                "ts": now,
-            })
-
-        # Cap action log
-        if len(self._action_log) > MAX_ACTION_LOG:
-            self._action_log = self._action_log[-MAX_ACTION_LOG:]
-
-        if filtered:
-            logger.info("Planned %d actions: %s", len(filtered),
-                        [a.kind.value for a in filtered])
-        return filtered
-
-    def record_result(self, result: HiveActionResult) -> None:
-        """Record the outcome of an executed action."""
-        for entry in reversed(self._action_log):
-            if entry["id"] == result.action_id:
-                entry["success"] = result.success
-                entry["output"] = result.output[:200]
-                break
-
-    # ── Built-in rules ───────────────────────────────────
-
-    def _rule_restart_failed(self, state: HiveState) -> list[HiveAction]:
-        """Generate restart actions for failed agents."""
-        actions: list[HiveAction] = []
-        for agent_id in state.failed_agents:
-            actions.append(HiveAction(
-                kind=HiveActionKind.RESTART_AGENT,
-                target_agent=agent_id,
-                reason=f"Agent {agent_id} health=FAILED",
-                params={"agent_id": agent_id},
-            ))
-        return actions
-
-    def _rule_delegate_repair(self, state: HiveState) -> list[HiveAction]:
-        """Delegate repair for unresolved correlated incidents."""
-        actions: list[HiveAction] = []
-        for incident in state.open_incidents:
-            if incident.affected_agents:
-                primary = incident.affected_agents[0]
+        # 1. Correlated incidents → delegate repair
+        for inc in state.open_incidents:
+            if len(inc.affected_agents) >= self._correlation_threshold:
                 actions.append(HiveAction(
                     kind=HiveActionKind.DELEGATE_REPAIR,
-                    target_agent=primary,
-                    reason=f"Correlated incident: {incident.symptom}",
-                    params={
-                        "incident_id": incident.id,
-                        "symptom": incident.symptom,
-                        "affected_agents": incident.affected_agents,
-                    },
+                    target_agents=list(inc.affected_agents),
+                    parameters={"reason": f"correlated_{inc.symptom}",
+                                "symptom": inc.symptom,
+                                "incident_id": inc.id},
                 ))
+
+        # 2. Resource alerts → coordinate
+        if state.resources and state.resources.total_disk_bytes > 0:
+            disk_pct = state.resources.used_disk_bytes / state.resources.total_disk_bytes
+            if disk_pct >= self._disk_threshold:
+                all_agents = list(state.agents.keys())
+                actions.append(HiveAction(
+                    kind=HiveActionKind.COORDINATE,
+                    target_agents=all_agents,
+                    parameters={"reason": "disk_critical",
+                                "disk_usage_pct": disk_pct},
+                ))
+
+        # 3. Failed agents → checkpoint healthy ones
+        healthy = [aid for aid, h in state.agents.items()
+                   if h.health == AgentHealth.HEALTHY]
+        failed = [aid for aid, h in state.agents.items()
+                  if h.health == AgentHealth.FAILED]
+        if failed and healthy:
+            actions.append(HiveAction(
+                kind=HiveActionKind.CHECKPOINT_ALL,
+                target_agents=healthy,
+                parameters={"reason": "failed_agent_safeguard",
+                            "failed_agents": failed},
+            ))
+
+        # 4. Stale agents → restart
+        now = time.time()
+        for aid, h in state.agents.items():
+            if h.last_event_ts > 0 and (now - h.last_event_ts) > self._agent_stale_seconds:
+                actions.append(HiveAction(
+                    kind=HiveActionKind.RESTART_AGENT,
+                    target_agents=[aid],
+                    parameters={"reason": "stale_agent",
+                                "last_event_age": now - h.last_event_ts},
+                ))
+
+        # 5. Custom rules
+        for rule in self._custom_rules:
+            try:
+                custom_actions = rule(state)
+                if custom_actions:
+                    actions.extend(custom_actions)
+            except Exception:
+                logger.exception("Custom planner rule failed")
+
+        self.action_log.extend(actions)
         return actions
-
-    def _rule_resource_rebalance(self, state: HiveState) -> list[HiveAction]:
-        """Generate rebalance actions when resource alerts fire."""
-        alerts = state.resources.alerts()
-        if not alerts:
-            return []
-        # Find agent with highest resource usage
-        max_agent = ""
-        max_usage = 0.0
-        for agent_id, res in state.resources.agent_resources.items():
-            usage = res.get("cpu_percent", 0.0) + res.get("disk_used", 0) / max(res.get("disk_total", 1), 1)
-            if usage > max_usage:
-                max_usage = usage
-                max_agent = agent_id
-        if max_agent:
-            return [HiveAction(
-                kind=HiveActionKind.REBALANCE,
-                target_agent=max_agent,
-                reason=f"Resource alerts: {', '.join(alerts)}",
-                params={"alerts": alerts},
-            )]
-        return []
-
-    @property
-    def action_log(self) -> list[dict[str, Any]]:
-        """Return action log."""
-        return list(self._action_log)

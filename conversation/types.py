@@ -296,7 +296,7 @@ class Thread:
             self.started_at = msg.timestamp
         if not self.ended_at or msg.timestamp > self.ended_at:
             self.ended_at = msg.timestamp
-        # message_count is now a live property
+        self.message_count = len(self.messages)
 
     @property
     def last_activity(self) -> float:

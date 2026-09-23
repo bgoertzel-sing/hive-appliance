@@ -145,7 +145,7 @@ class LocalAgentAdapter:
         agent_id = self._identity.agent_id
         try:
             if hasattr(self._appliance, 'repair_incident'):
-                result = self._appliance.repair_incident(action.params)
+                result = self._appliance.repair_incident(action.parameters)
                 logger.info(
                     "Agent %s executed action %s: success=%s",
                     agent_id, action.kind.value, result,
@@ -193,12 +193,18 @@ class LocalAgentAdapter:
 class StubAgentAdapter:
     """Test adapter that serves canned events and health."""
 
-    def __init__(self, agent_id: str, events: list[Event] | None = None,
+    def __init__(self, agent_id: str, display_name: str | None = None,
+                 events: list[Event] | None = None,
                  health: AgentHealth = AgentHealth.HEALTHY):
-        self._identity = AgentIdentity(agent_id=agent_id, display_name=agent_id)
+        self._identity = AgentIdentity(
+            agent_id=agent_id,
+            display_name=display_name or agent_id,
+        )
         self._events = list(events or [])
         self._health = health
+        self._open_incidents = 0
         self._executed: list[HiveAction] = []
+        self._checkpoints: dict[str, "StateCheckpoint"] = {}
 
     @property
     def identity(self) -> AgentIdentity:
@@ -206,37 +212,52 @@ class StubAgentAdapter:
         return self._identity
 
     def events_since(self, cursor: str | None) -> tuple[list[Event], str]:
-        """Execute events since operation."""
+        """Return events since cursor."""
         offset = int(cursor) if cursor else 0
         new = self._events[offset:]
         return new, str(len(self._events))
 
     def state_snapshot(self) -> dict[str, Any]:
-        """Execute state snapshot operation."""
+        """Return agent state snapshot."""
         return {"state": {}, "incidents": [], "event_count": len(self._events)}
 
     def health_summary(self) -> AgentHealthSummary:
-        """Execute health summary operation."""
+        """Return current health summary."""
         return AgentHealthSummary(
             agent_id=self._identity.agent_id,
             health=self._health,
-            open_incidents=0,
+            open_incidents=self._open_incidents,
             last_event_ts=time.time(),
         )
 
     def execute(self, action: HiveAction) -> HiveActionResult:
-        """Execute execute operation."""
+        """Execute a hive action."""
         self._executed.append(action)
-        return HiveActionResult(action_id=action.id, success=True, output="stub")
+        return HiveActionResult(
+            action_id=action.id,
+            success=True,
+            agent_results={self._identity.agent_id: {"status": "ok"}},
+        )
 
     def checkpoint(self, label: str) -> StateCheckpoint:
-        """Execute checkpoint operation."""
-        return StateCheckpoint(label=label)
+        """Create a state checkpoint."""
+        ckpt = StateCheckpoint(label=label)
+        self._checkpoints[ckpt.id] = ckpt
+        return ckpt
 
     def restore(self, checkpoint_id: str) -> bool:
-        """Execute restore operation."""
-        return True
+        """Restore from a checkpoint. Returns False if checkpoint not found."""
+        return checkpoint_id in self._checkpoints
+
+    def inject_event(self, event: Event) -> None:
+        """Inject a single event (test helper)."""
+        self._events.append(event)
 
     def add_events(self, events: list[Event]) -> None:
-        """Add events for testing."""
+        """Add multiple events (test helper)."""
         self._events.extend(events)
+
+    def set_health(self, health: AgentHealth, open_incidents: int = 0) -> None:
+        """Set agent health state (test helper)."""
+        self._health = health
+        self._open_incidents = open_incidents

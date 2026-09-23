@@ -287,7 +287,7 @@ class HiveAction:
     target_agent: str = ""
     target_agents: list[str] = field(default_factory=list)
     reason: str = ""
-    params: dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     parameters: dict[str, Any] = field(default_factory=dict)
     incident_id: str = ""
     status: str = "proposed"
