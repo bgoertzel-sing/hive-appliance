@@ -284,13 +284,19 @@ class HiveAction:
     """An action the HivePlanner wants to execute across agents."""
     id: str = field(default_factory=lambda: _uid("hact_"))
     kind: HiveActionKind = HiveActionKind.DELEGATE_REPAIR
-    target_agent: str = ""
     target_agents: list[str] = field(default_factory=list)
     reason: str = ""
     parameters: dict[str, Any] = field(default_factory=dict)
-    parameters: dict[str, Any] = field(default_factory=dict)
     incident_id: str = ""
     status: str = "proposed"
+
+    @property
+    def target_agent(self) -> str:
+        return self.target_agents[0] if self.target_agents else ""
+
+    @property
+    def params(self) -> dict[str, Any]:
+        return self.parameters
 
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""
@@ -307,6 +313,7 @@ class HiveActionResult:
     output: str = ""
     agent_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     error: str = ""
+    output: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""

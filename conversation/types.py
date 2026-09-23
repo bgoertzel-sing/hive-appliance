@@ -8,6 +8,9 @@ All records are dataclasses with JSON-compatible serialization.
 from __future__ import annotations
 
 import hashlib
+import math
+import mimetypes
+from pathlib import Path
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Optional
@@ -107,6 +110,10 @@ class Attachment:
     metadata: dict[str, Any] = field(default_factory=dict)
     created_at: float = field(default_factory=_now)
     downloaded_at: Optional[float] = None
+    attempt_id: str = ""
+    lease_until: Optional[float] = None
+    actual_size: int = 0
+    retry_count: int = 0
     schema_version: str = "1"
 
     def __post_init__(self):
@@ -123,8 +130,17 @@ class Attachment:
             errors.append("message_id is empty")
         if not self.file_id:
             errors.append("file_id is empty")
-        if self.file_size < 0:
+        if not isinstance(self.file_size, int) or self.file_size < 0:
             errors.append(f"file_size is negative: {self.file_size}")
+        if not isinstance(self.created_at, (int, float)) or not math.isfinite(self.created_at):
+            errors.append("created_at must be finite")
+        if self.download_status not in {
+            DownloadStatus.PENDING, DownloadStatus.DOWNLOADING,
+            DownloadStatus.COMPLETED, DownloadStatus.FAILED, DownloadStatus.SKIPPED,
+        }:
+            errors.append(f"unknown download_status: {self.download_status}")
+        if Path(self.id).name != self.id or self.id in {".", ".."}:
+            errors.append("id must be a single safe path component")
         return errors
 
     @property
@@ -135,15 +151,22 @@ class Attachment:
     @property
     def extension(self) -> str:
         """Infer file extension from filename or mime_type."""
-        if self.file_name and "." in self.file_name:
-            return self.file_name.rsplit(".", 1)[-1].lower()
+        if self.file_name:
+            suffix = Path(self.file_name).suffix.lower().lstrip(".")
+            if suffix and suffix.isalnum() and len(suffix) <= 10:
+                return suffix
         mime_ext = {
             "image/jpeg": "jpg", "image/png": "png", "image/gif": "gif",
             "image/webp": "webp", "audio/ogg": "ogg", "audio/mpeg": "mp3",
             "video/mp4": "mp4", "application/pdf": "pdf",
             "text/plain": "txt", "application/zip": "zip",
         }
-        return mime_ext.get(self.mime_type, "bin")
+        normalized = self.mime_type.split(";", 1)[0].strip().lower()
+        inferred = mime_ext.get(normalized)
+        if inferred:
+            return inferred
+        guessed = mimetypes.guess_extension(normalized) or ""
+        return guessed.lstrip(".")[:10] or "bin"
 
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""
@@ -173,6 +196,10 @@ class Attachment:
             metadata=d.get("metadata", {}),
             created_at=d.get("created_at", _now()),
             downloaded_at=d.get("downloaded_at"),
+            attempt_id=d.get("attempt_id", ""),
+            lease_until=d.get("lease_until"),
+            actual_size=d.get("actual_size", 0),
+            retry_count=d.get("retry_count", 0),
             schema_version=d.get("schema_version", "1"),
         )
 
@@ -285,6 +312,7 @@ class Thread:
     ended_at: Optional[float] = None
     message_count: int = 0
     topic: str = ""                       # Auto-detected or user-set topic
+    topic_summary: Optional[str] = None
 
     def add_message(self, msg: Message) -> None:
         """Add a message and update thread metadata."""
@@ -311,6 +339,33 @@ class Thread:
         if self.started_at and self.ended_at:
             return self.ended_at - self.started_at
         return 0.0
+
+    @property
+    def last_activity(self) -> Optional[float]:
+        return self.ended_at
+
+    @last_activity.setter
+    def last_activity(self, value: Optional[float]) -> None:
+        self.ended_at = value
+
+    @property
+    def participants(self) -> set[str]:
+        return self.participant_ids
+
+    @property
+    def agent_participants(self) -> set[str]:
+        return self.agent_participant_ids
+
+    @property
+    def duration_seconds(self) -> float:
+        return self.duration
+
+    def sort_messages(self) -> None:
+        self.messages.sort(key=lambda message: message.timestamp)
+        self.message_count = len(self.messages)
+        if self.messages:
+            self.started_at = self.messages[0].timestamp
+            self.ended_at = self.messages[-1].timestamp
 
     @property
     def has_attachments(self) -> bool:

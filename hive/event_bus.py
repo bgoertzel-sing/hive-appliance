@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 from typing import Any, Callable, Optional
 
 from hive.types import HiveEvent
@@ -19,6 +18,7 @@ from schemas.types import Event
 
 logger = logging.getLogger(__name__)
 
+# Type alias for subscribers
 SubscriberFn = Callable[[HiveEvent], None]
 
 
@@ -29,16 +29,18 @@ class HiveEventBus:
     """
 
     def __init__(self) -> None:
-        self._adapters: dict[str, Any] = {}
-        self._cursors: dict[str, Optional[str]] = {}
+        self._adapters: dict[str, Any] = {}       # agent_id -> adapter
+        self._cursors: dict[str, Optional[str]] = {}  # agent_id -> cursor
         self._subscribers: list[SubscriberFn] = []
         self._lock = threading.Lock()
         self._event_log: list[HiveEvent] = []
         self._max_log_size: int = 10_000
 
-    def register_adapter(self, adapter: Any) -> None:
-        """Register an agent adapter for polling (derives agent_id from adapter.identity)."""
-        agent_id = adapter.identity.agent_id
+    def register_adapter(self, agent_id: str | Any, adapter: Any = None) -> None:
+        """Register an agent adapter for polling."""
+        if adapter is None:
+            adapter = agent_id
+            agent_id = adapter.identity.agent_id
         with self._lock:
             self._adapters[agent_id] = adapter
             self._cursors[agent_id] = None
@@ -51,21 +53,43 @@ class HiveEventBus:
             self._cursors.pop(agent_id, None)
         logger.info("Unregistered adapter for agent %s", agent_id)
 
-    @property
-    def registered_agents(self) -> set[str]:
-        """Return set of registered agent IDs."""
-        with self._lock:
-            return set(self._adapters.keys())
-
-    def add_subscriber(self, fn: SubscriberFn) -> None:
+    def subscribe(self, fn: SubscriberFn) -> None:
         """Add an event subscriber."""
         with self._lock:
             self._subscribers.append(fn)
 
-    def remove_subscriber(self, fn: SubscriberFn) -> None:
+    add_subscriber = subscribe
+
+    def unsubscribe(self, fn: SubscriberFn) -> None:
         """Remove an event subscriber."""
         with self._lock:
             self._subscribers = [s for s in self._subscribers if s is not fn]
+
+    remove_subscriber = unsubscribe
+
+    def poll_agent(self, agent_id: str) -> list[HiveEvent]:
+        """Poll one agent for new events."""
+        with self._lock:
+            adapter = self._adapters.get(agent_id)
+            cursor = self._cursors.get(agent_id)
+        if adapter is None:
+            logger.warning("poll_agent called for unregistered agent %s", agent_id)
+            return []
+
+        try:
+            raw_events, new_cursor = adapter.events_since(cursor)
+        except Exception:
+            logger.exception("Error polling events from agent %s", agent_id)
+            return []
+
+        hive_events: list[HiveEvent] = []
+        for evt in raw_events:
+            hevt = HiveEvent(source_agent=agent_id, original_event=evt)
+            hive_events.append(hevt)
+
+        with self._lock:
+            self._cursors[agent_id] = new_cursor
+        return hive_events
 
     def poll_all(self) -> list[HiveEvent]:
         """Poll all adapters and return merged events (sorted by time)."""
@@ -74,28 +98,13 @@ class HiveEventBus:
 
         all_events: list[HiveEvent] = []
         for agent_id in agent_ids:
-            with self._lock:
-                adapter = self._adapters.get(agent_id)
-                cursor = self._cursors.get(agent_id)
-            if adapter is None:
-                continue
+            events = self.poll_agent(agent_id)
+            all_events.extend(events)
 
-            try:
-                raw_events, new_cursor = adapter.events_since(cursor)
-            except Exception:
-                logger.exception("Error polling events from agent %s", agent_id)
-                continue
-
-            for evt in raw_events:
-                hevt = HiveEvent(source_agent=agent_id, original_event=evt)
-                all_events.append(hevt)
-
-            with self._lock:
-                self._cursors[agent_id] = new_cursor
-
+        # Sort by receive time
         all_events.sort(key=lambda e: e.hive_received_at)
 
-        # Append to log, trim if needed
+        # Append to event log with cap
         self._event_log.extend(all_events)
         if len(self._event_log) > self._max_log_size:
             self._event_log = self._event_log[-self._max_log_size:]
@@ -108,30 +117,33 @@ class HiveEventBus:
                 try:
                     sub(hevt)
                 except Exception:
-                    logger.exception("Subscriber %s failed on event %s", sub, hevt.id)
+                    logger.exception(
+                        "Subscriber %s failed on event %s", sub, hevt.id
+                    )
 
         return all_events
 
     @property
     def event_count(self) -> int:
-        """Total events in the log."""
+        """Return event count."""
         return len(self._event_log)
 
-    def events_since(self, index: int) -> list[HiveEvent]:
-        """Return events from the log starting at the given index."""
-        return self._event_log[index:]
-
     def recent_events(self, seconds: float = 60.0) -> list[HiveEvent]:
-        """Return events from the last N seconds."""
-        cutoff = time.time() - seconds
-        return [e for e in self._event_log if e.hive_received_at >= cutoff]
+        cutoff = __import__("time").time() - seconds
+        return [event for event in self._event_log if event.hive_received_at > cutoff]
+
+    def events_since(self, offset: int) -> list[HiveEvent]:
+        return self._event_log[offset:]
 
     def clear(self) -> None:
-        """Clear all events from the log."""
         self._event_log.clear()
 
     @property
+    def registered_agents(self) -> list[str]:
+        return list(self._adapters)
+
+    @property
     def adapters(self) -> dict[str, Any]:
-        """Return adapters dict."""
+        """Return adapters."""
         with self._lock:
             return dict(self._adapters)

@@ -16,6 +16,8 @@ import shutil
 import sqlite3
 import threading
 import time
+import uuid
+import inspect
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional, Protocol, runtime_checkable
@@ -28,30 +30,10 @@ from conversation.types import (
 
 logger = logging.getLogger(__name__)
 
-# ── validation constants ─────────────────────────────────
-
-ALLOWED_EXTENSIONS = {
-    "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg",  # images
-    "mp4", "webm", "mov", "avi", "mkv",                 # video
-    "mp3", "ogg", "wav", "flac", "m4a", "opus",         # audio
-    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", # docs
-    "txt", "csv", "json", "xml", "html", "md",          # text
-    "zip", "tar", "gz", "7z", "rar",                    # archives
-    "bin", "dat",                                        # binary
-}
-
-VALID_STATES = {
-    "pending", "downloading", "completed", "failed", "cancelled",
-}
-
-# Lease timeout for crash recovery (AF07)
-LEASE_TIMEOUT_SECONDS = 300  # 5 minutes
-MAX_ATTEMPTS = 3
-
 # ── defaults ─────────────────────────────────────────────
 
-DEFAULT_DB_PATH = os.environ.get("HIVE_CONV_DB", "/hive/shared/conversation-store/messages.db")
-DEFAULT_ATTACHMENTS_DIR = os.environ.get("HIVE_ATTACHMENTS_DIR", "/hive/shared/conversation-store/attachments")
+DEFAULT_DB_PATH = "/hive/shared/conversation-store/messages.db"
+DEFAULT_ATTACHMENTS_DIR = "/hive/shared/conversation-store/attachments"
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB default max download size
 
 
@@ -85,8 +67,10 @@ class SharedFolderManager:
     """
 
     def __init__(self, base_dir: str = DEFAULT_ATTACHMENTS_DIR):
-        self._base_dir = Path(base_dir)
+        self._base_dir = Path(base_dir).resolve()
         self._lock = threading.Lock()
+        self._worker: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
 
     @property
     def base_dir(self) -> Path:
@@ -110,24 +94,12 @@ class SharedFolderManager:
         dir_path = self._base_dir / venue / venue_id / date_str
 
         # Filename: attachment_id.extension
-        # AF11: validate extension
-        ext = (attachment.extension or "bin").lower()
-        if ext not in ALLOWED_EXTENSIONS:
-            ext = "bin"
-        filename = f"{attachment.id}.{ext}"
+        filename = f"{self._component(attachment.id)}.{attachment.extension}"
 
         with self._lock:
             dir_path.mkdir(parents=True, exist_ok=True)
 
-        # AF04: verify resolved path is under base_dir
-        full_path = (dir_path / filename).resolve()
-        base_resolved = self._base_dir.resolve()
-        if not str(full_path).startswith(str(base_resolved)):
-            raise ValueError(f"Path escapes root: {full_path} not under {base_resolved}")
-        # AF04: reject symlinks in path
-        if dir_path.exists() and dir_path.is_symlink():
-            raise ValueError(f"Symlink in path rejected: {dir_path}")
-        return str(full_path)
+        return str(self._contained(dir_path / filename))
 
     def resolve_thumbnail_path(self, attachment: Attachment) -> str:
         """Compute thumbnail storage path."""
@@ -140,7 +112,7 @@ class SharedFolderManager:
         with self._lock:
             dir_path.mkdir(parents=True, exist_ok=True)
 
-        return str(dir_path / f"{attachment.id}_thumb.jpg")
+        return str(self._contained(dir_path / f"{self._component(attachment.id)}_thumb.jpg"))
 
     def disk_usage(self) -> dict[str, Any]:
         """Report disk usage of the attachments folder."""
@@ -165,8 +137,27 @@ class SharedFolderManager:
     def _sanitize(name: str) -> str:
         """Sanitize a string for use as a directory/file name."""
         # Replace unsafe chars with underscore
-        safe = "".join(c if c.isalnum() or c in "-_." else "_" for c in name)
+        safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in name)
         return safe[:100] or "unknown"  # Cap length
+
+    @staticmethod
+    def _component(name: str) -> str:
+        if Path(name).name != name or name in {"", ".", ".."}:
+            raise ValueError("unsafe attachment path component")
+        return SharedFolderManager._sanitize(name)
+
+    def _contained(self, path: Path) -> Path:
+        resolved = path.resolve()
+        if resolved != self._base_dir and self._base_dir not in resolved.parents:
+            raise ValueError("attachment path escapes configured root")
+        return resolved
+
+    def contains(self, path: str) -> bool:
+        try:
+            self._contained(Path(path))
+            return True
+        except ValueError:
+            return False
 
 
 # ── attachment store ─────────────────────────────────────
@@ -220,6 +211,10 @@ class AttachmentStore:
                 created_at      REAL NOT NULL,
                 downloaded_at   REAL,
                 schema_version  TEXT NOT NULL DEFAULT '1'
+                ,attempt_id     TEXT NOT NULL DEFAULT ''
+                ,lease_until    REAL
+                ,actual_size    INTEGER NOT NULL DEFAULT 0
+                ,retry_count    INTEGER NOT NULL DEFAULT 0
             );
 
             CREATE INDEX IF NOT EXISTS idx_attachments_message
@@ -231,6 +226,15 @@ class AttachmentStore:
             CREATE INDEX IF NOT EXISTS idx_attachments_type
                 ON attachments(attachment_type);
         """)
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(attachments)")}
+        for name, definition in {
+            "attempt_id": "TEXT NOT NULL DEFAULT ''",
+            "lease_until": "REAL",
+            "actual_size": "INTEGER NOT NULL DEFAULT 0",
+            "retry_count": "INTEGER NOT NULL DEFAULT 0",
+        }.items():
+            if name not in columns:
+                conn.execute(f"ALTER TABLE attachments ADD COLUMN {name} {definition}")
         conn.commit()
 
     # ── write operations ─────────────────────────────────
@@ -240,15 +244,29 @@ class AttachmentStore:
         if not attachments:
             return 0
 
-        added = 0
-        conn = self._conn
+        validated: list[tuple[Attachment, str]] = []
         for att in attachments:
             errors = att.validate()
             if errors:
-                logger.warning("Skipping invalid attachment %s: %s", att.id, errors)
-                continue
-            try:
-                conn.execute(
+                logger.warning("Rejected invalid attachment %s: %s", att.id, errors)
+                return 0
+            validated.append((att, json.dumps(att.metadata)))
+        added = 0
+        conn = self._conn
+        try:
+            for att, metadata_json in validated:
+                has_messages = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='messages'"
+                ).fetchone()
+                if has_messages:
+                    parent = conn.execute(
+                        "SELECT venue, venue_id FROM messages WHERE id=?", (att.message_id,)
+                    ).fetchone()
+                    if parent is None:
+                        raise ValueError(f"attachment parent {att.message_id!r} does not exist")
+                    if parent["venue"] != att.venue or parent["venue_id"] != att.venue_id:
+                        raise ValueError("attachment venue does not match its parent message")
+                cursor = conn.execute(
                     """INSERT OR IGNORE INTO attachments
                        (id, message_id, venue, venue_id, attachment_type,
                         file_id, file_unique_id, file_name, file_size,
@@ -262,15 +280,15 @@ class AttachmentStore:
                         att.file_name, att.file_size, att.mime_type,
                         att.local_path, att.download_status, att.download_error,
                         att.thumbnail_path, att.duration, att.width, att.height,
-                        json.dumps(att.metadata), att.created_at,
+                        metadata_json, att.created_at,
                         att.downloaded_at, att.schema_version,
                     ),
                 )
-                if self._conn.execute('SELECT changes()').fetchone()[0] > 0:
-                    added += 1
-            except sqlite3.Error:
-                logger.exception("Error inserting attachment %s", att.id)
-        conn.commit()
+                added += cursor.rowcount
+            conn.commit()
+        except BaseException:
+            conn.rollback()
+            raise
         return added
 
     def update_status(
@@ -281,15 +299,10 @@ class AttachmentStore:
         error: str = "",
         downloaded_at: Optional[float] = None,
     ) -> bool:
-        """Update download status for an attachment.
-
-        AF11: validates status is in VALID_STATES before writing.
-        """
-        if status not in VALID_STATES:
-            raise ValueError(f"Invalid status {status!r}; must be one of {VALID_STATES}")
+        """Update download status for an attachment."""
         conn = self._conn
         try:
-            conn.execute(
+            cursor = conn.execute(
                 """UPDATE attachments
                    SET download_status = ?, local_path = ?,
                        download_error = ?, downloaded_at = ?
@@ -297,10 +310,55 @@ class AttachmentStore:
                 (status, local_path, error, downloaded_at, attachment_id),
             )
             conn.commit()
-            return conn.total_changes > 0
+            return cursor.rowcount == 1
         except sqlite3.Error:
             logger.exception("Error updating attachment status %s", attachment_id)
             return False
+
+    def claim_pending(self, limit: int, lease_seconds: float = 300.0) -> list[Attachment]:
+        now = time.time()
+        conn = self._conn
+        claimed: list[Attachment] = []
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            conn.execute(
+                """UPDATE attachments SET download_status='pending', attempt_id='',
+                   lease_until=NULL, retry_count=retry_count+1
+                   WHERE download_status='downloading' AND lease_until < ?""", (now,)
+            )
+            ids = [row[0] for row in conn.execute(
+                """SELECT id FROM attachments WHERE download_status='pending'
+                   ORDER BY created_at, id LIMIT ?""", (limit,)
+            ).fetchall()]
+            for attachment_id in ids:
+                attempt_id = uuid.uuid4().hex
+                cursor = conn.execute(
+                    """UPDATE attachments SET download_status='downloading',
+                       attempt_id=?, lease_until=? WHERE id=? AND download_status='pending'""",
+                    (attempt_id, now + lease_seconds, attachment_id),
+                )
+                if cursor.rowcount:
+                    row = conn.execute("SELECT * FROM attachments WHERE id=?", (attachment_id,)).fetchone()
+                    claimed.append(self._row_to_attachment(row))
+            conn.commit()
+        except BaseException:
+            conn.rollback()
+            raise
+        return claimed
+
+    def finish_attempt(self, attachment_id: str, attempt_id: str, status: str,
+                       local_path: str = "", error: str = "",
+                       actual_size: int = 0) -> bool:
+        cursor = self._conn.execute(
+            """UPDATE attachments SET download_status=?, local_path=?, download_error=?,
+               downloaded_at=?, actual_size=?, lease_until=NULL
+               WHERE id=? AND attempt_id=? AND download_status='downloading'""",
+            (status, local_path, error,
+             time.time() if status == DownloadStatus.COMPLETED else None,
+             actual_size, attachment_id, attempt_id),
+        )
+        self._conn.commit()
+        return cursor.rowcount == 1
 
     # ── query operations ─────────────────────────────────
 
@@ -357,92 +415,6 @@ class AttachmentStore:
         ).fetchall()
         return [self._row_to_attachment(r) for r in rows]
 
-    def claim_pending(self, worker_id: str, limit: int = 10) -> list[Attachment]:
-        """AF08: Exclusively claim pending downloads using CAS.
-
-        Uses UPDATE ... WHERE to atomically claim rows. Only rows that
-        are pending (or have expired leases) and under max attempts are claimed.
-        """
-        now = time.time()
-        conn = self._conn
-        rows = conn.execute(
-            """SELECT id FROM attachments
-               WHERE (download_status = 'pending'
-                      OR (download_status = 'downloading'
-                          AND lease_expires > 0
-                          AND lease_expires < ?))
-                 AND attempt_count < ?
-               ORDER BY created_at ASC
-               LIMIT ?""",
-            (now, MAX_ATTEMPTS, limit),
-        ).fetchall()
-
-        claimed = []
-        lease_until = now + LEASE_TIMEOUT_SECONDS
-        for row in rows:
-            aid = row["id"]
-            conn.execute(
-                """UPDATE attachments
-                   SET download_status = 'downloading',
-                       lease_owner = ?,
-                       lease_expires = ?,
-                       attempt_count = attempt_count + 1
-                   WHERE id = ?
-                     AND (download_status = 'pending'
-                          OR (download_status = 'downloading'
-                              AND lease_expires < ?))""",
-                (worker_id, lease_until, aid, now),
-            )
-            if conn.execute("SELECT changes()").fetchone()[0] > 0:
-                att = self.get(aid)
-                if att:
-                    claimed.append(att)
-        conn.commit()
-        return claimed
-
-    def release_lease(self, attachment_id: str, worker_id: str) -> bool:
-        """AF07: Release a lease (on graceful shutdown or success)."""
-        conn = self._conn
-        conn.execute(
-            """UPDATE attachments
-               SET lease_owner = '', lease_expires = 0
-               WHERE id = ? AND lease_owner = ?""",
-            (attachment_id, worker_id),
-        )
-        conn.commit()
-        return conn.execute("SELECT changes()").fetchone()[0] > 0
-
-    def recover_stale_leases(self) -> int:
-        """AF07: Reset stale (crashed) downloads back to pending for retry."""
-        now = time.time()
-        conn = self._conn
-        conn.execute(
-            """UPDATE attachments
-               SET download_status = 'pending',
-                   lease_owner = '',
-                   lease_expires = 0
-               WHERE download_status = 'downloading'
-                 AND lease_expires > 0
-                 AND lease_expires < ?
-                 AND attempt_count < ?""",
-            (now, MAX_ATTEMPTS),
-        )
-        recovered = conn.execute("SELECT changes()").fetchone()[0]
-        conn.execute(
-            """UPDATE attachments
-               SET download_status = 'failed',
-                   download_error = 'max attempts exceeded',
-                   lease_owner = '',
-                   lease_expires = 0
-               WHERE download_status = 'downloading'
-                 AND lease_expires > 0
-                 AND lease_expires < ?
-                 AND attempt_count >= ?""",
-            (now, MAX_ATTEMPTS),
-        )
-        conn.commit()
-        return recovered
-
     def count(self, status: str = "") -> int:
         """Count attachments, optionally filtered by status."""
         if status:
@@ -462,7 +434,7 @@ class AttachmentStore:
         failed = self.count(DownloadStatus.FAILED)
         # Total downloaded size
         row = self._conn.execute(
-            "SELECT COALESCE(SUM(file_size), 0) FROM attachments WHERE download_status = 'completed'"
+            "SELECT COALESCE(SUM(actual_size), 0) FROM attachments WHERE download_status = 'completed'"
         ).fetchone()
         downloaded_bytes = row[0] if row else 0
         return {
@@ -470,80 +442,32 @@ class AttachmentStore:
             "completed": completed,
             "pending": pending,
             "failed": failed,
+            "downloading": self.count(DownloadStatus.DOWNLOADING),
             "skipped": self.count(DownloadStatus.SKIPPED),
             "downloaded_bytes": downloaded_bytes,
             "downloaded_mb": round(downloaded_bytes / (1024 * 1024), 2),
         }
 
-    # ── helpers ──────────────────────────────────────────
-
-
-    # ── AF12: lifecycle ──────────────────────────────────
-
     def delete(self, attachment_id: str, remove_file: bool = True) -> bool:
-        """Delete an attachment record and optionally its file."""
-        att = self.get(attachment_id)
-        if not att:
+        attachment = self.get(attachment_id)
+        if attachment is None:
             return False
-        if remove_file and att.local_path and os.path.isfile(att.local_path):
+        if remove_file and attachment.local_path:
             try:
-                os.remove(att.local_path)
+                Path(attachment.local_path).unlink(missing_ok=True)
             except OSError:
-                logger.warning("Could not remove file %s", att.local_path)
-        conn = self._conn
-        conn.execute("DELETE FROM attachments WHERE id = ?", (attachment_id,))
-        conn.commit()
-        return True
-
-    def delete_by_message(self, message_id: str, remove_files: bool = True) -> int:
-        """Delete all attachments for a message."""
-        atts = self.by_message(message_id)
-        count = 0
-        for att in atts:
-            if self.delete(att.id, remove_file=remove_files):
-                count += 1
-        return count
-
-    def apply_retention(self, max_age_seconds: float) -> int:
-        """Delete attachments older than max_age_seconds."""
-        cutoff = time.time() - max_age_seconds
-        conn = self._conn
-        rows = conn.execute(
-            "SELECT id FROM attachments WHERE created_at < ?", (cutoff,)
-        ).fetchall()
-        count = 0
-        for row in rows:
-            if self.delete(row["id"]):
-                count += 1
-        return count
-
-    def reconcile(self) -> dict:
-        """AF12: Reconcile metadata vs filesystem.
-
-        Returns counts of orphan_files, missing_files, repaired.
-        """
-        result = {"orphan_files": 0, "missing_files": 0, "repaired": 0}
-        conn = self._conn
-        rows = conn.execute(
-            "SELECT id, local_path FROM attachments WHERE download_status = 'completed' AND local_path != ''"
-        ).fetchall()
-        for row in rows:
-            if row["local_path"] and not os.path.isfile(row["local_path"]):
-                result["missing_files"] += 1
-                conn.execute(
-                    "UPDATE attachments SET download_status = 'pending', local_path = '' WHERE id = ?",
-                    (row["id"],),
-                )
-                result["repaired"] += 1
-        conn.commit()
-        return result
+                logger.exception("Unable to remove attachment file %s", attachment.local_path)
+        cursor = self._conn.execute("DELETE FROM attachments WHERE id=?", (attachment_id,))
+        self._conn.commit()
+        return cursor.rowcount == 1
 
     def close(self) -> None:
-        """Close the database connection."""
         conn = getattr(self._local, "conn", None)
-        if conn:
+        if conn is not None:
             conn.close()
             self._local.conn = None
+
+    # ── helpers ──────────────────────────────────────────
 
     def _row_to_attachment(self, row: sqlite3.Row) -> Attachment:
         """Convert a database row to an Attachment dataclass."""
@@ -575,6 +499,10 @@ class AttachmentStore:
             created_at=row["created_at"],
             downloaded_at=row["downloaded_at"],
             schema_version=row["schema_version"],
+            attempt_id=row["attempt_id"],
+            lease_until=row["lease_until"],
+            actual_size=row["actual_size"],
+            retry_count=row["retry_count"],
         )
 
 
@@ -602,6 +530,7 @@ class AttachmentDownloadManager:
         self._store = store
         self._folder = folder
         self._downloader = downloader
+        self._downloaders: dict[tuple[str, str], AttachmentDownloader] = {}
         self._max_file_size = max_file_size
         self._lock = threading.Lock()
 
@@ -609,12 +538,42 @@ class AttachmentDownloadManager:
         """Set or replace the platform downloader."""
         self._downloader = downloader
 
+    def register_downloader(self, venue: str, downloader: AttachmentDownloader,
+                            account_id: str = "default") -> None:
+        self._downloaders[(venue, account_id)] = downloader
+
+    def _downloader_for(self, attachment: Attachment) -> Optional[AttachmentDownloader]:
+        account_id = str(attachment.metadata.get("telegram_account_id")
+                         or attachment.metadata.get("account_id") or "default")
+        return self._downloaders.get((attachment.venue, account_id), self._downloader)
+
+    @property
+    def store(self) -> AttachmentStore:
+        return self._store
+
+    @property
+    def folder(self) -> SharedFolderManager:
+        return self._folder
+
     def enqueue(self, attachment: Attachment) -> bool:
         """Register an attachment for download.
 
         Returns True if successfully enqueued (or already exists).
         """
-        # Check file size limit
+        errors = attachment.validate()
+        if errors:
+            return False
+        if attachment.local_path and not self._folder.contains(attachment.local_path):
+            return False
+        downloader = self._downloader_for(attachment)
+        if downloader is not None:
+            try:
+                info = downloader.get_file_info(attachment.file_id)
+                remote_size = int(info.get("size", info.get("file_size", 0)) or 0)
+                if remote_size:
+                    attachment.file_size = remote_size
+            except (AttributeError, NotImplementedError):
+                pass
         if attachment.file_size > self._max_file_size > 0:
             logger.info(
                 "Skipping attachment %s: size %d exceeds limit %d",
@@ -629,16 +588,15 @@ class AttachmentDownloadManager:
         if not attachment.local_path:
             attachment.local_path = self._folder.resolve_path(attachment)
 
-        count = self._store.append([attachment])
-        return count > 0  # AF10: accurate result — False if duplicate
+        return self._store.append([attachment]) == 1
 
     def process_pending(self, batch_size: int = 10) -> list[dict[str, Any]]:
         """Process pending downloads. Returns results for each attempt."""
-        if self._downloader is None:
+        if self._downloader is None and not self._downloaders:
             logger.warning("No downloader configured — cannot process pending attachments")
             return []
 
-        pending = self._store.pending_downloads(limit=batch_size)
+        pending = self._store.claim_pending(limit=batch_size)
         results: list[dict[str, Any]] = []
 
         for att in pending:
@@ -655,12 +613,9 @@ class AttachmentDownloadManager:
         return results
 
     def _download_one(self, attachment: Attachment) -> dict[str, Any]:
-        """Download a single attachment.
-
-        AF05: Enforces actual byte-count limit (not just declared size).
-        AF06: Uses atomic temp→rename publication.
-        """
-        if self._downloader is None:
+        """Download a single attachment."""
+        downloader = self._downloader_for(attachment)
+        if downloader is None:
             raise RuntimeError("No downloader configured")
         att_id = attachment.id
 
@@ -668,103 +623,131 @@ class AttachmentDownloadManager:
         if not attachment.local_path:
             attachment.local_path = self._folder.resolve_path(attachment)
 
-        final_path = attachment.local_path
-        temp_path = final_path + ".part"
-
-        # Mark as downloading
-        self._store.update_status(att_id, DownloadStatus.DOWNLOADING)
+        final_path = Path(attachment.local_path)
+        temp_path = final_path.with_name(f".{final_path.name}.{attachment.attempt_id}.part")
+        temp_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            # AF06: Download to temp file first
-            success = self._downloader.download(
-                attachment.file_id, temp_path
-            )
-            if not success:
-                # AF06: Clean up partial
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
-                self._store.update_status(
-                    att_id,
-                    DownloadStatus.FAILED,
-                    error="Downloader returned False",
+            parameters = inspect.signature(downloader.download).parameters
+            if "max_bytes" in parameters:
+                success = downloader.download(
+                    attachment.file_id, str(temp_path), max_bytes=self._max_file_size
                 )
+            else:
+                success = downloader.download(attachment.file_id, str(temp_path))
+            if success:
+                if not temp_path.is_file():
+                    raise RuntimeError("downloader reported success without producing a file")
+                actual_size = temp_path.stat().st_size
+                if self._max_file_size > 0 and actual_size > self._max_file_size:
+                    raise ValueError(
+                        f"downloaded size {actual_size} exceeds limit {self._max_file_size}"
+                    )
+                os.replace(temp_path, final_path)
+                if not self._store.finish_attempt(
+                    att_id, attachment.attempt_id, DownloadStatus.COMPLETED,
+                    local_path=str(final_path), actual_size=actual_size,
+                ):
+                    final_path.unlink(missing_ok=True)
+                    raise RuntimeError("download lease was lost before publication")
+                logger.info("Downloaded attachment %s → %s", att_id, attachment.local_path)
+                return {"id": att_id, "success": True, "path": attachment.local_path}
+            else:
+                temp_path.unlink(missing_ok=True)
+                self._store.finish_attempt(att_id, attachment.attempt_id,
+                                           DownloadStatus.FAILED,
+                                           error="Downloader returned False")
                 return {"id": att_id, "success": False, "error": "download returned False"}
-
-            # AF06: Verify file actually exists after "success"
-            if not os.path.isfile(temp_path):
-                self._store.update_status(
-                    att_id,
-                    DownloadStatus.FAILED,
-                    error="Downloader reported success but file does not exist",
-                )
-                return {"id": att_id, "success": False, "error": "file missing after download"}
-
-            # AF05: Enforce actual byte-count limit
-            actual_size = os.path.getsize(temp_path)
-            if self._max_file_size > 0 and actual_size > self._max_file_size:
-                os.remove(temp_path)
-                err = f"Actual size {actual_size} exceeds limit {self._max_file_size}"
-                self._store.update_status(att_id, DownloadStatus.FAILED, error=err)
-                return {"id": att_id, "success": False, "error": err}
-
-            # AF06: Atomic rename to final path
-            shutil.move(temp_path, final_path)
-
-            self._store.update_status(
-                att_id,
-                DownloadStatus.COMPLETED,
-                local_path=final_path,
-                downloaded_at=time.time(),
-            )
-            logger.info("Downloaded attachment %s -> %s (%d bytes)", att_id, final_path, actual_size)
-            return {"id": att_id, "success": True, "path": final_path, "size": actual_size}
         except Exception as e:
-            # AF06: Clean up partial on any error
-            if os.path.exists(temp_path):
-                try:
-                    os.remove(temp_path)
-                except OSError:
-                    pass
             logger.exception("Failed to download attachment %s", att_id)
-            self._store.update_status(
-                att_id,
-                DownloadStatus.FAILED,
-                error=str(e)[:500],
-            )
+            temp_path.unlink(missing_ok=True)
+            self._store.finish_attempt(att_id, attachment.attempt_id,
+                                       DownloadStatus.FAILED,
+                                       error=str(e)[:500])
             return {"id": att_id, "success": False, "error": str(e)[:200]}
 
     def retry_failed(self, batch_size: int = 10) -> list[dict[str, Any]]:
-        """Retry previously failed downloads.
-
-        AF10: Only retries the specific failed items, not unrelated pending work.
-        """
+        """Retry previously failed downloads."""
         conn = self._store._conn
         rows = conn.execute(
-            """SELECT id FROM attachments
+            """UPDATE attachments SET download_status = 'pending', download_error=''
                WHERE download_status = 'failed'
-               ORDER BY created_at ASC LIMIT ?""",
+               AND id IN (
+                   SELECT id FROM attachments
+                   WHERE download_status = 'failed'
+                   ORDER BY created_at ASC LIMIT ?
+               )
+               RETURNING id""",
             (batch_size,),
         ).fetchall()
-
-        if not rows:
-            return []
-
-        retry_ids = [r["id"] for r in rows]
-        logger.info("Retrying %d failed attachments", len(retry_ids))
-
-        # Reset only these specific items
-        for aid in retry_ids:
-            conn.execute(
-                "UPDATE attachments SET download_status = 'pending', download_error = '' WHERE id = ?",
-                (aid,),
-            )
         conn.commit()
 
-        # Process only the items we just reset
-        results = []
-        for aid in retry_ids:
-            att = self._store.get(aid)
-            if att and att.download_status == DownloadStatus.PENDING:
-                result = self._download_one(att)
-                results.append(result)
-        return results
+        if rows:
+            logger.info("Reset %d failed attachments to pending", len(rows))
+            ids = {row[0] for row in rows}
+            claimed = self._store.claim_pending(limit=max(self._store.count(), batch_size))
+            results = []
+            for attachment in claimed:
+                if attachment.id in ids:
+                    results.append(self._download_one(attachment))
+                else:
+                    self._store.finish_attempt(
+                        attachment.id, attachment.attempt_id,
+                        DownloadStatus.PENDING, local_path=attachment.local_path
+                    )
+            return results
+        return []
+
+    def reconcile(self) -> dict[str, int]:
+        repaired = {"missing_completed": 0, "recovered_downloading": 0,
+                    "orphan_partials": 0}
+        conn = self._store._conn
+        now = time.time()
+        cursor = conn.execute(
+            """UPDATE attachments SET download_status='pending', attempt_id='',
+               lease_until=NULL WHERE download_status='downloading'
+               AND (lease_until IS NULL OR lease_until < ?)""", (now,)
+        )
+        repaired["recovered_downloading"] = cursor.rowcount
+        rows = conn.execute(
+            "SELECT id, local_path FROM attachments WHERE download_status='completed'"
+        ).fetchall()
+        for row in rows:
+            if not row["local_path"] or not Path(row["local_path"]).is_file():
+                conn.execute(
+                    """UPDATE attachments SET download_status='failed',
+                       download_error='completed file is missing' WHERE id=?""",
+                    (row["id"],),
+                )
+                repaired["missing_completed"] += 1
+        if self._folder.base_dir.exists():
+            for partial in self._folder.base_dir.rglob(".*.part"):
+                try:
+                    partial.unlink()
+                    repaired["orphan_partials"] += 1
+                except OSError:
+                    logger.exception("Unable to remove orphan partial %s", partial)
+        conn.commit()
+        return repaired
+
+    def start(self, poll_interval: float = 1.0, batch_size: int = 10) -> None:
+        if self._worker and self._worker.is_alive():
+            return
+        self._stop_event.clear()
+
+        def work() -> None:
+            self.reconcile()
+            while not self._stop_event.is_set():
+                self.process_pending(batch_size)
+                self._stop_event.wait(poll_interval)
+
+        self._worker = threading.Thread(
+            target=work, name="attachment-download-worker", daemon=True
+        )
+        self._worker.start()
+
+    def stop(self, timeout: float = 5.0) -> None:
+        self._stop_event.set()
+        if self._worker:
+            self._worker.join(timeout)
+            self._worker = None

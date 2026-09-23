@@ -66,6 +66,8 @@ class MessageStore:
                 content         TEXT NOT NULL DEFAULT '',
                 content_type    TEXT NOT NULL DEFAULT 'text',
                 reply_to_id     TEXT,
+                has_attachments INTEGER NOT NULL DEFAULT 0,
+                attachment_ids  TEXT NOT NULL DEFAULT '[]',
                 metadata        TEXT NOT NULL DEFAULT '{}',
                 ingested_at     REAL NOT NULL,
                 schema_version  TEXT NOT NULL DEFAULT '1'
@@ -81,6 +83,13 @@ class MessageStore:
             CREATE INDEX IF NOT EXISTS idx_messages_thread
                 ON messages(thread_id)
                 WHERE thread_id IS NOT NULL;
+
+            CREATE TABLE IF NOT EXISTS index_outbox (
+                message_id TEXT PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE,
+                status TEXT NOT NULL DEFAULT 'pending',
+                attempts INTEGER NOT NULL DEFAULT 0,
+                last_error TEXT NOT NULL DEFAULT ''
+            );
 
             -- FTS5 full-text search on message content
             CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(
@@ -102,18 +111,12 @@ class MessageStore:
                 VALUES ('delete', old.rowid, old.id, old.content, old.sender_name);
             END;
         """)
-        # AF02: attachment columns
-        for _col in [
-            "ALTER TABLE messages ADD COLUMN has_attachments INTEGER NOT NULL DEFAULT 0",
-            "ALTER TABLE messages ADD COLUMN attachment_ids TEXT NOT NULL DEFAULT '[]'",
-        ]:
-            try:
-                conn.execute(_col)
-            except sqlite3.OperationalError:
-                pass
-        # AF02/AF09: durable semantic outbox
-        conn.execute("CREATE TABLE IF NOT EXISTS semantic_outbox (message_id TEXT PRIMARY KEY, content TEXT NOT NULL, metadata TEXT NOT NULL DEFAULT '{}', created_at REAL NOT NULL, indexed_at REAL)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_outbox_pending ON semantic_outbox(indexed_at) WHERE indexed_at IS NULL")
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(messages)")}
+        if "has_attachments" not in columns:
+            conn.execute("ALTER TABLE messages ADD COLUMN has_attachments INTEGER NOT NULL DEFAULT 0")
+        if "attachment_ids" not in columns:
+            conn.execute("ALTER TABLE messages ADD COLUMN attachment_ids TEXT NOT NULL DEFAULT '[]'")
+        conn.commit()
 
     # ── write ────────────────────────────────────────────
 
@@ -142,15 +145,6 @@ class MessageStore:
                 raise ValueError(
                     f"Invalid message (id={msg.id!r}): {'; '.join(errors)}"
                 )
-            # AF09: reject cross-venue reply parents
-            if msg.reply_to_id:
-                # Ensure reply_to_id references same venue
-                parent = self.get(msg.reply_to_id)
-                if parent and parent.venue_id != msg.venue_id:
-                    raise ValueError(
-                        f'Cross-venue reply: msg {msg.id!r} (venue={msg.venue_id}) '
-                        f'replies to {msg.reply_to_id!r} (venue={parent.venue_id})'
-                    )
             meta_json = json.dumps(msg.metadata)
             validated.append((msg, meta_json))
 
@@ -164,23 +158,24 @@ class MessageStore:
                         """INSERT INTO messages
                            (id, venue, venue_id, venue_message_id, thread_id,
                             sender_id, sender_name, sender_agent_id, timestamp,
-                            content, content_type, reply_to_id, metadata,
-                            ingested_at, schema_version,
-                            has_attachments, attachment_ids)
+                            content, content_type, reply_to_id, has_attachments,
+                            attachment_ids, metadata, ingested_at, schema_version)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                         (
                             msg.id, msg.venue, msg.venue_id, msg.venue_message_id,
                             msg.thread_id, msg.sender_id, msg.sender_name,
                             msg.sender_agent_id, msg.timestamp, msg.content,
                             msg.content_type, msg.reply_to_id,
+                            int(msg.has_attachments), json.dumps(msg.attachment_ids),
                             meta_json, msg.ingested_at,
                             msg.schema_version,
-                            1 if getattr(msg, "has_attachments", False) else 0,
-                            __import__("json").dumps(getattr(msg, "attachment_ids", []) or []),
                         ),
                     )
                     added += 1
-                    self._enqueue_semantic(conn, msg, meta_json)
+                    conn.execute(
+                        "INSERT OR IGNORE INTO index_outbox(message_id) VALUES (?)",
+                        (msg.id,),
+                    )
                 except sqlite3.IntegrityError as exc:
                     # CS07: Only swallow UNIQUE constraint (duplicate ID).
                     # NOT NULL or CHECK violations are real errors.
@@ -198,12 +193,44 @@ class MessageStore:
             raise
         return added
 
+    def pending_index_messages(self, limit: int = 100) -> list[Message]:
+        rows = self._conn.execute(
+            """SELECT m.* FROM messages m JOIN index_outbox o ON o.message_id=m.id
+               WHERE o.status='pending' ORDER BY m.ingested_at, m.id LIMIT ?""",
+            (limit,),
+        ).fetchall()
+        return [self._row_to_message(row) for row in rows]
+
+    def mark_indexed(self, message_ids: list[str]) -> None:
+        if not message_ids:
+            return
+        self._conn.executemany(
+            "UPDATE index_outbox SET status='indexed', attempts=attempts+1, last_error='' WHERE message_id=?",
+            [(message_id,) for message_id in message_ids],
+        )
+        self._conn.commit()
+
+    def mark_index_failed(self, message_ids: list[str], error: str) -> None:
+        self._conn.executemany(
+            "UPDATE index_outbox SET attempts=attempts+1, last_error=? WHERE message_id=?",
+            [(error[:500], message_id) for message_id in message_ids],
+        )
+        self._conn.commit()
+
     # ── read ─────────────────────────────────────────────
 
     def get(self, message_id: str) -> Optional[Message]:
         """Fetch a single message by ID."""
         row = self._conn.execute(
             "SELECT * FROM messages WHERE id = ?", (message_id,)
+        ).fetchone()
+        return self._row_to_message(row) if row else None
+
+    def get_by_native_id(self, venue: str, venue_id: str,
+                         venue_message_id: str) -> Optional[Message]:
+        row = self._conn.execute(
+            "SELECT * FROM messages WHERE venue=? AND venue_id=? AND venue_message_id=?",
+            (venue, venue_id, venue_message_id),
         ).fetchone()
         return self._row_to_message(row) if row else None
 
@@ -424,71 +451,18 @@ class MessageStore:
 
     # ── internals ────────────────────────────────────────
 
-
-    # ── AF02: semantic outbox + reply resolver ────────────
-
-    def _enqueue_semantic(self, conn, msg, meta_json):
-        """Write message to semantic outbox for later indexing."""
-        try:
-            conn.execute(
-                'INSERT OR IGNORE INTO semantic_outbox (message_id, content, metadata, created_at) VALUES (?, ?, ?, ?)',
-                (msg.id, msg.content, meta_json, __import__('time').time()),
-            )
-        except Exception:
-            pass
-
-    def drain_semantic_outbox(self, semantic_index, batch_size=100):
-        """AF02/AF09: Drain pending outbox entries to semantic index.
-
-        Ensures SQL commits are eventually followed by semantic indexing.
-        """
-        conn = self._conn
-        rows = conn.execute(
-            'SELECT message_id, content, metadata FROM semantic_outbox WHERE indexed_at IS NULL ORDER BY created_at ASC LIMIT ?',
-            (batch_size,),
-        ).fetchall()
-        if not rows:
-            return 0
-        indexed = 0
-        for row in rows:
-            try:
-                meta = json.loads(row['metadata']) if row['metadata'] else {}
-                semantic_index.index_single(row['message_id'], row['content'], meta)
-                conn.execute(
-                    'UPDATE semantic_outbox SET indexed_at = ? WHERE message_id = ?',
-                    (__import__('time').time(), row['message_id']),
-                )
-                indexed += 1
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning('Semantic index failed for %s: %s', row['message_id'], e)
-        conn.commit()
-        return indexed
-
-    def resolve_reply(self, message_id):
-        """AF02: Resolve the reply chain for a message using native coordinates."""
-        chain = []
-        seen = set()
-        current_id = message_id
-        while current_id and current_id not in seen:
-            seen.add(current_id)
-            msg = self.get(current_id)
-            if not msg:
-                break
-            chain.append(msg)
-            current_id = msg.reply_to_id
-        return chain
-
     @staticmethod
     def _row_to_message(row: sqlite3.Row) -> Message:
         d = dict(row)
         d["metadata"] = json.loads(d.get("metadata", "{}"))
-        # AF02: parse attachment fields from SQL
-        if "has_attachments" in d:
-            d["has_attachments"] = bool(d["has_attachments"])
-        if "attachment_ids" in d and isinstance(d["attachment_ids"], str):
-            d["attachment_ids"] = json.loads(d["attachment_ids"])
+        d["has_attachments"] = bool(d.get("has_attachments", 0))
+        raw_ids = d.get("attachment_ids", "[]")
+        d["attachment_ids"] = json.loads(raw_ids) if isinstance(raw_ids, str) else raw_ids
         return Message.from_dict(d)
+
+    @property
+    def db_path(self) -> Path:
+        return self._db_path
 
     def close(self) -> None:
         """Execute close operation."""

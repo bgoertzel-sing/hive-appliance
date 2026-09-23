@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from conversation.attachments import (
@@ -25,6 +26,7 @@ from conversation.semantic import SemanticIndex
 from conversation.store import MessageStore
 from conversation.threading import Thread, ThreadAssembler
 from conversation.types import Attachment, Message
+from conversation.collectors.telegram import TelegramEventCollector
 
 # ── defaults ─────────────────────────────────────────────
 
@@ -90,14 +92,19 @@ class ConversationStoreClient:
         if self.assembler is None:
             self.assembler = ThreadAssembler()
         if self.attachment_store is None:
-            self.attachment_store = AttachmentStore()
+            self.attachment_store = AttachmentStore(str(self.store.db_path))
         if self.folder_manager is None:
-            self.folder_manager = SharedFolderManager()
+            self.folder_manager = SharedFolderManager(
+                str(Path(self.store.db_path).parent / "attachments")
+            )
         if self.download_manager is None:
             self.download_manager = AttachmentDownloadManager(
                 self.attachment_store,
                 self.folder_manager,
             )
+        elif (self.download_manager.store is not self.attachment_store
+              or self.download_manager.folder is not self.folder_manager):
+            raise ValueError("download_manager must use the configured attachment store and folder")
 
     # ── primary query methods ────────────────────────────
 
@@ -150,7 +157,7 @@ class ConversationStoreClient:
         # Convert dicts → (Message, distance) pairs
         pairs: list[tuple[Message, float]] = []
         for d in results:
-            msg = _dict_to_message(d)
+            msg = self.store.get(d.get("id", "")) or _dict_to_message(d)
             dist = d.get("distance", 0.0)
             # Post-filter by 'until'
             if until is not None and msg.timestamp > until:
@@ -367,9 +374,20 @@ class ConversationStoreClient:
             Number of new messages added to the store.
         """
         count = self.store.append(messages)
-        # Index all (SemanticIndex upserts, so duplicates are fine)
-        self.index.index(messages)
+        self.reconcile_index()
         return count
+
+    def reconcile_index(self, batch_size: int = 100) -> int:
+        pending = self.store.pending_index_messages(limit=batch_size)
+        if not pending:
+            return 0
+        try:
+            indexed = self.index.index(pending)
+        except Exception as exc:
+            self.store.mark_index_failed([message.id for message in pending], str(exc))
+            raise
+        self.store.mark_indexed([message.id for message in pending])
+        return indexed
 
     # ── attachment methods ────────────────────────────────
 
@@ -399,6 +417,18 @@ class ConversationStoreClient:
                 count += 1
         return count
 
+    def ingest_telegram_event(
+        self, event: dict, collector: TelegramEventCollector | None = None
+    ) -> tuple[Message, list[Attachment]]:
+        """Normalize a Telegram event, then persist its message and download work."""
+        collector = collector or TelegramEventCollector()
+        message, attachments = collector.parse_message(event)
+        self.ingest([message])
+        for attachment in attachments:
+            if not self.download_manager.enqueue(attachment):
+                raise ValueError(f"attachment {attachment.id} was not accepted")
+        return message, attachments
+
     def attachments_for_message(self, message_id: str) -> list[Attachment]:
         """Get all attachments for a message.
 
@@ -412,6 +442,23 @@ class ConversationStoreClient:
         list[Attachment]
         """
         return self.attachment_store.by_message(message_id)
+
+    def attachments_for_native_message(
+        self, venue: str, venue_id: str, venue_message_id: str
+    ) -> list[Attachment]:
+        message = self.store.get_by_native_id(venue, venue_id, venue_message_id)
+        return self.attachment_store.by_message(message.id) if message else []
+
+    def attachments_for_reply(self, message_id: str) -> list[Attachment]:
+        message = self.store.get(message_id)
+        if message is None or not message.reply_to_id:
+            return []
+        parent = self.store.get(message.reply_to_id)
+        if parent is None:
+            parent = self.store.get_by_native_id(
+                message.venue, message.venue_id, message.reply_to_id
+            )
+        return self.attachment_store.by_message(parent.id) if parent else []
 
     def attachments_for_venue(
         self,

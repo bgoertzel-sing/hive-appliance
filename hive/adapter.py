@@ -145,7 +145,7 @@ class LocalAgentAdapter:
         agent_id = self._identity.agent_id
         try:
             if hasattr(self._appliance, 'repair_incident'):
-                result = self._appliance.repair_incident(action.parameters)
+                result = self._appliance.repair_incident(action.params)
                 logger.info(
                     "Agent %s executed action %s: success=%s",
                     agent_id, action.kind.value, result,
@@ -193,18 +193,15 @@ class LocalAgentAdapter:
 class StubAgentAdapter:
     """Test adapter that serves canned events and health."""
 
-    def __init__(self, agent_id: str, display_name: str | None = None,
+    def __init__(self, agent_id: str, display_name: str = "",
                  events: list[Event] | None = None,
                  health: AgentHealth = AgentHealth.HEALTHY):
-        self._identity = AgentIdentity(
-            agent_id=agent_id,
-            display_name=display_name or agent_id,
-        )
+        self._identity = AgentIdentity(agent_id=agent_id, display_name=display_name or agent_id)
         self._events = list(events or [])
         self._health = health
         self._open_incidents = 0
         self._executed: list[HiveAction] = []
-        self._checkpoints: dict[str, "StateCheckpoint"] = {}
+        self._checkpoints: dict[str, StateCheckpoint] = {}
 
     @property
     def identity(self) -> AgentIdentity:
@@ -212,17 +209,17 @@ class StubAgentAdapter:
         return self._identity
 
     def events_since(self, cursor: str | None) -> tuple[list[Event], str]:
-        """Return events since cursor."""
+        """Execute events since operation."""
         offset = int(cursor) if cursor else 0
         new = self._events[offset:]
         return new, str(len(self._events))
 
     def state_snapshot(self) -> dict[str, Any]:
-        """Return agent state snapshot."""
+        """Execute state snapshot operation."""
         return {"state": {}, "incidents": [], "event_count": len(self._events)}
 
     def health_summary(self) -> AgentHealthSummary:
-        """Return current health summary."""
+        """Execute health summary operation."""
         return AgentHealthSummary(
             agent_id=self._identity.agent_id,
             health=self._health,
@@ -231,33 +228,30 @@ class StubAgentAdapter:
         )
 
     def execute(self, action: HiveAction) -> HiveActionResult:
-        """Execute a hive action."""
+        """Execute execute operation."""
         self._executed.append(action)
         return HiveActionResult(
-            action_id=action.id,
-            success=True,
-            agent_results={self._identity.agent_id: {"status": "ok"}},
+            action_id=action.id, success=True, output="stub",
+            agent_results={self.identity.agent_id: {"success": True, "output": "stub"}},
         )
 
     def checkpoint(self, label: str) -> StateCheckpoint:
-        """Create a state checkpoint."""
-        ckpt = StateCheckpoint(label=label)
-        self._checkpoints[ckpt.id] = ckpt
-        return ckpt
+        """Execute checkpoint operation."""
+        checkpoint = StateCheckpoint(id=f"stub-{len(self._checkpoints) + 1}", label=label)
+        self._checkpoints[checkpoint.id] = checkpoint
+        return checkpoint
 
     def restore(self, checkpoint_id: str) -> bool:
-        """Restore from a checkpoint. Returns False if checkpoint not found."""
+        """Execute restore operation."""
         return checkpoint_id in self._checkpoints
 
-    def inject_event(self, event: Event) -> None:
-        """Inject a single event (test helper)."""
-        self._events.append(event)
-
     def add_events(self, events: list[Event]) -> None:
-        """Add multiple events (test helper)."""
+        """Add events for testing."""
         self._events.extend(events)
 
+    def inject_event(self, event: Event) -> None:
+        self._events.append(event)
+
     def set_health(self, health: AgentHealth, open_incidents: int = 0) -> None:
-        """Set agent health state (test helper)."""
         self._health = health
         self._open_incidents = open_incidents
