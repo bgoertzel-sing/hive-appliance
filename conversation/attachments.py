@@ -124,7 +124,7 @@ class SharedFolderManager:
                     total_size += os.path.getsize(fp)
                     file_count += 1
                 except OSError:
-                    pass
+                    pass  # Expected: file may vanish between walk and stat
         return {
             "total_bytes": total_size,
             "total_mb": round(total_size / (1024 * 1024), 2),
@@ -576,7 +576,7 @@ class AttachmentDownloadManager:
                 if remote_size:
                     attachment.file_size = remote_size
             except (AttributeError, NotImplementedError):
-                pass
+                pass  # Expected: downloader may not support get_file_info
         if attachment.file_size > self._max_file_size > 0:
             logger.info(
                 "Skipping attachment %s: size %d exceeds limit %d",
