@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DB_PATH = "/hive/shared/conversation-store/messages.db"
 DEFAULT_ATTACHMENTS_DIR = "/hive/shared/conversation-store/attachments"
+VALID_DOWNLOAD_STATES = {"pending", "downloading", "completed", "failed", "skipped"}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB default max download size
 
 
@@ -69,8 +70,6 @@ class SharedFolderManager:
     def __init__(self, base_dir: str = DEFAULT_ATTACHMENTS_DIR):
         self._base_dir = Path(base_dir).resolve()
         self._lock = threading.Lock()
-        self._worker: Optional[threading.Thread] = None
-        self._stop_event = threading.Event()
 
     @property
     def base_dir(self) -> Path:
@@ -300,6 +299,8 @@ class AttachmentStore:
         downloaded_at: Optional[float] = None,
     ) -> bool:
         """Update download status for an attachment."""
+        if status not in VALID_DOWNLOAD_STATES:
+            raise ValueError(f"Invalid download status {status!r}; expected one of {VALID_DOWNLOAD_STATES}")
         conn = self._conn
         try:
             cursor = conn.execute(
@@ -533,6 +534,8 @@ class AttachmentDownloadManager:
         self._downloaders: dict[tuple[str, str], AttachmentDownloader] = {}
         self._max_file_size = max_file_size
         self._lock = threading.Lock()
+        self._worker: Optional[threading.Thread] = None
+        self._stop_event = threading.Event()
 
     def set_downloader(self, downloader: AttachmentDownloader) -> None:
         """Set or replace the platform downloader."""

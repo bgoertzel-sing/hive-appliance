@@ -83,7 +83,20 @@ class HiveReducer:
         return new_incidents
 
     def update_agent_health(self, agent_id: str, summary: AgentHealthSummary) -> None:
-        """Update an agent's health summary directly (from polling)."""
+        """Update an agent's health summary directly (from polling).
+
+        If the reducer has unresolved incidents for this agent, polled
+        health is overridden to at least DEGRADED (or FAILED for
+        critical/error incidents) so that a healthy poll cannot mask
+        active incident state.
+        """
+        incidents = self._agent_incidents.get(agent_id, [])
+        if incidents and summary.health == AgentHealth.HEALTHY:
+            has_critical = any(
+                i.get("severity") in ("critical", "error") for i in incidents
+            )
+            summary.health = AgentHealth.FAILED if has_critical else AgentHealth.DEGRADED
+            summary.open_incidents = max(summary.open_incidents, len(incidents))
         self._state.agents[agent_id] = summary
         self._state.last_updated = time.time()
 

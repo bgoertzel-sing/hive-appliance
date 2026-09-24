@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from typing import Any, Callable, Optional
 
 from hive.types import HiveEvent
@@ -129,7 +130,7 @@ class HiveEventBus:
         return len(self._event_log)
 
     def recent_events(self, seconds: float = 60.0) -> list[HiveEvent]:
-        cutoff = __import__("time").time() - seconds
+        cutoff = time.time() - seconds
         return [event for event in self._event_log if event.hive_received_at > cutoff]
 
     def events_since(self, offset: int) -> list[HiveEvent]:

@@ -313,7 +313,6 @@ class HiveActionResult:
     output: str = ""
     agent_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     error: str = ""
-    output: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         """Execute to dict operation."""
