@@ -327,11 +327,15 @@ class Thread:
         self.message_count = len(self.messages)
 
     @property
-    def last_activity(self) -> float:
+    def last_activity(self) -> Optional[float]:
         """Timestamp of the most recent message (AF13: compatibility alias)."""
         if self.messages:
             return max(m.timestamp for m in self.messages)
         return self.ended_at or self.started_at or 0.0
+
+    @last_activity.setter
+    def last_activity(self, value: Optional[float]) -> None:
+        self.ended_at = value
 
     @property
     def duration(self) -> float:
@@ -340,13 +344,6 @@ class Thread:
             return self.ended_at - self.started_at
         return 0.0
 
-    @property
-    def last_activity(self) -> Optional[float]:
-        return self.ended_at
-
-    @last_activity.setter
-    def last_activity(self, value: Optional[float]) -> None:
-        self.ended_at = value
 
     @property
     def participants(self) -> set[str]:
