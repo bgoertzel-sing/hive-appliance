@@ -9,6 +9,8 @@ C12.3 work package.
 """
 from __future__ import annotations
 
+import logging
+
 import json
 import os
 import shutil
@@ -18,6 +20,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
+
+
+logger = logging.getLogger(__name__)
 
 
 class VMState(str, Enum):
@@ -214,7 +219,7 @@ class VMManager:
                     break
                 time.sleep(0.5)
         except ProcessLookupError:
-            pass
+            logger.debug("VM process %d already exited", pid)
 
         self._pid_path(name).unlink(missing_ok=True)
         return VMInfo(name=name, state=VMState.STOPPED, config=config)

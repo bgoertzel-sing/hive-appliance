@@ -17,6 +17,8 @@ P0 fixes (Astra review):
 """
 from __future__ import annotations
 
+import logging
+
 import os
 import tempfile
 from typing import Any, Optional
@@ -245,7 +247,7 @@ class Appliance:
                 state = self.reducer.state_snapshot()
                 checkpoint = self._checkpoint_mgr.create(state)
             except Exception:
-                pass  # Non-fatal: proceed without checkpoint
+                logger.warning("Failed to create checkpoint before repair", exc_info=True)
 
         # Execute steps
         receipts: list[Receipt] = []
@@ -278,7 +280,7 @@ class Appliance:
                 if restored:
                     self.reducer.restore_snapshot(restored.appliance_state)
             except Exception:
-                pass  # Non-fatal rollback failure
+                logger.warning("Failed to rollback after repair failure", exc_info=True)
 
         return receipts
 

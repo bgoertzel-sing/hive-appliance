@@ -6,6 +6,7 @@ C00 work package — profile discovery.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import platform
 import subprocess
@@ -20,6 +21,9 @@ from schemas.types import (
     ResourceKind,
     Severity,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class HostCollector(BaseCollector):
@@ -57,7 +61,7 @@ class HostCollector(BaseCollector):
             resources.append({"kind": "service", "name": "cpu",
                               "attributes": {"cores": cpu_count}})
         except Exception:
-            pass
+            logger.debug("Failed to collect CPU info", exc_info=True)
 
         # Memory
         try:
@@ -74,7 +78,7 @@ class HostCollector(BaseCollector):
                 resources.append({"kind": "service", "name": "memory",
                                   "attributes": mem})
         except Exception:
-            pass
+            logger.debug("Failed to collect memory info", exc_info=True)
 
         # Disk
         try:
@@ -84,7 +88,7 @@ class HostCollector(BaseCollector):
                 resources.append({"kind": "volume", "name": "root",
                                   "attributes": {"df": result.stdout.strip()}})
         except Exception:
-            pass
+            logger.debug("Failed to collect disk info", exc_info=True)
 
         # Network
         try:
@@ -98,7 +102,7 @@ class HostCollector(BaseCollector):
                         "attributes": {"operstate": iface.get("operstate", ""),
                                        "addr_info": iface.get("addr_info", [])}})
         except Exception:
-            pass
+            logger.debug("Failed to collect network info", exc_info=True)
 
         info["resources"] = resources
         return info

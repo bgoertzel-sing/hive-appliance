@@ -6,6 +6,8 @@ WAL mode for concurrent read/write. Dedup on message ID.
 """
 from __future__ import annotations
 
+import logging
+
 import json
 import sqlite3
 import threading
@@ -17,6 +19,9 @@ from .types import Message
 # ── defaults ─────────────────────────────────────────────
 
 DEFAULT_DB_PATH = "/hive/shared/conversation-store/messages.db"
+
+
+logger = logging.getLogger(__name__)
 
 
 class MessageStore:
@@ -189,7 +194,7 @@ class MessageStore:
             try:
                 conn.rollback()
             except Exception:
-                pass
+                logger.debug("Rollback failed after store error", exc_info=True)
             raise
         return added
 
