@@ -211,6 +211,9 @@ class HiveAppliance:
         if self._running:
             logger.warning("HiveAppliance already running")
             return
+        if self._thread is not None and self._thread.is_alive():
+            # L1: previous stop() timed out; never run two control loops.
+            raise RuntimeError("previous hive control loop has not exited; refusing restart")
         self._running = True
         self._stop_event.clear()
         self._thread = threading.Thread(
@@ -219,18 +222,22 @@ class HiveAppliance:
         self._thread.start()
         logger.info("HiveAppliance started (poll_interval=%.1fs)", self._poll_interval)
 
-    def stop(self, timeout: float = 10.0) -> None:
-        """Stop the background control loop gracefully."""
-        if not self._running:
-            return
+    def stop(self, timeout: float = 10.0) -> bool:
+        """Stop the background control loop gracefully.
+
+        L1: returns False (and keeps the thread reference so run() refuses
+        a concurrent restart) if the loop does not exit within timeout.
+        """
         self._running = False
         self._stop_event.set()
         if self._thread is not None:
             self._thread.join(timeout=timeout)
             if self._thread.is_alive():
                 logger.warning("HiveAppliance thread did not stop within %.1fs", timeout)
+                return False
             self._thread = None
         logger.info("HiveAppliance stopped")
+        return True
 
     def _run_loop(self) -> None:
         """Internal loop for the background thread."""

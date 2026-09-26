@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 DEFAULT_DB_PATH = "/hive/shared/conversation-store/messages.db"
 DEFAULT_ATTACHMENTS_DIR = "/hive/shared/conversation-store/attachments"
 VALID_DOWNLOAD_STATES = {"pending", "downloading", "completed", "failed", "skipped"}
+TERMINAL_DOWNLOAD_STATES = {"completed", "failed", "skipped"}
+_STATUS_SQL_LIST = ",".join(f"'{x}'" for x in sorted(VALID_DOWNLOAD_STATES))
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB default max download size
 
 
@@ -252,7 +254,8 @@ class AttachmentStore:
                 file_size       INTEGER NOT NULL DEFAULT 0,
                 mime_type       TEXT NOT NULL DEFAULT '',
                 local_path      TEXT NOT NULL DEFAULT '',
-                download_status TEXT NOT NULL DEFAULT 'pending',
+                download_status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK (download_status IN ('completed','downloading','failed','pending','skipped')),
                 download_error  TEXT NOT NULL DEFAULT '',
                 thumbnail_path  TEXT NOT NULL DEFAULT '',
                 duration        REAL,
@@ -286,6 +289,14 @@ class AttachmentStore:
         }.items():
             if name not in columns:
                 conn.execute(f"ALTER TABLE attachments ADD COLUMN {name} {definition}")
+        # S1: legacy tables lack the CHECK constraint (SQLite cannot add one
+        # via ALTER), so enforce the same invariant with triggers.
+        for op in ("INSERT", "UPDATE"):
+            conn.execute(f"""
+                CREATE TRIGGER IF NOT EXISTS attachments_status_check_{op.lower()}
+                BEFORE {op} ON attachments
+                WHEN NEW.download_status NOT IN ({_STATUS_SQL_LIST})
+                BEGIN SELECT RAISE(ABORT, 'invalid download_status'); END""")
         conn.commit()
 
     # ── write operations ─────────────────────────────────
@@ -402,6 +413,12 @@ class AttachmentStore:
     def finish_attempt(self, attachment_id: str, attempt_id: str, status: str,
                        local_path: str = "", error: str = "",
                        actual_size: int = 0) -> bool:
+        # S1: an attempt can only finish into a terminal state.
+        if status not in TERMINAL_DOWNLOAD_STATES:
+            raise ValueError(f"Invalid terminal status {status!r}; expected one of "
+                             f"{sorted(TERMINAL_DOWNLOAD_STATES)}")
+        if not attempt_id:
+            raise ValueError("finish_attempt requires an attempt_id")
         cursor = self._conn.execute(
             """UPDATE attachments SET download_status=?, local_path=?, download_error=?,
                downloaded_at=?, actual_size=?, lease_until=NULL
@@ -826,8 +843,15 @@ class AttachmentDownloadManager:
         return repaired
 
     def start(self, poll_interval: float = 1.0, batch_size: int = 10) -> None:
-        if self._worker and self._worker.is_alive():
-            return
+        if self._worker is not None:
+            if self._worker.is_alive():
+                if self._stop_event.is_set():
+                    # L1: a previous stop() timed out; the old worker may
+                    # still be mid-download.  Never run two workers.
+                    raise RuntimeError(
+                        "previous attachment worker has not exited; refusing restart")
+                return
+            self._worker = None
         self._stop_event.clear()
 
         def work() -> None:
@@ -841,8 +865,18 @@ class AttachmentDownloadManager:
         )
         self._worker.start()
 
-    def stop(self, timeout: float = 5.0) -> None:
+    def stop(self, timeout: float = 5.0) -> bool:
+        """Stop the worker. Returns True if it exited.
+
+        L1: if the worker does not exit within timeout, the reference is
+        kept (so start() can refuse a concurrent restart) and False is
+        returned.
+        """
         self._stop_event.set()
-        if self._worker:
+        if self._worker is not None:
             self._worker.join(timeout)
+            if self._worker.is_alive():
+                logger.warning("Attachment worker did not stop within %.1fs", timeout)
+                return False
             self._worker = None
+        return True
