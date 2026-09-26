@@ -28,6 +28,14 @@ DEFAULT_CORRELATION_THRESHOLD = 2   # min agents for cross-agent incident
 MAX_AGENT_INCIDENTS = 500           # per-agent incident history cap
 MAX_HIVE_INCIDENTS = 1000           # total hive-level incident cap
 
+# H1: severity ordering used when merging polled health with reducer state
+_HEALTH_RANK = {
+    AgentHealth.UNKNOWN: 0,
+    AgentHealth.HEALTHY: 1,
+    AgentHealth.DEGRADED: 2,
+    AgentHealth.FAILED: 3,
+}
+
 
 class HiveReducer:
     """Processes HiveEvents and maintains HiveState.
@@ -51,6 +59,8 @@ class HiveReducer:
         self._agent_incidents: dict[str, list[dict[str, Any]]] = {}
         # Track seen hive incident IDs for dedup
         self._seen_hive_incidents: set[str] = set()
+        # H2: receipt identities already applied (replay dedupe)
+        self._seen_receipts: set[str] = set()
 
     @property
     def state(self) -> HiveState:
@@ -90,15 +100,38 @@ class HiveReducer:
         critical/error incidents) so that a healthy poll cannot mask
         active incident state.
         """
-        incidents = self._agent_incidents.get(agent_id, [])
-        if incidents and summary.health == AgentHealth.HEALTHY:
+        # H1: merge for every poll, not only HEALTHY ones.  A non-healthy
+        # poll (e.g. DEGRADED with open_incidents=0) must not erase the
+        # reducer's open-incident count or downgrade FAILED to DEGRADED.
+        open_list = self._open_agent_incidents(agent_id)
+        if open_list:
             has_critical = any(
-                i.get("severity") in ("critical", "error") for i in incidents
+                i.get("severity") in ("critical", "error") for i in open_list
             )
-            summary.health = AgentHealth.FAILED if has_critical else AgentHealth.DEGRADED
-            summary.open_incidents = max(summary.open_incidents, len(incidents))
+            floor = AgentHealth.FAILED if has_critical else AgentHealth.DEGRADED
+            if _HEALTH_RANK.get(summary.health, 0) < _HEALTH_RANK[floor]:
+                summary.health = floor
+            summary.open_incidents = max(summary.open_incidents, len(open_list))
         self._state.agents[agent_id] = summary
         self._state.last_updated = time.time()
+
+    def _open_agent_incidents(self, agent_id: str) -> list[dict[str, Any]]:
+        return [i for i in self._agent_incidents.get(agent_id, [])
+                if not i.get("resolved")]
+
+    def _recompute_agent_health(self, agent_id: str) -> None:
+        summary = self._state.agents.get(agent_id)
+        if summary is None:
+            return
+        open_list = self._open_agent_incidents(agent_id)
+        summary.open_incidents = len(open_list)
+        if not open_list:
+            if summary.health in (AgentHealth.FAILED, AgentHealth.DEGRADED):
+                summary.health = AgentHealth.HEALTHY
+        elif any(i.get("severity") in ("critical", "error") for i in open_list):
+            summary.health = AgentHealth.FAILED
+        elif _HEALTH_RANK.get(summary.health, 0) < _HEALTH_RANK[AgentHealth.DEGRADED]:
+            summary.health = AgentHealth.DEGRADED
 
     def register_agent(self, agent_id: str) -> None:
         """Register a new agent in hive state."""
@@ -158,24 +191,39 @@ class HiveReducer:
         if agent_id not in self._agent_incidents:
             self._agent_incidents[agent_id] = []
         incidents_list = self._agent_incidents[agent_id]
+        # H2: incidents are keyed by their identity (deterministic incident
+        # id from the payload), not by the carrying event id, so replayed or
+        # re-emitted incident events do not inflate open_incidents.
+        identity = payload.get("id") or event.id
+        existing = next((i for i in incidents_list
+                         if i["incident_id"] == identity), None)
+        if existing is not None:
+            existing["ts"] = max(existing["ts"], event.ts)
+            if payload.get("resolved"):
+                existing["resolved"] = True
+            self._recompute_agent_health(agent_id)
+            return new_incidents
         incidents_list.append({
-            "incident_id": event.id,
+            "incident_id": identity,
             "ts": event.ts,
             "symptom": symptom,
             "severity": payload.get("severity", "warn"),
+            "plan_id": payload.get("plan_id", ""),
+            "resolved": bool(payload.get("resolved", False)),
         })
-        # Prune old entries beyond cap
+        # Prune old entries beyond cap -- resolved ones first, never open ones
         if len(incidents_list) > MAX_AGENT_INCIDENTS:
-            self._agent_incidents[agent_id] = incidents_list[-MAX_AGENT_INCIDENTS:]
+            overflow = len(incidents_list) - MAX_AGENT_INCIDENTS
+            kept, dropped = [], 0
+            for i in incidents_list:
+                if dropped < overflow and i.get("resolved"):
+                    dropped += 1
+                    continue
+                kept.append(i)
+            self._agent_incidents[agent_id] = kept[-MAX_AGENT_INCIDENTS:] if dropped < overflow else kept
 
         # Update agent health
-        if agent_id in self._state.agents:
-            self._state.agents[agent_id].open_incidents += 1
-            severity = payload.get("severity", "warn")
-            if severity in ("critical", "error"):
-                self._state.agents[agent_id].health = AgentHealth.FAILED
-            elif self._state.agents[agent_id].health in (AgentHealth.HEALTHY, AgentHealth.UNKNOWN):
-                self._state.agents[agent_id].health = AgentHealth.DEGRADED
+        self._recompute_agent_health(agent_id)
 
         # Attempt cross-agent correlation
         correlated = self._correlate_incidents(symptom, event.ts)
@@ -239,16 +287,33 @@ class HiveReducer:
 
     def _handle_receipt(self, agent_id: str, event: Any) -> None:
         """Handle repair receipt — may resolve an agent's incident."""
-        if agent_id in self._state.agents:
-            verified = event.payload.get("verified", False)
-            if verified:
-                summary = self._state.agents[agent_id]
-                summary.open_incidents = max(0, summary.open_incidents - 1)
-                if summary.open_incidents == 0:
-                    summary.health = AgentHealth.HEALTHY
-                logger.info(
-                    "Agent %s incident resolved (verified receipt)", agent_id,
-                )
+        # H2: a receipt resolves a specific incident (matched by incident_id
+        # or plan_id) at most once; replayed receipts are ignored.
+        payload = event.payload
+        if not payload.get("verified", False):
+            return
+        rid = payload.get("id") or event.id
+        key = f"{agent_id}:{rid}"
+        if key in self._seen_receipts:
+            logger.debug("Ignoring replayed receipt %s from %s", rid, agent_id)
+            return
+        self._seen_receipts.add(key)
+        open_list = self._open_agent_incidents(agent_id)
+        target = None
+        inc_id = payload.get("incident_id", "")
+        plan_id = payload.get("plan_id", "")
+        if inc_id:
+            target = next((i for i in open_list if i["incident_id"] == inc_id), None)
+        if target is None and plan_id:
+            target = next((i for i in open_list if i.get("plan_id") == plan_id), None)
+        if target is None and not inc_id and not plan_id and open_list:
+            target = open_list[0]  # legacy: untargeted receipt -> oldest open
+        if target is None:
+            return
+        target["resolved"] = True
+        self._recompute_agent_health(agent_id)
+        logger.info("Agent %s incident %s resolved (verified receipt)",
+                    agent_id, target["incident_id"])
 
     def resolve_hive_incident(self, incident_id: str) -> bool:
         """Mark a hive-level incident as resolved."""
