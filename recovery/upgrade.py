@@ -77,7 +77,8 @@ class UpgradeResult:
     success: bool = False
     steps_completed: int = 0
     steps_total: int = 0
-    rolled_back: bool = False
+    rolled_back: bool = False      # U2: True ONLY if state was actually restored
+    rollback_error: str = ""       # U2: why rollback did not happen / failed
     pre_checkpoint_id: str = ""
     error: str = ""
     step_results: list[dict[str, Any]] = field(default_factory=list)
@@ -122,13 +123,18 @@ class UpgradeController:
 
     def execute(self, manifest: UpgradeManifest,
                 appliance_state: dict[str, Any],
-                dry_run: bool = False) -> UpgradeResult:
+                dry_run: bool = False,
+                restore_fn: Optional[Callable[[dict[str, Any]], None]] = None,
+                ) -> UpgradeResult:
         """Execute an upgrade manifest with checkpoint safety net.
 
         Args:
             manifest: The upgrade to execute.
             appliance_state: Current appliance state dict (for checkpoint).
             dry_run: If True, skip actual execution, just validate and plan.
+            restore_fn: U2 - callable that applies a checkpointed state.  On
+                step failure the pre-upgrade checkpoint is re-loaded from disk
+                and passed to it.  rolled_back is True only if that succeeds.
 
         Returns:
             UpgradeResult with outcome details.
@@ -168,15 +174,42 @@ class UpgradeController:
                     f"Step {i} ({step.verb}) failed: "
                     f"{step_result.get('error', 'unknown')}"
                 )
-                # 4. Rollback
-                result.rolled_back = True
+                failed = True
                 break
             result.steps_completed += 1
+        else:
+            failed = False
 
-        if not result.rolled_back:
+        if not failed:
             result.success = True
+            return result
 
+        # 4. Rollback (U2): actually restore; never claim it otherwise.
+        self._rollback(ckpt.id, restore_fn, result)
         return result
+
+    def _rollback(self, ckpt_id: str,
+                  restore_fn: Optional[Callable[[dict[str, Any]], None]],
+                  result: UpgradeResult) -> None:
+        """U2: Restore the pre-upgrade checkpoint; set rolled_back only on success."""
+        result.rolled_back = False
+        if restore_fn is None:
+            result.rollback_error = "no restore function configured; state NOT restored"
+            return
+        try:
+            restored = self._ckpt.load(ckpt_id)
+        except Exception as exc:
+            result.rollback_error = f"checkpoint load failed: {type(exc).__name__}: {exc}"
+            return
+        if restored is None:
+            result.rollback_error = f"checkpoint {ckpt_id} missing; state NOT restored"
+            return
+        try:
+            restore_fn(restored.appliance_state)
+        except Exception as exc:
+            result.rollback_error = f"restore failed: {type(exc).__name__}: {exc}"
+            return
+        result.rolled_back = True
 
     def _execute_step(self, step: UpgradeStep, index: int) -> dict[str, Any]:
         """Execute a single upgrade step and verify it."""

@@ -18,7 +18,6 @@ P0 fixes (Astra review):
 from __future__ import annotations
 
 import logging
-
 import os
 import tempfile
 from typing import Any, Optional
@@ -36,6 +35,17 @@ from schemas.types import (
     Severity,
 )
 
+logger = logging.getLogger(__name__)
+
+# U1: distinct repair outcomes (see Appliance.repair_outcomes)
+OUTCOME_RESOLVED = "resolved"
+OUTCOME_SIMULATED = "simulated"
+OUTCOME_BLOCKED_NO_CHECKPOINT = "blocked_no_checkpoint"
+OUTCOME_ROLLED_BACK = "rolled_back"
+OUTCOME_ROLLBACK_FAILED = "rollback_failed"
+OUTCOME_REJECTED = "rejected"
+OUTCOME_NO_PLAN = "no_plan"
+
 
 class Appliance:
     """Top-level controller for the Omega Hive Appliance."""
@@ -50,6 +60,8 @@ class Appliance:
         self.max_steps: int = 20
         self._active_repairs: set[str] = set()  # F8: track active repairs
         self._completed_repairs: set[str] = set()  # F8: track completed repairs
+        # U1: last outcome per incident id (durable copy is a RECOVERY event)
+        self.repair_outcomes: dict[str, str] = {}
 
         # M3: Recovery — checkpoint & upgrade support
         if store_path == ":memory:":
@@ -201,30 +213,85 @@ class Appliance:
         finally:
             self._active_repairs.discard(incident.id)
 
+    def _record_recovery(self, incident: IncidentReport, outcome: str,
+                         plan: Optional[Plan] = None, **extra: Any) -> None:
+        """U1: Persist the repair outcome as a RECOVERY event (durable)."""
+        self.repair_outcomes[incident.id] = outcome
+        payload: dict[str, Any] = {
+            "incident_id": incident.id,
+            "outcome": outcome,
+            "plan_id": plan.id if plan else "",
+        }
+        payload.update(extra)
+        sev = Severity.INFO if outcome in (OUTCOME_RESOLVED, OUTCOME_SIMULATED) else Severity.ERROR
+        event = Event(
+            kind=EventKind.RECOVERY,
+            source="appliance",
+            subject=incident.component or incident.id,
+            payload=payload,
+            severity=sev,
+        )
+        self.store.append(event)
+        self.reducer.reduce(event)
+
     def _do_repair(
         self,
         incident: IncidentReport,
         dry_run: bool = False,
     ) -> list[Receipt]:
-        """Internal repair implementation after dedup check."""
+        """Internal repair implementation after dedup check.
+
+        U1: fail-closed.  A real (non-dry-run) repair is never dispatched
+        unless a pre-repair checkpoint was created *and* can be read back.
+        Outcomes are recorded in self.repair_outcomes and as a durable
+        RECOVERY event; a failed rollback is reported as "rollback_failed"
+        rather than silently swallowed.
+        """
         # Generate plan
         plan = self.planner.plan(incident)
         if not plan.steps:
+            self.repair_outcomes[incident.id] = OUTCOME_NO_PLAN
             return []
 
         # F1/F2: Validate plan
         errors = plan.validate()
         if errors:
-            # Record rejected plan
             plan.status = "rejected"
             self.record_plan(plan)
+            self.repair_outcomes[incident.id] = OUTCOME_REJECTED
             return []
 
         # F13: Enforce max steps — reject over-budget plans
         if len(plan.steps) > self.max_steps:
             plan.status = "rejected_over_budget"
             self.record_plan(plan)
+            self.repair_outcomes[incident.id] = OUTCOME_REJECTED
             return []
+
+        # F3/U1: Recovery-ready gate — checkpoint BEFORE any dispatch.
+        checkpoint: Optional[StateCheckpoint] = None
+        if not dry_run:
+            ckpt_error = ""
+            try:
+                state = self.reducer.state_snapshot()
+                checkpoint = self._checkpoint_mgr.create(
+                    state, label=f"pre_repair_{incident.id}",
+                    metadata={"incident_id": incident.id, "plan_id": plan.id},
+                )
+                # Must be readable back, otherwise rollback is impossible.
+                if self._checkpoint_mgr.load(checkpoint.id) is None:
+                    ckpt_error = f"checkpoint {checkpoint.id} not readable after create"
+                    checkpoint = None
+            except Exception as exc:
+                logger.warning("Failed to create checkpoint before repair", exc_info=True)
+                ckpt_error = f"{type(exc).__name__}: {exc}"
+                checkpoint = None
+            if checkpoint is None:
+                plan.status = "blocked_no_checkpoint"
+                self.record_plan(plan)
+                self._record_recovery(incident, OUTCOME_BLOCKED_NO_CHECKPOINT,
+                                      plan, error=ckpt_error)
+                return []
 
         # Link plan to incident
         incident.plan_id = plan.id
@@ -239,15 +306,6 @@ class Appliance:
             executor = NoopExecutor()
         else:
             executor = self.executor
-
-        # F3: Recovery-ready gate — take checkpoint before real repair
-        checkpoint = None
-        if not dry_run:
-            try:
-                state = self.reducer.state_snapshot()
-                checkpoint = self._checkpoint_mgr.create(state)
-            except Exception:
-                logger.warning("Failed to create checkpoint before repair", exc_info=True)
 
         # Execute steps
         receipts: list[Receipt] = []
@@ -269,19 +327,35 @@ class Appliance:
                 if not receipt.simulated:
                     break
 
+        if dry_run:
+            self.repair_outcomes[incident.id] = OUTCOME_SIMULATED
+            return receipts
+
         # F7: Mark incident resolved when ALL steps verified
-        if all_verified and not dry_run:
+        if all_verified:
             incident.resolved = True
+            self._record_recovery(incident, OUTCOME_RESOLVED, plan,
+                                  checkpoint_id=checkpoint.id)
+            return receipts
 
-        # F3: Rollback on failure (non-dry-run only)
-        if not dry_run and not all_verified and checkpoint:
-            try:
-                restored = self._checkpoint_mgr.load(checkpoint.id)
-                if restored:
-                    self.reducer.restore_snapshot(restored.appliance_state)
-            except Exception:
-                logger.warning("Failed to rollback after repair failure", exc_info=True)
+        # F3/U1: Rollback on failure — failures are reported, not swallowed.
+        rollback_error = ""
+        try:
+            restored = self._checkpoint_mgr.load(checkpoint.id)
+            if restored is None:
+                rollback_error = f"checkpoint {checkpoint.id} missing at rollback"
+            else:
+                self.reducer.restore_snapshot(restored.appliance_state)
+        except Exception as exc:
+            logger.warning("Failed to rollback after repair failure", exc_info=True)
+            rollback_error = f"{type(exc).__name__}: {exc}"
 
+        if rollback_error:
+            self._record_recovery(incident, OUTCOME_ROLLBACK_FAILED, plan,
+                                  checkpoint_id=checkpoint.id, error=rollback_error)
+        else:
+            self._record_recovery(incident, OUTCOME_ROLLED_BACK, plan,
+                                  checkpoint_id=checkpoint.id)
         return receipts
 
     def repair_all(self, dry_run: bool = False) -> dict[str, list[Receipt]]:
@@ -338,4 +412,7 @@ class Appliance:
     def upgrade(self, manifest: UpgradeManifest, dry_run: bool = False) -> UpgradeResult:
         """Execute an upgrade with automatic rollback on failure."""
         state = self.reducer.state_snapshot()
-        return self._upgrade_ctrl.execute(manifest, state, dry_run=dry_run)
+        return self._upgrade_ctrl.execute(
+            manifest, state, dry_run=dry_run,
+            restore_fn=self.reducer.restore_snapshot,  # U2: real restore
+        )

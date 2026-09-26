@@ -47,8 +47,11 @@ class Reducer:
                 self.incidents.append(inc)
                 self._seen_incident_ids.add(inc.id)
 
-        # Update state with latest observation
-        if event.subject:
+        # Update state with latest observation.
+        # U1: RECOVERY events are audit records of repair outcomes; they must
+        # not be merged into component state (otherwise a post-rollback
+        # outcome record would re-mutate the just-restored state).
+        if event.subject and event.kind != EventKind.RECOVERY:
             self.state.setdefault(event.subject, {})
             self.state[event.subject].update(event.payload)
 
@@ -142,18 +145,44 @@ class Reducer:
         return [i for i in self.incidents if not i.resolved]
 
     def snapshot(self) -> dict[str, Any]:
-        """Return a snapshot of the current state."""
+        """Return a snapshot of the current state.
+
+        U3: includes the full incident records (and composite-receipt
+        tracking) so that restore_snapshot() round-trips them.
+        """
+        import copy
         return {
-            "state": self.state,
+            "state": copy.deepcopy(self.state),
+            "incidents": [i.to_dict() for i in self.incidents],
+            "plan_step_counts": dict(self._plan_step_counts),
+            "plan_receipts": {k: list(v) for k, v in self._plan_receipts.items()},
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
         }
 
     def restore_snapshot(self, snapshot: dict[str, Any]) -> None:
-        """Restore reducer state from a checkpoint snapshot."""
-        self.state = snapshot.get("state", {})
-        self.incidents = []
-        self._seen_incident_ids = set()
+        """Restore reducer state from a checkpoint snapshot.
+
+        U3: incident records, the seen-id dedup set and plan tracking are
+        rebuilt from the snapshot.  A snapshot that reports incidents but
+        carries no records (legacy/corrupt) raises ValueError instead of
+        silently dropping them; nothing is mutated in that case.
+        """
+        import copy
+        records = snapshot.get("incidents")
+        if records is None:
+            if snapshot.get("incidents_total", 0):
+                raise ValueError(
+                    "snapshot has incidents_total>0 but no incident records; "
+                    "refusing lossy restore"
+                )
+            records = []
+        incidents = [IncidentReport.from_dict(r) for r in records]
+        self.state = copy.deepcopy(snapshot.get("state", {}))
+        self.incidents = incidents
+        self._seen_incident_ids = {i.id for i in incidents}
+        self._plan_step_counts = dict(snapshot.get("plan_step_counts", {}))
+        self._plan_receipts = {k: list(v) for k, v in snapshot.get("plan_receipts", {}).items()}
 
     def state_snapshot(self) -> dict[str, Any]:
         """Alias for snapshot() for API compatibility."""
