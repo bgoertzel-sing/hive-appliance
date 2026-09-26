@@ -61,6 +61,10 @@ class HiveReducer:
         self._seen_hive_incidents: set[str] = set()
         # H2: receipt identities already applied (replay dedupe)
         self._seen_receipts: set[str] = set()
+        # H2 (6949): composite plan tracking, keyed "agent:plan_id"
+        self._plan_steps: dict[str, int] = {}
+        self._plan_verified_steps: dict[str, set[int]] = {}
+        self._plan_failed: set[str] = set()
 
     @property
     def state(self) -> HiveState:
@@ -86,6 +90,8 @@ class HiveReducer:
             new_incidents.extend(self._handle_incident(agent_id, event))
         elif event.kind == EventKind.OBSERVATION:
             self._handle_observation(agent_id, event)
+        elif event.kind == EventKind.PLAN:
+            self._handle_plan(agent_id, event)
         elif event.kind == EventKind.RECEIPT:
             self._handle_receipt(agent_id, event)
 
@@ -285,31 +291,79 @@ class HiveReducer:
                 active = payload.get("active", "unknown")
                 summary.services[svc] = active
 
-    def _handle_receipt(self, agent_id: str, event: Any) -> None:
-        """Handle repair receipt — may resolve an agent's incident."""
-        # H2: a receipt resolves a specific incident (matched by incident_id
-        # or plan_id) at most once; replayed receipts are ignored.
-        payload = event.payload
-        if not payload.get("verified", False):
+    def _handle_plan(self, agent_id: str, event: Any) -> None:
+        """H2 (6949): register a repair plan's step count and link it to its
+        incident, so completion requires a verified receipt for EVERY step
+        (same rule as controller/reducer.py F7)."""
+        payload = event.payload or {}
+        plan_id = payload.get("id", "")
+        steps = payload.get("steps", []) or []
+        if not plan_id or not steps:
             return
+        key = f"{agent_id}:{plan_id}"
+        if key not in self._plan_steps:
+            self._plan_steps[key] = len(steps)
+            self._plan_verified_steps[key] = set()
+        inc_id = payload.get("incident_id", "")
+        if inc_id:
+            for inc in self._agent_incidents.get(agent_id, []):
+                if inc["incident_id"] == inc_id:
+                    inc["plan_id"] = plan_id
+
+    def _handle_receipt(self, agent_id: str, event: Any) -> None:
+        """Handle repair receipt -- may resolve an agent's incident.
+
+        H2 (6949):
+        - a receipt must carry identity (incident_id and/or plan_id); an
+          untargeted receipt never resolves anything;
+        - contradictory identity (incident linked to another plan) is rejected;
+        - for a known plan the incident resolves only once every step index
+          has a verified receipt and no step receipt failed (composite
+          completion, consistent with the local controller reducer);
+        - replayed receipts (same receipt id) are applied at most once.
+        """
+        payload = event.payload or {}
         rid = payload.get("id") or event.id
         key = f"{agent_id}:{rid}"
         if key in self._seen_receipts:
             logger.debug("Ignoring replayed receipt %s from %s", rid, agent_id)
             return
         self._seen_receipts.add(key)
+        verified = bool(payload.get("verified", False))
+        inc_id = payload.get("incident_id", "") or ""
+        plan_id = payload.get("plan_id", "") or ""
+        if not inc_id and not plan_id:
+            logger.warning("Ignoring untargeted receipt %s from %s", rid, agent_id)
+            return
+        pkey = f"{agent_id}:{plan_id}" if plan_id else ""
+        if pkey and pkey in self._plan_steps:
+            if not verified:
+                self._plan_failed.add(pkey)
+            else:
+                idx = payload.get("step_index")
+                if isinstance(idx, int) and 0 <= idx < self._plan_steps[pkey]:
+                    self._plan_verified_steps[pkey].add(idx)
+        if not verified:
+            return
         open_list = self._open_agent_incidents(agent_id)
-        target = None
-        inc_id = payload.get("incident_id", "")
-        plan_id = payload.get("plan_id", "")
         if inc_id:
             target = next((i for i in open_list if i["incident_id"] == inc_id), None)
-        if target is None and plan_id:
+            if (target is not None and plan_id and target.get("plan_id")
+                    and target["plan_id"] != plan_id):
+                logger.warning("Rejecting contradictory receipt %s (incident %s "
+                               "is linked to plan %s, receipt says %s)", rid,
+                               inc_id, target["plan_id"], plan_id)
+                return
+        else:
             target = next((i for i in open_list if i.get("plan_id") == plan_id), None)
-        if target is None and not inc_id and not plan_id and open_list:
-            target = open_list[0]  # legacy: untargeted receipt -> oldest open
         if target is None:
             return
+        tplan = target.get("plan_id") or plan_id
+        tkey = f"{agent_id}:{tplan}" if tplan else ""
+        if tkey and tkey in self._plan_steps:
+            if (tkey in self._plan_failed or
+                    len(self._plan_verified_steps[tkey]) < self._plan_steps[tkey]):
+                return  # composite repair not yet complete
         target["resolved"] = True
         self._recompute_agent_health(agent_id)
         logger.info("Agent %s incident %s resolved (verified receipt)",

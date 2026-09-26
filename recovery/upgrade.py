@@ -78,8 +78,11 @@ class UpgradeResult:
     success: bool = False
     steps_completed: int = 0
     steps_total: int = 0
-    rolled_back: bool = False      # U2: True ONLY if state was actually restored
+    rolled_back: bool = False      # U2: True ONLY if metadata restored AND external actions rolled back
     rollback_error: str = ""       # U2: why rollback did not happen / failed
+    metadata_restored: bool = False    # U2 (6949): appliance state restored from checkpoint
+    actions_rolled_back: bool = False  # U2 (6949): every needed rollback_command succeeded
+    rollback_results: list[dict[str, Any]] = field(default_factory=list)
     pre_checkpoint_id: str = ""
     error: str = ""
     step_results: list[dict[str, Any]] = field(default_factory=list)
@@ -185,9 +188,45 @@ class UpgradeController:
             result.success = True
             return result
 
-        # 4. Rollback (U2): actually restore; never claim it otherwise.
+        # 4. Rollback (U2/6949): undo external actions first (rollback_command
+        #    of the failed step and every completed step, newest first), then
+        #    restore appliance metadata.  rolled_back is True only if BOTH
+        #    succeeded; never claim recovery otherwise.
+        action_errors = self._rollback_actions(manifest, result.steps_completed, result)
         self._rollback(ckpt.id, restore_fn, result)
+        result.metadata_restored = result.rolled_back
+        result.actions_rolled_back = not action_errors
+        if action_errors:
+            result.rolled_back = False
+            msg = "external actions NOT rolled back: " + "; ".join(action_errors)
+            result.rollback_error = (f"{result.rollback_error}; {msg}"
+                                     if result.rollback_error else msg)
         return result
+
+    def _rollback_actions(self, manifest: UpgradeManifest, failed_index: int,
+                          result: UpgradeResult) -> list[str]:
+        """U2 (6949): run rollback_command for steps failed_index..0 in reverse.
+
+        A step without a rollback_command cannot be undone, so it is reported
+        as an error (the upgrade is then NOT considered rolled back)."""
+        errors: list[str] = []
+        last = min(failed_index, len(manifest.steps) - 1)
+        for i in range(last, -1, -1):
+            step = manifest.steps[i]
+            if not step.rollback_command:
+                errors.append(f"step {i} ({step.verb}) has no rollback_command")
+                continue
+            rb = UpgradeStep(verb=step.verb, command=step.rollback_command,
+                             timeout_s=step.timeout_s, metadata=dict(step.metadata))
+            rb_result = self._execute_step(rb, i, f"{manifest.id or 'anon'}_rollback")
+            rb_result["rollback"] = True
+            result.rollback_results.append(rb_result)
+            if not rb_result.get("success", False):
+                detail = (rb_result.get("error")
+                          or rb_result.get("receipt", {}).get("stderr", "")
+                          or "rollback command failed")
+                errors.append(f"step {i} ({step.verb}) rollback_command failed: {detail}")
+        return errors
 
     def _rollback(self, ckpt_id: str,
                   restore_fn: Optional[Callable[[dict[str, Any]], None]],

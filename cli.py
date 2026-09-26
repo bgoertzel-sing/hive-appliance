@@ -289,9 +289,13 @@ def cmd_upgrade(args):
         print(f"  Checkpoint: {result.pre_checkpoint_id}")
     if not result.success:
         if result.rolled_back:
-            print("  Rolled back: state restored from pre-upgrade checkpoint")
+            print("  Rolled back: YES (rollback commands succeeded; "
+                  "state restored from pre-upgrade checkpoint)")
         else:
             print(f"  Rolled back: NO ({result.rollback_error or 'not attempted'})")
+            print(f"    metadata restored: {'yes' if result.metadata_restored else 'no'}; "
+                  f"external actions rolled back: "
+                  f"{'yes' if result.actions_rolled_back else 'no'}")
     app.close()
 
 

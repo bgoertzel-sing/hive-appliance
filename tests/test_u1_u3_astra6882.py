@@ -184,7 +184,10 @@ def test_u2_appliance_upgrade_actually_restores(tmp_path):
     r = app.upgrade(_failing_manifest())
 
     assert ex.calls
-    assert r.rolled_back is True and r.rollback_error == ""
+    # 6949: metadata restored, but the step had no rollback_command, so the
+    # upgrade as a whole is NOT reported as rolled back.
+    assert r.metadata_restored is True
+    assert r.rolled_back is False and "no rollback_command" in r.rollback_error
     assert not app.reducer.state.get("svc_a", {}).get("mutated")
     assert [i.id for i in app.reducer.incidents] == [inc.id]
 

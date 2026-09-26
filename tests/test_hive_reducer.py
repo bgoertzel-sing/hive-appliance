@@ -30,7 +30,7 @@ def _make_observation_event(service, active="active"):
 def _make_receipt_event(verified=True):
     return Event(
         kind=EventKind.RECEIPT,
-        payload={"verified": verified},
+        payload={"verified": verified, "incident_id": "inc_1"},
     )
 
 

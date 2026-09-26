@@ -301,6 +301,17 @@ class AttachmentStore:
 
     # ── write operations ─────────────────────────────────
 
+    def _path_admissible(self, local_path: str) -> bool:
+        """P2-store (6949): with a configured root, a persisted local_path
+        must be contained in it.  Empty paths are always admissible."""
+        if not local_path or self._root_folder is None:
+            return True
+        try:
+            self._root_folder._contained(Path(local_path))
+            return True
+        except (ValueError, OSError):
+            return False
+
     def append(self, attachments: list[Attachment]) -> int:
         """Insert attachments, deduplicating on ID. Returns count added."""
         if not attachments:
@@ -311,6 +322,10 @@ class AttachmentStore:
             errors = att.validate()
             if errors:
                 logger.warning("Rejected invalid attachment %s: %s", att.id, errors)
+                return 0
+            if not self._path_admissible(att.local_path):
+                logger.warning("Rejected attachment %s: local_path outside "
+                               "attachments root", att.id)
                 return 0
             validated.append((att, json.dumps(att.metadata)))
         added = 0
@@ -362,6 +377,10 @@ class AttachmentStore:
         downloaded_at: Optional[float] = None,
     ) -> bool:
         """Update download status for an attachment."""
+        if local_path and not self._path_admissible(local_path):
+            logger.warning("Rejected update for %s: local_path outside "
+                           "attachments root", attachment_id)
+            return False
         if status not in VALID_DOWNLOAD_STATES:
             raise ValueError(f"Invalid download status {status!r}; expected one of {VALID_DOWNLOAD_STATES}")
         conn = self._conn
@@ -419,6 +438,10 @@ class AttachmentStore:
                              f"{sorted(TERMINAL_DOWNLOAD_STATES)}")
         if not attempt_id:
             raise ValueError("finish_attempt requires an attempt_id")
+        if local_path and not self._path_admissible(local_path):
+            logger.warning("Rejected finish_attempt: local_path outside "
+                           "attachments root")
+            return False
         cursor = self._conn.execute(
             """UPDATE attachments SET download_status=?, local_path=?, download_error=?,
                downloaded_at=?, actual_size=?, lease_until=NULL

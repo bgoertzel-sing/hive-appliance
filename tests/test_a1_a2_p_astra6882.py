@@ -118,7 +118,10 @@ def test_p2_delete_refuses_uncontained_path(tmp_path):
     victim = tmp_path / "victim.txt"
     victim.write_text("precious")
     item = attachment(local_path=str(victim))
-    assert store.append([item]) == 1
+    # 6949: a rooted store refuses to persist an external path, so simulate a
+    # legacy row written by an unrooted store, then delete via the rooted one.
+    assert store.append([item]) == 0
+    assert AttachmentStore(str(tmp_path / "db.sqlite")).append([item]) == 1
     assert store.delete(item.id) is True
     assert victim.read_text() == "precious"
     assert store.get(item.id) is None
