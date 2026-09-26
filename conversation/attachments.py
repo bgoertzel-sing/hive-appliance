@@ -95,8 +95,7 @@ class SharedFolderManager:
         # Filename: attachment_id.extension
         filename = f"{self._component(attachment.id)}.{attachment.extension}"
 
-        with self._lock:
-            dir_path.mkdir(parents=True, exist_ok=True)
+        self._safe_mkdir(dir_path)
 
         return str(self._contained(dir_path / filename))
 
@@ -108,8 +107,7 @@ class SharedFolderManager:
         venue_id = self._sanitize(attachment.venue_id or "unknown")
         dir_path = self._base_dir / venue / venue_id / date_str / "thumbs"
 
-        with self._lock:
-            dir_path.mkdir(parents=True, exist_ok=True)
+        self._safe_mkdir(dir_path)
 
         return str(self._contained(dir_path / f"{self._component(attachment.id)}_thumb.jpg"))
 
@@ -151,6 +149,56 @@ class SharedFolderManager:
             raise ValueError("attachment path escapes configured root")
         return resolved
 
+    def _safe_mkdir(self, dir_path: Path) -> None:
+        """P1: create dir_path under base_dir without ever following a symlink.
+
+        Every component is validated *before* anything is created, so a
+        planted symlink cannot cause directories to be made outside the root.
+        """
+        rel = dir_path.relative_to(self._base_dir)  # ValueError if not under root
+        if any(part in ("", ".", "..") for part in rel.parts):
+            raise ValueError("unsafe attachment directory component")
+        with self._lock:
+            if self._base_dir.is_symlink():
+                raise ValueError("attachment root is a symlink")
+            self._base_dir.mkdir(parents=True, exist_ok=True)
+            cur = self._base_dir
+            for part in rel.parts:
+                cur = cur / part
+                if cur.is_symlink():
+                    raise ValueError(f"symlink in attachment path: {cur}")
+                if cur.exists():
+                    if not cur.is_dir():
+                        raise ValueError(f"non-directory in attachment path: {cur}")
+                else:
+                    cur.mkdir()
+                    if cur.is_symlink():  # raced in
+                        raise ValueError(f"symlink in attachment path: {cur}")
+            self._contained(dir_path)
+
+    def attempt_artifact_path(self, canonical: str, attempt_id: str) -> Path:
+        """A1: attempt-specific published file path (never shared by attempts)."""
+        if not attempt_id or Path(attempt_id).name != attempt_id or attempt_id in {".", ".."}:
+            raise ValueError("unsafe attempt id")
+        base = Path(canonical)
+        name = f"{base.stem}.{self._sanitize(attempt_id)}{base.suffix}"
+        return self._contained(base.with_name(name))
+
+    def is_safe_file(self, path: str) -> bool:
+        """P2: path is a regular (non-symlink) file lexically and really inside root."""
+        if not path:
+            return False
+        p = Path(path)
+        if not p.is_absolute():
+            return False
+        try:
+            p.relative_to(self._base_dir)
+        except ValueError:
+            return False
+        if p.is_symlink():
+            return False
+        return self.contains(path)
+
     def contains(self, path: str) -> bool:
         try:
             self._contained(Path(path))
@@ -168,8 +216,12 @@ class AttachmentStore:
     separate 'attachments' table. Thread-safe via thread-local connections.
     """
 
-    def __init__(self, db_path: str = DEFAULT_DB_PATH):
+    def __init__(self, db_path: str = DEFAULT_DB_PATH,
+                 attachments_root: Optional[str] = None):
         self._db_path = Path(db_path)
+        # P2: files are only ever unlinked if contained in this root.
+        self._root_folder = (SharedFolderManager(attachments_root)
+                             if attachments_root else None)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._local = threading.local()
         self._init_schema(self._conn)
@@ -449,15 +501,28 @@ class AttachmentStore:
             "downloaded_mb": round(downloaded_bytes / (1024 * 1024), 2),
         }
 
-    def delete(self, attachment_id: str, remove_file: bool = True) -> bool:
+    def delete(self, attachment_id: str, remove_file: bool = True,
+               folder: Optional["SharedFolderManager"] = None) -> bool:
+        """Delete an attachment row and (optionally) its file.
+
+        P2: the file is removed only if it is a regular file contained in the
+        configured attachments root (folder or attachments_root).  Paths
+        outside the root, symlinks, or an unknown root are never unlinked;
+        the metadata row is still deleted.
+        """
         attachment = self.get(attachment_id)
         if attachment is None:
             return False
+        root = folder or self._root_folder
         if remove_file and attachment.local_path:
-            try:
-                Path(attachment.local_path).unlink(missing_ok=True)
-            except OSError:
-                logger.exception("Unable to remove attachment file %s", attachment.local_path)
+            if root is None or not root.is_safe_file(attachment.local_path):
+                logger.warning("Refusing to unlink uncontained attachment file %s",
+                               attachment.local_path)
+            else:
+                try:
+                    Path(attachment.local_path).unlink(missing_ok=True)
+                except OSError:
+                    logger.exception("Unable to remove attachment file %s", attachment.local_path)
         cursor = self._conn.execute("DELETE FROM attachments WHERE id=?", (attachment_id,))
         self._conn.commit()
         return cursor.rowcount == 1
@@ -622,13 +687,18 @@ class AttachmentDownloadManager:
             raise RuntimeError("No downloader configured")
         att_id = attachment.id
 
-        # Resolve path if not set
-        if not attachment.local_path:
-            attachment.local_path = self._folder.resolve_path(attachment)
-
-        final_path = Path(attachment.local_path)
+        # P2/A1: never trust a stored local_path; always derive a contained,
+        # attempt-specific artifact path so a losing attempt can only ever
+        # touch its own files.
+        try:
+            canonical = self._folder.resolve_path(attachment)
+            final_path = self._folder.attempt_artifact_path(canonical, attachment.attempt_id)
+        except ValueError as e:
+            self._store.finish_attempt(att_id, attachment.attempt_id,
+                                       DownloadStatus.FAILED, error=str(e)[:500])
+            return {"id": att_id, "success": False, "error": str(e)[:200]}
+        attachment.local_path = str(final_path)
         temp_path = final_path.with_name(f".{final_path.name}.{attachment.attempt_id}.part")
-        temp_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             parameters = inspect.signature(downloader.download).parameters
@@ -646,11 +716,15 @@ class AttachmentDownloadManager:
                     raise ValueError(
                         f"downloaded size {actual_size} exceeds limit {self._max_file_size}"
                     )
+                if not (self._folder.contains(str(final_path))
+                        and not final_path.parent.is_symlink()):
+                    raise ValueError("publish path escapes attachment root")
                 os.replace(temp_path, final_path)
                 if not self._store.finish_attempt(
                     att_id, attachment.attempt_id, DownloadStatus.COMPLETED,
                     local_path=str(final_path), actual_size=actual_size,
                 ):
+                    # A1: only this attempt's own artifact is removed.
                     final_path.unlink(missing_ok=True)
                     raise RuntimeError("download lease was lost before publication")
                 logger.info("Downloaded attachment %s → %s", att_id, attachment.local_path)
@@ -723,14 +797,32 @@ class AttachmentDownloadManager:
                     (row["id"],),
                 )
                 repaired["missing_completed"] += 1
-        if self._folder.base_dir.exists():
-            for partial in self._folder.base_dir.rglob(".*.part"):
-                try:
-                    partial.unlink()
-                    repaired["orphan_partials"] += 1
-                except OSError:
-                    logger.exception("Unable to remove orphan partial %s", partial)
         conn.commit()
+        # A2: partials belonging to a live lease are in-flight, not orphans.
+        active = {row[0] for row in conn.execute(
+            """SELECT attempt_id FROM attachments WHERE download_status='downloading'
+               AND attempt_id != '' AND lease_until IS NOT NULL AND lease_until >= ?""",
+            (now,),
+        ).fetchall()}
+        repaired["active_partials_kept"] = 0
+        base = self._folder.base_dir
+        if base.exists() and not base.is_symlink():
+            for dirpath, _dirs, files in os.walk(base, followlinks=False):
+                for fname in files:
+                    if not (fname.startswith(".") and fname.endswith(".part")):
+                        continue
+                    partial = Path(dirpath) / fname
+                    attempt = fname[:-len(".part")].rsplit(".", 1)[-1]
+                    if attempt in active:
+                        repaired["active_partials_kept"] += 1
+                        continue
+                    if partial.is_symlink() or not self._folder.contains(str(partial)):
+                        continue
+                    try:
+                        partial.unlink()
+                        repaired["orphan_partials"] += 1
+                    except OSError:
+                        logger.exception("Unable to remove orphan partial %s", partial)
         return repaired
 
     def start(self, poll_interval: float = 1.0, batch_size: int = 10) -> None:
