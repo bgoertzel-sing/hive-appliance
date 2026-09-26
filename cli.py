@@ -48,6 +48,57 @@ def _build_appliance(store_path: str, dry_run: bool = False) -> Appliance:
     return app
 
 
+def manifest_from_json(data: dict) -> UpgradeManifest:
+    """Build an UpgradeManifest from CLI JSON.
+
+    Accepts the canonical UpgradeManifest.to_dict() shape and the legacy CLI
+    shape (manifest "name"/"version", step "name"/"verify_command").
+    Unknown step keys are rejected rather than silently dropped.
+    """
+    if not isinstance(data, dict):
+        raise ValueError("manifest must be a JSON object")
+    raw_steps = data.get("steps", [])
+    if not isinstance(raw_steps, list) or not raw_steps:
+        raise ValueError("manifest must contain a non-empty 'steps' list")
+    allowed = {"verb", "name", "command", "rollback_command", "timeout_s",
+               "metadata", "verify_command"}
+    steps = []
+    for i, st in enumerate(raw_steps):
+        if not isinstance(st, dict):
+            raise ValueError(f"step {i} must be an object")
+        unknown = set(st) - allowed
+        if unknown:
+            raise ValueError(f"step {i} has unknown keys: {sorted(unknown)}")
+        verb = st.get("verb") or st.get("name") or ""
+        command = st.get("command", "")
+        if not verb or not command:
+            raise ValueError(f"step {i} requires 'verb' (or 'name') and 'command'")
+        metadata = dict(st.get("metadata", {}) or {})
+        if st.get("verify_command"):
+            metadata["verify_command"] = st["verify_command"]
+        steps.append(UpgradeStep(
+            verb=verb,
+            command=command,
+            rollback_command=st.get("rollback_command", ""),
+            timeout_s=float(st.get("timeout_s", 60.0)),
+            metadata=metadata,
+        ))
+    name = data.get("id") or data.get("name") or ""
+    version = data.get("version", "")
+    description = data.get("description") or (
+        f"{name} {version}".strip() if name else "")
+    kwargs = dict(
+        id=name,
+        description=description,
+        pre_flight=data.get("pre_flight", []),
+        steps=steps,
+        schema_version=str(data.get("schema_version", "1")),
+    )
+    if "ts" in data:
+        kwargs["ts"] = float(data["ts"])
+    return UpgradeManifest(**kwargs)
+
+
 def cmd_observe(args):
     """Execute cmd observe operation."""
     app = _build_appliance(args.store)
@@ -221,27 +272,26 @@ def cmd_upgrade(args):
     with open(args.manifest) as f:
         manifest_data = json.load(f)
 
-    steps = []
-    for s in manifest_data.get("steps", []):
-        steps.append(UpgradeStep(
-            name=s["name"],
-            command=s["command"],
-            verify_command=s.get("verify_command", ""),
-            rollback_command=s.get("rollback_command", ""),
-        ))
-    manifest = UpgradeManifest(
-        name=manifest_data["name"],
-        version=manifest_data.get("version", "1.0.0"),
-        steps=steps,
-    )
+    try:
+        manifest = manifest_from_json(manifest_data)
+    except (TypeError, ValueError) as exc:
+        print(f"ERROR: invalid upgrade manifest: {exc}")
+        sys.exit(2)
 
     app = _build_appliance(args.store)
     result = app.upgrade(manifest)
-    print(f"Upgrade '{manifest.name}': {'SUCCESS' if result.success else 'FAILED'}")
+    label = manifest.description or manifest.id
+    print(f"Upgrade '{label}': {'SUCCESS' if result.success else 'FAILED'}")
+    print(f"  Steps: {result.steps_completed}/{result.steps_total}")
     if result.error:
         print(f"  Error: {result.error}")
-    if result.checkpoint_id:
-        print(f"  Checkpoint: {result.checkpoint_id}")
+    if result.pre_checkpoint_id:
+        print(f"  Checkpoint: {result.pre_checkpoint_id}")
+    if not result.success:
+        if result.rolled_back:
+            print("  Rolled back: state restored from pre-upgrade checkpoint")
+        else:
+            print(f"  Rolled back: NO ({result.rollback_error or 'not attempted'})")
     app.close()
 
 

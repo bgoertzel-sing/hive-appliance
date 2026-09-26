@@ -14,6 +14,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Optional
 
 from recovery.checkpoint import CheckpointManager, StateCheckpoint
+from schemas.types import Plan
 
 
 @dataclass
@@ -166,7 +167,7 @@ class UpgradeController:
 
         # 3. Execute steps
         for i, step in enumerate(manifest.steps):
-            step_result = self._execute_step(step, i)
+            step_result = self._execute_step(step, i, manifest.id)
             result.step_results.append(step_result)
 
             if not step_result.get("success", False):
@@ -211,7 +212,8 @@ class UpgradeController:
             return
         result.rolled_back = True
 
-    def _execute_step(self, step: UpgradeStep, index: int) -> dict[str, Any]:
+    def _execute_step(self, step: UpgradeStep, index: int,
+                      manifest_id: str = "") -> dict[str, Any]:
         """Execute a single upgrade step and verify it."""
         if self._executor is None:
             return {"success": True, "index": index, "verb": step.verb,
@@ -219,14 +221,21 @@ class UpgradeController:
 
         try:
             # Build a plan-like step dict for the executor
+            # Executors read "timeout" (seconds) and require a Plan for
+            # receipt provenance; passing plan=None crashed on plan.id.
             step_dict = {
                 "verb": step.verb,
                 "command": step.command,
+                "timeout": int(step.timeout_s),
                 "timeout_s": step.timeout_s,
             }
+            plan = Plan(id=f"upgrade_{manifest_id or 'anon'}_{index}",
+                        steps=[{"verb": step.verb, "command": step.command}],
+                        status="upgrade",
+                        attempt_id=f"upgrade_{manifest_id or 'anon'}_{index}")
             # Use executor's execute_step if available
             if hasattr(self._executor, "execute_step"):
-                receipt = self._executor.execute_step(step_dict, None, index)
+                receipt = self._executor.execute_step(step_dict, plan, index)
                 # Verify
                 if self._verifier and hasattr(self._verifier, "verify"):
                     verified = self._verifier.verify(receipt, step_dict)
