@@ -224,6 +224,9 @@ class AttachmentStore:
         # P2: files are only ever unlinked if contained in this root.
         self._root_folder = (SharedFolderManager(attachments_root)
                              if attachments_root else None)
+        # P2 (6986): lexical (unresolved, absolute) form of the root too
+        self._root_lexical = (Path(os.path.abspath(attachments_root))
+                              if attachments_root else None)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._local = threading.local()
         self._init_schema(self._conn)
@@ -301,16 +304,32 @@ class AttachmentStore:
 
     # ── write operations ─────────────────────────────────
 
-    def _path_admissible(self, local_path: str) -> bool:
-        """P2-store (6949): with a configured root, a persisted local_path
-        must be contained in it.  Empty paths are always admissible."""
-        if not local_path or self._root_folder is None:
-            return True
+    def _admit_path(self, local_path: str) -> Optional[str]:
+        """P2 (6986): return the canonical path to PERSIST, or None if rejected.
+
+        With a configured root the path must be absolute, lexically contained
+        (after normpath, against the resolved or configured root) AND
+        contained after symlink resolution; the resolved path that was
+        checked is what gets stored.  Empty paths pass through unchanged."""
+        if not local_path:
+            return ""
+        if self._root_folder is None:
+            return local_path
+        p = Path(local_path)
+        if not p.is_absolute():
+            return None
+        lex = Path(os.path.normpath(str(p)))
+        roots = {self._root_folder.base_dir, self._root_lexical}
+        if not any(r is not None and (lex == r or r in lex.parents) for r in roots):
+            return None
         try:
-            self._root_folder._contained(Path(local_path))
-            return True
+            return str(self._root_folder._contained(p))
         except (ValueError, OSError):
-            return False
+            return None
+
+    def _path_admissible(self, local_path: str) -> bool:
+        """P2-store (6949): bool form of _admit_path()."""
+        return self._admit_path(local_path) is not None
 
     def append(self, attachments: list[Attachment]) -> int:
         """Insert attachments, deduplicating on ID. Returns count added."""
@@ -323,10 +342,12 @@ class AttachmentStore:
             if errors:
                 logger.warning("Rejected invalid attachment %s: %s", att.id, errors)
                 return 0
-            if not self._path_admissible(att.local_path):
+            _canon = self._admit_path(att.local_path)
+            if _canon is None:
                 logger.warning("Rejected attachment %s: local_path outside "
                                "attachments root", att.id)
                 return 0
+            att.local_path = _canon
             validated.append((att, json.dumps(att.metadata)))
         added = 0
         conn = self._conn
@@ -377,10 +398,12 @@ class AttachmentStore:
         downloaded_at: Optional[float] = None,
     ) -> bool:
         """Update download status for an attachment."""
-        if local_path and not self._path_admissible(local_path):
+        _canon = self._admit_path(local_path)
+        if _canon is None:
             logger.warning("Rejected update for %s: local_path outside "
                            "attachments root", attachment_id)
             return False
+        local_path = _canon
         if status not in VALID_DOWNLOAD_STATES:
             raise ValueError(f"Invalid download status {status!r}; expected one of {VALID_DOWNLOAD_STATES}")
         conn = self._conn
@@ -438,10 +461,12 @@ class AttachmentStore:
                              f"{sorted(TERMINAL_DOWNLOAD_STATES)}")
         if not attempt_id:
             raise ValueError("finish_attempt requires an attempt_id")
-        if local_path and not self._path_admissible(local_path):
+        _canon = self._admit_path(local_path)
+        if _canon is None:
             logger.warning("Rejected finish_attempt: local_path outside "
                            "attachments root")
             return False
+        local_path = _canon
         cursor = self._conn.execute(
             """UPDATE attachments SET download_status=?, local_path=?, download_error=?,
                downloaded_at=?, actual_size=?, lease_until=NULL

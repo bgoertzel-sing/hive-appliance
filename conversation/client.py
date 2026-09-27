@@ -91,11 +91,16 @@ class ConversationStoreClient:
             )
         if self.assembler is None:
             self.assembler = ThreadAssembler()
-        if self.attachment_store is None:
-            self.attachment_store = AttachmentStore(str(self.store.db_path))
         if self.folder_manager is None:
             self.folder_manager = SharedFolderManager(
                 str(Path(self.store.db_path).parent / "attachments")
+            )
+        if self.attachment_store is None:
+            # P2 (6986): the default store enforces the SAME root the folder
+            # manager writes into, so path admission is never bypassed.
+            self.attachment_store = AttachmentStore(
+                str(self.store.db_path),
+                attachments_root=str(self.folder_manager.base_dir),
             )
         if self.download_manager is None:
             self.download_manager = AttachmentDownloadManager(

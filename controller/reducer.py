@@ -10,10 +10,16 @@ P0 fixes:
   F12: Typed diagnosis - unavailable services don't become file_missing.
 """
 from __future__ import annotations
+import copy
 
 from typing import Any
 
 from schemas.types import Event, EventKind, IncidentReport, Severity
+
+
+def _valid_index(idx: Any, count: int) -> bool:
+    """N2/H2 (6986): a step index must be a real int (not bool) in range."""
+    return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
 
 
 class Reducer:
@@ -25,8 +31,13 @@ class Reducer:
         # F10: Track seen incident IDs for dedup
         self._seen_incident_ids: set[str] = set()
         # F7: Track plan receipts for composite verification
-        self._plan_receipts: dict[str, list[bool]] = {}
         self._plan_step_counts: dict[str, int] = {}
+        # N2 (6986): distinct verified / failed step indices per plan
+        self._plan_verified: dict[str, set[int]] = {}
+        self._plan_failed_steps: dict[str, set[int]] = {}
+        # H2 (6986): receipts that arrived before their PLAN, replayed on PLAN
+        self._pending_receipts: dict[str, dict[str, dict[str, Any]]] = {}
+        self._seen_receipt_ids: set[str] = set()
 
     def reduce(self, event: Event) -> list[IncidentReport]:
         """Process an event, update state, and return any new incidents."""
@@ -108,37 +119,77 @@ class Reducer:
             self._seen_incident_ids.add(incident.id)
 
     def _handle_plan(self, event: Event) -> None:
-        """F7: Register plan step count for composite receipt tracking."""
-        plan_payload = event.payload
-        plan_id = plan_payload.get("id", "")
-        step_count = len(plan_payload.get("steps", []))
-        if plan_id and step_count:
-            self._plan_step_counts[plan_id] = step_count
-            self._plan_receipts[plan_id] = []
+        """F7/N1 (6986): register the plan's step count, link it to its
+        incident (PLAN.incident_id -> incident.plan_id), then replay any
+        receipts that arrived before the plan."""
+        p = event.payload or {}
+        plan_id = p.get("id", "")
+        steps = p.get("steps", []) or []
+        if not plan_id or not steps:
+            return
+        if plan_id not in self._plan_step_counts:
+            self._plan_step_counts[plan_id] = len(steps)
+            self._plan_verified[plan_id] = set()
+            self._plan_failed_steps[plan_id] = set()
+        inc_id = p.get("incident_id", "")
+        if inc_id:
+            for inc in self.incidents:
+                if inc.id == inc_id and not inc.plan_id:
+                    inc.plan_id = plan_id
+        for rid, rp in list(self._pending_receipts.pop(plan_id, {}).items()):
+            self._apply_receipt(plan_id, rp)
+        self._maybe_resolve(plan_id)
 
     def _handle_receipt(self, event: Event) -> None:
-        """F7: Only resolve incident when ALL plan steps are verified."""
-        plan_id = event.payload.get("plan_id", "")
-        verified = event.payload.get("verified", False)
+        """F7/N2/H2 (6986): composite completion by DISTINCT step index.
 
-        if plan_id in self._plan_step_counts:
-            # F7: Composite receipt tracking
-            self._plan_receipts.setdefault(plan_id, [])
-            self._plan_receipts[plan_id].append(verified)
+        - no plan_id => resolves nothing (untargeted);
+        - plan not yet registered => buffered (never fail-open), replayed
+          when the PLAN arrives;
+        - step_index must be an int (not bool) in [0, steps);
+        - latest receipt per index wins: verified adds it, a failed receipt
+          marks it failed (a later verified retry of that index clears it);
+        - the incident resolves only when every index is verified and none
+          is currently failed.
+        """
+        p = dict(event.payload or {})
+        plan_id = p.get("plan_id", "") or ""
+        if not plan_id:
+            return
+        rid = p.get("id") or getattr(event, "id", "") or ""
+        p["id"] = rid
+        if rid in self._seen_receipt_ids:
+            return
+        if plan_id not in self._plan_step_counts:
+            self._pending_receipts.setdefault(plan_id, {}).setdefault(rid, p)
+            return
+        self._apply_receipt(plan_id, p)
+        self._maybe_resolve(plan_id)
 
-            expected = self._plan_step_counts[plan_id]
-            received = self._plan_receipts[plan_id]
-            if len(received) >= expected and all(received):
-                # All steps verified — resolve incident
-                for inc in self.incidents:
-                    if inc.plan_id == plan_id:
-                        inc.resolved = True
+    def _apply_receipt(self, plan_id: str, p: dict[str, Any]) -> None:
+        rid = p.get("id", "")
+        if rid in self._seen_receipt_ids:
+            return
+        self._seen_receipt_ids.add(rid)
+        idx = p.get("step_index")
+        if not _valid_index(idx, self._plan_step_counts[plan_id]):
+            return
+        if p.get("verified") is True:
+            self._plan_verified[plan_id].add(idx)
+            self._plan_failed_steps[plan_id].discard(idx)
         else:
-            # Legacy path: single-receipt resolution
-            if verified:
-                for inc in self.incidents:
-                    if inc.plan_id == plan_id:
-                        inc.resolved = True
+            self._plan_failed_steps[plan_id].add(idx)
+            self._plan_verified[plan_id].discard(idx)
+
+    def _maybe_resolve(self, plan_id: str) -> None:
+        n = self._plan_step_counts.get(plan_id, 0)
+        if not n or self._plan_failed_steps.get(plan_id):
+            return
+        if len(self._plan_verified.get(plan_id, ())) != n:
+            return
+        for inc in self.incidents:
+            if inc.plan_id == plan_id:
+                inc.resolved = True
 
     def open_incidents(self) -> list[IncidentReport]:
         """Execute open incidents operation."""
@@ -155,7 +206,11 @@ class Reducer:
             "state": copy.deepcopy(self.state),
             "incidents": [i.to_dict() for i in self.incidents],
             "plan_step_counts": dict(self._plan_step_counts),
-            "plan_receipts": {k: list(v) for k, v in self._plan_receipts.items()},
+            # N2: plan_receipts = sorted distinct VERIFIED step indices
+            "plan_receipts": {k: sorted(v) for k, v in self._plan_verified.items()},
+            "plan_failed_steps": {k: sorted(v) for k, v in self._plan_failed_steps.items()},
+            "pending_receipts": copy.deepcopy(self._pending_receipts),
+            "seen_receipt_ids": sorted(self._seen_receipt_ids),
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
         }
@@ -182,7 +237,19 @@ class Reducer:
         self.incidents = incidents
         self._seen_incident_ids = {i.id for i in incidents}
         self._plan_step_counts = dict(snapshot.get("plan_step_counts", {}))
-        self._plan_receipts = {k: list(v) for k, v in snapshot.get("plan_receipts", {}).items()}
+        # N2: legacy bool lists carry no step identity and are dropped
+        # (fail closed: completion must be re-proven).
+        self._plan_verified = {
+            k: {i for i in v if _valid_index(i, self._plan_step_counts.get(k, 0))}
+            for k, v in snapshot.get("plan_receipts", {}).items()}
+        for k in self._plan_step_counts:
+            self._plan_verified.setdefault(k, set())
+        self._plan_failed_steps = {k: set(v) for k, v in
+                                   snapshot.get("plan_failed_steps", {}).items()}
+        for k in self._plan_step_counts:
+            self._plan_failed_steps.setdefault(k, set())
+        self._pending_receipts = copy.deepcopy(snapshot.get("pending_receipts", {}))
+        self._seen_receipt_ids = set(snapshot.get("seen_receipt_ids", []))
 
     def state_snapshot(self) -> dict[str, Any]:
         """Alias for snapshot() for API compatibility."""

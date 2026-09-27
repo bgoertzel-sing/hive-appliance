@@ -30,7 +30,7 @@ def _make_observation_event(service, active="active"):
 def _make_receipt_event(verified=True):
     return Event(
         kind=EventKind.RECEIPT,
-        payload={"verified": verified, "incident_id": "inc_1"},
+        payload={"verified": verified, "incident_id": "inc_1", "step_index": 0},
     )
 
 
@@ -140,7 +140,10 @@ def test_reduce_receipt_resolves_incident():
     assert r.state.agents["a1"].open_incidents == 1
     assert r.state.agents["a1"].health == AgentHealth.DEGRADED
 
-    # Resolve via receipt
+    # Resolve via receipt (6986: PLAN metadata must be registered first)
+    r.reduce(HiveEvent(source_agent="a1", original_event=Event(
+        kind=EventKind.PLAN,
+        payload={"id": "p1", "incident_id": "inc_1", "steps": [{"verb": "v"}]})))
     r.reduce(HiveEvent(source_agent="a1",
                         original_event=_make_receipt_event(verified=True)))
     assert r.state.agents["a1"].open_incidents == 0

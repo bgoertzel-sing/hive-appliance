@@ -46,9 +46,14 @@ class TestReducer:
         r.incidents.append(inc)
         assert len(r.open_incidents()) == 1
 
+        # 6986: plan metadata must be known before a receipt can resolve
+        r.reduce(Event(kind=EventKind.PLAN, source="planner", subject="/etc/test",
+                       payload={"id": "plan_123", "incident_id": inc.id,
+                                "steps": [{"verb": "restore_file"}]}))
         # Simulate a verified receipt
         e = Event(kind=EventKind.RECEIPT, source="verifier",
-                  subject="/etc/test", payload={"plan_id": "plan_123", "verified": True})
+                  subject="/etc/test", payload={"plan_id": "plan_123", "verified": True,
+                                                "step_index": 0})
         r.reduce(e)
         assert len(r.open_incidents()) == 0
 

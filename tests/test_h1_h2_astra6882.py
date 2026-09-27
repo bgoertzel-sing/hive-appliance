@@ -13,11 +13,19 @@ def _inc(agent, inc_id, severity="warn", plan_id=""):
                  "plan_id": plan_id}))
 
 
-def _rcpt(agent, rid, incident_id="", plan_id="", verified=True):
+def _rcpt(agent, rid, incident_id="", plan_id="", verified=True, step_index=0):
     return HiveEvent(source_agent=agent, original_event=Event(
         kind=EventKind.RECEIPT, source="t", subject="svc",
         payload={"id": rid, "verified": verified, "incident_id": incident_id,
-                 "plan_id": plan_id}))
+                 "plan_id": plan_id, "step_index": step_index}))
+
+
+def _plan(agent, plan_id, incident_id, n=1):
+    # 6986: resolution requires registered PLAN metadata (fail closed)
+    return HiveEvent(source_agent=agent, original_event=Event(
+        kind=EventKind.PLAN, source="t", subject="svc",
+        payload={"id": plan_id, "incident_id": incident_id,
+                 "steps": [{"verb": "v"}] * n}))
 
 
 def _r():
@@ -39,6 +47,8 @@ def test_h2_replayed_receipt_does_not_resolve_other_incident():
     r = _r()
     r.reduce(_inc("a1", "inc_1", plan_id="p1"))
     r.reduce(_inc("a1", "inc_2", plan_id="p2"))
+    r.reduce(_plan("a1", "p1", "inc_1"))
+    r.reduce(_plan("a1", "p2", "inc_2"))
     rc = _rcpt("a1", "rcpt_1", incident_id="inc_1")
     r.reduce(rc)
     r.reduce(rc)  # replay
@@ -54,6 +64,8 @@ def test_h2_receipt_matched_by_plan_id():
     r = _r()
     r.reduce(_inc("a1", "inc_1", plan_id="p1"))
     r.reduce(_inc("a1", "inc_2", plan_id="p2"))
+    r.reduce(_plan("a1", "p1", "inc_1"))
+    r.reduce(_plan("a1", "p2", "inc_2"))
     r.reduce(_rcpt("a1", "rc", plan_id="p2"))
     assert [i["incident_id"] for i in r._open_agent_incidents("a1")] == ["inc_1"]
 
@@ -69,6 +81,7 @@ def test_h2_unverified_receipt_ignored_and_all_resolved_is_healthy():
     r = _r()
     r.reduce(_inc("a1", "inc_1", severity="critical"))
     assert r.state.agents["a1"].health == AgentHealth.FAILED
+    r.reduce(_plan("a1", "p1", "inc_1"))
     r.reduce(_rcpt("a1", "rc0", incident_id="inc_1", verified=False))
     assert r.state.agents["a1"].open_incidents == 1
     r.reduce(_rcpt("a1", "rc1", incident_id="inc_1"))
@@ -109,6 +122,7 @@ def test_h1_failed_poll_not_downgraded():
 def test_h1_resolved_incidents_do_not_force_degraded():
     r = _r()
     r.reduce(_inc("a1", "inc_1"))
+    r.reduce(_plan("a1", "p1", "inc_1"))
     r.reduce(_rcpt("a1", "rc", incident_id="inc_1"))
     r.update_agent_health("a1", AgentHealthSummary(
         agent_id="a1", health=AgentHealth.HEALTHY, open_incidents=0))
