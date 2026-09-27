@@ -17,6 +17,10 @@ from typing import Any
 from schemas.types import Event, EventKind, IncidentReport, Severity
 
 
+# N4 (7003): buffer key for incident-only receipts whose plan is not yet known
+_INC_KEY = "@inc:"
+
+
 def _valid_index(idx: Any, count: int) -> bool:
     """N2/H2 (6986): a step index must be a real int (not bool) in range."""
     return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
@@ -136,7 +140,14 @@ class Reducer:
             for inc in self.incidents:
                 if inc.id == inc_id and not inc.plan_id:
                     inc.plan_id = plan_id
-        for rid, rp in list(self._pending_receipts.pop(plan_id, {}).items()):
+        # N3: apply the entire buffer, THEN decide completion once.
+        batch = list(self._pending_receipts.pop(plan_id, {}).items())
+        if inc_id:
+            t = self._open_incident(inc_id)
+            if t is not None and t.plan_id == plan_id:
+                batch += [(rid, dict(rp, plan_id=plan_id)) for rid, rp in
+                          self._pending_receipts.pop(_INC_KEY + inc_id, {}).items()]
+        for rid, rp in batch:
             self._apply_receipt(plan_id, rp)
         self._maybe_resolve(plan_id)
 
@@ -153,13 +164,25 @@ class Reducer:
           is currently failed.
         """
         p = dict(event.payload or {})
-        plan_id = p.get("plan_id", "") or ""
-        if not plan_id:
-            return
         rid = p.get("id") or getattr(event, "id", "") or ""
         p["id"] = rid
         if rid in self._seen_receipt_ids:
             return
+        plan_id = p.get("plan_id", "") or ""
+        inc_id = p.get("incident_id", "") or ""
+        if not plan_id and not inc_id:
+            self._seen_receipt_ids.add(rid)          # untargeted: resolves nothing
+            return
+        if self._contradicts(p, plan_id):
+            self._seen_receipt_ids.add(rid)          # N4: identity contradiction
+            return
+        if not plan_id:
+            # N4: incident-only receipt -> plan of the linked open incident
+            target = self._open_incident(inc_id)
+            plan_id = (target.plan_id or "") if target is not None else ""
+            if not plan_id:
+                self._pending_receipts.setdefault(_INC_KEY + inc_id, {}).setdefault(rid, p)
+                return
         if plan_id not in self._plan_step_counts:
             self._pending_receipts.setdefault(plan_id, {}).setdefault(rid, p)
             return
@@ -171,6 +194,8 @@ class Reducer:
         if rid in self._seen_receipt_ids:
             return
         self._seen_receipt_ids.add(rid)
+        if self._contradicts(p, plan_id):
+            return
         idx = p.get("step_index")
         if not _valid_index(idx, self._plan_step_counts[plan_id]):
             return
@@ -180,6 +205,20 @@ class Reducer:
         else:
             self._plan_failed_steps[plan_id].add(idx)
             self._plan_verified[plan_id].discard(idx)
+
+    def _open_incident(self, inc_id: str):
+        return next((i for i in self.incidents
+                     if i.id == inc_id and not i.resolved), None)
+
+    def _contradicts(self, p: dict[str, Any], plan_id: str) -> bool:
+        """N4 (7003): same identity contract as the hive reducer -- a receipt
+        naming an open incident that is linked to a DIFFERENT plan is
+        rejected and counts for nothing."""
+        inc_id = p.get("incident_id", "") or ""
+        if not inc_id or not plan_id:
+            return False
+        t = self._open_incident(inc_id)
+        return t is not None and bool(t.plan_id) and t.plan_id != plan_id
 
     def _maybe_resolve(self, plan_id: str) -> None:
         n = self._plan_step_counts.get(plan_id, 0)

@@ -317,11 +317,19 @@ class HiveReducer:
             for inc in self._agent_incidents.get(agent_id, []):
                 if inc["incident_id"] == inc_id and not inc.get("plan_id"):
                     inc["plan_id"] = plan_id
+        # N3 (7003): apply the WHOLE newly eligible buffer first, then decide
+        # completion once -- a buffered failure must not be skipped because
+        # an earlier buffered success already closed the incident.
+        touched = {plan_id}
         for rid, p in list(self._pending_receipts.get(agent_id, {}).items()):
-            self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid))
-        self._maybe_resolve_plan(agent_id, plan_id, "")
+            got = self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid),
+                                       resolve=False)
+            if got:
+                touched.add(got)
+        for pid in sorted(touched):
+            self._maybe_resolve_plan(agent_id, pid, "")
 
-    def _handle_receipt(self, agent_id: str, event: Any) -> None:
+    def _handle_receipt(self, agent_id: str, event: Any, resolve: bool = True) -> Any:
         """Handle repair receipt -- may resolve an agent's incident.
 
         H2 (6949/6986):
@@ -373,7 +381,9 @@ class HiveReducer:
             else:
                 self._plan_failed[pkey].add(idx)
                 self._plan_verified_steps[pkey].discard(idx)
-        self._maybe_resolve_plan(agent_id, eff_plan, inc_id)
+        if resolve:
+            self._maybe_resolve_plan(agent_id, eff_plan, inc_id)
+        return eff_plan
 
     def _maybe_resolve_plan(self, agent_id: str, plan_id: str, inc_id: str) -> None:
         pkey = f"{agent_id}:{plan_id}"
