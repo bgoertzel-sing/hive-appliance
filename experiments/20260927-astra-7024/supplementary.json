@@ -1,0 +1,866 @@
+{
+  "buffer_contradiction_then_other_resolved": {
+    "passed": false,
+    "errors": [
+      {
+        "event": 6,
+        "error": "('open incident identity mismatch', [], ['i'])"
+      }
+    ],
+    "events": [
+      {
+        "event": 0,
+        "kind": "incident",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 1,
+        "kind": "incident",
+        "payload": {
+          "id": "other",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 2,
+        "kind": "receipt",
+        "payload": {
+          "id": "bad",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 3,
+        "kind": "receipt",
+        "payload": {
+          "id": "good",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 4,
+        "kind": "plan",
+        "payload": {
+          "id": "q",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {
+          "q": []
+        },
+        "hive_verified": {
+          "q": []
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 5,
+        "kind": "receipt",
+        "payload": {
+          "id": "q0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "q"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ]
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 6,
+        "kind": "plan",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "local_open": [],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 7,
+        "kind": "receipt",
+        "payload": {
+          "id": "retry",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [],
+        "hive_open": [],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "healthy"
+      }
+    ],
+    "restore_at": null
+  },
+  "buffer_contradiction_then_other_resolved_snapshot": {
+    "passed": false,
+    "errors": [
+      {
+        "event": 6,
+        "error": "('open incident identity mismatch', [], ['i'])"
+      }
+    ],
+    "events": [
+      {
+        "event": 0,
+        "kind": "incident",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 1,
+        "kind": "incident",
+        "payload": {
+          "id": "other",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 2,
+        "kind": "receipt",
+        "payload": {
+          "id": "bad",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 3,
+        "kind": "receipt",
+        "payload": {
+          "id": "good",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 4,
+        "kind": "plan",
+        "payload": {
+          "id": "q",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {
+          "q": []
+        },
+        "hive_verified": {
+          "q": []
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 5,
+        "kind": "receipt",
+        "payload": {
+          "id": "q0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "q"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ]
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 6,
+        "kind": "plan",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "local_open": [],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 7,
+        "kind": "receipt",
+        "payload": {
+          "id": "retry",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [],
+        "hive_open": [],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "healthy"
+      }
+    ],
+    "restore_at": 5
+  },
+  "contradiction_received_after_other_plan": {
+    "passed": true,
+    "errors": [],
+    "events": [
+      {
+        "event": 0,
+        "kind": "incident",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 1,
+        "kind": "incident",
+        "payload": {
+          "id": "other",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 2,
+        "kind": "plan",
+        "payload": {
+          "id": "q",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {
+          "q": []
+        },
+        "hive_verified": {
+          "q": []
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 3,
+        "kind": "receipt",
+        "payload": {
+          "id": "bad",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {
+          "q": []
+        },
+        "hive_verified": {
+          "q": []
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 4,
+        "kind": "receipt",
+        "payload": {
+          "id": "good",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {
+          "q": []
+        },
+        "hive_verified": {
+          "q": []
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 5,
+        "kind": "receipt",
+        "payload": {
+          "id": "q0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "q"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ]
+        },
+        "local_failed": {
+          "q": []
+        },
+        "hive_failed": {
+          "q": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 6,
+        "kind": "plan",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "failed"
+      },
+      {
+        "event": 7,
+        "kind": "receipt",
+        "payload": {
+          "id": "retry",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p"
+        },
+        "local_open": [],
+        "hive_open": [],
+        "local_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "hive_verified": {
+          "q": [
+            0
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "local_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_failed": {
+          "q": [],
+          "p": []
+        },
+        "hive_health": "healthy"
+      }
+    ],
+    "restore_at": null
+  },
+  "prelinked_incident_only_different_plan_incident": {
+    "passed": true,
+    "errors": [],
+    "events": [
+      {
+        "event": 0,
+        "kind": "incident",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical",
+          "plan_id": "p"
+        },
+        "local_open": [
+          "i"
+        ],
+        "hive_open": [
+          "i"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 1,
+        "kind": "incident",
+        "payload": {
+          "id": "other",
+          "component": "svc",
+          "symptom": "s",
+          "severity": "critical"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 2,
+        "kind": "receipt",
+        "payload": {
+          "id": "is",
+          "step_index": 0,
+          "verified": true,
+          "incident_id": "i"
+        },
+        "local_open": [
+          "i",
+          "other"
+        ],
+        "hive_open": [
+          "i",
+          "other"
+        ],
+        "local_verified": {},
+        "hive_verified": {},
+        "local_failed": {},
+        "hive_failed": {},
+        "hive_health": "failed"
+      },
+      {
+        "event": 3,
+        "kind": "plan",
+        "payload": {
+          "id": "p",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "local_open": [],
+        "hive_open": [],
+        "local_verified": {
+          "p": [
+            0
+          ]
+        },
+        "hive_verified": {
+          "p": [
+            0
+          ]
+        },
+        "local_failed": {
+          "p": []
+        },
+        "hive_failed": {
+          "p": []
+        },
+        "hive_health": "healthy"
+      }
+    ],
+    "restore_at": null
+  }
+}

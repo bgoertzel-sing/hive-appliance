@@ -1,0 +1,259 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index afeb9ec..a6e7f49 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -17,6 +17,10 @@ from typing import Any
+ from schemas.types import Event, EventKind, IncidentReport, Severity
+ 
+ 
++# N4 (7003): buffer key for incident-only receipts whose plan is not yet known
++_INC_KEY = "@inc:"
++
++
+ def _valid_index(idx: Any, count: int) -> bool:
+     """N2/H2 (6986): a step index must be a real int (not bool) in range."""
+     return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
+@@ -136,7 +140,14 @@ class Reducer:
+             for inc in self.incidents:
+                 if inc.id == inc_id and not inc.plan_id:
+                     inc.plan_id = plan_id
+-        for rid, rp in list(self._pending_receipts.pop(plan_id, {}).items()):
++        # N3: apply the entire buffer, THEN decide completion once.
++        batch = list(self._pending_receipts.pop(plan_id, {}).items())
++        if inc_id:
++            t = self._open_incident(inc_id)
++            if t is not None and t.plan_id == plan_id:
++                batch += [(rid, dict(rp, plan_id=plan_id)) for rid, rp in
++                          self._pending_receipts.pop(_INC_KEY + inc_id, {}).items()]
++        for rid, rp in batch:
+             self._apply_receipt(plan_id, rp)
+         self._maybe_resolve(plan_id)
+ 
+@@ -153,13 +164,25 @@ class Reducer:
+           is currently failed.
+         """
+         p = dict(event.payload or {})
+-        plan_id = p.get("plan_id", "") or ""
+-        if not plan_id:
+-            return
+         rid = p.get("id") or getattr(event, "id", "") or ""
+         p["id"] = rid
+         if rid in self._seen_receipt_ids:
+             return
++        plan_id = p.get("plan_id", "") or ""
++        inc_id = p.get("incident_id", "") or ""
++        if not plan_id and not inc_id:
++            self._seen_receipt_ids.add(rid)          # untargeted: resolves nothing
++            return
++        if self._contradicts(p, plan_id):
++            self._seen_receipt_ids.add(rid)          # N4: identity contradiction
++            return
++        if not plan_id:
++            # N4: incident-only receipt -> plan of the linked open incident
++            target = self._open_incident(inc_id)
++            plan_id = (target.plan_id or "") if target is not None else ""
++            if not plan_id:
++                self._pending_receipts.setdefault(_INC_KEY + inc_id, {}).setdefault(rid, p)
++                return
+         if plan_id not in self._plan_step_counts:
+             self._pending_receipts.setdefault(plan_id, {}).setdefault(rid, p)
+             return
+@@ -171,6 +194,8 @@ class Reducer:
+         if rid in self._seen_receipt_ids:
+             return
+         self._seen_receipt_ids.add(rid)
++        if self._contradicts(p, plan_id):
++            return
+         idx = p.get("step_index")
+         if not _valid_index(idx, self._plan_step_counts[plan_id]):
+             return
+@@ -181,6 +206,20 @@ class Reducer:
+             self._plan_failed_steps[plan_id].add(idx)
+             self._plan_verified[plan_id].discard(idx)
+ 
++    def _open_incident(self, inc_id: str):
++        return next((i for i in self.incidents
++                     if i.id == inc_id and not i.resolved), None)
++
++    def _contradicts(self, p: dict[str, Any], plan_id: str) -> bool:
++        """N4 (7003): same identity contract as the hive reducer -- a receipt
++        naming an open incident that is linked to a DIFFERENT plan is
++        rejected and counts for nothing."""
++        inc_id = p.get("incident_id", "") or ""
++        if not inc_id or not plan_id:
++            return False
++        t = self._open_incident(inc_id)
++        return t is not None and bool(t.plan_id) and t.plan_id != plan_id
++
+     def _maybe_resolve(self, plan_id: str) -> None:
+         n = self._plan_step_counts.get(plan_id, 0)
+         if not n or self._plan_failed_steps.get(plan_id):
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 1720774..e7449e8 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -317,11 +317,19 @@ class HiveReducer:
+             for inc in self._agent_incidents.get(agent_id, []):
+                 if inc["incident_id"] == inc_id and not inc.get("plan_id"):
+                     inc["plan_id"] = plan_id
++        # N3 (7003): apply the WHOLE newly eligible buffer first, then decide
++        # completion once -- a buffered failure must not be skipped because
++        # an earlier buffered success already closed the incident.
++        touched = {plan_id}
+         for rid, p in list(self._pending_receipts.get(agent_id, {}).items()):
+-            self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid))
+-        self._maybe_resolve_plan(agent_id, plan_id, "")
+-
+-    def _handle_receipt(self, agent_id: str, event: Any) -> None:
++            got = self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid),
++                                       resolve=False)
++            if got:
++                touched.add(got)
++        for pid in sorted(touched):
++            self._maybe_resolve_plan(agent_id, pid, "")
++
++    def _handle_receipt(self, agent_id: str, event: Any, resolve: bool = True) -> Any:
+         """Handle repair receipt -- may resolve an agent's incident.
+ 
+         H2 (6949/6986):
+@@ -373,7 +381,9 @@ class HiveReducer:
+             else:
+                 self._plan_failed[pkey].add(idx)
+                 self._plan_verified_steps[pkey].discard(idx)
+-        self._maybe_resolve_plan(agent_id, eff_plan, inc_id)
++        if resolve:
++            self._maybe_resolve_plan(agent_id, eff_plan, inc_id)
++        return eff_plan
+ 
+     def _maybe_resolve_plan(self, agent_id: str, plan_id: str, inc_id: str) -> None:
+         pkey = f"{agent_id}:{plan_id}"
+diff --git a/tests/test_astra7003.py b/tests/test_astra7003.py
+new file mode 100644
+index 0000000..905403f
+--- /dev/null
++++ b/tests/test_astra7003.py
+@@ -0,0 +1,124 @@
++"""Tests for Astra re-review 7003 at 44aaef8: N3 (buffered failure vs hive
++completion) and N4 (contradictory incident identity). Every stream is run
++through BOTH reducers with agreement asserted after every event."""
++from __future__ import annotations
++
++from controller.reducer import Reducer
++from hive.reducer import HiveReducer
++from hive.types import AgentHealth, HiveEvent
++from schemas.types import Event, EventKind, IncidentReport
++
++
++def _ev(kind, payload):
++    return Event(kind=kind, source="t", subject="svc", payload=payload)
++
++
++def _inc(iid):
++    return _ev(EventKind.INCIDENT, IncidentReport(id=iid, component="svc",
++                                                  symptom="down").to_dict())
++
++
++def _plan(pid, iid, n):
++    return _ev(EventKind.PLAN, {"id": pid, "incident_id": iid,
++                                "steps": [{"verb": "v"}] * n})
++
++
++def _rc(rid, plan_id="", idx=0, ok=True, incident_id=""):
++    p = {"id": rid, "step_index": idx, "verified": ok}
++    if plan_id:
++        p["plan_id"] = plan_id
++    if incident_id:
++        p["incident_id"] = incident_id
++    return _ev(EventKind.RECEIPT, p)
++
++
++def _run(stream, loc=None, hive=None):
++    loc = loc or Reducer()
++    if hive is None:
++        hive = HiveReducer()
++        hive.register_agent("a1")
++    counts = []
++    for n, e in enumerate(stream):
++        loc.reduce(e)
++        hive.reduce(HiveEvent(source_agent="a1", original_event=e))
++        lo = len(loc.open_incidents())
++        hi = len(hive._open_agent_incidents("a1"))
++        assert lo == hi, f"disagree after event {n}: local={lo} hive={hi}"
++        assert hive.state.agents["a1"].open_incidents == hi
++        counts.append(lo)
++    return loc, hive, counts
++
++
++# ------------------------------------------------------------------ N3
++def test_n3_buffered_failure_after_successes_keeps_both_open():
++    loc, hive, counts = _run([
++        _inc("i"), _rc("r0", "p", 0), _rc("r1", "p", 1), _rc("rf", "p", 0, ok=False),
++        _plan("p", "i", 2)])
++    assert counts == [1, 1, 1, 1, 1]
++    assert hive.state.agents["a1"].health != AgentHealth.HEALTHY
++    # a fresh verified retry of step 0 closes both, exactly once
++    _, _, c2 = _run([_rc("r0b", "p", 0)], loc, hive)
++    assert c2 == [0]
++    assert hive.state.agents["a1"].health == AgentHealth.HEALTHY
++
++
++def test_n3_failure_then_success_buffer_latest_wins():
++    _, _, counts = _run([
++        _inc("i"), _rc("rf", "p", 0, ok=False), _rc("r0", "p", 0), _rc("r1", "p", 1),
++        _plan("p", "i", 2)])
++    assert counts == [1, 1, 1, 1, 0]
++
++
++def test_n3_replayed_buffered_failure_ignored_after_retry():
++    loc, hive, counts = _run([
++        _inc("i"), _rc("rf", "p", 0, ok=False), _plan("p", "i", 2),
++        _rc("r1", "p", 1), _rc("r0", "p", 0), _rc("rf", "p", 0, ok=False)])
++    assert counts == [1, 1, 1, 1, 0, 0]
++
++
++# ------------------------------------------------------------------ N4
++def _two_plans():
++    return [_inc("i"), _inc("other"), _plan("p", "i", 2), _plan("q", "other", 1)]
++
++
++def test_n4_contradictory_identity_rejected_in_both():
++    loc, hive, counts = _run(_two_plans() + [
++        _rc("a", "p", 0), _rc("x", "p", 1, incident_id="other")])
++    assert counts[-1] == 2
++    # the contradictory receipt did not count; a clean step-1 receipt does
++    _, _, c2 = _run([_rc("b", "p", 1)], loc, hive)
++    assert c2 == [1]
++    assert [i.id for i in loc.open_incidents()] == ["other"]
++
++
++def test_n4_contradiction_buffered_before_plan_rejected_in_both():
++    _, _, counts = _run([
++        _inc("i"), _inc("other"), _plan("q", "other", 1),
++        _rc("a", "p", 0), _rc("x", "p", 1, incident_id="other"),
++        _plan("p", "i", 2)])
++    assert counts[-1] == 2
++
++
++def test_n4_consistent_incident_id_counts_in_both():
++    _, _, counts = _run(_two_plans() + [
++        _rc("a", "p", 0, incident_id="i"), _rc("b", "p", 1, incident_id="i")])
++    assert counts[-1] == 1
++
++
++def test_n4_incident_only_receipt_linked_and_buffered_agree():
++    # linked incident: plan derived from the incident
++    _, _, c1 = _run([_inc("i"), _plan("p", "i", 1), _rc("a", idx=0, incident_id="i")])
++    assert c1[-1] == 0
++    # unlinked incident: buffered until its PLAN links it, then applied
++    _, _, c2 = _run([_inc("i"), _rc("a", idx=0, incident_id="i"), _plan("p", "i", 1)])
++    assert c2 == [1, 1, 0]
++
++
++def test_n4_local_snapshot_keeps_incident_only_buffer():
++    loc = Reducer()
++    for e in [_inc("i"), _rc("a", idx=0, incident_id="i")]:
++        loc.reduce(e)
++    r2 = Reducer()
++    r2.restore_snapshot(loc.snapshot())
++    r2.reduce(_plan("p", "i", 1))
++    assert r2.open_incidents() == []
