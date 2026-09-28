@@ -5,7 +5,7 @@ Copied from 6979; independently rerun by Astra 6986.
 import ast, dataclasses, json, logging, pathlib, sqlite3, sys, tempfile, threading, time, traceback
 from unittest.mock import patch
 E=pathlib.Path(__file__).resolve().parent
-R=E.parent.parent/'repos/hive-astra-7024'
+R=pathlib.Path(__import__('os').environ.get('HIVE_SRC', str(E.parent.parent)))
 sys.path.insert(0,str(R))
 from conversation.types import Thread, Message, Attachment, DownloadStatus
 from conversation.attachments import AttachmentStore, SharedFolderManager, AttachmentDownloadManager

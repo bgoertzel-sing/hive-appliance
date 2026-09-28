@@ -1,6 +1,6 @@
 import hashlib, importlib.metadata as md, json, os, pathlib, platform, shutil, subprocess, sys, time
 E=pathlib.Path(__file__).resolve().parent
-R=E.parent.parent/'repos/hive-astra-7024'
+R=pathlib.Path(__import__('os').environ.get('HIVE_SRC', str(E.parent.parent)))
 S=E/'source'
 S.mkdir(exist_ok=True)
 files=subprocess.check_output(['git','ls-files','-z'],cwd=R).decode().split('\0')

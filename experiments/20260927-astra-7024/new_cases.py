@@ -3,7 +3,7 @@ No production edits. Assertions compare identity, counts, progress and health af
 """
 import itertools,json,pathlib,sys,traceback
 E=pathlib.Path(__file__).resolve().parent
-sys.path.insert(0,str(E.parent.parent/'repos/hive-astra-7024'))
+sys.path.insert(0,str(pathlib.Path(__import__('os').environ.get('HIVE_SRC', str(E.parent.parent)))))
 from schemas.types import Event,EventKind
 from controller.reducer import Reducer
 from hive.reducer import HiveReducer

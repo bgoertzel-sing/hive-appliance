@@ -1,6 +1,6 @@
 """Independent 7003 edge probes; extends 6986 public-repair and path scenarios."""
 import sys,pathlib,tempfile,json,os,traceback
-E=pathlib.Path(__file__).resolve().parent; R=E.parent.parent/'repos/hive-astra-7024';sys.path.insert(0,str(R))
+E=pathlib.Path(__file__).resolve().parent; R=pathlib.Path(__import__('os').environ.get('HIVE_SRC', str(E.parent.parent)));sys.path.insert(0,str(R))
 from controller.reducer import Reducer
 from controller.appliance import Appliance
 from schemas.types import Event,EventKind,IncidentReport,Receipt,Severity
