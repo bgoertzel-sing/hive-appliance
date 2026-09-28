@@ -1,0 +1,5697 @@
+{
+  "lifecycle": {
+    "resolved_current": {
+      "passed": true,
+      "expected_open": [
+        "i"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_74ae103287604399",
+            "kind": "incident",
+            "ts": 1790630998.590004,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d20bef6e73754ff3",
+            "kind": "incident",
+            "ts": 1790630998.5900156,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_60e9b3aef787467f",
+            "kind": "plan",
+            "ts": 1790630998.5900319,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_64f1796754144db8",
+            "kind": "plan",
+            "ts": 1790630998.5900402,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "other",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d747d2fc40f74257",
+            "kind": "receipt",
+            "ts": 1790630998.5900483,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "q",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_95c86272350c4e27",
+            "kind": "receipt",
+            "ts": 1790630998.5900552,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7b27dd1d16a34967",
+            "kind": "receipt",
+            "ts": 1790630998.590083,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        }
+      ]
+    },
+    "resolved_snapshot": {
+      "passed": true,
+      "expected_open": [
+        "i"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_74ae103287604399",
+            "kind": "incident",
+            "ts": 1790630998.590004,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d20bef6e73754ff3",
+            "kind": "incident",
+            "ts": 1790630998.5900156,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_60e9b3aef787467f",
+            "kind": "plan",
+            "ts": 1790630998.5900319,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_64f1796754144db8",
+            "kind": "plan",
+            "ts": 1790630998.5900402,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "other",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d747d2fc40f74257",
+            "kind": "receipt",
+            "ts": 1790630998.5900483,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "q",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_95c86272350c4e27",
+            "kind": "receipt",
+            "ts": 1790630998.5900552,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7b27dd1d16a34967",
+            "kind": "receipt",
+            "ts": 1790630998.590083,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        }
+      ]
+    },
+    "resolved_old_snapshot": {
+      "passed": true,
+      "expected_open": [
+        "i"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_74ae103287604399",
+            "kind": "incident",
+            "ts": 1790630998.590004,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d20bef6e73754ff3",
+            "kind": "incident",
+            "ts": 1790630998.5900156,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_60e9b3aef787467f",
+            "kind": "plan",
+            "ts": 1790630998.5900319,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_64f1796754144db8",
+            "kind": "plan",
+            "ts": 1790630998.5900402,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "other",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d747d2fc40f74257",
+            "kind": "receipt",
+            "ts": 1790630998.5900483,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "q",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_95c86272350c4e27",
+            "kind": "receipt",
+            "ts": 1790630998.5900552,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7b27dd1d16a34967",
+            "kind": "receipt",
+            "ts": 1790630998.590083,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        }
+      ]
+    },
+    "resolved_baseline": {
+      "passed": false,
+      "expected_open": [
+        "i"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_74ae103287604399",
+            "kind": "incident",
+            "ts": 1790630998.590004,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d20bef6e73754ff3",
+            "kind": "incident",
+            "ts": 1790630998.5900156,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_60e9b3aef787467f",
+            "kind": "plan",
+            "ts": 1790630998.5900319,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_64f1796754144db8",
+            "kind": "plan",
+            "ts": 1790630998.5900402,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "other",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d747d2fc40f74257",
+            "kind": "receipt",
+            "ts": 1790630998.5900483,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "q",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_95c86272350c4e27",
+            "kind": "receipt",
+            "ts": 1790630998.5900552,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7b27dd1d16a34967",
+            "kind": "receipt",
+            "ts": 1790630998.590083,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": [
+                0
+              ]
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ],
+                "q": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        }
+      ]
+    },
+    "unlinked_current": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_cb4bb6acdf784d25",
+            "kind": "incident",
+            "ts": 1790630998.5900903,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a7108075c9a4aa4",
+            "kind": "incident",
+            "ts": 1790630998.5900972,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_cfb2c2c0a11a44a4",
+            "kind": "plan",
+            "ts": 1790630998.590105,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_19c36a646ca440aa",
+            "kind": "receipt",
+            "ts": 1790630998.590112,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_2b81f043e5874683",
+            "kind": "receipt",
+            "ts": 1790630998.590119,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "unlinked_snapshot": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_cb4bb6acdf784d25",
+            "kind": "incident",
+            "ts": 1790630998.5900903,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a7108075c9a4aa4",
+            "kind": "incident",
+            "ts": 1790630998.5900972,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_cfb2c2c0a11a44a4",
+            "kind": "plan",
+            "ts": 1790630998.590105,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_19c36a646ca440aa",
+            "kind": "receipt",
+            "ts": 1790630998.590112,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_2b81f043e5874683",
+            "kind": "receipt",
+            "ts": 1790630998.590119,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "unlinked_old_snapshot": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_cb4bb6acdf784d25",
+            "kind": "incident",
+            "ts": 1790630998.5900903,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a7108075c9a4aa4",
+            "kind": "incident",
+            "ts": 1790630998.5900972,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_cfb2c2c0a11a44a4",
+            "kind": "plan",
+            "ts": 1790630998.590105,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_19c36a646ca440aa",
+            "kind": "receipt",
+            "ts": 1790630998.590112,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_2b81f043e5874683",
+            "kind": "receipt",
+            "ts": 1790630998.590119,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "unlinked_baseline": {
+      "passed": false,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": false,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_cb4bb6acdf784d25",
+            "kind": "incident",
+            "ts": 1790630998.5900903,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a7108075c9a4aa4",
+            "kind": "incident",
+            "ts": 1790630998.5900972,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_cfb2c2c0a11a44a4",
+            "kind": "plan",
+            "ts": 1790630998.590105,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_19c36a646ca440aa",
+            "kind": "receipt",
+            "ts": 1790630998.590112,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_2b81f043e5874683",
+            "kind": "receipt",
+            "ts": 1790630998.590119,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": false,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "foreign_owner": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_b51814e392ce462a",
+            "kind": "incident",
+            "ts": 1790630998.6014068,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d935487ff72749cd",
+            "kind": "incident",
+            "ts": 1790630998.601415,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_26f1f0dc638242b7",
+            "kind": "plan",
+            "ts": 1790630998.6014245,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_ce5cfb88d1da4ab4",
+            "kind": "plan",
+            "ts": 1790630998.601435,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "other",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_5cd14a88694f4d8d",
+            "kind": "receipt",
+            "ts": 1790630998.601442,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "good0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_ad80b680f3a241c6",
+            "kind": "receipt",
+            "ts": 1790630998.6014493,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ],
+                "q": []
+              },
+              "failed": {
+                "p": [],
+                "q": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i",
+            "q": "other"
+          },
+          "hive_owner": {
+            "a:p": "i",
+            "a:q": "other"
+          },
+          "links": {
+            "i": "p",
+            "other": "q"
+          }
+        }
+      ]
+    },
+    "incident_only_owner": {
+      "passed": true,
+      "expected_open": [],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_fd77dddccde24791",
+            "kind": "incident",
+            "ts": 1790630998.6021893,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_a4697d924ad64216",
+            "kind": "plan",
+            "ts": 1790630998.6021988,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_5f40800c25774d5e",
+            "kind": "receipt",
+            "ts": 1790630998.6022062,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "i"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_756decba82c34e35",
+            "kind": "receipt",
+            "ts": 1790630998.6022134,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "i"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p"
+          }
+        }
+      ]
+    },
+    "incident_only_unlinked": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_725142ff90844e3e",
+            "kind": "incident",
+            "ts": 1790630998.6026618,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_c429496a95d2499d",
+            "kind": "incident",
+            "ts": 1790630998.6026697,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_687f5fa30a624ea5",
+            "kind": "plan",
+            "ts": 1790630998.6026778,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_52f8a61eb0764c77",
+            "kind": "receipt",
+            "ts": 1790630998.602685,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_696ad0d0f24b40bc",
+            "kind": "receipt",
+            "ts": 1790630998.6026921,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "reregister_plan_only": {
+      "passed": false,
+      "expected_open": [
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_e6c8e745f99d4b5b",
+            "kind": "incident",
+            "ts": 1790630998.603248,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_912bbe663c974038",
+            "kind": "incident",
+            "ts": 1790630998.6032555,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a379a20c27d44b7",
+            "kind": "plan",
+            "ts": 1790630998.6032634,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_6209c9380ea04174",
+            "kind": "plan",
+            "ts": 1790630998.6032715,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_df350875b4d44b88",
+            "kind": "receipt",
+            "ts": 1790630998.603279,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_10733c52ae9547e2",
+            "kind": "receipt",
+            "ts": 1790630998.603286,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        }
+      ]
+    },
+    "reregister_incident_only": {
+      "passed": false,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_e6c8e745f99d4b5b",
+            "kind": "incident",
+            "ts": 1790630998.603248,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_912bbe663c974038",
+            "kind": "incident",
+            "ts": 1790630998.6032555,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a379a20c27d44b7",
+            "kind": "plan",
+            "ts": 1790630998.6032634,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_6209c9380ea04174",
+            "kind": "plan",
+            "ts": 1790630998.6032715,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_cc88be7a56f34cd2",
+            "kind": "receipt",
+            "ts": 1790630998.6039832,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_58c587f093c94c81",
+            "kind": "receipt",
+            "ts": 1790630998.603991,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        }
+      ]
+    },
+    "reregister_dual_address": {
+      "passed": true,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_e6c8e745f99d4b5b",
+            "kind": "incident",
+            "ts": 1790630998.603248,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_912bbe663c974038",
+            "kind": "incident",
+            "ts": 1790630998.6032555,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a379a20c27d44b7",
+            "kind": "plan",
+            "ts": 1790630998.6032634,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_6209c9380ea04174",
+            "kind": "plan",
+            "ts": 1790630998.6032715,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_b12377b376fc4393",
+            "kind": "receipt",
+            "ts": 1790630998.6046617,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_9a980194ed5144ee",
+            "kind": "receipt",
+            "ts": 1790630998.6046693,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        }
+      ]
+    },
+    "reregister_after_complete": {
+      "passed": false,
+      "expected_open": [
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_ea0289db3b8d4a42",
+            "kind": "incident",
+            "ts": 1790630998.6054018,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_798fb6dcb54f45ce",
+            "kind": "incident",
+            "ts": 1790630998.6054099,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_c85ec4c8b12c466f",
+            "kind": "plan",
+            "ts": 1790630998.6054182,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_b5877e9691354036",
+            "kind": "receipt",
+            "ts": 1790630998.6054254,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d1b2c60fc7f74a74",
+            "kind": "receipt",
+            "ts": 1790630998.6054325,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_8087682039a64f23",
+            "kind": "plan",
+            "ts": 1790630998.6054406,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        }
+      ]
+    },
+    "reregister_snapshot": {
+      "passed": false,
+      "expected_open": [
+        "other"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_e6c8e745f99d4b5b",
+            "kind": "incident",
+            "ts": 1790630998.603248,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_912bbe663c974038",
+            "kind": "incident",
+            "ts": 1790630998.6032555,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_7a379a20c27d44b7",
+            "kind": "plan",
+            "ts": 1790630998.6032634,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_6209c9380ea04174",
+            "kind": "plan",
+            "ts": 1790630998.6032715,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_ecfa80557e5e4df5",
+            "kind": "receipt",
+            "ts": 1790630998.6061037,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_c1e2ada517324c70",
+            "kind": "receipt",
+            "ts": 1790630998.6061115,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "healthy",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "p",
+            "other": "p"
+          }
+        }
+      ]
+    },
+    "old_snapshot_plan_before_incident": {
+      "passed": false,
+      "expected_open": [
+        "i",
+        "other"
+      ],
+      "agreement_every_event": false,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_2c4b679a81794bdb",
+            "kind": "plan",
+            "ts": 1790630998.6070087,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "unknown",
+              "displayed_open": 0
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {}
+        },
+        {
+          "event": {
+            "id": "evt_221bf6d023f54251",
+            "kind": "incident",
+            "ts": 1790630998.6070168,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "i"
+          },
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_46e200d494f848ba",
+            "kind": "incident",
+            "ts": 1790630998.607024,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_b179c78841304930",
+            "kind": "receipt",
+            "ts": 1790630998.607031,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_940eb85475444124",
+            "kind": "receipt",
+            "ts": 1790630998.6070383,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": false,
+          "local_owner": {},
+          "hive_owner": {
+            "a:p": "i"
+          },
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        }
+      ]
+    },
+    "first_plan_empty_owner": {
+      "passed": true,
+      "expected_open": [
+        "i"
+      ],
+      "agreement_every_event": true,
+      "trace": [
+        {
+          "event": {
+            "id": "evt_e65be8c329404389",
+            "kind": "incident",
+            "ts": 1790630998.607869,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_d7196b1eefca4e5c",
+            "kind": "incident",
+            "ts": 1790630998.607877,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "other",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {},
+            "failed": {},
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {},
+              "failed": {},
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_9ca07491223749de",
+            "kind": "plan",
+            "ts": 1790630998.6078856,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {},
+          "hive_owner": {},
+          "links": {
+            "i": "",
+            "other": ""
+          }
+        },
+        {
+          "event": {
+            "id": "evt_b1b3849711e941a4",
+            "kind": "plan",
+            "ts": 1790630998.6078932,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "other",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": []
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "other"
+          },
+          "hive_owner": {
+            "a:p": "other"
+          },
+          "links": {
+            "i": "",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_e046e1bba005454d",
+            "kind": "receipt",
+            "ts": 1790630998.6079001,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i",
+              "other"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i",
+                "other"
+              ],
+              "verified": {
+                "p": [
+                  0
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 2
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "other"
+          },
+          "hive_owner": {
+            "a:p": "other"
+          },
+          "links": {
+            "i": "",
+            "other": "p"
+          }
+        },
+        {
+          "event": {
+            "id": "evt_2efe92509a094b0c",
+            "kind": "receipt",
+            "ts": 1790630998.607907,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "r1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "state": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "hive": {
+              "open": [
+                "i"
+              ],
+              "verified": {
+                "p": [
+                  0,
+                  1
+                ]
+              },
+              "failed": {
+                "p": []
+              },
+              "health": "failed",
+              "displayed_open": 1
+            }
+          },
+          "agreement": true,
+          "local_owner": {
+            "p": "other"
+          },
+          "hive_owner": {
+            "a:p": "other"
+          },
+          "links": {
+            "i": "",
+            "other": "p"
+          }
+        }
+      ]
+    }
+  },
+  "legacy": {
+    "total": 384,
+    "passed": 384,
+    "closed_without_fresh": 0
+  },
+  "discard_side_effects": [
+    {
+      "case": "single_bucket",
+      "state": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        }
+      },
+      "discarded": 2,
+      "counter_in_snapshot": false,
+      "counter_after_second_restore": 0
+    },
+    {
+      "case": "one_per_step_mixed",
+      "state": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        }
+      },
+      "discarded": 2,
+      "counter_in_snapshot": false,
+      "counter_after_second_restore": 0
+    }
+  ]
+}

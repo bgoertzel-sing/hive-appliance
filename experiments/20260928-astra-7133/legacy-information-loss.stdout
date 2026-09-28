@@ -1,0 +1,122 @@
+{
+  "identical_legacy_snapshot_bytes": true,
+  "cases": [
+    {
+      "label": "latest_failure",
+      "expected_open": [
+        "i"
+      ],
+      "live_open": [
+        "i"
+      ],
+      "migrated_open": [
+        "i"
+      ],
+      "migrated_verified": [],
+      "migrated_failed": [],
+      "legacy_snapshot": {
+        "state": {},
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1700000000.0,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "plan_step_counts": {},
+        "plan_receipts": {},
+        "plan_failed_steps": {},
+        "pending_receipts": {
+          "p": {
+            "seed1": {
+              "id": "seed1",
+              "plan_id": "p",
+              "step_index": 1,
+              "verified": true
+            },
+            "new_failure": {
+              "id": "new_failure",
+              "plan_id": "p",
+              "step_index": 0,
+              "verified": false
+            }
+          },
+          "@inc:i": {
+            "old_success": {
+              "id": "old_success",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            }
+          }
+        },
+        "seen_receipt_ids": [],
+        "incidents_total": 1,
+        "incidents_open": 1
+      }
+    },
+    {
+      "label": "latest_success",
+      "expected_open": [],
+      "live_open": [],
+      "migrated_open": [
+        "i"
+      ],
+      "migrated_verified": [],
+      "migrated_failed": [],
+      "legacy_snapshot": {
+        "state": {},
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1700000000.0,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "plan_step_counts": {},
+        "plan_receipts": {},
+        "plan_failed_steps": {},
+        "pending_receipts": {
+          "p": {
+            "seed1": {
+              "id": "seed1",
+              "plan_id": "p",
+              "step_index": 1,
+              "verified": true
+            },
+            "new_failure": {
+              "id": "new_failure",
+              "plan_id": "p",
+              "step_index": 0,
+              "verified": false
+            }
+          },
+          "@inc:i": {
+            "old_success": {
+              "id": "old_success",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            }
+          }
+        },
+        "seen_receipt_ids": [],
+        "incidents_total": 1,
+        "incidents_open": 1
+      }
+    }
+  ],
+  "note": "The first semantic run compared incidental generated incident timestamps too. This follow-up fixes ts explicitly; it does not overwrite the earlier observation."
+}
