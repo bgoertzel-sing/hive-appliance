@@ -1,0 +1,4014 @@
+{
+ "summary": {
+  "inverted": {
+   "total": 3,
+   "pass": 3,
+   "fail": 0
+  },
+  "named": {
+   "total": 14,
+   "pass": 14,
+   "fail": 0
+  },
+  "named_snapshot": {
+   "total": 14,
+   "pass": 14,
+   "fail": 0
+  },
+  "systematic": {
+   "total": 384,
+   "pass": 384,
+   "fail": 0
+  },
+  "supplementary": {
+   "total": 4,
+   "pass": 4,
+   "fail": 0
+  },
+  "public_repair": {
+   "total": 2,
+   "pass": 2,
+   "fail": 0
+  }
+ },
+ "results": {
+  "inverted": [
+   {
+    "name": "buffered_successes_failure_plan (old 1/0 -> want 1/1)",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "same_then_fresh_retry (want 0/0)",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "contradiction_both_plans_registered (old 1/2 -> want 2/2)",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     }
+    ]
+   }
+  ],
+  "named": [
+   {
+    "name": "failure_then_success_in_buffer",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "multiple_failed_indices",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "retry_before_plan",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "retry_after_plan",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "duplicate_retries",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "duplicate_old_failure_replayed",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "plan_replay",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "two_plans_one_incident",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "untargeted_receipts_resolve_nothing",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "incident_only_held_across_other_plan",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "o"
+      ],
+      "hive": [
+       "o"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "contradiction_while_buffered_other_open",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_incident_success_late_plan_failure",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_incident_failure_late_plan_success",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_plan_success_late_incident_failure",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   }
+  ],
+  "named_snapshot": [
+   {
+    "name": "failure_then_success_in_buffer_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "multiple_failed_indices_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "retry_before_plan_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "retry_after_plan_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "duplicate_retries_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "duplicate_old_failure_replayed_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "plan_replay_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "two_plans_one_incident_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "untargeted_receipts_resolve_nothing_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "incident_only_held_across_other_plan_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "o"
+      ],
+      "hive": [
+       "o"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "contradiction_while_buffered_other_open_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_incident_success_late_plan_failure_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_incident_failure_late_plan_success_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "mixed_early_plan_success_late_incident_failure_snap",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   }
+  ],
+  "systematic": [
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 2, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 1, 3, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 1, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 2, 3, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 1, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(0, 3, 2, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 2, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 0, 3, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 0, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 2, 3, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 0, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(1, 3, 2, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 1, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 0, 3, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 0, 3) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 1, 3, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 0, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(2, 3, 1, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 1, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 0, 2, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 0, 2) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 1, 2, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 0, 1) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(0, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 0, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 0, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 0, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 0, 1, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 1, 0, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 1, 0, 1)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 1, 1, 0)",
+    "pass": true,
+    "errors": []
+   },
+   {
+    "name": "sys order=(3, 2, 1, 0) addr=(1, 1, 1, 1)",
+    "pass": true,
+    "errors": []
+   }
+  ],
+  "supplementary": [
+   {
+    "name": "buffer_contradiction_then_other_resolved",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "buffer_contradiction_then_other_resolved_snapshot",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   },
+   {
+    "name": "control_contradiction_arrives_after_plan_q",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     }
+    ]
+   },
+   {
+    "name": "prelink_other_resolved_before_receipt_arrives",
+    "pass": true,
+    "errors": [],
+    "trace": [
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i",
+       "o"
+      ],
+      "hive": [
+       "i",
+       "o"
+      ],
+      "hive_count": 2
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [
+       "i"
+      ],
+      "hive": [
+       "i"
+      ],
+      "hive_count": 1
+     },
+     {
+      "local": [],
+      "hive": [],
+      "hive_count": 0
+     }
+    ]
+   }
+  ],
+  "public_repair": [
+   {
+    "name": "public_repair_success",
+    "pass": true,
+    "errors": [],
+    "executed": [
+     0,
+     1
+    ],
+    "verified": [
+     true,
+     true
+    ],
+    "outcome": "resolved",
+    "local_open": 0,
+    "hive_open": 0,
+    "hive_health": "healthy"
+   },
+   {
+    "name": "public_repair_failure_step1",
+    "pass": true,
+    "errors": [],
+    "executed": [
+     0,
+     1
+    ],
+    "verified": [
+     true,
+     false
+    ],
+    "outcome": "rolled_back",
+    "local_open": 1,
+    "hive_open": 1,
+    "hive_health": "failed"
+   }
+  ]
+ }
+}
