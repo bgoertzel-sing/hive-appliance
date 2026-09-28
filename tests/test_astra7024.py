@@ -161,5 +161,11 @@ def test_legacy_bucketed_pending_snapshot_restores():
                           "verified": True}}}
     r2 = Reducer()
     r2.restore_snapshot(snap)
+    # Astra 7075 N5: legacy bucketed pending evidence cannot recover arrival
+    # order, so it is discarded (fail closed) and must be re-proven.
+    assert r2.legacy_pending_discarded == 2
     r2.reduce(_plan("p", "i", 2))
+    assert [i.id for i in r2.open_incidents()] == ["i"]
+    r2.reduce(_rc("f0", "p", 0))
+    r2.reduce(_rc("f1", "p", 1))
     assert r2.open_incidents() == []

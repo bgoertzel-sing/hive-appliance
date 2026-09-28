@@ -41,6 +41,11 @@ class Reducer:
         # (same shape as the hive reducer), never per-plan/per-incident buckets.
         self._pending_receipts: dict[str, dict[str, Any]] = {}
         self._seen_receipt_ids: set[str] = set()
+        # N6 (7075): durable plan -> owning incident (first PLAN wins),
+        # independent of incident open/closed state.
+        self._plan_owner: dict[str, str] = {}
+        # N5 (7075): count of ambiguous legacy pending receipts discarded
+        self.legacy_pending_discarded = 0
 
     def reduce(self, event: Event) -> list[IncidentReport]:
         """Process an event, update state, and return any new incidents."""
@@ -145,6 +150,8 @@ class Reducer:
             self._plan_failed_steps[plan_id] = set()
         inc_id = p.get("incident_id", "")
         if inc_id:
+            # N6 (7075): durable plan owner, first PLAN wins
+            self._plan_owner.setdefault(plan_id, inc_id)
             for inc in self.incidents:
                 if inc.id == inc_id and not inc.plan_id:
                     inc.plan_id = plan_id
@@ -183,10 +190,12 @@ class Reducer:
             self._seen_receipt_ids.add(rid)
             self._pending_receipts.pop(rid, None)
             return ""
-        target = self._open_incident(inc_id) if inc_id else None
-        if (target is not None and plan_id and target.plan_id
-                and target.plan_id != plan_id):
-            self._seen_receipt_ids.add(rid)          # N4: identity contradiction
+        # N6 (7075): identity is checked against DURABLE linkage (incident
+        # link in any lifecycle state + the plan's registered owner), before
+        # any step progress is recorded.
+        target = self._find_incident(inc_id) if inc_id else None
+        if plan_id and inc_id and self._contradicts(plan_id, inc_id, target):
+            self._seen_receipt_ids.add(rid)          # N4/N6: identity contradiction
             self._pending_receipts.pop(rid, None)
             return ""
         eff = plan_id or ((target.plan_id or "") if target is not None else "")
@@ -207,6 +216,18 @@ class Reducer:
             self._maybe_resolve(eff)
         return eff
 
+    def _find_incident(self, inc_id: str):
+        return next((i for i in self.incidents if i.id == inc_id), None)
+
+    def _contradicts(self, plan_id: str, inc_id: str, target: Any) -> bool:
+        """N6 (7075): a dual-addressed receipt is contradictory if the named
+        incident is (durably) linked to another plan, or the plan's declared
+        owner is a different incident.  Lifecycle state is irrelevant."""
+        if target is not None and target.plan_id and target.plan_id != plan_id:
+            return True
+        owner = self._plan_owner.get(plan_id, "")
+        return bool(owner) and owner != inc_id
+
     def _open_incident(self, inc_id: str):
         return next((i for i in self.incidents
                      if i.id == inc_id and not i.resolved), None)
@@ -218,7 +239,9 @@ class Reducer:
         if len(self._plan_verified.get(plan_id, ())) != n:
             return
         for inc in self.incidents:
-            if inc.plan_id == plan_id:
+            # N6 (7075): only the linked incident or the plan's declared owner
+            if inc.plan_id == plan_id or (not inc.plan_id and self._plan_owner.get(plan_id) == inc.id):
+                inc.plan_id = plan_id
                 inc.resolved = True
 
     def open_incidents(self) -> list[IncidentReport]:
@@ -242,6 +265,8 @@ class Reducer:
             # N5: arrival-ordered list of pending receipt payloads
             "pending_receipts": [copy.deepcopy(v) for v in self._pending_receipts.values()],
             "seen_receipt_ids": sorted(self._seen_receipt_ids),
+            "plan_owner": dict(self._plan_owner),
+            "pending_format": "arrival-v1",
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
         }
@@ -280,14 +305,26 @@ class Reducer:
         for k in self._plan_step_counts:
             self._plan_failed_steps.setdefault(k, set())
         raw = snapshot.get("pending_receipts", []) or []
+        self.legacy_pending_discarded = 0
         if isinstance(raw, dict):
-            # legacy (7003) bucketed format: {bucket: {rid: payload}}
-            raw = [rp for bucket in raw.values() for rp in bucket.values()]
+            # N5 (7075): the legacy (7003) bucketed format {bucket: {rid: payload}}
+            # cannot recover the original arrival interleaving (streams with
+            # opposite latest outcomes yield byte-identical snapshots), so this
+            # ambiguous pending evidence is DISCARDED (fail closed): affected
+            # steps must be re-proven by fresh receipts.
+            self.legacy_pending_discarded = sum(
+                len(b) if isinstance(b, dict) else 1 for b in raw.values())
+            raw = []
         self._pending_receipts = {}
         for rp in raw:
             rp = copy.deepcopy(rp)
             self._pending_receipts.setdefault(rp.get("id", "") or "", rp)
         self._seen_receipt_ids = set(snapshot.get("seen_receipt_ids", []))
+        # N6: owner map; older snapshots derive it from durable incident links
+        self._plan_owner = dict(snapshot.get("plan_owner", {}) or {})
+        for inc in incidents:
+            if inc.plan_id:
+                self._plan_owner.setdefault(inc.plan_id, inc.id)
 
     def state_snapshot(self) -> dict[str, Any]:
         """Alias for snapshot() for API compatibility."""
