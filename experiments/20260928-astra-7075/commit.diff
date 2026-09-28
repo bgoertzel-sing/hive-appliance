@@ -1,0 +1,211 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index a6e7f49..9674c8b 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -12,15 +12,12 @@ P0 fixes:
+ from __future__ import annotations
+ import copy
+ 
++from types import SimpleNamespace
+ from typing import Any
+ 
+ from schemas.types import Event, EventKind, IncidentReport, Severity
+ 
+ 
+-# N4 (7003): buffer key for incident-only receipts whose plan is not yet known
+-_INC_KEY = "@inc:"
+-
+-
+ def _valid_index(idx: Any, count: int) -> bool:
+     """N2/H2 (6986): a step index must be a real int (not bool) in range."""
+     return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
+@@ -39,8 +36,10 @@ class Reducer:
+         # N2 (6986): distinct verified / failed step indices per plan
+         self._plan_verified: dict[str, set[int]] = {}
+         self._plan_failed_steps: dict[str, set[int]] = {}
+-        # H2 (6986): receipts that arrived before their PLAN, replayed on PLAN
+-        self._pending_receipts: dict[str, dict[str, dict[str, Any]]] = {}
++        # H2 (6986): receipts not yet applicable (plan unknown), replayed on
++        # PLAN.  N5 (7024): ONE buffer keyed by receipt id, in arrival order
++        # (same shape as the hive reducer), never per-plan/per-incident buckets.
++        self._pending_receipts: dict[str, dict[str, Any]] = {}
+         self._seen_receipt_ids: set[str] = set()
+ 
+     def reduce(self, event: Event) -> list[IncidentReport]:
+@@ -124,8 +123,17 @@ class Reducer:
+ 
+     def _handle_plan(self, event: Event) -> None:
+         """F7/N1 (6986): register the plan's step count, link it to its
+-        incident (PLAN.incident_id -> incident.plan_id), then replay any
+-        receipts that arrived before the plan."""
++        incident (PLAN.incident_id -> incident.plan_id), then re-examine
++        EVERY pending receipt in arrival order.
++
++        N5 (7024): a single arrival-ordered buffer, so the latest evidence per
++        step index wins regardless of plan- vs incident-addressing.
++        N4 (7024): every pending receipt is re-checked for identity
++        contradiction after each PLAN, exactly as the hive reducer does, so
++        the rejection point does not depend on unrelated incident lifecycles.
++        N3 (7003): the whole eligible batch is applied first, then completion
++        is decided once per touched plan.
++        """
+         p = event.payload or {}
+         plan_id = p.get("id", "")
+         steps = p.get("steps", []) or []
+@@ -140,86 +148,69 @@ class Reducer:
+             for inc in self.incidents:
+                 if inc.id == inc_id and not inc.plan_id:
+                     inc.plan_id = plan_id
+-        # N3: apply the entire buffer, THEN decide completion once.
+-        batch = list(self._pending_receipts.pop(plan_id, {}).items())
+-        if inc_id:
+-            t = self._open_incident(inc_id)
+-            if t is not None and t.plan_id == plan_id:
+-                batch += [(rid, dict(rp, plan_id=plan_id)) for rid, rp in
+-                          self._pending_receipts.pop(_INC_KEY + inc_id, {}).items()]
+-        for rid, rp in batch:
+-            self._apply_receipt(plan_id, rp)
+-        self._maybe_resolve(plan_id)
+-
+-    def _handle_receipt(self, event: Event) -> None:
+-        """F7/N2/H2 (6986): composite completion by DISTINCT step index.
+-
+-        - no plan_id => resolves nothing (untargeted);
+-        - plan not yet registered => buffered (never fail-open), replayed
+-          when the PLAN arrives;
++        touched = {plan_id}
++        for rid, rp in list(self._pending_receipts.items()):
++            got = self._handle_receipt(SimpleNamespace(payload=rp, id=rid),
++                                       resolve=False)
++            if got:
++                touched.add(got)
++        for pid in sorted(touched):
++            self._maybe_resolve(pid)
++
++    def _handle_receipt(self, event: Any, resolve: bool = True) -> str:
++        """F7/N2/H2 (6986), N4/N5 (7024): same admission contract as
++        hive.reducer.HiveReducer._handle_receipt.
++
++        - no plan_id and no incident_id => resolves nothing (untargeted);
++        - naming an open incident linked to a DIFFERENT plan => rejected;
++        - incident-only receipt => plan of the linked open incident;
++        - plan unknown (missing/late PLAN) => buffered in arrival order,
++          re-examined after every PLAN (never fail-open);
+         - step_index must be an int (not bool) in [0, steps);
+         - latest receipt per index wins: verified adds it, a failed receipt
+           marks it failed (a later verified retry of that index clears it);
+-        - the incident resolves only when every index is verified and none
+-          is currently failed.
++        - receipt ids are applied at most once.
++        Returns the effective plan id when the receipt was applied, else "".
+         """
+         p = dict(event.payload or {})
+         rid = p.get("id") or getattr(event, "id", "") or ""
+         p["id"] = rid
+         if rid in self._seen_receipt_ids:
+-            return
++            return ""
+         plan_id = p.get("plan_id", "") or ""
+         inc_id = p.get("incident_id", "") or ""
+         if not plan_id and not inc_id:
+-            self._seen_receipt_ids.add(rid)          # untargeted: resolves nothing
+-            return
+-        if self._contradicts(p, plan_id):
++            self._seen_receipt_ids.add(rid)
++            self._pending_receipts.pop(rid, None)
++            return ""
++        target = self._open_incident(inc_id) if inc_id else None
++        if (target is not None and plan_id and target.plan_id
++                and target.plan_id != plan_id):
+             self._seen_receipt_ids.add(rid)          # N4: identity contradiction
+-            return
+-        if not plan_id:
+-            # N4: incident-only receipt -> plan of the linked open incident
+-            target = self._open_incident(inc_id)
+-            plan_id = (target.plan_id or "") if target is not None else ""
+-            if not plan_id:
+-                self._pending_receipts.setdefault(_INC_KEY + inc_id, {}).setdefault(rid, p)
+-                return
+-        if plan_id not in self._plan_step_counts:
+-            self._pending_receipts.setdefault(plan_id, {}).setdefault(rid, p)
+-            return
+-        self._apply_receipt(plan_id, p)
+-        self._maybe_resolve(plan_id)
+-
+-    def _apply_receipt(self, plan_id: str, p: dict[str, Any]) -> None:
+-        rid = p.get("id", "")
+-        if rid in self._seen_receipt_ids:
+-            return
++            self._pending_receipts.pop(rid, None)
++            return ""
++        eff = plan_id or ((target.plan_id or "") if target is not None else "")
++        if not eff or eff not in self._plan_step_counts:
++            self._pending_receipts.setdefault(rid, p)
++            return ""
+         self._seen_receipt_ids.add(rid)
+-        if self._contradicts(p, plan_id):
+-            return
++        self._pending_receipts.pop(rid, None)
+         idx = p.get("step_index")
+-        if not _valid_index(idx, self._plan_step_counts[plan_id]):
+-            return
+-        if p.get("verified") is True:
+-            self._plan_verified[plan_id].add(idx)
+-            self._plan_failed_steps[plan_id].discard(idx)
+-        else:
+-            self._plan_failed_steps[plan_id].add(idx)
+-            self._plan_verified[plan_id].discard(idx)
++        if _valid_index(idx, self._plan_step_counts[eff]):
++            if p.get("verified") is True:
++                self._plan_verified[eff].add(idx)
++                self._plan_failed_steps[eff].discard(idx)
++            else:
++                self._plan_failed_steps[eff].add(idx)
++                self._plan_verified[eff].discard(idx)
++        if resolve:
++            self._maybe_resolve(eff)
++        return eff
+ 
+     def _open_incident(self, inc_id: str):
+         return next((i for i in self.incidents
+                      if i.id == inc_id and not i.resolved), None)
+ 
+-    def _contradicts(self, p: dict[str, Any], plan_id: str) -> bool:
+-        """N4 (7003): same identity contract as the hive reducer -- a receipt
+-        naming an open incident that is linked to a DIFFERENT plan is
+-        rejected and counts for nothing."""
+-        inc_id = p.get("incident_id", "") or ""
+-        if not inc_id or not plan_id:
+-            return False
+-        t = self._open_incident(inc_id)
+-        return t is not None and bool(t.plan_id) and t.plan_id != plan_id
+-
+     def _maybe_resolve(self, plan_id: str) -> None:
+         n = self._plan_step_counts.get(plan_id, 0)
+         if not n or self._plan_failed_steps.get(plan_id):
+@@ -248,7 +239,8 @@ class Reducer:
+             # N2: plan_receipts = sorted distinct VERIFIED step indices
+             "plan_receipts": {k: sorted(v) for k, v in self._plan_verified.items()},
+             "plan_failed_steps": {k: sorted(v) for k, v in self._plan_failed_steps.items()},
+-            "pending_receipts": copy.deepcopy(self._pending_receipts),
++            # N5: arrival-ordered list of pending receipt payloads
++            "pending_receipts": [copy.deepcopy(v) for v in self._pending_receipts.values()],
+             "seen_receipt_ids": sorted(self._seen_receipt_ids),
+             "incidents_total": len(self.incidents),
+             "incidents_open": len(self.open_incidents()),
+@@ -287,7 +279,14 @@ class Reducer:
+                                    snapshot.get("plan_failed_steps", {}).items()}
+         for k in self._plan_step_counts:
+             self._plan_failed_steps.setdefault(k, set())
+-        self._pending_receipts = copy.deepcopy(snapshot.get("pending_receipts", {}))
++        raw = snapshot.get("pending_receipts", []) or []
++        if isinstance(raw, dict):
++            # legacy (7003) bucketed format: {bucket: {rid: payload}}
++            raw = [rp for bucket in raw.values() for rp in bucket.values()]
++        self._pending_receipts = {}
++        for rp in raw:
++            rp = copy.deepcopy(rp)
++            self._pending_receipts.setdefault(rp.get("id", "") or "", rp)
+         self._seen_receipt_ids = set(snapshot.get("seen_receipt_ids", []))
+ 
+     def state_snapshot(self) -> dict[str, Any]:

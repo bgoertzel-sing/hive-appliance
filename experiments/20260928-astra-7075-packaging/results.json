@@ -1,0 +1,60 @@
+[
+  {
+    "label": "build",
+    "command": [
+      "/usr/bin/python3",
+      "-m",
+      "build",
+      "--wheel",
+      "--outdir",
+      "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7075-packaging/wheels"
+    ],
+    "cwd": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-astra-7075",
+    "exit": 0
+  },
+  {
+    "label": "venv",
+    "command": [
+      "/usr/bin/python3",
+      "-m",
+      "venv",
+      "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe/venv"
+    ],
+    "cwd": "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe",
+    "exit": 0
+  },
+  {
+    "label": "install",
+    "command": [
+      "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe/venv/bin/python",
+      "-m",
+      "pip",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7075-packaging/wheels/hive_appliance-0.1.0-py3-none-any.whl"
+    ],
+    "cwd": "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe",
+    "exit": 0
+  },
+  {
+    "label": "imports",
+    "command": [
+      "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe/venv/bin/python",
+      "-I",
+      "-c",
+      "import cli, controller.appliance, hive, conversation.client, recovery; print('installed imports OK')"
+    ],
+    "cwd": "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe",
+    "exit": 0
+  },
+  {
+    "label": "cli",
+    "command": [
+      "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe/venv/bin/hive-appliance",
+      "--help"
+    ],
+    "cwd": "/home/openclaw/tmp/hive-7075-wheel-_m1ngfpe",
+    "exit": 0
+  }
+]

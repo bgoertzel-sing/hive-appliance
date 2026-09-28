@@ -1,0 +1,8 @@
+{
+  "command": ["/usr/bin/python3", "projects/hive-appliance/experiments/20260928-astra-7075/verify_evidence.py"],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "AssertionError at line 42: assert len(old) == len(new) and len(changed) == 1",
+  "cause": "Verifier incorrectly required every script to have one import-path adaptation. supplementary.py is byte-identical and imports the adapted new_cases.py preamble.",
+  "correction": "Require zero changes for supplementary.py and exactly one import-path change for each other published harness. No test or production source changed."
+}

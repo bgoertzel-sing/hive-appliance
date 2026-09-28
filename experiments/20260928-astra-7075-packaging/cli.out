@@ -1,0 +1,24 @@
+usage: hive-appliance [-h] [--store STORE] [--store-dir STORE_DIR]
+                      {observe,profile,incidents,state,events,repair,run-plan,checkpoint,restore,upgrade}
+                      ...
+
+Omega Hive Appliance CLI
+
+positional arguments:
+  {observe,profile,incidents,state,events,repair,run-plan,checkpoint,restore,upgrade}
+    observe             Run collectors
+    profile             Discover hive profile
+    incidents           List open incidents
+    state               Show state snapshot
+    events              List recent events
+    repair              Repair open incidents
+    run-plan            Execute a plan from JSON
+    checkpoint          Take a state checkpoint
+    restore             Restore from checkpoint
+    upgrade             Execute an upgrade manifest
+
+options:
+  -h, --help            show this help message and exit
+  --store STORE         Event store path
+  --store-dir STORE_DIR
+                        Profile store directory
