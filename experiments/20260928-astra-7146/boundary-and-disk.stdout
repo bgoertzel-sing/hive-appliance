@@ -1,0 +1,149 @@
+{
+  "n8_total": 14,
+  "n8_passed": 0,
+  "agreement": 14,
+  "linked_stale": {
+    "events": [
+      {
+        "id": "evt_0ace2d3175b84fcf",
+        "kind": "plan",
+        "ts": 1790634780.9504378,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_a1bec18a32b04029",
+        "kind": "receipt",
+        "ts": 1790634780.950446,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "old0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_7bcbcfb6f070487f",
+        "kind": "receipt",
+        "ts": 1790634780.9504533,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "failure",
+          "step_index": 0,
+          "verified": false,
+          "plan_id": "",
+          "incident_id": "i"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_c45101626eea4f7a",
+        "kind": "incident",
+        "ts": 1790634780.9504604,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "p"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790634780.9504952,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "failure": {
+            "id": "failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "old0"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "checkpoint": "ckpt_1790634780_1",
+    "current": {
+      "open": [],
+      "verified": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "pending": {},
+      "owner": {
+        "p": "i"
+      },
+      "quarantine": [],
+      "diag": {
+        "legacy_pending_discarded": 1,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts."
+      }
+    },
+    "baseline_open": [
+      "i"
+    ],
+    "baseline_verified": {
+      "p": [
+        1
+      ]
+    },
+    "baseline_failed": {
+      "p": [
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "lifecycle": {
+    "resolved_current": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "resolved_snapshot": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "resolved_old_snapshot": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "resolved_baseline": {
+      "passed": false,
+      "agreement_every_event": true
+    },
+    "unlinked_current": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "unlinked_snapshot": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "unlinked_old_snapshot": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "unlinked_baseline": {
+      "passed": false,
+      "agreement_every_event": false
+    },
+    "foreign_owner": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "incident_only_owner": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "incident_only_unlinked": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "reregister_plan_only": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "reregister_incident_only": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "reregister_dual_address": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "reregister_after_complete": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "reregister_snapshot": {
+      "passed": true,
+      "agreement_every_event": true
+    },
+    "old_snapshot_plan_before_incident": {
+      "passed": false,
+      "agreement_every_event": false
+    },
+    "first_plan_empty_owner": {
+      "passed": true,
+      "agreement_every_event": true
+    }
+  },
+  "legacy": {
+    "total": 384,
+    "passed": 384,
+    "closed_without_fresh": 0
+  },
+  "discard_side_effects": [
+    {
+      "case": "single_bucket",
+      "state": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        }
+      },
+      "discarded": 2,
+      "counter_in_snapshot": false,
+      "counter_after_second_restore": 2
+    },
+    {
+      "case": "one_per_step_mixed",
+      "state": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        }
+      },
+      "discarded": 2,
+      "counter_in_snapshot": false,
+      "counter_after_second_restore": 2
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+diff --git a/tests/test_astra7133.py b/tests/test_astra7133.py
+new file mode 100644
+index 0000000..6fea1b7
+--- /dev/null
++++ b/tests/test_astra7133.py
+@@ -0,0 +1,153 @@
++"""Astra 7133: N6 conflicting PLAN re-registration, ownerless legacy restore; N7 diagnostics.
++
++Witnesses mirror docs/ASTRA_REVIEW_7133.md.  Local and hive reducers are
++checked for agreement after EVERY event.
++"""
++import json
++
++from controller.reducer import Reducer
++from hive.reducer import HiveReducer
++from hive.types import HiveEvent
++from schemas.types import Event, EventKind, IncidentReport
++
++
++def ev(kind, payload):
++    return Event(kind=kind, source="t", subject="svc", payload=payload)
++
++
++def INC(i):
++    return ev(EventKind.INCIDENT, IncidentReport(id=i, component="svc", symptom="down").to_dict())
++
++
++def PLAN(pid, iid, n):
++    return ev(EventKind.PLAN, {"id": pid, "incident_id": iid, "steps": [{"verb": "v"}] * n})
++
++
++def RC(rid, plan_id="", idx=0, ok=True, incident_id=""):
++    p = {"id": rid, "step_index": idx, "verified": ok}
++    if plan_id:
++        p["plan_id"] = plan_id
++    if incident_id:
++        p["incident_id"] = incident_id
++    return ev(EventKind.RECEIPT, p)
++
++
++def lo(r):
++    return sorted(i.id for i in r.open_incidents())
++
++
++def ho(h):
++    return sorted(i["incident_id"] for i in h._open_agent_incidents("a1"))
++
++
++def both(stream):
++    loc, hive = Reducer(), HiveReducer()
++    hive.register_agent("a1")
++    for e in stream:
++        loc.reduce(e)
++        hive.reduce(HiveEvent(source_agent="a1", original_event=e))
++        assert lo(loc) == ho(hive), (e.kind, e.payload)
++    return loc, hive
++
++
++def test_reregister_after_complete_closes_nothing():
++    loc, hive = both([INC("i"), INC("other"), PLAN("p", "i", 2), RC("a", "p", 0), RC("b", "p", 1),
++                      PLAN("p", "other", 2)])
++    assert lo(loc) == ["other"] and ho(hive) == ["other"]
++    assert hive.state.agents["a1"].open_incidents == 1
++    assert loc.rejected_plan_registrations == 1 and hive.rejected_plan_registrations == 1
++    assert loc._find_incident("other").plan_id == ""
++
++
++def test_reregister_before_complete_plan_only_receipts_close_owner_only():
++    loc, hive = both([INC("i"), INC("other"), PLAN("p", "i", 2), PLAN("p", "other", 2),
++                      RC("a", "p", 0), RC("b", "p", 1)])
++    assert lo(loc) == ["other"] and ho(hive) == ["other"]
++
++
++def test_reregister_incident_only_receipts_naming_non_owner_do_not_count():
++    loc, hive = both([INC("i"), INC("other"), PLAN("p", "i", 2), PLAN("p", "other", 2),
++                      RC("a", idx=0, incident_id="other"), RC("b", idx=1, incident_id="other")])
++    assert lo(loc) == ["i", "other"] and ho(hive) == ["i", "other"]
++    assert loc._plan_verified["p"] == set() and hive._plan_verified_steps["a1:p"] == set()
++
++
++def test_reregister_after_snapshot_round_trip():
++    r = Reducer()
++    for e in (INC("i"), INC("other"), PLAN("p", "i", 2)):
++        r.reduce(e)
++    r2 = Reducer()
++    r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++    for e in (PLAN("p", "other", 2), RC("a", "p", 0), RC("b", "p", 1)):
++        r2.reduce(e)
++    assert lo(r2) == ["other"]
++
++
++def test_reregister_dual_address_control_and_same_owner_replan_ok():
++    loc, hive = both([INC("i"), INC("other"), PLAN("p", "i", 2), PLAN("p", "other", 2),
++                      RC("a", "p", 0, incident_id="other"), RC("b", "p", 1, incident_id="other")])
++    assert lo(loc) == ["i", "other"] and ho(hive) == ["i", "other"]
++    loc, hive = both([INC("i"), PLAN("p", "i", 2), PLAN("p", "i", 2), RC("a", "p", 0), RC("b", "p", 1)])
++    assert lo(loc) == [] and ho(hive) == []
++
++
++def test_owner_incident_only_receipts_still_complete():
++    loc, hive = both([INC("i"), PLAN("p", "i", 2), RC("a", idx=0, incident_id="i"),
++                      RC("b", idx=1, incident_id="i")])
++    assert lo(loc) == [] and ho(hive) == []
++
++
++def _ownerless_legacy_snapshot():
++    # PLAN-before-INCIDENT leaves no durable incident link; old producers had no plan_owner
++    r = Reducer()
++    for e in (PLAN("p", "i", 2), INC("i"), INC("other")):
++        r.reduce(e)
++    snap = json.loads(json.dumps(r.snapshot()))
++    for k in ("plan_owner", "owner_unproven", "migration_diagnostics"):
++        snap.pop(k, None)
++    assert all(not inc.get("plan_id") for inc in snap["incidents"])
++    return snap
++
++
++def test_ownerless_legacy_restore_quarantines_and_rejects_contradiction():
++    r = Reducer()
++    r.restore_snapshot(_ownerless_legacy_snapshot())
++    assert r.migration_diagnostics["legacy_ownerless_plans"] == ["p"]
++    r.reduce(RC("a", "p", 0))
++    r.reduce(RC("x", "p", 1, incident_id="other"))
++    assert r._plan_verified["p"] == set()          # quarantined, nothing admitted
++    r.reduce(PLAN("p", "i", 2))                    # owner re-established
++    assert r._plan_verified["p"] == {0}            # matches uninterrupted hive
++    assert lo(r) == ["i", "other"]
++    r.reduce(RC("b", "p", 1))
++    assert lo(r) == ["other"]
++
++
++def test_ownerless_legacy_restore_drops_unvalidated_progress():
++    snap = _ownerless_legacy_snapshot()
++    snap["plan_receipts"] = {"p": [0, 1]}
++    r = Reducer()
++    r.restore_snapshot(snap)
++    assert lo(r) == ["i", "other"]
++    assert r.migration_diagnostics["legacy_verified_discarded"] == 2
++    r.reduce(PLAN("p", "i", 2))
++    assert lo(r) == ["i", "other"]                 # must be re-proven
++
++
++def test_n7_discard_diagnostics_persist_across_restores_and_log(caplog):
++    legacy = {"state": {}, "incidents": [IncidentReport(id="i", component="svc", symptom="down").to_dict()],
++              "plan_step_counts": {}, "plan_receipts": {}, "plan_failed_steps": {},
++              "pending_receipts": {"p": {"r0": {"id": "r0", "plan_id": "p", "step_index": 0, "verified": True},
++                                         "r1": {"id": "r1", "plan_id": "p", "step_index": 1, "verified": True}}},
++              "seen_receipt_ids": [], "incidents_total": 1, "incidents_open": 1}
++    r = Reducer()
++    with caplog.at_level("WARNING"):
++        r.restore_snapshot(json.loads(json.dumps(legacy)))
++    assert "discarded 2" in caplog.text
++    snap = json.loads(json.dumps(r.snapshot()))
++    assert snap["migration_diagnostics"]["legacy_pending_discarded"] == 2
++    assert "fresh" in snap["migration_diagnostics"]["recovery"]
++    r2 = Reducer()
++    r2.restore_snapshot(snap)
++    assert r2.legacy_pending_discarded == 2
++    assert r2.snapshot()["migration_diagnostics"]["legacy_pending_discarded"] == 2
