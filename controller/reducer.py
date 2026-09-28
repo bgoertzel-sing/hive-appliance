@@ -11,11 +11,14 @@ P0 fixes:
 """
 from __future__ import annotations
 import copy
+import logging
 
 from types import SimpleNamespace
 from typing import Any
 
 from schemas.types import Event, EventKind, IncidentReport, Severity
+
+logger = logging.getLogger(__name__)
 
 
 def _valid_index(idx: Any, count: int) -> bool:
@@ -46,6 +49,14 @@ class Reducer:
         self._plan_owner: dict[str, str] = {}
         # N5 (7075): count of ambiguous legacy pending receipts discarded
         self.legacy_pending_discarded = 0
+        # N6 (7133): plans whose owner a legacy snapshot could not prove; their
+        # receipts are buffered and they cannot complete until a PLAN
+        # re-establishes the owner.
+        self._owner_unproven: set[str] = set()
+        # N7 (7133): durable migration diagnostics (persisted in snapshots)
+        self.migration_diagnostics: dict[str, Any] = {}
+        # N6 (7133): conflicting PLAN re-registrations rejected
+        self.rejected_plan_registrations = 0
 
     def reduce(self, event: Event) -> list[IncidentReport]:
         """Process an event, update state, and return any new incidents."""
@@ -144,14 +155,23 @@ class Reducer:
         steps = p.get("steps", []) or []
         if not plan_id or not steps:
             return
+        inc_id = p.get("incident_id", "") or ""
+        owner = self._plan_owner.get(plan_id, "")
+        if inc_id and owner and owner != inc_id:
+            # N6 (7133): a conflicting re-registration is rejected before ANY
+            # mutation (no relink, no pending replay, no completion).
+            self.rejected_plan_registrations += 1
+            logger.warning("Rejecting PLAN %s -> %s: plan is owned by incident %s",
+                           plan_id, inc_id, owner)
+            return
         if plan_id not in self._plan_step_counts:
             self._plan_step_counts[plan_id] = len(steps)
             self._plan_verified[plan_id] = set()
             self._plan_failed_steps[plan_id] = set()
-        inc_id = p.get("incident_id", "")
         if inc_id:
-            # N6 (7075): durable plan owner, first PLAN wins
+            # N6 (7075): durable plan owner, first non-empty PLAN owner wins
             self._plan_owner.setdefault(plan_id, inc_id)
+            self._owner_unproven.discard(plan_id)       # N6 (7133)
             for inc in self.incidents:
                 if inc.id == inc_id and not inc.plan_id:
                     inc.plan_id = plan_id
@@ -199,7 +219,16 @@ class Reducer:
             self._pending_receipts.pop(rid, None)
             return ""
         eff = plan_id or ((target.plan_id or "") if target is not None else "")
-        if not eff or eff not in self._plan_step_counts:
+        if not plan_id and eff:
+            # N6 (7133): an incident-only receipt counts toward the inferred
+            # plan only if that plan's immutable owner is the named incident.
+            owner = self._plan_owner.get(eff, "")
+            if owner and owner != inc_id:
+                self._seen_receipt_ids.add(rid)
+                self._pending_receipts.pop(rid, None)
+                return ""
+        if (not eff or eff not in self._plan_step_counts
+                or eff in self._owner_unproven):
             self._pending_receipts.setdefault(rid, p)
             return ""
         self._seen_receipt_ids.add(rid)
@@ -223,10 +252,13 @@ class Reducer:
         """N6 (7075): a dual-addressed receipt is contradictory if the named
         incident is (durably) linked to another plan, or the plan's declared
         owner is a different incident.  Lifecycle state is irrelevant."""
-        if target is not None and target.plan_id and target.plan_id != plan_id:
-            return True
         owner = self._plan_owner.get(plan_id, "")
-        return bool(owner) and owner != inc_id
+        if owner:
+            # N6 (7133): the immutable owner decides (a plan may be a retry for
+            # an incident already linked to an earlier plan).
+            return owner != inc_id
+        return bool(target is not None and target.plan_id
+                    and target.plan_id != plan_id)
 
     def _open_incident(self, inc_id: str):
         return next((i for i in self.incidents
@@ -238,10 +270,15 @@ class Reducer:
             return
         if len(self._plan_verified.get(plan_id, ())) != n:
             return
+        if plan_id in self._owner_unproven:
+            return
+        owner = self._plan_owner.get(plan_id, "")
         for inc in self.incidents:
-            # N6 (7075): only the linked incident or the plan's declared owner
-            if inc.plan_id == plan_id or (not inc.plan_id and self._plan_owner.get(plan_id) == inc.id):
-                inc.plan_id = plan_id
+            # N6 (7133): the immutable owner is the sole completion authority;
+            # a plan with no declared owner may only close incidents linked to it.
+            if (inc.id == owner) if owner else (inc.plan_id == plan_id):
+                if not inc.plan_id:
+                    inc.plan_id = plan_id
                 inc.resolved = True
 
     def open_incidents(self) -> list[IncidentReport]:
@@ -267,6 +304,8 @@ class Reducer:
             "seen_receipt_ids": sorted(self._seen_receipt_ids),
             "plan_owner": dict(self._plan_owner),
             "pending_format": "arrival-v1",
+            "owner_unproven": sorted(self._owner_unproven),
+            "migration_diagnostics": copy.deepcopy(self.migration_diagnostics),
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
         }
@@ -315,16 +354,59 @@ class Reducer:
             self.legacy_pending_discarded = sum(
                 len(b) if isinstance(b, dict) else 1 for b in raw.values())
             raw = []
+            if self.legacy_pending_discarded:
+                logger.warning("Legacy bucketed pending snapshot: discarded %d "
+                               "pending receipt(s); affected steps need fresh "
+                               "receipts", self.legacy_pending_discarded)
         self._pending_receipts = {}
         for rp in raw:
             rp = copy.deepcopy(rp)
             self._pending_receipts.setdefault(rp.get("id", "") or "", rp)
         self._seen_receipt_ids = set(snapshot.get("seen_receipt_ids", []))
-        # N6: owner map; older snapshots derive it from durable incident links
+        discarded_now = self.legacy_pending_discarded
+        diag = copy.deepcopy(snapshot.get("migration_diagnostics") or {})
         self._plan_owner = dict(snapshot.get("plan_owner", {}) or {})
-        for inc in incidents:
-            if inc.plan_id:
-                self._plan_owner.setdefault(inc.plan_id, inc.id)
+        self._owner_unproven = set(snapshot.get("owner_unproven", []) or [])
+        if "plan_owner" not in snapshot:
+            # N6 (7133): pre-owner snapshot.  An owner is rebuilt ONLY from an
+            # unambiguous durable link (exactly one incident linked to the
+            # plan).  Plans with no link (PLAN-before-INCIDENT) or conflicting
+            # links are quarantined: previously admitted progress cannot be
+            # revalidated, so it is dropped, receipts are buffered, and the
+            # plan cannot complete until a PLAN re-establishes its owner.
+            links: dict[str, set[str]] = {}
+            for inc in incidents:
+                if inc.plan_id:
+                    links.setdefault(inc.plan_id, set()).add(inc.id)
+            for pid, ids in links.items():
+                if len(ids) == 1:
+                    self._plan_owner[pid] = next(iter(ids))
+            dropped = 0
+            for pid in sorted(self._plan_step_counts):
+                if pid in self._plan_owner:
+                    continue
+                self._owner_unproven.add(pid)
+                dropped += len(self._plan_verified.get(pid, ()))
+                self._plan_verified[pid] = set()
+            if self._owner_unproven:
+                diag["legacy_ownerless_plans"] = sorted(
+                    set(diag.get("legacy_ownerless_plans", [])) | self._owner_unproven)
+                diag["legacy_verified_discarded"] = int(
+                    diag.get("legacy_verified_discarded", 0)) + dropped
+                logger.warning("Legacy snapshot without plan owners: plans %s "
+                               "quarantined (%d verified step(s) discarded) until "
+                               "a PLAN re-establishes the owner",
+                               sorted(self._owner_unproven), dropped)
+        if discarded_now:
+            diag["legacy_pending_discarded"] = int(
+                diag.get("legacy_pending_discarded", 0)) + discarded_now
+        if diag:
+            diag.setdefault("recovery", "Discarded legacy evidence is not replayed; "
+                            "affected plan steps must be re-proven by fresh, "
+                            "uniquely identified receipts.")
+        # N7 (7133): persisted + cumulative across later snapshot/restore
+        self.migration_diagnostics = diag
+        self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
 
     def state_snapshot(self) -> dict[str, Any]:
         """Alias for snapshot() for API compatibility."""

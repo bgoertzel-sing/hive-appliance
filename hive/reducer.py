@@ -75,6 +75,8 @@ class HiveReducer:
         self._pending_receipts: dict[str, dict[str, dict[str, Any]]] = {}
         # N6 (7075): durable plan owner, "agent:plan_id" -> incident id
         self._plan_owner: dict[str, str] = {}
+        # N6 (7133): conflicting PLAN re-registrations rejected
+        self.rejected_plan_registrations = 0
 
     @property
     def state(self) -> HiveState:
@@ -310,11 +312,18 @@ class HiveReducer:
         if not plan_id or not steps:
             return
         key = f"{agent_id}:{plan_id}"
+        inc_id = payload.get("incident_id", "") or ""
+        owner = self._plan_owner.get(key, "")
+        if inc_id and owner and owner != inc_id:
+            # N6 (7133): reject conflicting re-registration before ANY mutation
+            self.rejected_plan_registrations += 1
+            logger.warning("Rejecting PLAN %s -> %s from %s: plan is owned by "
+                           "incident %s", plan_id, inc_id, agent_id, owner)
+            return
         if key not in self._plan_steps:
             self._plan_steps[key] = len(steps)
             self._plan_verified_steps[key] = set()
             self._plan_failed[key] = set()
-        inc_id = payload.get("incident_id", "")
         if inc_id:
             self._plan_owner.setdefault(key, inc_id)   # N6 (7075)
             for inc in self._agent_incidents.get(agent_id, []):
@@ -365,8 +374,9 @@ class HiveReducer:
                            if i["incident_id"] == inc_id), None)
             owner = self._plan_owner.get(f"{agent_id}:{plan_id}", "") if plan_id else ""
             linked = (target or {}).get("plan_id", "")
-            if plan_id and ((linked and linked != plan_id)
-                            or (owner and owner != inc_id)):
+            # N6 (7133): the immutable owner decides when known
+            if plan_id and ((owner and owner != inc_id)
+                            or (not owner and linked and linked != plan_id)):
                 self._seen_receipts.add(key)
                 self._pending_receipts.get(agent_id, {}).pop(rid, None)
                 logger.warning("Rejecting contradictory receipt %s (incident %s "
@@ -375,6 +385,15 @@ class HiveReducer:
                 return
         eff_plan = plan_id or (target.get("plan_id", "") if target else "")
         pkey = f"{agent_id}:{eff_plan}" if eff_plan else ""
+        if not plan_id and pkey:
+            # N6 (7133): incident-only receipt must name the inferred plan's owner
+            eowner = self._plan_owner.get(pkey, "")
+            if eowner and eowner != inc_id:
+                self._seen_receipts.add(key)
+                self._pending_receipts.get(agent_id, {}).pop(rid, None)
+                logger.warning("Rejecting receipt %s: incident %s is not the "
+                               "owner (%s) of plan %s", rid, inc_id, eowner, eff_plan)
+                return
         if not pkey or pkey not in self._plan_steps:
             self._pending_receipts.setdefault(agent_id, {}).setdefault(rid, payload)
             return
@@ -402,10 +421,12 @@ class HiveReducer:
         changed = False
         for inc in self._open_agent_incidents(agent_id):
             linked = inc.get("plan_id")
-            # N6 (7075): no fallback to the receipt's incident_id; only the
-            # linked incident or the plan's declared owner may be resolved.
-            if linked == plan_id or (not linked and self._plan_owner.get(pkey) == inc["incident_id"]):
-                inc["plan_id"] = plan_id
+            owner = self._plan_owner.get(pkey, "")
+            # N6 (7133): the immutable owner is the sole completion authority;
+            # an ownerless plan may only close incidents linked to it.
+            if (inc["incident_id"] == owner) if owner else (linked == plan_id):
+                if not linked:
+                    inc["plan_id"] = plan_id
                 inc["resolved"] = True
                 changed = True
                 logger.info("Agent %s incident %s resolved (all %d plan steps "
