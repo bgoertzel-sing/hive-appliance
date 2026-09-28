@@ -105,6 +105,8 @@ def _ownerless_legacy_snapshot():
     snap = json.loads(json.dumps(r.snapshot()))
     for k in ("plan_owner", "owner_unproven", "migration_diagnostics"):
         snap.pop(k, None)
+    for inc in snap["incidents"]:
+        inc["plan_id"] = ""          # old producers never linked PLAN-before-INCIDENT
     assert all(not inc.get("plan_id") for inc in snap["incidents"])
     return snap
 
@@ -116,7 +118,9 @@ def test_ownerless_legacy_restore_quarantines_and_rejects_contradiction():
     r.reduce(RC("a", "p", 0))
     r.reduce(RC("x", "p", 1, incident_id="other"))
     assert r._plan_verified["p"] == set()          # quarantined, nothing admitted
-    r.reduce(PLAN("p", "i", 2))                    # owner re-established
+    r.reduce(PLAN("p", "i", 2))                    # 7146: ordinary PLAN does NOT rebind
+    assert r._plan_verified["p"] == set()
+    assert r.rebind_plan_owner("p", "i")           # explicit operator rebind
     assert r._plan_verified["p"] == {0}            # matches uninterrupted hive
     assert lo(r) == ["i", "other"]
     r.reduce(RC("b", "p", 1))

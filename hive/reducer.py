@@ -91,6 +91,11 @@ class HiveReducer:
 
         if event is None:
             return new_incidents
+        # N6 (7146): conflicting PLAN re-registration rejected before ANY
+        # mutation (including timestamps).
+        if event.kind == EventKind.PLAN and self._reject_conflicting_plan(
+                agent_id, event.payload or {}):
+            return new_incidents
 
         # Update agent last-event timestamp
         if agent_id in self._state.agents:
@@ -226,7 +231,7 @@ class HiveReducer:
             "ts": event.ts,
             "symptom": symptom,
             "severity": payload.get("severity", "warn"),
-            "plan_id": payload.get("plan_id", ""),
+            "plan_id": payload.get("plan_id", "") or self._unique_owned_plan(agent_id, identity),  # N8 (7146)
             "resolved": bool(payload.get("resolved", False)),
         })
         # Prune old entries beyond cap -- resolved ones first, never open ones
@@ -242,6 +247,8 @@ class HiveReducer:
 
         # Update agent health
         self._recompute_agent_health(agent_id)
+        # N8 (7146): drain pending evidence now eligible via the late incident
+        self._drain_pending(agent_id, set())
 
         # Attempt cross-agent correlation
         correlated = self._correlate_incidents(symptom, event.ts)
@@ -313,12 +320,7 @@ class HiveReducer:
             return
         key = f"{agent_id}:{plan_id}"
         inc_id = payload.get("incident_id", "") or ""
-        owner = self._plan_owner.get(key, "")
-        if inc_id and owner and owner != inc_id:
-            # N6 (7133): reject conflicting re-registration before ANY mutation
-            self.rejected_plan_registrations += 1
-            logger.warning("Rejecting PLAN %s -> %s from %s: plan is owned by "
-                           "incident %s", plan_id, inc_id, agent_id, owner)
+        if self._reject_conflicting_plan(agent_id, payload):
             return
         if key not in self._plan_steps:
             self._plan_steps[key] = len(steps)
@@ -332,14 +334,7 @@ class HiveReducer:
         # N3 (7003): apply the WHOLE newly eligible buffer first, then decide
         # completion once -- a buffered failure must not be skipped because
         # an earlier buffered success already closed the incident.
-        touched = {plan_id}
-        for rid, p in list(self._pending_receipts.get(agent_id, {}).items()):
-            got = self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid),
-                                       resolve=False)
-            if got:
-                touched.add(got)
-        for pid in sorted(touched):
-            self._maybe_resolve_plan(agent_id, pid, "")
+        self._drain_pending(agent_id, {plan_id})
 
     def _handle_receipt(self, agent_id: str, event: Any, resolve: bool = True) -> Any:
         """Handle repair receipt -- may resolve an agent's incident.
@@ -384,6 +379,9 @@ class HiveReducer:
                                inc_id, linked, plan_id, owner)
                 return
         eff_plan = plan_id or (target.get("plan_id", "") if target else "")
+        if not eff_plan and inc_id:
+            # N8 (7146): unlinked incident-only receipt -> unique owned plan
+            eff_plan = self._unique_owned_plan(agent_id, inc_id)
         pkey = f"{agent_id}:{eff_plan}" if eff_plan else ""
         if not plan_id and pkey:
             # N6 (7133): incident-only receipt must name the inferred plan's owner
@@ -418,6 +416,8 @@ class HiveReducer:
             return
         if len(self._plan_verified_steps.get(pkey, ())) < n:
             return
+        if self._pending_blocks(agent_id, plan_id, self._plan_owner.get(pkey, "")):
+            return
         changed = False
         for inc in self._open_agent_incidents(agent_id):
             linked = inc.get("plan_id")
@@ -433,6 +433,44 @@ class HiveReducer:
                             "verified)", agent_id, inc["incident_id"], n)
         if changed:
             self._recompute_agent_health(agent_id)
+
+    def _reject_conflicting_plan(self, agent_id: str, payload: dict) -> bool:
+        plan_id = payload.get("id", "") or ""
+        inc_id = payload.get("incident_id", "") or ""
+        owner = self._plan_owner.get(f"{agent_id}:{plan_id}", "") if plan_id else ""
+        if inc_id and owner and owner != inc_id:
+            self.rejected_plan_registrations += 1
+            logger.warning("Rejecting PLAN %s -> %s from %s: plan is owned by "
+                           "incident %s", plan_id, inc_id, agent_id, owner)
+            return True
+        return False
+
+    def _unique_owned_plan(self, agent_id: str, inc_id: str) -> str:
+        pre = f"{agent_id}:"
+        owned = [k[len(pre):] for k, o in self._plan_owner.items()
+                 if k.startswith(pre) and o == inc_id]
+        return owned[0] if len(owned) == 1 else ""
+
+    def _drain_pending(self, agent_id: str, touched: set) -> None:
+        touched = set(touched)
+        for rid, p in list(self._pending_receipts.get(agent_id, {}).items()):
+            got = self._handle_receipt(agent_id, SimpleNamespace(payload=p, id=rid),
+                                       resolve=False)
+            if got:
+                touched.add(got)
+        for pid in sorted(touched):
+            self._maybe_resolve_plan(agent_id, pid, "")
+
+    def _pending_blocks(self, agent_id: str, plan_id: str, owner: str) -> bool:
+        linked = {i["incident_id"] for i in self._agent_incidents.get(agent_id, [])
+                  if i.get("plan_id") == plan_id}
+        if owner:
+            linked.add(owner)
+        for p in self._pending_receipts.get(agent_id, {}).values():
+            pid = p.get("plan_id") or ""
+            if pid == plan_id or (not pid and (p.get("incident_id") or "") in linked):
+                return True
+        return False
 
     def resolve_hive_incident(self, incident_id: str) -> bool:
         """Mark a hive-level incident as resolved."""

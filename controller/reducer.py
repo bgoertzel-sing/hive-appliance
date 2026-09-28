@@ -61,6 +61,10 @@ class Reducer:
     def reduce(self, event: Event) -> list[IncidentReport]:
         """Process an event, update state, and return any new incidents."""
         new_incidents: list[IncidentReport] = []
+        # N6 (7146): a conflicting PLAN re-registration is rejected before ANY
+        # reducer mutation, including the component-state merge below.
+        if event.kind == EventKind.PLAN and self._reject_conflicting_plan(event.payload or {}):
+            return new_incidents
 
         if event.kind == EventKind.OBSERVATION:
             new_incidents.extend(self._handle_observation(event))
@@ -136,6 +140,74 @@ class Reducer:
         if incident.id not in self._seen_incident_ids:
             self.incidents.append(incident)
             self._seen_incident_ids.add(incident.id)
+            # N8 (7146): a late INCIDENT is linked to the plan it owns and all
+            # eligible pending evidence is drained before any completion.
+            if not incident.plan_id:
+                owned = self._owned_plans(incident.id)
+                if len(owned) == 1:
+                    incident.plan_id = owned[0]
+            self._drain_pending(set())
+
+    def _owned_plans(self, inc_id: str) -> list[str]:
+        return sorted(p for p, o in self._plan_owner.items() if o == inc_id)
+
+    def _reject_conflicting_plan(self, p: dict) -> bool:
+        plan_id = p.get("id", "") or ""
+        inc_id = p.get("incident_id", "") or ""
+        owner = self._plan_owner.get(plan_id, "") if plan_id else ""
+        if inc_id and owner and owner != inc_id:
+            self.rejected_plan_registrations += 1
+            logger.warning("Rejecting PLAN %s -> %s: plan is owned by incident %s",
+                           plan_id, inc_id, owner)
+            return True
+        return False
+
+    def _drain_pending(self, touched: set) -> None:
+        """Apply every newly eligible pending receipt (arrival order), THEN
+        decide completion once per touched plan (N3/N8)."""
+        touched = set(touched)
+        for rid, rp in list(self._pending_receipts.items()):
+            got = self._handle_receipt(SimpleNamespace(payload=rp, id=rid),
+                                       resolve=False)
+            if got:
+                touched.add(got)
+        for pid in sorted(touched):
+            self._maybe_resolve(pid)
+
+    def _pending_blocks(self, plan_id: str, owner: str) -> bool:
+        """N8 (7146): completion is refused while any pending receipt still
+        addresses the plan or its owner/linked incident."""
+        linked = {i.id for i in self.incidents if i.plan_id == plan_id}
+        if owner:
+            linked.add(owner)
+        for rp in self._pending_receipts.values():
+            pid = rp.get("plan_id") or ""
+            if pid == plan_id or (not pid and (rp.get("incident_id") or "") in linked):
+                return True
+        return False
+
+    def rebind_plan_owner(self, plan_id: str, incident_id: str) -> bool:
+        """N6 (7146): explicit, operator-authoritative owner rebind for a plan
+        quarantined by legacy migration (lost owner).  An ordinary PLAN cannot
+        re-establish a lost owner because no reducer field can prove it matches
+        the original.  Returns True if the rebind was applied."""
+        if plan_id not in self._owner_unproven or not incident_id:
+            return False
+        inc = self._find_incident(incident_id)
+        if inc is None or (inc.plan_id and inc.plan_id != plan_id):
+            return False
+        self._owner_unproven.discard(plan_id)
+        self._plan_owner[plan_id] = incident_id
+        if not inc.plan_id:
+            inc.plan_id = plan_id
+        d = self.migration_diagnostics
+        d.setdefault("owner_rebinds", []).append(
+            {"plan_id": plan_id, "incident_id": incident_id})
+        (d.get("owner_candidates") or {}).pop(plan_id, None)
+        logger.warning("Operator rebind: plan %s owner set to incident %s",
+                       plan_id, incident_id)
+        self._drain_pending({plan_id})
+        return True
 
     def _handle_plan(self, event: Event) -> None:
         """F7/N1 (6986): register the plan's step count, link it to its
@@ -156,13 +228,17 @@ class Reducer:
         if not plan_id or not steps:
             return
         inc_id = p.get("incident_id", "") or ""
-        owner = self._plan_owner.get(plan_id, "")
-        if inc_id and owner and owner != inc_id:
-            # N6 (7133): a conflicting re-registration is rejected before ANY
-            # mutation (no relink, no pending replay, no completion).
-            self.rejected_plan_registrations += 1
-            logger.warning("Rejecting PLAN %s -> %s: plan is owned by incident %s",
-                           plan_id, inc_id, owner)
+        if self._reject_conflicting_plan(p):
+            return
+        if inc_id and plan_id in self._owner_unproven:
+            # N6 (7146): a lost legacy owner is NOT re-established by an
+            # ordinary PLAN; it is recorded as a candidate for operator rebind.
+            lst = self.migration_diagnostics.setdefault(
+                "owner_candidates", {}).setdefault(plan_id, [])
+            if inc_id not in lst and len(lst) < 8:
+                lst.append(inc_id)
+            logger.warning("PLAN %s -> %s held: owner lost in legacy migration; "
+                           "use rebind_plan_owner()", plan_id, inc_id)
             return
         if plan_id not in self._plan_step_counts:
             self._plan_step_counts[plan_id] = len(steps)
@@ -175,14 +251,7 @@ class Reducer:
             for inc in self.incidents:
                 if inc.id == inc_id and not inc.plan_id:
                     inc.plan_id = plan_id
-        touched = {plan_id}
-        for rid, rp in list(self._pending_receipts.items()):
-            got = self._handle_receipt(SimpleNamespace(payload=rp, id=rid),
-                                       resolve=False)
-            if got:
-                touched.add(got)
-        for pid in sorted(touched):
-            self._maybe_resolve(pid)
+        self._drain_pending({plan_id})
 
     def _handle_receipt(self, event: Any, resolve: bool = True) -> str:
         """F7/N2/H2 (6986), N4/N5 (7024): same admission contract as
@@ -219,6 +288,12 @@ class Reducer:
             self._pending_receipts.pop(rid, None)
             return ""
         eff = plan_id or ((target.plan_id or "") if target is not None else "")
+        if not eff and inc_id:
+            # N8 (7146): incident-only receipt for a not-yet-linked incident
+            # counts toward the unique plan that incident owns.
+            owned = self._owned_plans(inc_id)
+            if len(owned) == 1:
+                eff = owned[0]
         if not plan_id and eff:
             # N6 (7133): an incident-only receipt counts toward the inferred
             # plan only if that plan's immutable owner is the named incident.
@@ -273,6 +348,8 @@ class Reducer:
         if plan_id in self._owner_unproven:
             return
         owner = self._plan_owner.get(plan_id, "")
+        if self._pending_blocks(plan_id, owner):
+            return
         for inc in self.incidents:
             # N6 (7133): the immutable owner is the sole completion authority;
             # a plan with no declared owner may only close incidents linked to it.
@@ -345,6 +422,7 @@ class Reducer:
             self._plan_failed_steps.setdefault(k, set())
         raw = snapshot.get("pending_receipts", []) or []
         self.legacy_pending_discarded = 0
+        legacy_payloads: list[Any] = []
         if isinstance(raw, dict):
             # N5 (7075): the legacy (7003) bucketed format {bucket: {rid: payload}}
             # cannot recover the original arrival interleaving (streams with
@@ -353,6 +431,8 @@ class Reducer:
             # steps must be re-proven by fresh receipts.
             self.legacy_pending_discarded = sum(
                 len(b) if isinstance(b, dict) else 1 for b in raw.values())
+            legacy_payloads = [x for b in raw.values()
+                               for x in (b.values() if isinstance(b, dict) else [b])]
             raw = []
             if self.legacy_pending_discarded:
                 logger.warning("Legacy bucketed pending snapshot: discarded %d "
@@ -397,13 +477,51 @@ class Reducer:
                                "quarantined (%d verified step(s) discarded) until "
                                "a PLAN re-establishes the owner",
                                sorted(self._owner_unproven), dropped)
+        # N5 (7146): successes that discarded pending evidence could have
+        # superseded are invalidated, INDEPENDENT of owner reconstruction.
+        invalidated = 0
+        for rp in legacy_payloads:
+            rp = rp if isinstance(rp, dict) else {}
+            pid = rp.get("plan_id") or ""
+            iid = rp.get("incident_id") or ""
+            if pid:
+                affected = {pid}
+            elif iid:
+                affected = ({i.plan_id for i in incidents if i.id == iid and i.plan_id}
+                            | {p for p, o in self._plan_owner.items() if o == iid})
+                if not affected:
+                    affected = set(self._plan_verified)   # cannot tell: all
+            elif rp:
+                affected = set()                          # untargeted
+            else:
+                affected = set(self._plan_verified)
+            idx = rp.get("step_index")
+            for p in affected:
+                v = self._plan_verified.get(p)
+                if not v:
+                    continue
+                if isinstance(idx, int) and not isinstance(idx, bool):
+                    if idx in v:
+                        v.discard(idx)
+                        invalidated += 1
+                else:
+                    invalidated += len(v)
+                    v.clear()
+        if invalidated:
+            diag["legacy_verified_invalidated"] = int(
+                diag.get("legacy_verified_invalidated", 0)) + invalidated
+            logger.warning("Legacy pending discard invalidated %d verified step(s); "
+                           "they must be re-proven", invalidated)
         if discarded_now:
             diag["legacy_pending_discarded"] = int(
                 diag.get("legacy_pending_discarded", 0)) + discarded_now
         if diag:
-            diag.setdefault("recovery", "Discarded legacy evidence is not replayed; "
-                            "affected plan steps must be re-proven by fresh, "
-                            "uniquely identified receipts.")
+            diag["recovery"] = (
+                "Discarded legacy evidence is not replayed; affected plan steps "
+                "must be re-proven by fresh, uniquely identified receipts. Plans "
+                "in legacy_ownerless_plans stay quarantined until an operator "
+                "calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN "
+                "does not re-establish a lost owner.")
         # N7 (7133): persisted + cumulative across later snapshot/restore
         self.migration_diagnostics = diag
         self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
