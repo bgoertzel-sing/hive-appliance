@@ -120,7 +120,7 @@ def test_ownerless_legacy_restore_quarantines_and_rejects_contradiction():
     assert r._plan_verified["p"] == set()          # quarantined, nothing admitted
     r.reduce(PLAN("p", "i", 2))                    # 7146: ordinary PLAN does NOT rebind
     assert r._plan_verified["p"] == set()
-    assert r.rebind_plan_owner("p", "i")           # explicit operator rebind
+    assert r.rebind_plan_owner("p", "i", actor="op", reason="test")  # explicit operator rebind
     assert r._plan_verified["p"] == {0}            # matches uninterrupted hive
     assert lo(r) == ["i", "other"]
     r.reduce(RC("b", "p", 1))

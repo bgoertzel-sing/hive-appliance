@@ -161,13 +161,15 @@ def test_n6b_explicit_rebind_recovers_and_persists():
     r = Reducer()
     r.restore_snapshot(_lost_owner_snapshot())
     r.reduce(RC("a", "p", 0))
-    assert not r.rebind_plan_owner("p", "nope")
-    assert r.rebind_plan_owner("p", "i")
-    assert not r.rebind_plan_owner("p", "other")     # only while quarantined
+    kw = dict(actor="op", reason="test", allow_non_candidate=True)
+    assert not r.rebind_plan_owner("p", "nope", **kw)
+    assert r.rebind_plan_owner("p", "i", **kw)
+    assert not r.rebind_plan_owner("p", "other", **kw)   # only while quarantined
     r2 = Reducer()
     r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
     assert r2._plan_owner["p"] == "i" and "p" not in r2._owner_unproven
-    assert r2.migration_diagnostics["owner_rebinds"] == [{"plan_id": "p", "incident_id": "i"}]
+    assert [(x["plan_id"], x["incident_id"], x["actor"], x["reason"])
+            for x in r2.migration_diagnostics["owner_rebinds"]] == [("p", "i", "op", "test")]
     r2.reduce(RC("x", "p", 1, incident_id="other"))  # contradiction rejected
     assert lo(r2) == ["i", "other"]
     r2.reduce(RC("b", "p", 1))

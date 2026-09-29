@@ -247,8 +247,12 @@ class HiveReducer:
 
         # Update agent health
         self._recompute_agent_health(agent_id)
-        # N8 (7146): drain pending evidence now eligible via the late incident
-        self._drain_pending(agent_id, set())
+        # N8 (7146) / H2 (7160): drain pending evidence now eligible via the
+        # late incident, then re-check completion of every plan it OWNS.
+        pre = f"{agent_id}:"
+        owned = {k[len(pre):] for k, o in self._plan_owner.items()
+                 if k.startswith(pre) and o == identity}
+        self._drain_pending(agent_id, owned)
 
         # Attempt cross-agent correlation
         correlated = self._correlate_incidents(symptom, event.ts)
