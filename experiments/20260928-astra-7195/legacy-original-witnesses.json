@@ -1,0 +1,321 @@
+{
+  "identical_snapshot_bytes": true,
+  "cases": [
+    {
+      "name": "latest_failure",
+      "passed": true,
+      "discarded": 3,
+      "snapshot": {
+        "state": {},
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1700000000.0,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "plan_step_counts": {},
+        "plan_receipts": {},
+        "plan_failed_steps": {},
+        "pending_receipts": {
+          "p": {
+            "seed1": {
+              "id": "seed1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new_failure": {
+              "id": "new_failure",
+              "step_index": 0,
+              "verified": false,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "@inc:i": {
+            "old_success": {
+              "id": "old_success",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "i"
+            }
+          }
+        },
+        "seen_receipt_ids": [],
+        "incidents_total": 1,
+        "incidents_open": 1
+      },
+      "checkpoint_id": "ckpt_1790658953_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "after_fresh0": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            0
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "after_fresh1": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "uninterrupted_local": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": [
+            0
+          ]
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 0,
+        "pending": 0
+      },
+      "uninterrupted_hive": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": [
+            0
+          ]
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "health": "failed",
+        "displayed_open": 1
+      }
+    },
+    {
+      "name": "latest_success",
+      "passed": true,
+      "discarded": 3,
+      "snapshot": {
+        "state": {},
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1700000000.0,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "plan_step_counts": {},
+        "plan_receipts": {},
+        "plan_failed_steps": {},
+        "pending_receipts": {
+          "p": {
+            "seed1": {
+              "id": "seed1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new_failure": {
+              "id": "new_failure",
+              "step_index": 0,
+              "verified": false,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "@inc:i": {
+            "old_success": {
+              "id": "old_success",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "i"
+            }
+          }
+        },
+        "seen_receipt_ids": [],
+        "incidents_total": 1,
+        "incidents_open": 1
+      },
+      "checkpoint_id": "ckpt_1790658953_2",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "after_fresh0": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            0
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "after_fresh1": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 3,
+        "pending": 0
+      },
+      "uninterrupted_local": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "discarded": 0,
+        "pending": 0
+      },
+      "uninterrupted_hive": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "owner": {
+          "p": "i"
+        },
+        "links": {
+          "i": "p"
+        },
+        "health": "healthy",
+        "displayed_open": 0
+      }
+    }
+  ]
+}

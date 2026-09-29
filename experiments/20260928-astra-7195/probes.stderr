@@ -1,0 +1,35 @@
+Failed to download attachment att_f6e16adc91bd0af0
+Traceback (most recent call last):
+  File "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/source/conversation/attachments.py", line 794, in _download_one
+    raise RuntimeError("download lease was lost before publication")
+RuntimeError: download lease was lost before publication
+Failed to create checkpoint before repair
+Traceback (most recent call last):
+  File "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/source/controller/appliance.py", line 277, in _do_repair
+    checkpoint = self._checkpoint_mgr.create(
+  File "/usr/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/usr/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/usr/lib/python3.10/unittest/mock.py", line 1173, in _execute_mock_call
+    raise effect
+OSError: checkpoint unavailable
+Failed to rollback after repair failure
+Traceback (most recent call last):
+  File "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/source/controller/appliance.py", line 344, in _do_repair
+    restored = self._checkpoint_mgr.load(checkpoint.id)
+  File "/usr/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/usr/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/usr/lib/python3.10/unittest/mock.py", line 1179, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/probes.py", line 329, in load
+    if calls[0]>1 and mode=='rollback_raises': raise OSError('rollback unavailable')
+OSError: rollback unavailable
+Attachment worker did not stop within 0.0s
+Refusing to unlink uncontained attachment file /home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/tmp/P2_effect_boundary-rxy05vfg/append/root/tg/room/2023-11-14/att_f6e16adc91bd0af0.526fd33db060429880194d0e78fa4e42.bin
+Refusing to unlink uncontained attachment file /home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/tmp/P2_effect_boundary-rxy05vfg/update/root/tg/room/2023-11-14/att_f6e16adc91bd0af0.261b52adadfc4f32b08afb972a6ebf34.bin
+Refusing to unlink uncontained attachment file /home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/tmp/P2_effect_boundary-rxy05vfg/delete_unknown_root/external
+Rejected attachment att_f6e16adc91bd0af0: local_path outside attachments root
+Refusing to unlink uncontained attachment file /home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7195/tmp/P2_effect_boundary-rxy05vfg/delete_configured_root/external

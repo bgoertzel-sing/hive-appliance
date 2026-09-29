@@ -1,0 +1,21 @@
+--- pinned7173/review7173.py
++++ review7195/review7173.py
+@@ -191,7 +191,7 @@
+                 passed=pure and accepted and not duplicate and state(l) == after and pv['would_close'] == expected_closed
+                 and rec['closed'] == expected_closed and rec['candidate'] == candidate
+                 and rec['actor'] == '  op  ' and rec['reason'] == 'fixture evidence'
+-                and rec['held_receipts'] == (0 if held == 'none' else 2 if held == 'success' else 3)))
++                and rec['pending_before'] == (0 if held == 'none' else 2 if held == 'success' else 3)))
+     row['cases'] = rows
+     assert all(r['passed'] for r in rows)
+ 
+@@ -222,7 +222,8 @@
+     l.rebind_plan_owner('p', 'i', actor='op', reason='fixture', allow_non_candidate=True)
+     after = state(l)
+     removed = sorted(set(before['pending']) - set(after['pending']))
+-    advertised = sorted(x['id'] for x in pv['held_receipts'])
++    advertised = sorted(x['id'] for kind, rows in pv['effects'].items()
++                        if kind != 'still_held' for x in rows)
+     row.update(preview=pv, before=before, after=after, removed_receipts=removed, advertised=advertised,
+                audit=l.migration_diagnostics['owner_rebinds'][-1])
+     assert advertised == removed, 'Preview held/released list omits another linked receipt consumed by rebind'
