@@ -1,0 +1,653 @@
+{
+  "rejected_public_mutations": {
+    "local_changed": [
+      "rejected_plan_registrations"
+    ],
+    "hive_changed": [
+      "rejected_plan_registrations"
+    ],
+    "local_before": {},
+    "local_after": {},
+    "local_pending_unchanged": true,
+    "hive_pending_unchanged": true
+  },
+  "linked_stale_progress": {
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640373.6920674,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "failure": {
+            "id": "failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "old0"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "trace": [
+      {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "pending": {},
+        "owner": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diag": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "pending": {},
+        "owner": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diag": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "pending": {},
+        "owner": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diag": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+        }
+      }
+    ],
+    "passed": true
+  },
+  "quarantine_recovery": [
+    {
+      "mode": "held_before_plan",
+      "passed": false,
+      "trace": [
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new1": {
+              "id": "new1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new1": {
+              "id": "new1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "mode": "fresh_after_plan",
+      "passed": false,
+      "trace": [
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new1": {
+              "id": "new1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "mode": "same_owner_replay",
+      "passed": false,
+      "trace": [
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {},
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new1": {
+              "id": "new1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        },
+        {
+          "open": [
+            "i"
+          ],
+          "verified": {
+            "p": []
+          },
+          "pending": {
+            "new0": {
+              "id": "new0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "new1": {
+              "id": "new1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            }
+          },
+          "owner": {},
+          "quarantine": [
+            "p"
+          ],
+          "diag": {
+            "legacy_ownerless_plans": [
+              "p"
+            ],
+            "legacy_verified_discarded": 0,
+            "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+            "owner_candidates": {
+              "p": [
+                "i"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "quarantine_without_plan": {
+    "open": [
+      "i"
+    ],
+    "verified": {
+      "p": []
+    },
+    "pending": {
+      "new0": {
+        "id": "new0",
+        "step_index": 0,
+        "verified": true,
+        "plan_id": "p",
+        "incident_id": ""
+      },
+      "new1": {
+        "id": "new1",
+        "step_index": 1,
+        "verified": true,
+        "plan_id": "p",
+        "incident_id": ""
+      }
+    },
+    "owner": {},
+    "quarantine": [
+      "p"
+    ],
+    "diag": {
+      "legacy_ownerless_plans": [
+        "p"
+      ],
+      "legacy_verified_discarded": 0,
+      "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+    }
+  },
+  "diagnostics_repeat": {
+    "before": {
+      "legacy_verified_invalidated": 1,
+      "legacy_pending_discarded": 1,
+      "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+    },
+    "after": {
+      "legacy_verified_invalidated": 1,
+      "legacy_pending_discarded": 1,
+      "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+    },
+    "equal": true
+  },
+  "diagnostics_cumulative": {
+    "legacy_verified_invalidated": 1,
+    "legacy_pending_discarded": 2,
+    "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+  },
+  "diagnostics_bound": {
+    "input_plans": 2048,
+    "stored_plans": 2048,
+    "json_bytes": 17685
+  }
+}

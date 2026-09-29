@@ -1,0 +1,291 @@
+[
+  {
+    "ambiguous": false,
+    "real_completed_legacy_plan": true,
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4845288,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {},
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 0
+    },
+    "before": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4845288,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "plan_owner": {
+        "p": "i"
+      },
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 1,
+      "incidents_open": 0
+    },
+    "accepted": false,
+    "after": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4845288,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "plan_owner": {
+        "p": "i"
+      },
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 1,
+      "incidents_open": 0
+    }
+  },
+  {
+    "ambiguous": true,
+    "real_completed_legacy_plan": true,
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4848797,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "other",
+          "ts": 1790640854.484954,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {},
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "incidents_total": 2,
+      "incidents_open": 1
+    },
+    "before": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4848797,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "other",
+          "ts": 1790640854.484954,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [
+        "p"
+      ],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 2,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+      },
+      "incidents_total": 2,
+      "incidents_open": 1
+    },
+    "accepted": true,
+    "after": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1790640854.4848797,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "other",
+          "ts": 1790640854.484954,
+          "severity": "warn",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "r0",
+        "r1"
+      ],
+      "plan_owner": {
+        "p": "i"
+      },
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 2,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+        "owner_rebinds": [
+          {
+            "plan_id": "p",
+            "incident_id": "i"
+          }
+        ]
+      },
+      "incidents_total": 2,
+      "incidents_open": 1
+    }
+  }
+]

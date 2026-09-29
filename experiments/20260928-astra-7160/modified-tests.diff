@@ -1,0 +1,204 @@
+diff --git a/tests/test_astra7133.py b/tests/test_astra7133.py
+index 6fea1b7..470a3d6 100644
+--- a/tests/test_astra7133.py
++++ b/tests/test_astra7133.py
+@@ -105,6 +105,8 @@ def _ownerless_legacy_snapshot():
+     snap = json.loads(json.dumps(r.snapshot()))
+     for k in ("plan_owner", "owner_unproven", "migration_diagnostics"):
+         snap.pop(k, None)
++    for inc in snap["incidents"]:
++        inc["plan_id"] = ""          # old producers never linked PLAN-before-INCIDENT
+     assert all(not inc.get("plan_id") for inc in snap["incidents"])
+     return snap
+ 
+@@ -116,7 +118,9 @@ def test_ownerless_legacy_restore_quarantines_and_rejects_contradiction():
+     r.reduce(RC("a", "p", 0))
+     r.reduce(RC("x", "p", 1, incident_id="other"))
+     assert r._plan_verified["p"] == set()          # quarantined, nothing admitted
+-    r.reduce(PLAN("p", "i", 2))                    # owner re-established
++    r.reduce(PLAN("p", "i", 2))                    # 7146: ordinary PLAN does NOT rebind
++    assert r._plan_verified["p"] == set()
++    assert r.rebind_plan_owner("p", "i")           # explicit operator rebind
+     assert r._plan_verified["p"] == {0}            # matches uninterrupted hive
+     assert lo(r) == ["i", "other"]
+     r.reduce(RC("b", "p", 1))
+diff --git a/tests/test_astra7146.py b/tests/test_astra7146.py
+new file mode 100644
+index 0000000..2a4414a
+--- /dev/null
++++ b/tests/test_astra7146.py
+@@ -0,0 +1,174 @@
++"""Astra 7146: N8 pending failure vs late INCIDENT, N5 linked legacy stale success,
++N6(a) rejected PLAN mutates nothing, N6(b) lost owner needs explicit rebind.
++
++Witnesses mirror docs/ASTRA_REVIEW_7146.md; local and hive are checked for
++agreement after every event.
++"""
++import copy
++import json
++
++from controller.reducer import Reducer
++from hive.reducer import HiveReducer
++from hive.types import HiveEvent
++from schemas.types import Event, EventKind, IncidentReport
++
++
++def ev(kind, payload):
++    return Event(kind=kind, source="t", subject="svc", payload=payload)
++
++
++def INC(i):
++    return ev(EventKind.INCIDENT, IncidentReport(id=i, component="svc", symptom="down").to_dict())
++
++
++def PLAN(pid, iid, n):
++    return ev(EventKind.PLAN, {"id": pid, "incident_id": iid, "steps": [{"verb": "v"}] * n})
++
++
++def RC(rid, plan_id="", idx=0, ok=True, incident_id=""):
++    p = {"id": rid, "step_index": idx, "verified": ok}
++    if plan_id:
++        p["plan_id"] = plan_id
++    if incident_id:
++        p["incident_id"] = incident_id
++    return ev(EventKind.RECEIPT, p)
++
++
++def lo(r):
++    return sorted(i.id for i in r.open_incidents())
++
++
++def ho(h):
++    return sorted(i["incident_id"] for i in h._open_agent_incidents("a1"))
++
++
++def both(stream):
++    loc, hive = Reducer(), HiveReducer()
++    hive.register_agent("a1")
++    for e in stream:
++        loc.reduce(e)
++        hive.reduce(HiveEvent(source_agent="a1", original_event=e))
++        assert lo(loc) == ho(hive), (e.kind, e.payload)
++    return loc, hive
++
++
++def test_n8_failure_before_incident_blocks_completion():
++    loc, hive = both([PLAN("p", "i", 2), RC("a", "p", 0), RC("f", idx=0, ok=False, incident_id="i"),
++                      INC("i"), RC("b", "p", 1)])
++    assert lo(loc) == ["i"] and ho(hive) == ["i"]
++    assert hive.state.agents["a1"].open_incidents == 1
++    assert loc._plan_failed_steps["p"] == {0}
++
++
++def test_n8_failure_after_incident_blocks_completion():
++    loc, hive = both([PLAN("p", "i", 2), RC("a", "p", 0), INC("i"),
++                      RC("f", idx=0, ok=False, incident_id="i"), RC("b", "p", 1)])
++    assert lo(loc) == ["i"] and ho(hive) == ["i"]
++    assert loc._find_incident("i").plan_id == "p"
++
++
++def test_n8_fresh_retry_closes_and_replan_does_not_reopen_wrongly():
++    loc, hive = both([PLAN("p", "i", 2), RC("a", "p", 0), RC("f", idx=0, ok=False, incident_id="i"),
++                      INC("i"), RC("b", "p", 1), PLAN("p", "i", 2), RC("c", "p", 0)])
++    assert lo(loc) == [] and ho(hive) == []
++
++
++def test_n8_every_snapshot_boundary():
++    stream = [PLAN("p", "i", 2), RC("a", "p", 0), RC("f", idx=0, ok=False, incident_id="i"),
++              INC("i"), RC("b", "p", 1)]
++    for cut in range(len(stream) + 1):
++        r = Reducer()
++        for e in stream[:cut]:
++            r.reduce(e)
++        for _ in range(2):
++            r2 = Reducer()
++            r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++            r = r2
++        for e in stream[cut:]:
++            r.reduce(e)
++        assert lo(r) == ["i"], cut
++
++
++def _linked_legacy_snapshot():
++    r = Reducer()
++    for e in (PLAN("p", "i", 2), RC("a", "p", 0), INC("i")):
++        r.reduce(e)
++    snap = json.loads(json.dumps(r.snapshot()))
++    for k in ("plan_owner", "owner_unproven", "migration_diagnostics", "pending_format"):
++        snap.pop(k, None)
++    for inc in snap["incidents"]:
++        inc["plan_id"] = "p"                       # INCIDENT arrived prelinked
++    snap["plan_receipts"] = {"p": [0]}
++    snap["pending_receipts"] = {"@inc:i": {"f": {"id": "f", "incident_id": "i",
++                                                 "step_index": 0, "verified": False}}}
++    return snap
++
++
++def test_n5_linked_legacy_stale_success_invalidated():
++    r = Reducer()
++    r.restore_snapshot(_linked_legacy_snapshot())
++    assert r._plan_owner["p"] == "i" and "p" not in r._owner_unproven
++    assert r._plan_verified["p"] == set()
++    assert r.migration_diagnostics["legacy_verified_invalidated"] == 1
++    for _ in range(2):
++        r2 = Reducer()
++        r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++        r = r2
++    r.reduce(PLAN("p", "i", 2))
++    r.reduce(RC("b", "p", 1))
++    assert lo(r) == ["i"]                         # step 0 must be re-proven
++    r.reduce(RC("c", "p", 0))
++    assert lo(r) == []
++
++
++def test_n6a_rejected_plan_mutates_nothing_local_or_hive():
++    loc, hive = both([INC("i"), INC("other"), PLAN("p", "i", 2)])
++    before_l = copy.deepcopy({k: v for k, v in vars(loc).items() if k != "rejected_plan_registrations"})
++    before_h = copy.deepcopy({k: v for k, v in vars(hive).items() if k != "rejected_plan_registrations"})
++    bad = PLAN("p", "other", 2)
++    loc.reduce(bad)
++    hive.reduce(HiveEvent(source_agent="a1", original_event=bad))
++    assert {k: v for k, v in vars(loc).items() if k != "rejected_plan_registrations"} == before_l
++    assert {k: v for k, v in vars(hive).items() if k != "rejected_plan_registrations"} == before_h
++    assert loc.rejected_plan_registrations == 1 and hive.rejected_plan_registrations == 1
++
++
++def _lost_owner_snapshot():
++    r = Reducer()
++    for e in (PLAN("p", "i", 2), INC("i"), INC("other")):
++        r.reduce(e)
++    snap = json.loads(json.dumps(r.snapshot()))
++    for k in ("plan_owner", "owner_unproven", "migration_diagnostics"):
++        snap.pop(k, None)
++    for inc in snap["incidents"]:
++        inc["plan_id"] = ""
++    return snap
++
++
++def test_n6b_ordinary_plan_cannot_replace_lost_owner():
++    r = Reducer()
++    r.restore_snapshot(_lost_owner_snapshot())
++    r.reduce(PLAN("p", "other", 2))
++    r.reduce(RC("a", "p", 0, incident_id="other"))
++    r.reduce(RC("b", "p", 1, incident_id="other"))
++    assert lo(r) == ["i", "other"]
++    assert "p" in r._owner_unproven
++    assert r.migration_diagnostics["owner_candidates"]["p"] == ["other"]
++    assert "rebind_plan_owner" in r.migration_diagnostics["recovery"]
++
++
++def test_n6b_explicit_rebind_recovers_and_persists():
++    r = Reducer()
++    r.restore_snapshot(_lost_owner_snapshot())
++    r.reduce(RC("a", "p", 0))
++    assert not r.rebind_plan_owner("p", "nope")
++    assert r.rebind_plan_owner("p", "i")
++    assert not r.rebind_plan_owner("p", "other")     # only while quarantined
++    r2 = Reducer()
++    r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++    assert r2._plan_owner["p"] == "i" and "p" not in r2._owner_unproven
++    assert r2.migration_diagnostics["owner_rebinds"] == [{"plan_id": "p", "incident_id": "i"}]
++    r2.reduce(RC("x", "p", 1, incident_id="other"))  # contradiction rejected
++    assert lo(r2) == ["i", "other"]
++    r2.reduce(RC("b", "p", 1))
++    assert lo(r2) == ["other"]

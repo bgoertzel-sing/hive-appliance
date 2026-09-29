@@ -1,0 +1,260 @@
+[
+  {
+    "fresh_post_migration_evidence": false,
+    "before": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "historical",
+          "ts": 1790640607.5130079,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        },
+        {
+          "id": "unrelated",
+          "ts": 1790640607.5130339,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [
+        "p"
+      ],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 0,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+      },
+      "incidents_total": 2,
+      "incidents_open": 2
+    },
+    "accepted": true,
+    "after": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "historical",
+          "ts": 1790640607.5130079,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        },
+        {
+          "id": "unrelated",
+          "ts": 1790640607.5130339,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {
+        "p": "unrelated"
+      },
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 0,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+        "owner_rebinds": [
+          {
+            "plan_id": "p",
+            "incident_id": "unrelated"
+          }
+        ]
+      },
+      "incidents_total": 2,
+      "incidents_open": 2
+    },
+    "open": [
+      "historical",
+      "unrelated"
+    ],
+    "diagnostics_stable": true,
+    "rebind_log_entries": 1
+  },
+  {
+    "fresh_post_migration_evidence": true,
+    "before": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "historical",
+          "ts": 1790640607.5130079,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        },
+        {
+          "id": "unrelated",
+          "ts": 1790640607.5130339,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [
+        {
+          "id": "fresh0",
+          "plan_id": "p",
+          "step_index": 0,
+          "verified": true
+        },
+        {
+          "id": "fresh1",
+          "plan_id": "p",
+          "step_index": 1,
+          "verified": true
+        }
+      ],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [
+        "p"
+      ],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 0,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner."
+      },
+      "incidents_total": 2,
+      "incidents_open": 2
+    },
+    "accepted": true,
+    "after": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "historical",
+          "ts": 1790640607.5130079,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        },
+        {
+          "id": "unrelated",
+          "ts": 1790640607.5130339,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0,
+          1
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "fresh0",
+        "fresh1"
+      ],
+      "plan_owner": {
+        "p": "unrelated"
+      },
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 0,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. Plans in legacy_ownerless_plans stay quarantined until an operator calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN does not re-establish a lost owner.",
+        "owner_rebinds": [
+          {
+            "plan_id": "p",
+            "incident_id": "unrelated"
+          }
+        ]
+      },
+      "incidents_total": 2,
+      "incidents_open": 1
+    },
+    "open": [
+      "historical"
+    ],
+    "diagnostics_stable": true,
+    "rebind_log_entries": 1
+  }
+]
