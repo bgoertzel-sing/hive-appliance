@@ -1,0 +1,6 @@
+{
+  "command": ["python3", "projects/hive-appliance/experiments/20260928-astra-7173/replay.py", "/home/openclaw/research-agent/projects/hive-appliance/experiments/20260928-astra-7173/relocation-smoke", "--only", "probes"],
+  "actual_process_exit": 1,
+  "meaning": "Replay returns nonzero when any child is nonzero; all expected historical-policy and current-defect failures reproduced. No pytest invocation.",
+  "child_process_evidence": "relocation-smoke/replay-summary.json and each child started/exit/stdout/stderr file"
+}

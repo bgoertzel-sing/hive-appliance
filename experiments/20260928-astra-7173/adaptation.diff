@@ -1,0 +1,29 @@
+--- 7160/mechanism_probes.py
++++ 7173/mechanism_probes.py
+@@ -28,7 +28,7 @@
+   if mode=='current_twice':l=restore(restore(l))
+   if mode=='legacy_twice':l.restore_snapshot(s)
+   l.reduce(P());l.reduce(R('fresh1',1));before=state(l)
+-  rebound=l.rebind_plan_owner('p','i') if not linked else None
++  rebound=l.rebind_plan_owner('p','i', actor='review7173', reason='legacy witness', allow_non_candidate=True) if not linked else None
+   l.reduce(R('fresh0'));after=state(l)
+   rows.append(dict(linked=linked,mode=mode,checkpoint=ck.id,before=before,rebound=rebound,after=after,passed=before['open']==['i'] and after['open']==[]))
+ out['disk_recovery']=rows
+@@ -41,7 +41,7 @@
+   l.reduce(R('new0'));l.reduce(R('new1',1))
+   if case=='held_failure':l.reduce(R('newerfail',0,False))
+  before=state(l);target='missing' if case=='missing' else ('other' if case.startswith('foreign') else 'i')
+- accepted=l.rebind_plan_owner('p',target);second=l.rebind_plan_owner('p','other');after=state(l);l=restore(restore(l))
++ accepted=l.rebind_plan_owner('p',target, actor='review7173', reason='legacy witness', allow_non_candidate=True);second=l.rebind_plan_owner('p','other', actor='review7173', reason='legacy witness', allow_non_candidate=True);after=state(l);l=restore(restore(l))
+  rows.append(dict(case=case,before=before,target=target,accepted=accepted,second=second,after=after,persisted=state(l)==after))
+ out['rebind']=rows
+ # Snapshot and audit bound: per-plan candidates cap eight; number plans and audit entries uncapped.
+@@ -52,7 +52,7 @@
+ l=Reducer();l.restore_snapshot(s)
+ for k in range(128):l.reduce(P('p'+str(k),'i'+str(k),1))
+ candidates=len(l.migration_diagnostics['owner_candidates'])
+-for k in range(128):assert l.rebind_plan_owner('p'+str(k),'i'+str(k))
++for k in range(128):assert l.rebind_plan_owner('p'+str(k),'i'+str(k), actor='review7173', reason='recorded candidate')
+ out['global_bounds']=dict(plans=128,candidate_plan_keys=candidates,rebind_entries=len(l.migration_diagnostics['owner_rebinds']),legacy_ids=len(l.migration_diagnostics['legacy_ownerless_plans']),open=len(l.open_incidents()),restored_equal=state(restore(l))==state(l))
+ # Live pending/namespace controls: compare open IDs and step sets after EVERY event.
+ sequences={

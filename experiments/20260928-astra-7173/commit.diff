@@ -1,0 +1,243 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index e3d2541..3d5c0c1 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -18,6 +18,9 @@ from typing import Any
+ 
+ from schemas.types import Event, EventKind, IncidentReport, Severity
+ 
++# N10 (7160): global bound for historical migration diagnostics lists/maps
++MAX_DIAG_ENTRIES = 256
++
+ logger = logging.getLogger(__name__)
+ 
+ 
+@@ -50,8 +53,8 @@ class Reducer:
+         # N5 (7075): count of ambiguous legacy pending receipts discarded
+         self.legacy_pending_discarded = 0
+         # N6 (7133): plans whose owner a legacy snapshot could not prove; their
+-        # receipts are buffered and they cannot complete until a PLAN
+-        # re-establishes the owner.
++        # receipts are buffered and they cannot complete until a trusted
++        # operator calls rebind_plan_owner() (N6 7146 / N9 7160).
+         self._owner_unproven: set[str] = set()
+         # N7 (7133): durable migration diagnostics (persisted in snapshots)
+         self.migration_diagnostics: dict[str, Any] = {}
+@@ -142,11 +145,14 @@ class Reducer:
+             self._seen_incident_ids.add(incident.id)
+             # N8 (7146): a late INCIDENT is linked to the plan it owns and all
+             # eligible pending evidence is drained before any completion.
+-            if not incident.plan_id:
+-                owned = self._owned_plans(incident.id)
+-                if len(owned) == 1:
+-                    incident.plan_id = owned[0]
+-            self._drain_pending(set())
++            owned = self._owned_plans(incident.id)
++            if not incident.plan_id and len(owned) == 1:
++                incident.plan_id = owned[0]
++            # H2 (7160): re-check completion of every plan this incident OWNS,
++            # so a late INCIDENT after all successes closes without waiting for
++            # another trigger.  A mere payload link to an ownerless plan does
++            # not (old evidence must not auto-close a newly reported incident).
++            self._drain_pending(set(owned))
+ 
+     def _owned_plans(self, inc_id: str) -> list[str]:
+         return sorted(p for p, o in self._plan_owner.items() if o == inc_id)
+@@ -186,27 +192,100 @@ class Reducer:
+                 return True
+         return False
+ 
+-    def rebind_plan_owner(self, plan_id: str, incident_id: str) -> bool:
+-        """N6 (7146): explicit, operator-authoritative owner rebind for a plan
+-        quarantined by legacy migration (lost owner).  An ordinary PLAN cannot
+-        re-establish a lost owner because no reducer field can prove it matches
+-        the original.  Returns True if the rebind was applied."""
+-        if plan_id not in self._owner_unproven or not incident_id:
+-            return False
++    def _rebind_check(self, plan_id: str, incident_id: str,
++                      allow_non_candidate: bool):
++        if plan_id not in self._owner_unproven:
++            return False, "plan is not quarantined", None
++        if not incident_id:
++            return False, "no target incident", None
+         inc = self._find_incident(incident_id)
+-        if inc is None or (inc.plan_id and inc.plan_id != plan_id):
+-            return False
++        if inc is None:
++            return False, "unknown target incident", None
++        if inc.resolved:
++            return False, "target incident is already resolved", inc
++        if inc.plan_id and inc.plan_id != plan_id:
++            return False, "target incident is linked to another plan", inc
++        cands = (self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, [])
++        if incident_id not in cands and not allow_non_candidate:
++            return False, "target is not a recorded owner candidate", inc
++        return True, "", inc
++
++    def _apply_rebind(self, plan_id: str, incident_id: str, inc: Any) -> None:
+         self._owner_unproven.discard(plan_id)
+         self._plan_owner[plan_id] = incident_id
+         if not inc.plan_id:
+             inc.plan_id = plan_id
+-        d = self.migration_diagnostics
+-        d.setdefault("owner_rebinds", []).append(
+-            {"plan_id": plan_id, "incident_id": incident_id})
+-        (d.get("owner_candidates") or {}).pop(plan_id, None)
+-        logger.warning("Operator rebind: plan %s owner set to incident %s",
+-                       plan_id, incident_id)
++        (self.migration_diagnostics.get("owner_candidates") or {}).pop(plan_id, None)
+         self._drain_pending({plan_id})
++
++    def preview_rebind(self, plan_id: str, incident_id: str,
++                       allow_non_candidate: bool = False) -> dict[str, Any]:
++        """N9 (7160): side-effect-free preview of rebind_plan_owner(): whether
++        it is allowed (and why not), recorded candidates, the held receipts
++        it would release, and which open incidents it would close."""
++        ok, why, _ = self._rebind_check(plan_id, incident_id, allow_non_candidate)
++        cands = list((self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, []))
++        held = []
++        for rid, rp in self._pending_receipts.items():
++            pid = rp.get("plan_id") or ""
++            if pid == plan_id or (not pid and (rp.get("incident_id") or "") == incident_id):
++                held.append({"id": rid, "plan_id": pid,
++                             "incident_id": rp.get("incident_id") or "",
++                             "step_index": rp.get("step_index"),
++                             "verified": rp.get("verified")})
++        would_close: list[str] = []
++        if ok:
++            sim = copy.deepcopy(self)
++            before = {i.id for i in sim.open_incidents()}
++            sim._apply_rebind(plan_id, incident_id, sim._find_incident(incident_id))
++            would_close = sorted(before - {i.id for i in sim.open_incidents()})
++        return {"plan_id": plan_id, "incident_id": incident_id, "allowed": ok,
++                "refusal": why, "candidates": cands,
++                "is_candidate": incident_id in cands, "held_receipts": held,
++                "would_close": would_close}
++
++    def rebind_plan_owner(self, plan_id: str, incident_id: str, *, actor: str,
++                          reason: str, allow_non_candidate: bool = False) -> bool:
++        """N6 (7146) / N9 (7160): explicit TRUSTED-OPERATOR owner rebind for a
++        plan quarantined by legacy migration (lost owner).
++
++        This is an authority override, not proof of lost history: the caller
++        supplies the ownership evidence.  Never expose it as an ordinary event
++        or an unauthenticated endpoint.  Requirements:
++          - non-empty actor and reason (recorded in owner_rebinds);
++          - the plan is quarantined; the target exists, is OPEN, and is not
++            linked to another plan;
++          - the target is a recorded owner candidate (proposed by a PLAN after
++            migration) unless allow_non_candidate=True is passed deliberately.
++        Call preview_rebind() first to see held evidence and what would close.
++        Returns True if applied.
++        """
++        if not (isinstance(actor, str) and actor.strip()):
++            raise ValueError("rebind_plan_owner requires a non-empty actor")
++        if not (isinstance(reason, str) and reason.strip()):
++            raise ValueError("rebind_plan_owner requires a non-empty reason")
++        ok, why, inc = self._rebind_check(plan_id, incident_id, allow_non_candidate)
++        if not ok:
++            logger.warning("Refused rebind of plan %s -> %s by %s: %s",
++                           plan_id, incident_id, actor, why)
++            return False
++        preview = self.preview_rebind(plan_id, incident_id, allow_non_candidate)
++        before = {i.id for i in self.open_incidents()}
++        self._apply_rebind(plan_id, incident_id, inc)
++        closed = sorted(before - {i.id for i in self.open_incidents()})
++        d = self.migration_diagnostics
++        recs = d.setdefault("owner_rebinds", [])
++        d["owner_rebinds_total"] = int(d.get("owner_rebinds_total", len(recs))) + 1
++        recs.append({"plan_id": plan_id, "incident_id": incident_id,
++                     "actor": actor, "reason": reason,
++                     "candidate": preview["is_candidate"],
++                     "held_receipts": len(preview["held_receipts"]),
++                     "closed": closed})
++        del recs[:-MAX_DIAG_ENTRIES]
++        logger.warning("Operator rebind by %s (%s): plan %s owner set to incident "
++                       "%s (candidate=%s, held=%d, closed=%s)", actor, reason,
++                       plan_id, incident_id, preview["is_candidate"],
++                       len(preview["held_receipts"]), closed)
+         return True
+ 
+     def _handle_plan(self, event: Event) -> None:
+@@ -233,10 +312,14 @@ class Reducer:
+         if inc_id and plan_id in self._owner_unproven:
+             # N6 (7146): a lost legacy owner is NOT re-established by an
+             # ordinary PLAN; it is recorded as a candidate for operator rebind.
+-            lst = self.migration_diagnostics.setdefault(
+-                "owner_candidates", {}).setdefault(plan_id, [])
+-            if inc_id not in lst and len(lst) < 8:
+-                lst.append(inc_id)
++            d = self.migration_diagnostics
++            cmap = d.setdefault("owner_candidates", {})
++            if plan_id not in cmap and len(cmap) >= MAX_DIAG_ENTRIES:
++                d["owner_candidates_dropped"] = int(d.get("owner_candidates_dropped", 0)) + 1
++            else:
++                lst = cmap.setdefault(plan_id, [])
++                if inc_id not in lst and len(lst) < 8:
++                    lst.append(inc_id)
+             logger.warning("PLAN %s -> %s held: owner lost in legacy migration; "
+                            "use rebind_plan_owner()", plan_id, inc_id)
+             return
+@@ -453,7 +536,7 @@ class Reducer:
+             # plan).  Plans with no link (PLAN-before-INCIDENT) or conflicting
+             # links are quarantined: previously admitted progress cannot be
+             # revalidated, so it is dropped, receipts are buffered, and the
+-            # plan cannot complete until a PLAN re-establishes its owner.
++            # plan cannot complete until an operator rebind_plan_owner().
+             links: dict[str, set[str]] = {}
+             for inc in incidents:
+                 if inc.plan_id:
+@@ -469,13 +552,18 @@ class Reducer:
+                 dropped += len(self._plan_verified.get(pid, ()))
+                 self._plan_verified[pid] = set()
+             if self._owner_unproven:
+-                diag["legacy_ownerless_plans"] = sorted(
+-                    set(diag.get("legacy_ownerless_plans", [])) | self._owner_unproven)
++                # N10 (7160): bounded history + total; the actionable current
++                # quarantine is persisted separately as owner_unproven.
++                prev = list(diag.get("legacy_ownerless_plans", []) or [])
++                new = sorted(self._owner_unproven - set(prev))
++                diag["legacy_ownerless_total"] = int(
++                    diag.get("legacy_ownerless_total", len(prev))) + len(new)
++                diag["legacy_ownerless_plans"] = (prev + new)[:MAX_DIAG_ENTRIES]
+                 diag["legacy_verified_discarded"] = int(
+                     diag.get("legacy_verified_discarded", 0)) + dropped
+                 logger.warning("Legacy snapshot without plan owners: plans %s "
+                                "quarantined (%d verified step(s) discarded) until "
+-                               "a PLAN re-establishes the owner",
++                               "an operator calls rebind_plan_owner()",
+                                sorted(self._owner_unproven), dropped)
+         # N5 (7146): successes that discarded pending evidence could have
+         # superseded are invalidated, INDEPENDENT of owner reconstruction.
+@@ -520,8 +608,10 @@ class Reducer:
+                 "Discarded legacy evidence is not replayed; affected plan steps "
+                 "must be re-proven by fresh, uniquely identified receipts. Plans "
+                 "in legacy_ownerless_plans stay quarantined until an operator "
+-                "calls rebind_plan_owner(plan_id, incident_id); an ordinary PLAN "
+-                "does not re-establish a lost owner.")
++                "calls rebind_plan_owner(plan_id, incident_id, actor=..., "
++                "reason=...) after preview_rebind(); targets must be open and a "
++                "recorded owner candidate unless allow_non_candidate=True. An "
++                "ordinary PLAN does not re-establish a lost owner.")
+         # N7 (7133): persisted + cumulative across later snapshot/restore
+         self.migration_diagnostics = diag
+         self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 0a70dd7..da16d7f 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -247,8 +247,12 @@ class HiveReducer:
+ 
+         # Update agent health
+         self._recompute_agent_health(agent_id)
+-        # N8 (7146): drain pending evidence now eligible via the late incident
+-        self._drain_pending(agent_id, set())
++        # N8 (7146) / H2 (7160): drain pending evidence now eligible via the
++        # late incident, then re-check completion of every plan it OWNS.
++        pre = f"{agent_id}:"
++        owned = {k[len(pre):] for k, o in self._plan_owner.items()
++                 if k.startswith(pre) and o == identity}
++        self._drain_pending(agent_id, owned)
+ 
+         # Attempt cross-agent correlation
+         correlated = self._correlate_incidents(symptom, event.ts)

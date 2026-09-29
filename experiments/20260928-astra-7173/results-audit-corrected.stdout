@@ -1,0 +1,102 @@
+{
+  "agreement": [
+    {
+      "group": "original402",
+      "schedules": 402,
+      "event_states": 2426,
+      "mismatches": 0
+    },
+    {
+      "group": "lifecycle",
+      "schedules": 48,
+      "event_states": 276,
+      "mismatches": 0
+    }
+  ],
+  "semantic": {
+    "current_format": {
+      "total": 3072,
+      "passed": 3072,
+      "failed": 0
+    },
+    "prior_ordered_format": {
+      "total": 3072,
+      "passed": 3072,
+      "failed": 0
+    },
+    "legacy_fail_closed": {
+      "total": 384,
+      "passed": 384,
+      "failed": 0
+    },
+    "original_witnesses": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "stale_progress": {
+      "total": 3,
+      "passed": 0,
+      "failed": 3
+    },
+    "ownership_lifecycle": {
+      "total": 48,
+      "passed": 48,
+      "failed": 0
+    },
+    "authentic_old_ownership": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0
+    },
+    "agent_namespace": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0
+    },
+    "failed_lifecycle_names": [],
+    "failed_old_owner_names": []
+  },
+  "raw_7024_failures": [
+    "two_plans_one_incident_failure",
+    "prelinked_incident_only_different_plan_incident"
+  ],
+  "stale_safety_passes": 3,
+  "stale_old_automatic_recovery_passes": 0,
+  "explicit_disk_recovery_passes": 6,
+  "n8_passes": 14,
+  "n8_agreement": 14,
+  "rejected_state_changes": [
+    [
+      "rejected_plan_registrations"
+    ],
+    [
+      "rejected_plan_registrations"
+    ]
+  ],
+  "new": {
+    "total": 10,
+    "passed": 7,
+    "failed": [
+      "n9_preview_mutable_alias_purity",
+      "n9_preview_release_coverage",
+      "n10_authentic_previous_upgrade_caps"
+    ]
+  },
+  "exits": {
+    "adversarial": 1,
+    "adversarial-inverted": 0,
+    "boundary-and-disk": 0,
+    "independent": 0,
+    "mechanism-probes": 0,
+    "new-cases": 1,
+    "older-regressions": 0,
+    "probes": 0,
+    "pytest": 1,
+    "results-audit": 1,
+    "review7173": 1,
+    "semantic-7133": 1,
+    "supplementary": 1
+  },
+  "record_note": "Owner-map references in unchanged semantic harness intermediate traces can alias later state; final oracles remain valid. New review7173 traces deep-copy maps."
+}
