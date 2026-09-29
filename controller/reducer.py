@@ -20,6 +20,18 @@ from schemas.types import Event, EventKind, IncidentReport, Severity
 
 # N10 (7160): global bound for historical migration diagnostics lists/maps
 MAX_DIAG_ENTRIES = 256
+# N9 (7173): per-kind receipt ids retained in a rebind audit record
+MAX_EFFECT_IDS = 32
+EFFECT_KINDS = ("credited", "failure_recorded", "consumed_no_effect", "still_held")
+
+
+def _as_int(x: Any) -> int:
+    if isinstance(x, bool):
+        return 0
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return 0
 
 logger = logging.getLogger(__name__)
 
@@ -168,17 +180,57 @@ class Reducer:
             return True
         return False
 
-    def _drain_pending(self, touched: set) -> None:
+    def _drain_pending(self, touched: set, outcome: Any = None) -> None:
         """Apply every newly eligible pending receipt (arrival order), THEN
-        decide completion once per touched plan (N3/N8)."""
+        decide completion once per touched plan (N3/N8).
+
+        N9 (7173): when outcome is a dict, the effect on EVERY buffered
+        receipt is recorded from the actual before/after state
+        (credited / failure_recorded / consumed_no_effect / still_held)."""
         touched = set(touched)
         for rid, rp in list(self._pending_receipts.items()):
+            if outcome is not None:
+                v0 = {k: frozenset(v) for k, v in self._plan_verified.items()}
+                f0 = {k: frozenset(v) for k, v in self._plan_failed_steps.items()}
             got = self._handle_receipt(SimpleNamespace(payload=rp, id=rid),
                                        resolve=False)
             if got:
                 touched.add(got)
+            if outcome is not None:
+                outcome[rid] = self._receipt_effect(rid, rp, got, v0, f0)
         for pid in sorted(touched):
             self._maybe_resolve(pid)
+
+    def _receipt_effect(self, rid: str, rp: dict, got: str, v0: dict,
+                        f0: dict) -> dict[str, Any]:
+        rec = {"id": rid,
+               "plan_id": copy.deepcopy(rp.get("plan_id") or ""),
+               "incident_id": copy.deepcopy(rp.get("incident_id") or ""),
+               "step_index": copy.deepcopy(rp.get("step_index")),
+               "verified": copy.deepcopy(rp.get("verified")),
+               "applied_to": got or ""}
+        if rid in self._pending_receipts:
+            rec["outcome"] = "still_held"
+            return rec
+        grew = lost = failed = False
+        for k in set(v0) | set(self._plan_verified):
+            a, b = v0.get(k, frozenset()), set(self._plan_verified.get(k, ()))
+            grew = grew or bool(b - a)
+            lost = lost or bool(a - b)
+        for k in set(f0) | set(self._plan_failed_steps):
+            a, b = f0.get(k, frozenset()), set(self._plan_failed_steps.get(k, ()))
+            failed = failed or bool(b - a)
+        rec["outcome"] = ("credited" if grew else
+                          "failure_recorded" if (failed or lost) else
+                          "consumed_no_effect")
+        return rec
+
+    @staticmethod
+    def _group_effects(outcome: dict) -> dict[str, list]:
+        groups: dict[str, list] = {k: [] for k in EFFECT_KINDS}
+        for rec in outcome.values():
+            groups[rec["outcome"]].append(rec)
+        return groups
 
     def _pending_blocks(self, plan_id: str, owner: str) -> bool:
         """N8 (7146): completion is refused while any pending receipt still
@@ -210,19 +262,26 @@ class Reducer:
             return False, "target is not a recorded owner candidate", inc
         return True, "", inc
 
-    def _apply_rebind(self, plan_id: str, incident_id: str, inc: Any) -> None:
+    def _apply_rebind(self, plan_id: str, incident_id: str, inc: Any,
+                      outcome: Any = None) -> None:
         self._owner_unproven.discard(plan_id)
         self._plan_owner[plan_id] = incident_id
         if not inc.plan_id:
             inc.plan_id = plan_id
         (self.migration_diagnostics.get("owner_candidates") or {}).pop(plan_id, None)
-        self._drain_pending({plan_id})
+        self._drain_pending({plan_id}, outcome)
 
     def preview_rebind(self, plan_id: str, incident_id: str,
                        allow_non_candidate: bool = False) -> dict[str, Any]:
-        """N9 (7160): side-effect-free preview of rebind_plan_owner(): whether
-        it is allowed (and why not), recorded candidates, the held receipts
-        it would release, and which open incidents it would close."""
+        """N9 (7160/7173): side-effect-free preview of rebind_plan_owner().
+
+        Returns whether it is allowed (and why not), recorded candidates,
+        held_receipts (buffered receipts that directly name the plan or the
+        target) and, derived from a simulated rebind on a deep copy, effects:
+        EVERY buffered receipt grouped by what the rebind would do to it
+        (credited / failure_recorded / consumed_no_effect / still_held),
+        effect_counts and would_close.  The whole result is deep-copied, so
+        it never aliases live reducer state."""
         ok, why, _ = self._rebind_check(plan_id, incident_id, allow_non_candidate)
         cands = list((self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, []))
         held = []
@@ -234,20 +293,26 @@ class Reducer:
                              "step_index": rp.get("step_index"),
                              "verified": rp.get("verified")})
         would_close: list[str] = []
+        effects: dict[str, list] = {k: [] for k in EFFECT_KINDS}
         if ok:
             sim = copy.deepcopy(self)
             before = {i.id for i in sim.open_incidents()}
-            sim._apply_rebind(plan_id, incident_id, sim._find_incident(incident_id))
+            out: dict[str, Any] = {}
+            sim._apply_rebind(plan_id, incident_id, sim._find_incident(incident_id), out)
             would_close = sorted(before - {i.id for i in sim.open_incidents()})
-        return {"plan_id": plan_id, "incident_id": incident_id, "allowed": ok,
-                "refusal": why, "candidates": cands,
-                "is_candidate": incident_id in cands, "held_receipts": held,
-                "would_close": would_close}
+            effects = self._group_effects(out)
+        return copy.deepcopy({
+            "plan_id": plan_id, "incident_id": incident_id, "allowed": ok,
+            "refusal": why, "candidates": cands,
+            "is_candidate": incident_id in cands, "held_receipts": held,
+            "effects": effects,
+            "effect_counts": {k: len(v) for k, v in effects.items()},
+            "would_close": would_close})
 
     def rebind_plan_owner(self, plan_id: str, incident_id: str, *, actor: str,
                           reason: str, allow_non_candidate: bool = False) -> bool:
-        """N6 (7146) / N9 (7160): explicit TRUSTED-OPERATOR owner rebind for a
-        plan quarantined by legacy migration (lost owner).
+        """N6 (7146) / N9 (7160, 7173): explicit TRUSTED-OPERATOR owner rebind
+        for a plan quarantined by legacy migration (lost owner).
 
         This is an authority override, not proof of lost history: the caller
         supplies the ownership evidence.  Never expose it as an ordinary event
@@ -258,6 +323,9 @@ class Reducer:
           - the target is a recorded owner candidate (proposed by a PLAN after
             migration) unless allow_non_candidate=True is passed deliberately.
         Call preview_rebind() first to see held evidence and what would close.
+        The audit record accounts for EVERY buffered receipt the rebind
+        drained, from the actual before/after state: pending_before,
+        effect_counts and bounded effect_ids per kind.
         Returns True if applied.
         """
         if not (isinstance(actor, str) and actor.strip()):
@@ -269,23 +337,28 @@ class Reducer:
             logger.warning("Refused rebind of plan %s -> %s by %s: %s",
                            plan_id, incident_id, actor, why)
             return False
-        preview = self.preview_rebind(plan_id, incident_id, allow_non_candidate)
+        cands = (self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, [])
+        is_cand = incident_id in cands
         before = {i.id for i in self.open_incidents()}
-        self._apply_rebind(plan_id, incident_id, inc)
+        out: dict[str, Any] = {}
+        self._apply_rebind(plan_id, incident_id, inc, out)
         closed = sorted(before - {i.id for i in self.open_incidents()})
+        eff = self._group_effects(out)
+        counts = {k: len(v) for k, v in eff.items()}
         d = self.migration_diagnostics
         recs = d.setdefault("owner_rebinds", [])
-        d["owner_rebinds_total"] = int(d.get("owner_rebinds_total", len(recs))) + 1
+        d["owner_rebinds_total"] = _as_int(d.get("owner_rebinds_total", len(recs))) + 1
         recs.append({"plan_id": plan_id, "incident_id": incident_id,
-                     "actor": actor, "reason": reason,
-                     "candidate": preview["is_candidate"],
-                     "held_receipts": len(preview["held_receipts"]),
+                     "actor": actor, "reason": reason, "candidate": is_cand,
+                     "pending_before": len(out), "effect_counts": counts,
+                     "effect_ids": {k: [str(r["id"]) for r in v][:MAX_EFFECT_IDS]
+                                    for k, v in eff.items()},
                      "closed": closed})
         del recs[:-MAX_DIAG_ENTRIES]
         logger.warning("Operator rebind by %s (%s): plan %s owner set to incident "
-                       "%s (candidate=%s, held=%d, closed=%s)", actor, reason,
-                       plan_id, incident_id, preview["is_candidate"],
-                       len(preview["held_receipts"]), closed)
+                       "%s (candidate=%s, pending_before=%d, effects=%s, closed=%s)",
+                       actor, reason, plan_id, incident_id, is_cand, len(out),
+                       counts, closed)
         return True
 
     def _handle_plan(self, event: Event) -> None:
@@ -613,8 +686,41 @@ class Reducer:
                 "recorded owner candidate unless allow_non_candidate=True. An "
                 "ordinary PLAN does not re-establish a lost owner.")
         # N7 (7133): persisted + cumulative across later snapshot/restore
+        # N10 (7173): bounds enforced on EVERY restore (incl. upgraded ones)
+        self._normalize_diagnostics(diag, self._owner_unproven)
         self.migration_diagnostics = diag
         self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
+
+    @staticmethod
+    def _normalize_diagnostics(diag: dict, unproven: set) -> None:
+        """N10 (7173): enforce MAX_DIAG_ENTRIES on every restore, including
+        current-format snapshots written by earlier versions.  Totals are
+        initialised from the pre-pruned history.  The safety-critical
+        owner_unproven set is persisted separately and is NEVER capped;
+        candidate keys of still-quarantined plans are kept first."""
+        lop = diag.get("legacy_ownerless_plans")
+        if lop is not None:
+            lop = list(lop) if isinstance(lop, (list, tuple, set)) else []
+            diag["legacy_ownerless_total"] = max(
+                _as_int(diag.get("legacy_ownerless_total")), len(lop))
+            diag["legacy_ownerless_plans"] = lop[:MAX_DIAG_ENTRIES]
+        recs = diag.get("owner_rebinds")
+        if recs is not None:
+            recs = list(recs) if isinstance(recs, (list, tuple)) else []
+            diag["owner_rebinds_total"] = max(
+                _as_int(diag.get("owner_rebinds_total")), len(recs))
+            diag["owner_rebinds"] = recs[-MAX_DIAG_ENTRIES:]
+        cmap = diag.get("owner_candidates")
+        if cmap is not None:
+            cmap = cmap if isinstance(cmap, dict) else {}
+            keys = sorted(cmap, key=lambda k: (k not in unproven, str(k)))
+            kept = keys[:MAX_DIAG_ENTRIES]
+            if len(keys) > len(kept):
+                diag["owner_candidates_dropped"] = _as_int(
+                    diag.get("owner_candidates_dropped")) + len(keys) - len(kept)
+            diag["owner_candidates"] = {
+                k: (list(cmap[k]) if isinstance(cmap[k], (list, tuple)) else [])[:8]
+                for k in kept}
 
     def state_snapshot(self) -> dict[str, Any]:
         """Alias for snapshot() for API compatibility."""
