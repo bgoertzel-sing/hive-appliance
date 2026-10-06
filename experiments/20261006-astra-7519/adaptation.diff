@@ -1,0 +1,11 @@
+--- 7195/new_cases.py
++++ 7519/new_cases.py
+@@ -46,7 +46,7 @@
+ run('retry_before_plan_duplicate_failure',[I(),R('f0',0,False),R('f1',1,False),R('r0',0),R('r1',1),R('f0',0,False),R('r0',0),P(),P()],[1]*7+[0,0])
+ run('neither_identity',[I(),P(),R('x',0,p=''),R('y',1,p='')],[1]*4)
+ run('two_plans_one_incident',[I(),R('p0'),R('q0',p='q'),R('q1',1,p='q'),P('q'),P(),R('p1',1),P('q')],[1,1,1,1,0,0,0,0])
+-run('two_plans_one_incident_failure',[I(),R('p0'),R('q0',p='q'),R('qf',1,False,p='q'),P('q'),P(),R('p1',1),R('qretry',1,p='q'),P()],[1]*7+[0,0])
++run('two_plans_one_incident_failure',[I(),R('p0'),R('q0',p='q'),R('qf',1,False,p='q'),P('q'),P(),R('p1',1),R('qretry',1,p='q'),P()],[1]*6+[0,0,0])
+ run('incident_only_then_other_plan',[I(),I('other'),R('a',p='',i='i'),P('p','other',1),P('q','i',1)],[1,2,2,2,1])
+ run('incident_only_then_other_plan_restore',[I(),I('other'),R('a',p='',i='i'),P('p','other',1),P('q','i',1)],[1,2,2,2,1],restore_at=2)
+ run('contradiction_created_while_buffered',[I(),I('other'),R('a',0,i='other'),R('b',1),P('q','other',1),P(),R('clean',0)],[1,2,2,2,2,2,1])

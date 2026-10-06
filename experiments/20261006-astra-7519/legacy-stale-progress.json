@@ -1,0 +1,701 @@
+[
+  {
+    "name": "direct",
+    "passed": false,
+    "events": [
+      {
+        "id": "evt_96429561a5f941b3",
+        "kind": "plan",
+        "ts": 1791273665.0003622,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_9008d2e1cffb41ac",
+        "kind": "receipt",
+        "ts": 1791273665.0003707,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "stale_success",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_575c39fb29d04399",
+        "kind": "receipt",
+        "ts": 1791273665.0003781,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "later_failure",
+          "step_index": 0,
+          "verified": false,
+          "plan_id": "",
+          "incident_id": "i"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_84aaeee83d8f48fe",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "legacy_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "later_failure": {
+            "id": "later_failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "stale_success"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "checkpoint_id": "ckpt_1791273665_3",
+    "discarded": 1,
+    "restored": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_plan": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_fresh1": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 1
+    },
+    "after_fresh0": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 2
+    },
+    "uninterrupted_local": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "uninterrupted_hive": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "health": "failed",
+      "displayed_open": 1
+    },
+    "oracle": "Discard cannot leave stale step-0 success sufficient to close after only fresh step 1."
+  },
+  {
+    "name": "roundtrip_twice",
+    "passed": false,
+    "events": [
+      {
+        "id": "evt_30d3315e524147b5",
+        "kind": "plan",
+        "ts": 1791273665.0017815,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e8684351a1ad4cbe",
+        "kind": "receipt",
+        "ts": 1791273665.0017893,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "stale_success",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f9e9e26871024ef4",
+        "kind": "receipt",
+        "ts": 1791273665.001796,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "later_failure",
+          "step_index": 0,
+          "verified": false,
+          "plan_id": "",
+          "incident_id": "i"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_779ed5cdaec74343",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "legacy_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "later_failure": {
+            "id": "later_failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "stale_success"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "checkpoint_id": "ckpt_1791273665_4",
+    "discarded": 1,
+    "restored": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_plan": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_fresh1": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 1
+    },
+    "after_fresh0": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 2
+    },
+    "uninterrupted_local": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "uninterrupted_hive": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "health": "failed",
+      "displayed_open": 1
+    },
+    "oracle": "Discard cannot leave stale step-0 success sufficient to close after only fresh step 1."
+  },
+  {
+    "name": "legacy_twice",
+    "passed": false,
+    "events": [
+      {
+        "id": "evt_63985a70f569418d",
+        "kind": "plan",
+        "ts": 1791273665.0035586,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_50f6a4d12a5c477d",
+        "kind": "receipt",
+        "ts": 1791273665.0035665,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "stale_success",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_5e05d4987cce4cf0",
+        "kind": "receipt",
+        "ts": 1791273665.0035737,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "later_failure",
+          "step_index": 0,
+          "verified": false,
+          "plan_id": "",
+          "incident_id": "i"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_c660c073e7424133",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "legacy_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "later_failure": {
+            "id": "later_failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "stale_success"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "checkpoint_id": "ckpt_1791273665_5",
+    "discarded": 1,
+    "restored": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_plan": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 0
+    },
+    "after_fresh1": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 1
+    },
+    "after_fresh0": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "i": ""
+      },
+      "discarded": 1,
+      "pending": 2
+    },
+    "uninterrupted_local": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "uninterrupted_hive": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "failed": {
+        "p": [
+          0
+        ]
+      },
+      "owner": {
+        "p": "i"
+      },
+      "links": {
+        "i": "p"
+      },
+      "health": "failed",
+      "displayed_open": 1
+    },
+    "oracle": "Discard cannot leave stale step-0 success sufficient to close after only fresh step 1."
+  }
+]

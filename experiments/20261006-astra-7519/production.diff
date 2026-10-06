@@ -1,0 +1,64 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index e068f1a..5955fe0 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -496,6 +496,17 @@ class Reducer:
+                      if i.id == inc_id and not i.resolved), None)
+ 
+     def _maybe_resolve(self, plan_id: str) -> None:
++        """Close the owning incident when plan_id is fully verified.
++
++        MULTI-PLAN POLICY (decided by Ben Goertzel, 2026-10-06; see
++        docs/POLICY_MULTI_PLAN_SUPERSESSION.md): an incident may own several
++        repair plans.  ANY one of them that completes (every step verified, no
++        failed step, owner proven, no blocking pending evidence) closes the
++        incident, even if a sibling plan for the same incident failed.  No
++        newest-plan selection and no explicit supersedes relation is required;
++        a sibling failure before or after the closure never blocks or reopens
++        it.  Only plans OWNED by the incident can close it.
++        """
+         n = self._plan_step_counts.get(plan_id, 0)
+         if not n or self._plan_failed_steps.get(plan_id):
+             return
+@@ -514,6 +525,12 @@ class Reducer:
+                     inc.plan_id = plan_id
+                 inc.resolved = True
+ 
++    def quarantined_plans(self) -> list[str]:
++        """Authoritative CURRENT quarantine (owner_unproven), sorted.  Use
++        this, not migration_diagnostics["legacy_ownerless_plans"] (a capped
++        historical sample), to enumerate plans awaiting an operator rebind."""
++        return sorted(self._owner_unproven)
++
+     def open_incidents(self) -> list[IncidentReport]:
+         """Execute open incidents operation."""
+         return [i for i in self.incidents if not i.resolved]
+@@ -677,14 +694,22 @@ class Reducer:
+             diag["legacy_pending_discarded"] = int(
+                 diag.get("legacy_pending_discarded", 0)) + discarded_now
+         if diag:
++            # 7195 follow-up 1: owner_unproven is the authoritative CURRENT
++            # quarantine; legacy_ownerless_plans is a capped historical sample.
+             diag["recovery"] = (
+                 "Discarded legacy evidence is not replayed; affected plan steps "
+-                "must be re-proven by fresh, uniquely identified receipts. Plans "
+-                "in legacy_ownerless_plans stay quarantined until an operator "
+-                "calls rebind_plan_owner(plan_id, incident_id, actor=..., "
+-                "reason=...) after preview_rebind(); targets must be open and a "
+-                "recorded owner candidate unless allow_non_candidate=True. An "
+-                "ordinary PLAN does not re-establish a lost owner.")
++                "must be re-proven by fresh, uniquely identified receipts. The "
++                "authoritative CURRENT quarantine is owner_unproven (persisted in "
++                "the snapshot; enumerate it with Reducer.quarantined_plans()). "
++                "legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of "
++                "plans quarantined at migration (see legacy_ownerless_total); it "
++                "is not updated by rebinds and must not be used to enumerate "
++                "actionable plans. A plan in owner_unproven stays quarantined "
++                "until an operator calls rebind_plan_owner(plan_id, incident_id, "
++                "actor=..., reason=...) after preview_rebind(); targets must be "
++                "open and a recorded owner candidate unless "
++                "allow_non_candidate=True. An ordinary PLAN does not re-establish "
++                "a lost owner.")
+         # N7 (7133): persisted + cumulative across later snapshot/restore
+         # N10 (7173): bounds enforced on EVERY restore (incl. upgraded ones)
+         self._normalize_diagnostics(diag, self._owner_unproven)
