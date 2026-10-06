@@ -8,7 +8,7 @@ import pytest
 
 from controller.reducer import Reducer, MAX_DIAG_ENTRIES
 from hive.reducer import HiveReducer
-from hive.types import HiveEvent
+from hive.types import AgentHealth, HiveEvent
 from schemas.types import Event, EventKind, IncidentReport
 
 
@@ -41,21 +41,56 @@ def ho(h):
     return sorted(i["incident_id"] for i in h._open_agent_incidents("a1"))
 
 
-def agree(loc, hive, plans):
+_SEV_FAILED = ("critical", "error")
+
+
+def expected_health(loc, prev):
+    """Independent health oracle (Astra 7195 follow-up 2), derived from the
+    LOCAL reducer's incidents and severities, never from hive state:
+      - UNKNOWN until the first open incident;
+      - FAILED while any open incident is error/critical;
+      - otherwise DEGRADED while any incident is open (H1 contract: an earlier
+        FAILED is not de-escalated while incidents remain open);
+      - HEALTHY once every incident is closed after a DEGRADED/FAILED period
+        (including an incident opened and closed by the same event).
+    """
+    opened = [i for i in loc.incidents if not i.resolved]
+    sev = [getattr(i.severity, "value", i.severity) for i in opened]
+    if any(s in _SEV_FAILED for s in sev):
+        return AgentHealth.FAILED
+    if opened:
+        return AgentHealth.FAILED if prev == AgentHealth.FAILED else AgentHealth.DEGRADED
+    # An incident reported and closed within the SAME event (late INCIDENT
+    # after all successes, H2) still had an open period: hive marks it
+    # DEGRADED on append, then HEALTHY on resolution.
+    if prev in (AgentHealth.DEGRADED, AgentHealth.FAILED) or loc.incidents:
+        return AgentHealth.HEALTHY
+    return prev
+
+
+def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN):
+    """Assert local/hive agreement on open IDs/counts, verified and failed step
+    sets, AND hive health against the independent oracle.  Returns the
+    expected health (thread it into the next call as prev)."""
     assert lo(loc) == ho(hive)
     assert hive.state.agents["a1"].open_incidents == len(lo(loc))
     for p in plans:
         assert set(loc._plan_verified.get(p, set())) == set(hive._plan_verified_steps.get("a1:" + p, set())), p
         assert set(loc._plan_failed_steps.get(p, set())) == set(hive._plan_failed.get("a1:" + p, set())), p
+    exp = expected_health(loc, prev)
+    got = hive.state.agents["a1"].health
+    assert got == exp, f"health mismatch: hive={got} expected={exp}"
+    return exp
 
 
 def both(stream, plans=("p",)):
     loc, hive = Reducer(), HiveReducer()
     hive.register_agent("a1")
+    health = agree(loc, hive, plans)          # UNKNOWN before any event
     for e in stream:
         loc.reduce(e)
         hive.reduce(HiveEvent(source_agent="a1", original_event=e))
-        agree(loc, hive, plans)
+        health = agree(loc, hive, plans, health)
     return loc, hive
 
 
