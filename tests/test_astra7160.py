@@ -44,7 +44,7 @@ def ho(h):
 _SEV_FAILED = ("critical", "error")
 
 
-def expected_health(loc, prev):
+def expected_health(loc, prev, opened_once=False):
     """Independent health oracle (Astra 7195 follow-up 2), derived from the
     LOCAL reducer's incidents and severities, never from hive state:
       - UNKNOWN until the first open incident;
@@ -60,15 +60,18 @@ def expected_health(loc, prev):
         return AgentHealth.FAILED
     if opened:
         return AgentHealth.FAILED if prev == AgentHealth.FAILED else AgentHealth.DEGRADED
-    # An incident reported and closed within the SAME event (late INCIDENT
-    # after all successes, H2) still had an open period: hive marks it
-    # DEGRADED on append, then HEALTHY on resolution.
-    if prev in (AgentHealth.DEGRADED, AgentHealth.FAILED) or loc.incidents:
+    # An incident reported OPEN and closed within the SAME event (late
+    # INCIDENT after all successes, H2) still had an open period: hive marks
+    # it DEGRADED on append, then HEALTHY on resolution.  H-oracle-resolved
+    # (Astra 7519): an incident that ARRIVES already resolved never had an
+    # open period, so mere incident history is not evidence -- opened_once is
+    # tracked independently from the event stream by both().
+    if prev in (AgentHealth.DEGRADED, AgentHealth.FAILED) or opened_once:
         return AgentHealth.HEALTHY
     return prev
 
 
-def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN):
+def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN, opened_once=False):
     """Assert local/hive agreement on open IDs/counts, verified and failed step
     sets, AND hive health against the independent oracle.  Returns the
     expected health (thread it into the next call as prev)."""
@@ -77,7 +80,7 @@ def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN):
     for p in plans:
         assert set(loc._plan_verified.get(p, set())) == set(hive._plan_verified_steps.get("a1:" + p, set())), p
         assert set(loc._plan_failed_steps.get(p, set())) == set(hive._plan_failed.get("a1:" + p, set())), p
-    exp = expected_health(loc, prev)
+    exp = expected_health(loc, prev, opened_once)
     got = hive.state.agents["a1"].health
     assert got == exp, f"health mismatch: hive={got} expected={exp}"
     return exp
@@ -87,10 +90,20 @@ def both(stream, plans=("p",)):
     loc, hive = Reducer(), HiveReducer()
     hive.register_agent("a1")
     health = agree(loc, hive, plans)          # UNKNOWN before any event
+    seen = set()
     for e in stream:
+        # opened_once: this event introduces a NEW incident identity that is
+        # not already resolved on arrival (derived from the stream, not from
+        # reducer state).
+        opened_once = False
+        if e.kind == EventKind.INCIDENT:
+            iid = e.payload.get("id") or e.id
+            if iid not in seen and not e.payload.get("resolved"):
+                opened_once = True
+            seen.add(iid)
         loc.reduce(e)
         hive.reduce(HiveEvent(source_agent="a1", original_event=e))
-        health = agree(loc, hive, plans, health)
+        health = agree(loc, hive, plans, health, opened_once)
     return loc, hive
 
 

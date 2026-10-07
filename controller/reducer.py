@@ -517,10 +517,14 @@ class Reducer:
         owner = self._plan_owner.get(plan_id, "")
         if self._pending_blocks(plan_id, owner):
             return
+        # P3-ownerless (Astra 7519): the immutable owner is the SOLE
+        # completion authority.  A plan with no proven owner (e.g. PLAN with an
+        # empty incident_id) never closes anything, not even incidents that
+        # link to it via inc.plan_id -- linkage alone is not ownership.
+        if not owner:
+            return
         for inc in self.incidents:
-            # N6 (7133): the immutable owner is the sole completion authority;
-            # a plan with no declared owner may only close incidents linked to it.
-            if (inc.id == owner) if owner else (inc.plan_id == plan_id):
+            if inc.id == owner:
                 if not inc.plan_id:
                     inc.plan_id = plan_id
                 inc.resolved = True

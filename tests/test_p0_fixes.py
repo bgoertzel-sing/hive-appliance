@@ -184,7 +184,10 @@ class TestF7CompositeReceipt:
             kind=EventKind.PLAN,
             source="planner",
             subject="inc_1",
-            payload={"id": "plan_2", "steps": [{"verb": "touch"}, {"verb": "verify"}]},
+            # P3-ownerless (Astra 7519): only a plan with a proven owner may
+            # close an incident, so the plan declares its owning incident.
+            payload={"id": "plan_2", "incident_id": "inc_1",
+                     "steps": [{"verb": "touch"}, {"verb": "verify"}]},
         )
         reducer.reduce(plan_event)
 

@@ -422,13 +422,15 @@ class HiveReducer:
             return
         if self._pending_blocks(agent_id, plan_id, self._plan_owner.get(pkey, "")):
             return
+        owner = self._plan_owner.get(pkey, "")
+        # P3-ownerless (Astra 7519): the immutable owner is the SOLE completion
+        # authority; an ownerless plan never closes linked incidents.
+        if not owner:
+            return
         changed = False
         for inc in self._open_agent_incidents(agent_id):
             linked = inc.get("plan_id")
-            owner = self._plan_owner.get(pkey, "")
-            # N6 (7133): the immutable owner is the sole completion authority;
-            # an ownerless plan may only close incidents linked to it.
-            if (inc["incident_id"] == owner) if owner else (linked == plan_id):
+            if inc["incident_id"] == owner:
                 if not linked:
                     inc["plan_id"] = plan_id
                 inc["resolved"] = True

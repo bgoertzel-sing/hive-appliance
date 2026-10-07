@@ -16,6 +16,11 @@ failed:
   blocks the closure and never reopens the incident.
 - Only plans **owned** by the incident (immutable owner, see N6) can close it.
   A plan owned by another incident cannot.
+- **Ownerless plans close nothing** (Astra 7519 P3-ownerless; Ben 2026-10-07
+  "ok we can try it that way"). A plan with no proven owner, e.g. a PLAN with
+  an empty `incident_id`, never closes an incident, even one whose `plan_id`
+  links to it. Linkage alone is not ownership. Earlier code had a linked-plan
+  fallback; it was removed from both reducers.
 
 Both the local `controller/reducer.py` and the hive `hive/reducer.py` already
 behave this way. The decision makes this the specified behavior, not an
@@ -27,5 +32,6 @@ accident.
   `experiments/*/new_cases.py` (which wanted the failed plan q retried before
   closure) is superseded by this decision. Those Astra artifacts are left
   unchanged as a record.
-- Tests: `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+- Tests: `tests/test_astra7519.py` (ownerless negative controls incl.
+  restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
