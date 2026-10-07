@@ -1,0 +1,257 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index 5955fe0..e9153e3 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -517,10 +517,14 @@ class Reducer:
+         owner = self._plan_owner.get(plan_id, "")
+         if self._pending_blocks(plan_id, owner):
+             return
++        # P3-ownerless (Astra 7519): the immutable owner is the SOLE
++        # completion authority.  A plan with no proven owner (e.g. PLAN with an
++        # empty incident_id) never closes anything, not even incidents that
++        # link to it via inc.plan_id -- linkage alone is not ownership.
++        if not owner:
++            return
+         for inc in self.incidents:
+-            # N6 (7133): the immutable owner is the sole completion authority;
+-            # a plan with no declared owner may only close incidents linked to it.
+-            if (inc.id == owner) if owner else (inc.plan_id == plan_id):
++            if inc.id == owner:
+                 if not inc.plan_id:
+                     inc.plan_id = plan_id
+                 inc.resolved = True
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index 4a20cb0..416c3f6 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -16,6 +16,11 @@ failed:
+   blocks the closure and never reopens the incident.
+ - Only plans **owned** by the incident (immutable owner, see N6) can close it.
+   A plan owned by another incident cannot.
++- **Ownerless plans close nothing** (Astra 7519 P3-ownerless; Ben 2026-10-07
++  "ok we can try it that way"). A plan with no proven owner, e.g. a PLAN with
++  an empty `incident_id`, never closes an incident, even one whose `plan_id`
++  links to it. Linkage alone is not ownership. Earlier code had a linked-plan
++  fallback; it was removed from both reducers.
+ 
+ Both the local `controller/reducer.py` and the hive `hive/reducer.py` already
+ behave this way. The decision makes this the specified behavior, not an
+@@ -27,5 +32,6 @@ accident.
+   `experiments/*/new_cases.py` (which wanted the failed plan q retried before
+   closure) is superseded by this decision. Those Astra artifacts are left
+   unchanged as a record.
+-- Tests: `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
++- Tests: `tests/test_astra7519.py` (ownerless negative controls incl.
++  restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+diff --git a/hive/reducer.py b/hive/reducer.py
+index da16d7f..3b7d208 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -422,13 +422,15 @@ class HiveReducer:
+             return
+         if self._pending_blocks(agent_id, plan_id, self._plan_owner.get(pkey, "")):
+             return
++        owner = self._plan_owner.get(pkey, "")
++        # P3-ownerless (Astra 7519): the immutable owner is the SOLE completion
++        # authority; an ownerless plan never closes linked incidents.
++        if not owner:
++            return
+         changed = False
+         for inc in self._open_agent_incidents(agent_id):
+             linked = inc.get("plan_id")
+-            owner = self._plan_owner.get(pkey, "")
+-            # N6 (7133): the immutable owner is the sole completion authority;
+-            # an ownerless plan may only close incidents linked to it.
+-            if (inc["incident_id"] == owner) if owner else (linked == plan_id):
++            if inc["incident_id"] == owner:
+                 if not linked:
+                     inc["plan_id"] = plan_id
+                 inc["resolved"] = True
+diff --git a/tests/test_astra7160.py b/tests/test_astra7160.py
+index f780386..6306694 100644
+--- a/tests/test_astra7160.py
++++ b/tests/test_astra7160.py
+@@ -44,7 +44,7 @@ def ho(h):
+ _SEV_FAILED = ("critical", "error")
+ 
+ 
+-def expected_health(loc, prev):
++def expected_health(loc, prev, opened_once=False):
+     """Independent health oracle (Astra 7195 follow-up 2), derived from the
+     LOCAL reducer's incidents and severities, never from hive state:
+       - UNKNOWN until the first open incident;
+@@ -60,15 +60,18 @@ def expected_health(loc, prev):
+         return AgentHealth.FAILED
+     if opened:
+         return AgentHealth.FAILED if prev == AgentHealth.FAILED else AgentHealth.DEGRADED
+-    # An incident reported and closed within the SAME event (late INCIDENT
+-    # after all successes, H2) still had an open period: hive marks it
+-    # DEGRADED on append, then HEALTHY on resolution.
+-    if prev in (AgentHealth.DEGRADED, AgentHealth.FAILED) or loc.incidents:
++    # An incident reported OPEN and closed within the SAME event (late
++    # INCIDENT after all successes, H2) still had an open period: hive marks
++    # it DEGRADED on append, then HEALTHY on resolution.  H-oracle-resolved
++    # (Astra 7519): an incident that ARRIVES already resolved never had an
++    # open period, so mere incident history is not evidence -- opened_once is
++    # tracked independently from the event stream by both().
++    if prev in (AgentHealth.DEGRADED, AgentHealth.FAILED) or opened_once:
+         return AgentHealth.HEALTHY
+     return prev
+ 
+ 
+-def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN):
++def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN, opened_once=False):
+     """Assert local/hive agreement on open IDs/counts, verified and failed step
+     sets, AND hive health against the independent oracle.  Returns the
+     expected health (thread it into the next call as prev)."""
+@@ -77,7 +80,7 @@ def agree(loc, hive, plans, prev=AgentHealth.UNKNOWN):
+     for p in plans:
+         assert set(loc._plan_verified.get(p, set())) == set(hive._plan_verified_steps.get("a1:" + p, set())), p
+         assert set(loc._plan_failed_steps.get(p, set())) == set(hive._plan_failed.get("a1:" + p, set())), p
+-    exp = expected_health(loc, prev)
++    exp = expected_health(loc, prev, opened_once)
+     got = hive.state.agents["a1"].health
+     assert got == exp, f"health mismatch: hive={got} expected={exp}"
+     return exp
+@@ -87,10 +90,20 @@ def both(stream, plans=("p",)):
+     loc, hive = Reducer(), HiveReducer()
+     hive.register_agent("a1")
+     health = agree(loc, hive, plans)          # UNKNOWN before any event
++    seen = set()
+     for e in stream:
++        # opened_once: this event introduces a NEW incident identity that is
++        # not already resolved on arrival (derived from the stream, not from
++        # reducer state).
++        opened_once = False
++        if e.kind == EventKind.INCIDENT:
++            iid = e.payload.get("id") or e.id
++            if iid not in seen and not e.payload.get("resolved"):
++                opened_once = True
++            seen.add(iid)
+         loc.reduce(e)
+         hive.reduce(HiveEvent(source_agent="a1", original_event=e))
+-        health = agree(loc, hive, plans, health)
++        health = agree(loc, hive, plans, health, opened_once)
+     return loc, hive
+ 
+ 
+diff --git a/tests/test_astra7519.py b/tests/test_astra7519.py
+new file mode 100644
+index 0000000..78800c6
+--- /dev/null
++++ b/tests/test_astra7519.py
+@@ -0,0 +1,97 @@
++"""Astra 7519 findings:
++P3-ownerless (Medium): a plan with no proven owner (e.g. PLAN with an empty
++  incident_id) must never close an incident, not even incidents that link to
++  it via plan_id -- in both the local and hive reducers, before and after
++  snapshot/restore.  Owned-plan closure is unchanged.
++H-oracle-resolved (Low): the health oracle must not treat an incident that
++  ARRIVES already resolved as a past open period (hive stays UNKNOWN).
++"""
++import json
++
++from controller.reducer import Reducer
++from hive.reducer import HiveReducer
++from hive.types import AgentHealth, HiveEvent
++from schemas.types import Event, EventKind, IncidentReport
++from tests.test_astra7160 import PLAN, RC, both, ho, lo
++
++
++def ev(kind, payload):
++    return Event(kind=kind, source="t", subject="svc", payload=payload)
++
++
++def INCL(i, plan_id="", resolved=False):
++    d = IncidentReport(id=i, component="svc", symptom="down").to_dict()
++    d["plan_id"] = plan_id
++    d["resolved"] = resolved
++    return ev(EventKind.INCIDENT, d)
++
++
++def rt(r):
++    r2 = Reducer()
++    r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++    return r2
++
++
++WITNESS = [INCL("i", "p"), INCL("j", "p"), PLAN("p", "", 1), RC("x", "p", 0)]
++
++
++# ------------------------------------------------------------ P3-ownerless
++def test_ownerless_linked_plan_closes_nothing_both_reducers():
++    loc, hive = both(WITNESS)
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
++    assert loc._plan_owner.get("p", "") == ""
++    assert hive._plan_owner.get("a1:p", "") == ""
++
++
++def test_ownerless_witness_survives_restore_after_every_event():
++    r = Reducer()
++    for e in WITNESS:
++        r.reduce(e)
++        r = rt(r)
++    assert lo(r) == ["i", "j"]
++    for _ in range(3):
++        r = rt(r)
++        assert lo(r) == ["i", "j"]
++
++
++def test_ownerless_plan_receipt_first_then_links():
++    loc, hive = both([PLAN("p", "", 1), RC("x", "p", 0), INCL("i", "p"), INCL("j", "p")])
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
++
++
++def test_single_linked_ownerless_plan_does_not_close():
++    loc, hive = both([INCL("i", "p"), PLAN("p", "", 2), RC("a", "p", 0), RC("b", "p", 1)])
++    assert lo(loc) == ["i"] and ho(hive) == ["i"]
++
++
++def test_owned_plan_still_closes_its_owner_only():
++    loc, hive = both([INCL("i", "p"), PLAN("p", "i", 1), RC("x", "p", 0)])
++    assert lo(loc) == [] and ho(hive) == []
++    r = Reducer()
++    for e in [INCL("i", "p"), PLAN("p", "i", 1), RC("x", "p", 0)]:
++        r.reduce(e)
++        r = rt(r)
++    assert lo(r) == []
++
++
++def test_owned_plan_does_not_close_foreign_linked_incident():
++    loc, hive = both([INCL("i"), INCL("j", "p"), PLAN("p", "i", 1), RC("x", "p", 0)])
++    assert "j" in lo(loc) and "j" in ho(hive)
++    assert "i" not in lo(loc) and "i" not in ho(hive)
++
++
++# ------------------------------------------------------- H-oracle-resolved
++def test_already_resolved_first_incident_keeps_unknown():
++    loc, hive = both([INCL("i", resolved=True)])
++    assert hive.state.agents["a1"].health == AgentHealth.UNKNOWN
++
++
++def test_same_event_open_and_close_still_healthy():
++    loc, hive = both([PLAN("p", "i", 1), RC("a", "p", 0), INCL("i")])
++    assert lo(loc) == []
++    assert hive.state.agents["a1"].health == AgentHealth.HEALTHY
++
++
++def test_resolved_arrival_after_open_period():
++    loc, hive = both([INCL("i"), INCL("k", resolved=True)])
++    assert hive.state.agents["a1"].health == AgentHealth.DEGRADED
+diff --git a/tests/test_p0_fixes.py b/tests/test_p0_fixes.py
+index 6f6b0e9..56cba9a 100644
+--- a/tests/test_p0_fixes.py
++++ b/tests/test_p0_fixes.py
+@@ -184,7 +184,10 @@ class TestF7CompositeReceipt:
+             kind=EventKind.PLAN,
+             source="planner",
+             subject="inc_1",
+-            payload={"id": "plan_2", "steps": [{"verb": "touch"}, {"verb": "verify"}]},
++            # P3-ownerless (Astra 7519): only a plan with a proven owner may
++            # close an incident, so the plan declares its owning incident.
++            payload={"id": "plan_2", "incident_id": "inc_1",
++                     "steps": [{"verb": "touch"}, {"verb": "verify"}]},
+         )
+         reducer.reduce(plan_event)
+ 

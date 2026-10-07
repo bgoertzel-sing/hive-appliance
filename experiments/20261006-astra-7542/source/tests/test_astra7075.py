@@ -1,0 +1,164 @@
+"""Astra 7075: N5 legacy pending snapshots fail closed; N6 durable plan ownership.
+
+Witnesses mirror docs/ASTRA_REVIEW_7075.md sections 1 and 2.
+"""
+import json
+
+from controller.reducer import Reducer
+from hive.reducer import HiveReducer
+from hive.types import HiveEvent
+from schemas.types import Event, EventKind, IncidentReport
+
+
+def ev(kind, payload):
+    return Event(kind=kind, source="t", subject="svc", payload=payload)
+
+
+def INC(i):
+    return ev(EventKind.INCIDENT, IncidentReport(id=i, component="svc", symptom="down").to_dict())
+
+
+def PLAN(pid, iid, n):
+    return ev(EventKind.PLAN, {"id": pid, "incident_id": iid, "steps": [{"verb": "v"}] * n})
+
+
+def rc(rid, plan_id="", idx=0, ok=True, incident_id=""):
+    p = {"id": rid, "step_index": idx, "verified": ok}
+    if plan_id:
+        p["plan_id"] = plan_id
+    if incident_id:
+        p["incident_id"] = incident_id
+    return p
+
+
+def RC(*a, **k):
+    return ev(EventKind.RECEIPT, rc(*a, **k))
+
+
+def both(stream):
+    loc, hive = Reducer(), HiveReducer()
+    hive.register_agent("a1")
+    for e in stream:
+        loc.reduce(e)
+        hive.reduce(HiveEvent(source_agent="a1", original_event=e))
+    return loc, hive
+
+
+def lo(r):
+    return sorted(i.id for i in r.open_incidents())
+
+
+def ho(h):
+    return sorted(i["incident_id"] for i in h._open_agent_incidents("a1"))
+
+
+def _legacy(pending):
+    return {"state": {}, "incidents": [IncidentReport(id="i", component="svc", symptom="down").to_dict()],
+            "plan_step_counts": {}, "plan_receipts": {}, "plan_failed_steps": {},
+            "pending_receipts": pending, "seen_receipt_ids": [],
+            "incidents_total": 1, "incidents_open": 1}
+
+
+def _restore(snap):
+    r = Reducer()
+    r.restore_snapshot(json.loads(json.dumps(snap)))
+    return r
+
+
+# ---------------- N5 ----------------
+
+def test_n5_legacy_witness_fails_closed_then_fresh_evidence_completes():
+    # seed1(p/1 ok), old_success(i/0 ok), new_failure(p/0 FAIL): true latest step0 = failed
+    pend = {"p": {"seed1": rc("seed1", "p", 1), "new_failure": rc("new_failure", "p", 0, ok=False)},
+            "i": {"old_success": rc("old_success", idx=0, incident_id="i")}}
+    r = _restore(_legacy(pend))
+    assert r.legacy_pending_discarded == 3
+    assert r._pending_receipts == {}
+    r.reduce(PLAN("p", "i", 2))
+    assert lo(r) == ["i"]                      # never manufactured completion
+    assert r._plan_verified["p"] == set()
+    r.reduce(RC("fresh0", "p", 0))
+    assert lo(r) == ["i"]
+    r.reduce(RC("fresh1", "p", 1))
+    assert lo(r) == []
+
+
+def test_n5_information_loss_opposite_outcomes_both_stay_open():
+    # two opposite streams collapse to the same bucketed snapshot: neither may close
+    for pend in ({"p": {"s0": rc("s0", "p", 0), "s1": rc("s1", "p", 1)},
+                  "i": {"f0": rc("f0", idx=0, ok=False, incident_id="i")}},
+                 {"p": {"f0": rc("f0", "p", 0, ok=False), "s1": rc("s1", "p", 1)},
+                  "i": {"s0": rc("s0", idx=0, incident_id="i")}}):
+        r = _restore(_legacy(pend))
+        r.reduce(PLAN("p", "i", 2))
+        assert lo(r) == ["i"]
+
+
+def test_n5_new_format_pending_still_round_trips():
+    r = Reducer()
+    for e in (INC("i"), RC("a", "p", 0), RC("b", "p", 1)):
+        r.reduce(e)
+    snap = r.snapshot()
+    assert snap["pending_format"] == "arrival-v1" and isinstance(snap["pending_receipts"], list)
+    r2 = _restore(snap)
+    assert r2.legacy_pending_discarded == 0
+    r2.reduce(PLAN("p", "i", 2))
+    assert lo(r2) == []
+
+
+# ---------------- N6 ----------------
+
+RESOLVED = [INC("i"), INC("o"), PLAN("p", "i", 2), PLAN("q", "o", 1), RC("q0", "q", 0),
+            RC("p0", "p", 0), RC("x", "p", 1, incident_id="o")]
+
+
+def test_n6_resolved_target_rejected_local_and_hive():
+    loc, hive = both(RESOLVED)
+    assert lo(loc) == ["i"] and ho(hive) == ["i"]
+    assert hive.state.agents["a1"].open_incidents == 1
+    assert loc._plan_verified["p"] == {0}
+    assert hive._plan_verified_steps["a1:p"] == {0}
+
+
+def test_n6_resolved_target_rejected_after_snapshot_restore():
+    for drop_owner in (False, True):           # True = older snapshot without plan_owner
+        r = Reducer()
+        for e in RESOLVED[:5]:
+            r.reduce(e)
+        snap = json.loads(json.dumps(r.snapshot()))
+        if drop_owner:
+            snap.pop("plan_owner")
+        r2 = _restore(snap)
+        for e in RESOLVED[5:]:
+            r2.reduce(e)
+        assert lo(r2) == ["i"], drop_owner
+
+
+def test_n6_unlinked_target_rejected_hive_does_not_resolve_it():
+    s = [INC("i"), INC("o"), PLAN("p", "i", 2), RC("p0", "p", 0), RC("x", "p", 1, incident_id="o")]
+    loc, hive = both(s)
+    assert lo(loc) == ["i", "o"] and ho(hive) == ["i", "o"]
+    assert hive.state.agents["a1"].open_incidents == 2
+
+
+def test_n6_open_identity_control_still_rejected():
+    s = [INC("i"), INC("o"), PLAN("p", "i", 2), PLAN("q", "o", 1), RC("p0", "p", 0),
+         RC("x", "p", 1, incident_id="o")]
+    loc, hive = both(s)
+    assert lo(loc) == ["i", "o"] and ho(hive) == ["i", "o"]
+
+
+def test_n6_buffered_contradiction_rejected_when_plan_arrives():
+    s = [INC("i"), INC("o"), RC("x", "p", 1, incident_id="o"), RC("p0", "p", 0), PLAN("p", "i", 2)]
+    loc, hive = both(s)
+    assert lo(loc) == ["i", "o"] and ho(hive) == ["i", "o"]
+    loc2, hive2 = both(s + [RC("p1", "p", 1)])
+    assert lo(loc2) == ["o"] and ho(hive2) == ["o"]
+
+
+def test_n6_consistent_dual_address_and_owner_before_incident_still_work():
+    loc, hive = both([INC("i"), PLAN("p", "i", 2), RC("a", "p", 0, incident_id="i"),
+                      RC("b", "p", 1, incident_id="i")])
+    assert lo(loc) == [] and ho(hive) == []
+    loc, hive = both([PLAN("p", "i", 1), INC("i"), RC("a", "p", 0)])
+    assert lo(loc) == [] and ho(hive) == []

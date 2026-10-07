@@ -1,0 +1,26 @@
+{
+  "source_pin": "85c505d1608680f1ac965ad5fad46a573c032b35",
+  "fetched_origin_main": "85c505d1608680f1ac965ad5fad46a573c032b35",
+  "source_files_verified": 135,
+  "helper_files_verified": 14,
+  "child_invocations_with_complete_records": 15,
+  "secret_scan": {
+    "method": "high-confidence token/private-key/credential-URL regex",
+    "patterns": {
+      "github_token": "\\bgh[pousr]_[A-Za-z0-9]{30,}\\b|\\bgithub_pat_[A-Za-z0-9_]{30,}\\b",
+      "openai_style_token": "\\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{35,}\\b",
+      "aws_access_key": "\\b(?:AKIA|ASIA)[A-Z0-9]{16}\\b",
+      "private_key": "-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----",
+      "slack_token": "\\bxox[baprs]-[A-Za-z0-9-]{20,}\\b",
+      "credential_url": "https?://[^\\s/:@]+:[^\\s/@]+@[^\\s/]+"
+    },
+    "files_scanned": 302,
+    "hits": [],
+    "limitation": "Pattern scan, not a credential authenticity test; inherited public fixtures and deliberate local paths retained."
+  },
+  "allowed_changes": [
+    "docs/ASTRA_REVIEW_7542.md",
+    "experiments/20261006-astra-7542/"
+  ],
+  "full_suite_runs": 1
+}
