@@ -159,7 +159,11 @@ class TestF7CompositeReceipt:
             kind=EventKind.PLAN,
             source="planner",
             subject="inc_1",
-            payload={"id": "plan_1", "steps": [{"verb": "touch"}, {"verb": "verify"}]},
+            # L-F7-negative-fixtures (Astra 7542): the plan declares its owner
+            # so the open-state assertion can only hold because the plan is
+            # INCOMPLETE, not because ownership is missing.
+            payload={"id": "plan_1", "incident_id": "inc_1",
+                     "steps": [{"verb": "touch"}, {"verb": "verify"}]},
         )
         reducer.reduce(plan_event)
 
@@ -176,6 +180,7 @@ class TestF7CompositeReceipt:
             payload={"plan_id": "plan_1", "verified": True, "step_index": 0},
         )
         reducer.reduce(receipt_event)
+        assert reducer._plan_owner.get("plan_1") == "inc_1"
         assert not inc.resolved  # Not resolved yet!
 
     def test_all_receipts_resolve(self):
@@ -211,7 +216,10 @@ class TestF7CompositeReceipt:
             kind=EventKind.PLAN,
             source="planner",
             subject="inc_1",
-            payload={"id": "plan_3", "steps": [{"verb": "touch"}, {"verb": "verify"}]},
+            # L-F7-negative-fixtures (Astra 7542): owned plan, valid step
+            # indices, so only the failed step can keep the incident open.
+            payload={"id": "plan_3", "incident_id": "inc_1",
+                     "steps": [{"verb": "touch"}, {"verb": "verify"}]},
         )
         reducer.reduce(plan_event)
 
@@ -222,9 +230,12 @@ class TestF7CompositeReceipt:
 
         # First verified, second not
         reducer.reduce(Event(kind=EventKind.RECEIPT, source="v",
-                             payload={"plan_id": "plan_3", "verified": True}))
+                             payload={"plan_id": "plan_3", "verified": True,
+                                      "step_index": 0}))
         reducer.reduce(Event(kind=EventKind.RECEIPT, source="v",
-                             payload={"plan_id": "plan_3", "verified": False}))
+                             payload={"plan_id": "plan_3", "verified": False,
+                                      "step_index": 1}))
+        assert reducer._plan_owner.get("plan_3") == "inc_1"
         assert not inc.resolved
 
 
