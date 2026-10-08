@@ -522,6 +522,17 @@ class Reducer:
         # empty incident_id) never closes anything, not even incidents that
         # link to it via inc.plan_id -- linkage alone is not ownership.
         if not owner:
+            # O-ownerless-hold (Astra 7542, option (a)): make the stuck plan
+            # visible instead of silently doing nothing.
+            linked = sorted(i.id for i in self.incidents
+                            if not i.resolved and i.plan_id == plan_id)
+            if linked:
+                logger.warning(
+                    "Plan %s is complete but has no proven owner; it closes "
+                    "nothing (linked open incidents %s stay open). Repair: "
+                    "send a PLAN for %s that declares incident_id. See "
+                    "quarantine_reasons() (ownerless_linked).", plan_id, linked,
+                    plan_id)
             return
         for inc in self.incidents:
             if inc.id == owner:
@@ -534,6 +545,29 @@ class Reducer:
         this, not migration_diagnostics["legacy_ownerless_plans"] (a capped
         historical sample), to enumerate plans awaiting an operator rebind."""
         return sorted(self._owner_unproven)
+
+    def quarantine_reasons(self) -> dict[str, str]:
+        """Every plan that cannot currently close an incident, with a reason.
+
+        - ``owner_unproven``: owner lost in legacy migration; repair with
+          preview_rebind()/rebind_plan_owner() (same set as quarantined_plans()).
+        - ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
+          registered plan with NO owner that an open incident links to via
+          plan_id.  Linkage is never treated as ownership; repair by sending a
+          later PLAN for the same plan id that declares ``incident_id``.
+
+        Derived from durable state, so it survives snapshot/restore.
+        quarantined_plans() is unchanged (owner_unproven only) because its
+        entries are rebind candidates and ownerless_linked plans are not.
+        """
+        out = {pid: "owner_unproven" for pid in self._owner_unproven}
+        for inc in self.incidents:
+            pid = inc.plan_id
+            if (not inc.resolved and pid and pid not in out
+                    and pid in self._plan_step_counts
+                    and not self._plan_owner.get(pid)):
+                out[pid] = "ownerless_linked"
+        return dict(sorted(out.items()))
 
     def open_incidents(self) -> list[IncidentReport]:
         """Execute open incidents operation."""

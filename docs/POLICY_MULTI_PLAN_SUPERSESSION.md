@@ -32,6 +32,19 @@ accident.
   `experiments/*/new_cases.py` (which wanted the failed plan q retried before
   closure) is superseded by this decision. Those Astra artifacts are left
   unchanged as a record.
-- Tests: `tests/test_astra7519.py` (ownerless negative controls incl.
+- **Ownerless linked plans are visible, not silent** (Astra 7542
+  O-ownerless-hold, option (a); Ben 2026-10-08 "(a) is best for a first try").
+  A registered plan with no owner that an open incident links to is reported
+  by `Reducer.quarantine_reasons()` / `HiveReducer.quarantine_reasons()` with
+  reason `ownerless_linked`, and a WARNING is logged when such a plan
+  completes. `quarantined_plans()` is unchanged (owner_unproven rebind
+  candidates only); `rebind_plan_owner()` still refuses these plans.
+  **Repair:** send a later PLAN for the same plan id that declares
+  `incident_id`; that sets the immutable owner, and the already-verified
+  receipts then close that owner (only). Ownership is never inferred from
+  linkage. Full hold/rebind (option (b)) is deferred unless (a) causes
+  problems in practice.
+- Tests: `tests/test_astra7542.py` (ownerless_linked visibility/repair),
+  `tests/test_astra7519.py` (ownerless negative controls incl.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).

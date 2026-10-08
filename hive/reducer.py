@@ -138,6 +138,24 @@ class HiveReducer:
         self._state.agents[agent_id] = summary
         self._state.last_updated = time.time()
 
+    def quarantine_reasons(self) -> dict[str, str]:
+        """Plans ("agent:plan_id") that cannot close an incident, with reason.
+
+        ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
+        registered plan with no owner that an open incident links to.  Linkage
+        is never ownership; repair with a later PLAN declaring incident_id.
+        """
+        out: dict[str, str] = {}
+        for agent_id, incs in self._agent_incidents.items():
+            for inc in incs:
+                pid = inc.get("plan_id")
+                if inc.get("resolved") or not pid:
+                    continue
+                key = f"{agent_id}:{pid}"
+                if key in self._plan_steps and not self._plan_owner.get(key):
+                    out[key] = "ownerless_linked"
+        return dict(sorted(out.items()))
+
     def _open_agent_incidents(self, agent_id: str) -> list[dict[str, Any]]:
         return [i for i in self._agent_incidents.get(agent_id, [])
                 if not i.get("resolved")]
@@ -426,6 +444,17 @@ class HiveReducer:
         # P3-ownerless (Astra 7519): the immutable owner is the SOLE completion
         # authority; an ownerless plan never closes linked incidents.
         if not owner:
+            # O-ownerless-hold (Astra 7542, option (a)): surface, don't hide.
+            linked = sorted(i["incident_id"]
+                            for i in self._open_agent_incidents(agent_id)
+                            if i.get("plan_id") == plan_id)
+            if linked:
+                logger.warning(
+                    "Agent %s plan %s is complete but has no proven owner; it "
+                    "closes nothing (linked open incidents %s stay open). "
+                    "Repair: send a PLAN that declares incident_id. See "
+                    "quarantine_reasons() (ownerless_linked).", agent_id,
+                    plan_id, linked)
             return
         changed = False
         for inc in self._open_agent_incidents(agent_id):
