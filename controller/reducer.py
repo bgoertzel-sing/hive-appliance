@@ -72,6 +72,14 @@ class Reducer:
         self.migration_diagnostics: dict[str, Any] = {}
         # N6 (7133): conflicting PLAN re-registrations rejected
         self.rejected_plan_registrations = 0
+        # F-foreign-progress (Astra 7582): incident named by the receipt that
+        # last set each step's verified/failed state ('' = plan-only receipt).
+        # A rebind keeps only steps whose evidence named '' or the NEW owner.
+        self._plan_step_src: dict[str, dict[int, str]] = {}
+        # F-hold-expiry (Astra 7582): plans ever held as ownerless_linked; they
+        # get an owner ONLY via the audited rebind_plan_owner().
+        self._held_ownerless: set[str] = set()
+        self._quiet = False   # preview simulations log at debug level
 
     def reduce(self, event: Event) -> list[IncidentReport]:
         """Process an event, update state, and return any new incidents."""
@@ -104,6 +112,7 @@ class Reducer:
             self.state.setdefault(event.subject, {})
             self.state[event.subject].update(event.payload)
 
+        self._latch_holds()   # F-hold-expiry (Astra 7582)
         return new_incidents
 
     def _handle_observation(self, event: Event) -> list[IncidentReport]:
@@ -255,7 +264,8 @@ class Reducer:
     def _rebind_check(self, plan_id: str, incident_id: str,
                       allow_non_candidate: bool):
         if (plan_id not in self._owner_unproven
-                and not self._ownerless_linked(plan_id)):
+                and not self._ownerless_linked(plan_id)
+                and not self._held_latched(plan_id)):
             return False, "plan is not quarantined", None
         if not incident_id:
             return False, "no target incident", None
@@ -272,13 +282,35 @@ class Reducer:
         return True, "", inc
 
     def _apply_rebind(self, plan_id: str, incident_id: str, inc: Any,
-                      outcome: Any = None) -> None:
+                      outcome: Any = None) -> list[int]:
+        # F-foreign-progress (Astra 7582): evidence that named another
+        # incident never counts for the new owner (re-prove those steps).
+        foreign = self._discard_foreign_steps(plan_id, incident_id)
+        self._held_ownerless.discard(plan_id)
         self._owner_unproven.discard(plan_id)
         self._plan_owner[plan_id] = incident_id
         if not inc.plan_id:
             inc.plan_id = plan_id
         (self.migration_diagnostics.get("owner_candidates") or {}).pop(plan_id, None)
         self._drain_pending({plan_id}, outcome)
+        return foreign
+
+    def _discard_foreign_steps(self, plan_id: str, incident_id: str) -> list[int]:
+        src = self._plan_step_src.get(plan_id, {})
+        steps = (set(self._plan_verified.get(plan_id, ()))
+                 | set(self._plan_failed_steps.get(plan_id, ())))
+        # unknown provenance (pre-7582 snapshot) is treated as foreign
+        foreign = sorted(i for i in steps if src.get(i) not in ("", incident_id))
+        for i in foreign:
+            self._plan_verified.get(plan_id, set()).discard(i)
+            self._plan_failed_steps.get(plan_id, set()).discard(i)
+            src.pop(i, None)
+        if foreign:
+            (logger.debug if self._quiet else logger.warning)(
+                "Rebind of plan %s -> %s discarded step evidence %s that did "
+                "not name the new owner; those steps must be re-proven",
+                plan_id, incident_id, foreign)
+        return foreign
 
     def preview_rebind(self, plan_id: str, incident_id: str,
                        allow_non_candidate: bool = False) -> dict[str, Any]:
@@ -303,11 +335,14 @@ class Reducer:
                              "verified": rp.get("verified")})
         would_close: list[str] = []
         effects: dict[str, list] = {k: [] for k in EFFECT_KINDS}
+        foreign: list[int] = []
         if ok:
             sim = copy.deepcopy(self)
+            sim._quiet = True
             before = {i.id for i in sim.open_incidents()}
             out: dict[str, Any] = {}
-            sim._apply_rebind(plan_id, incident_id, sim._find_incident(incident_id), out)
+            foreign = sim._apply_rebind(plan_id, incident_id,
+                                        sim._find_incident(incident_id), out)
             would_close = sorted(before - {i.id for i in sim.open_incidents()})
             effects = self._group_effects(out)
         return copy.deepcopy({
@@ -317,6 +352,7 @@ class Reducer:
             "is_candidate": incident_id in cands, "held_receipts": held,
             "effects": effects,
             "effect_counts": {k: len(v) for k, v in effects.items()},
+            "foreign_steps_discarded": foreign,
             "would_close": would_close})
 
     def rebind_plan_owner(self, plan_id: str, incident_id: str, *, actor: str,
@@ -351,11 +387,10 @@ class Reducer:
             return False
         cands = (self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, [])
         is_cand = incident_id in cands
-        hold = ("owner_unproven" if plan_id in self._owner_unproven
-                else "ownerless_linked")
+        hold = self.quarantine_reasons().get(plan_id, "ownerless_linked")
         before = {i.id for i in self.open_incidents()}
         out: dict[str, Any] = {}
-        self._apply_rebind(plan_id, incident_id, inc, out)
+        foreign = self._apply_rebind(plan_id, incident_id, inc, out)
         closed = sorted(before - {i.id for i in self.open_incidents()})
         eff = self._group_effects(out)
         counts = {k: len(v) for k, v in eff.items()}
@@ -368,7 +403,8 @@ class Reducer:
                      "pending_before": len(out), "effect_counts": counts,
                      "effect_ids": {k: [str(r["id"]) for r in v][:MAX_EFFECT_IDS]
                                     for k, v in eff.items()},
-                     "closed": closed})
+                     "closed": closed,
+                     "foreign_steps_discarded": foreign[:MAX_EFFECT_IDS]})
         del recs[:-MAX_DIAG_ENTRIES]
         logger.warning("Operator rebind by %s (%s): plan %s [%s] owner set to "
                        "incident %s (candidate=%s, pending_before=%d, effects=%s, "
@@ -400,7 +436,9 @@ class Reducer:
         held = ("owner unproven after legacy migration"
                 if plan_id in self._owner_unproven else
                 "ownerless plan linked to an open incident"
-                if self._ownerless_linked(plan_id) else "")
+                if self._ownerless_linked(plan_id) else
+                "previously held ownerless plan (owner only via audited rebind)"
+                if self._held_latched(plan_id) else "")
         if inc_id and held:
             # N6 (7146) / Ben msg 7547 option (a) (Astra 7562): an ordinary
             # PLAN never sets the owner of a HELD plan; it is only recorded
@@ -487,6 +525,8 @@ class Reducer:
         self._pending_receipts.pop(rid, None)
         idx = p.get("step_index")
         if _valid_index(idx, self._plan_step_counts[eff]):
+            # F-foreign-progress (Astra 7582): remember whose evidence it is
+            self._plan_step_src.setdefault(eff, {})[idx] = inc_id
             if p.get("verified") is True:
                 self._plan_verified[eff].add(idx)
                 self._plan_failed_steps[eff].discard(idx)
@@ -577,6 +617,21 @@ class Reducer:
                 and any(not i.resolved and i.plan_id == plan_id
                         for i in self.incidents))
 
+    def _held_latched(self, plan_id: str) -> bool:
+        return (plan_id in self._held_ownerless
+                and plan_id in self._plan_step_counts
+                and not self._plan_owner.get(plan_id))
+
+    def _latch_holds(self) -> None:
+        """F-hold-expiry (Astra 7582): remember every plan currently held as
+        ownerless_linked so it stays held (ownerless_held) after its linked
+        incidents are resolved by other means."""
+        for inc in self.incidents:
+            pid = inc.plan_id
+            if (not inc.resolved and pid and pid not in self._held_ownerless
+                    and self._ownerless_linked(pid)):
+                self._held_ownerless.add(pid)
+
     def quarantine_reasons(self) -> dict[str, str]:
         """Held plans (same keys as quarantined_plans()) with their reason.
 
@@ -589,6 +644,9 @@ class Reducer:
           registered plan with NO owner that an open incident links to via
           plan_id.  Linkage is never treated as ownership.  A re-sent PLAN
           declaring incident_id only records an owner candidate.
+        - ``ownerless_held`` (Astra 7582 F-hold-expiry): a plan that WAS held
+          ownerless_linked and still has no owner, even after its linked
+          incidents were resolved some other way.
 
         Both are repaired the same way: preview_rebind() then the audited
         rebind_plan_owner().  Derived from durable state, so it survives
@@ -601,6 +659,9 @@ class Reducer:
                     and pid in self._plan_step_counts
                     and not self._plan_owner.get(pid)):
                 out[pid] = "ownerless_linked"
+        for pid in self._held_ownerless:
+            if pid not in out and self._held_latched(pid):
+                out[pid] = "ownerless_held"
         return dict(sorted(out.items()))
 
     def open_incidents(self) -> list[IncidentReport]:
@@ -627,6 +688,10 @@ class Reducer:
             "plan_owner": dict(self._plan_owner),
             "pending_format": "arrival-v1",
             "owner_unproven": sorted(self._owner_unproven),
+            # Astra 7582: step provenance + hold latch survive restore
+            "plan_step_src": {k: {str(i): v2 for i, v2 in v.items()}
+                              for k, v in self._plan_step_src.items()},
+            "held_ownerless": sorted(self._held_ownerless),
             "migration_diagnostics": copy.deepcopy(self.migration_diagnostics),
             "incidents_total": len(self.incidents),
             "incidents_open": len(self.open_incidents()),
@@ -692,6 +757,13 @@ class Reducer:
         diag = copy.deepcopy(snapshot.get("migration_diagnostics") or {})
         self._plan_owner = dict(snapshot.get("plan_owner", {}) or {})
         self._owner_unproven = set(snapshot.get("owner_unproven", []) or [])
+        self._held_ownerless = set(snapshot.get("held_ownerless", []) or [])
+        self._plan_step_src = {}
+        for k, v in (snapshot.get("plan_step_src") or {}).items():
+            if isinstance(v, dict):
+                self._plan_step_src[k] = {int(i): str(s2) for i, s2 in v.items()
+                                          if str(i).isdigit()}
+        self._latch_holds()
         if "plan_owner" not in snapshot:
             # N6 (7133): pre-owner snapshot.  An owner is rebuilt ONLY from an
             # unambiguous durable link (exactly one incident linked to the
@@ -771,12 +843,14 @@ class Reducer:
             diag["recovery"] = (
                 "Discarded legacy evidence is not replayed; affected plan steps "
                 "must be re-proven by fresh, uniquely identified receipts. The "
-                "authoritative CURRENT quarantine is owner_unproven (persisted in "
-                "the snapshot; enumerate it with Reducer.quarantined_plans()). "
+                "authoritative CURRENT hold list is Reducer.quarantined_plans() "
+                "(reasons via quarantine_reasons()): owner_unproven (legacy "
+                "migration), ownerless_linked and ownerless_held (Astra 7562/"
+                "7582); owner_unproven alone is NOT the full hold list. "
                 "legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of "
                 "plans quarantined at migration (see legacy_ownerless_total); it "
                 "is not updated by rebinds and must not be used to enumerate "
-                "actionable plans. A plan in owner_unproven stays quarantined "
+                "actionable plans. A held plan stays quarantined "
                 "until an operator calls rebind_plan_owner(plan_id, incident_id, "
                 "actor=..., reason=...) after preview_rebind(); targets must be "
                 "open and a recorded owner candidate unless "

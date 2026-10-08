@@ -50,7 +50,12 @@ def _many_quarantined(n):
 
 
 def _guidance_ok(rec):
-    assert "authoritative CURRENT quarantine is owner_unproven" in rec
+    # Astra 7582 (Low): owner_unproven is NOT the full hold list any more;
+    # the text must point at quarantined_plans() and name every hold reason.
+    assert "authoritative CURRENT hold list is Reducer.quarantined_plans()" in rec
+    assert "owner_unproven alone is NOT the full hold list" in rec
+    for reason in ("owner_unproven", "ownerless_linked", "ownerless_held"):
+        assert reason in rec
     assert "quarantined_plans()" in rec
     assert "HISTORICAL SAMPLE" in rec
     assert "legacy_ownerless_plans stay quarantined" not in rec

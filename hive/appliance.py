@@ -46,9 +46,12 @@ class HiveAppliance:
         health_poll_interval: float = 30.0,
         correlation_threshold: int = 2,
         auto_execute: bool = False,
+        rebind_journal: str | None = None,
     ):
         self.bus = HiveEventBus()
-        self.reducer = HiveReducer(correlation_threshold=correlation_threshold)
+        # Astra 7582: rebind_journal = durable operator-rebind journal path
+        self.reducer = HiveReducer(correlation_threshold=correlation_threshold,
+                                   rebind_journal=rebind_journal)
         self.planner = HivePlanner()
         self.shared_store = SharedStoreAdapter()
         self.dashboard = HealthDashboard()

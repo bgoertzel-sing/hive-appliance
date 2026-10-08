@@ -7,7 +7,9 @@ rollup, resource aggregation, and drift detection.
 from __future__ import annotations
 
 import copy
+import json
 import logging
+import os
 import time
 from types import SimpleNamespace
 from typing import Any
@@ -61,6 +63,7 @@ class HiveReducer:
         self,
         correlation_window: float = DEFAULT_CORRELATION_WINDOW,
         correlation_threshold: int = DEFAULT_CORRELATION_THRESHOLD,
+        rebind_journal: str | None = None,
     ):
         self._state = HiveState()
         self._correlation_window = correlation_window
@@ -87,6 +90,20 @@ class HiveReducer:
         self.owner_candidates: dict[str, list[str]] = {}
         self.owner_rebinds: list[dict[str, Any]] = []
         self.owner_rebinds_total = 0
+        # F-foreign-progress (Astra 7582): incident named by the receipt that
+        # last set each step ("agent:plan" -> {idx: incident, '' = plan-only}).
+        self._plan_step_src: dict[str, dict[int, str]] = {}
+        # F-hold-expiry (Astra 7582): plans ever held ownerless_linked; they
+        # get an owner ONLY via the audited rebind_plan_owner().
+        self._held_ownerless: set[str] = set()
+        self._quiet = False   # preview simulations log at debug level
+        # Astra 7582 (Medium): durable operator rebind journal (JSONL,
+        # fsync'd write-ahead).  Entries loaded at start are re-applied, with
+        # their original actor/reason, once the replayed event stream makes
+        # the plan held and the target incident open again.
+        self._journal_path = rebind_journal
+        self._journal_pending: list[dict[str, Any]] = (
+            self._load_journal(rebind_journal) if rebind_journal else [])
 
     @property
     def state(self) -> HiveState:
@@ -122,6 +139,8 @@ class HiveReducer:
         elif event.kind == EventKind.RECEIPT:
             self._handle_receipt(agent_id, event)
 
+        self._latch_holds()      # F-hold-expiry (Astra 7582)
+        self._replay_journal()   # Astra 7582: durable rebinds
         self._state.last_updated = time.time()
         return new_incidents
 
@@ -170,6 +189,10 @@ class HiveReducer:
                 key = f"{agent_id}:{pid}"
                 if key in self._plan_steps and not self._plan_owner.get(key):
                     out[key] = "ownerless_linked"
+        # F-hold-expiry (Astra 7582): once held, held until audited rebind
+        for key in self._held_ownerless:
+            if key not in out and self._held_latched_key(key):
+                out[key] = "ownerless_held"
         return dict(sorted(out.items()))
 
     def quarantined_plans(self) -> list[str]:
@@ -184,9 +207,28 @@ class HiveReducer:
                 and any(i.get("plan_id") == plan_id
                         for i in self._open_agent_incidents(agent_id)))
 
+    def _held_latched_key(self, key: str) -> bool:
+        return (key in self._held_ownerless and key in self._plan_steps
+                and not self._plan_owner.get(key))
+
+    def _held_latched(self, agent_id: str, plan_id: str) -> bool:
+        return bool(plan_id) and self._held_latched_key(f"{agent_id}:{plan_id}")
+
+    def _latch_holds(self) -> None:
+        for agent_id, incs in self._agent_incidents.items():
+            for inc in incs:
+                pid = inc.get("plan_id")
+                if inc.get("resolved") or not pid:
+                    continue
+                key = f"{agent_id}:{pid}"
+                if (key not in self._held_ownerless and key in self._plan_steps
+                        and not self._plan_owner.get(key)):
+                    self._held_ownerless.add(key)
+
     def _rebind_check(self, agent_id: str, plan_id: str, incident_id: str,
                       allow_non_candidate: bool):
-        if not self._ownerless_linked(agent_id, plan_id):
+        if not (self._ownerless_linked(agent_id, plan_id)
+                or self._held_latched(agent_id, plan_id)):
             return False, "plan is not quarantined", None
         if not incident_id:
             return False, "no target incident", None
@@ -204,13 +246,85 @@ class HiveReducer:
         return True, "", inc
 
     def _apply_rebind(self, agent_id: str, plan_id: str, incident_id: str,
-                      inc: dict) -> None:
+                      inc: dict) -> list[int]:
         key = f"{agent_id}:{plan_id}"
+        # F-foreign-progress (Astra 7582): evidence naming another incident
+        # never counts for the new owner; buffered receipts are rechecked by
+        # _drain_pending against the new owner (foreign ones are rejected).
+        foreign = self._discard_foreign_steps(key, incident_id)
+        self._held_ownerless.discard(key)
         self._plan_owner[key] = incident_id
         if not inc.get("plan_id"):
             inc["plan_id"] = plan_id
         self.owner_candidates.pop(key, None)
         self._drain_pending(agent_id, {plan_id})
+        return foreign
+
+    def _discard_foreign_steps(self, key: str, incident_id: str) -> list[int]:
+        src = self._plan_step_src.get(key, {})
+        steps = (set(self._plan_verified_steps.get(key, ()))
+                 | set(self._plan_failed.get(key, ())))
+        foreign = sorted(i for i in steps if src.get(i) not in ("", incident_id))
+        for i in foreign:
+            self._plan_verified_steps.get(key, set()).discard(i)
+            self._plan_failed.get(key, set()).discard(i)
+            src.pop(i, None)
+        if foreign:
+            (logger.debug if self._quiet else logger.warning)(
+                "Rebind of plan %s -> %s discarded step evidence %s that did "
+                "not name the new owner; those steps must be re-proven",
+                key, incident_id, foreign)
+        return foreign
+
+    # ── Astra 7582: durable rebind journal ──
+    @staticmethod
+    def _load_journal(path: str) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
+        if not os.path.exists(path):
+            return out
+        with open(path, encoding="utf-8") as f:
+            for n, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except ValueError:
+                    logger.warning("Rebind journal %s line %d unreadable; skipped", path, n)
+                    continue
+                if (isinstance(e, dict) and e.get("op") == "owner_rebind"
+                        and all(isinstance(e.get(k), str) and e.get(k).strip()
+                                for k in ("agent_id", "plan_id", "incident_id",
+                                          "actor", "reason"))):
+                    out.append(e)
+                else:
+                    logger.warning("Rebind journal %s line %d invalid; skipped", path, n)
+        return out
+
+    def _journal_append(self, entry: dict[str, Any]) -> None:
+        with open(self._journal_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, sort_keys=True) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+
+    def journal_pending(self) -> list[dict[str, Any]]:
+        """Journaled rebinds not (yet) re-applied after a restart."""
+        return copy.deepcopy(self._journal_pending)
+
+    def _replay_journal(self) -> None:
+        if not self._journal_pending:
+            return
+        keep = []
+        for e in self._journal_pending:
+            ok, _, inc = self._rebind_check(e["agent_id"], e["plan_id"],
+                                            e["incident_id"], True)
+            if ok:
+                self._do_rebind(e["agent_id"], e["plan_id"], e["incident_id"],
+                                inc, actor=e["actor"], reason=e["reason"],
+                                replayed=True)
+            else:
+                keep.append(e)
+        self._journal_pending = keep
 
     def _held_receipts(self, agent_id: str, plan_id: str,
                        incident_id: str) -> list[dict[str, Any]]:
@@ -233,11 +347,15 @@ class HiveReducer:
         key = f"{agent_id}:{plan_id}"
         cands = list(self.owner_candidates.get(key, []))
         would_close: list[str] = []
+        foreign: list[int] = []
         if ok:
             sim = copy.deepcopy(self)
+            sim._quiet = True            # Astra 7582 (Low): no live-looking logs
+            sim._journal_path = None     # a preview never writes the journal
+            sim._journal_pending = []
             before = {i["incident_id"] for i in sim._open_agent_incidents(agent_id)}
             _, _, sinc = sim._rebind_check(agent_id, plan_id, incident_id, True)
-            sim._apply_rebind(agent_id, plan_id, incident_id, sinc)
+            foreign = sim._apply_rebind(agent_id, plan_id, incident_id, sinc)
             would_close = sorted(before - {i["incident_id"] for i in
                                            sim._open_agent_incidents(agent_id)})
         return copy.deepcopy({
@@ -246,6 +364,7 @@ class HiveReducer:
             "hold_reason": self.quarantine_reasons().get(key, ""),
             "candidates": cands, "is_candidate": incident_id in cands,
             "held_receipts": self._held_receipts(agent_id, plan_id, incident_id),
+            "foreign_steps_discarded": foreign,
             "would_close": would_close})
 
     def rebind_plan_owner(self, agent_id: str, plan_id: str, incident_id: str,
@@ -267,26 +386,50 @@ class HiveReducer:
             logger.warning("Refused hive rebind of %s:%s -> %s by %s: %s",
                            agent_id, plan_id, incident_id, actor, why)
             return False
+        if self._journal_path:
+            entry = {"v": 1, "op": "owner_rebind", "agent_id": agent_id,
+                     "plan_id": plan_id, "incident_id": incident_id,
+                     "actor": actor, "reason": reason, "ts": time.time(),
+                     "candidate": incident_id in self.owner_candidates.get(
+                         f"{agent_id}:{plan_id}", [])}
+            try:
+                self._journal_append(entry)   # write-ahead; fail closed
+            except OSError as exc:
+                logger.error("Refused hive rebind of %s:%s -> %s: rebind "
+                             "journal write failed: %s", agent_id, plan_id,
+                             incident_id, exc)
+                return False
+        self._do_rebind(agent_id, plan_id, incident_id, inc, actor=actor,
+                        reason=reason)
+        return True
+
+    def _do_rebind(self, agent_id: str, plan_id: str, incident_id: str,
+                   inc: dict, *, actor: str, reason: str,
+                   replayed: bool = False) -> None:
         key = f"{agent_id}:{plan_id}"
+        hold = self.quarantine_reasons().get(key, "ownerless_linked")
         is_cand = incident_id in self.owner_candidates.get(key, [])
         held = self._held_receipts(agent_id, plan_id, incident_id)
         before = {i["incident_id"] for i in self._open_agent_incidents(agent_id)}
-        self._apply_rebind(agent_id, plan_id, incident_id, inc)
+        foreign = self._apply_rebind(agent_id, plan_id, incident_id, inc)
         closed = sorted(before - {i["incident_id"] for i in
                                   self._open_agent_incidents(agent_id)})
         self.owner_rebinds_total += 1
         self.owner_rebinds.append({
             "agent_id": agent_id, "plan_id": plan_id,
             "incident_id": incident_id, "actor": actor, "reason": reason,
-            "candidate": is_cand, "hold_reason": "ownerless_linked",
+            "candidate": is_cand, "hold_reason": hold,
             "pending_before": len(held),
             "held_receipt_ids": [str(r["id"]) for r in held][:MAX_HIVE_REBIND_IDS],
+            "foreign_steps_discarded": foreign[:MAX_HIVE_REBIND_IDS],
+            "replayed": replayed,
             "closed": closed})
         del self.owner_rebinds[:-MAX_HIVE_REBIND_RECORDS]
-        logger.warning("Operator hive rebind by %s (%s): %s owner set to "
-                       "incident %s (candidate=%s, held=%d, closed=%s)", actor,
-                       reason, key, incident_id, is_cand, len(held), closed)
-        return True
+        logger.warning("Operator hive rebind%s by %s (%s): %s owner set to "
+                       "incident %s (candidate=%s, held=%d, foreign=%s, "
+                       "closed=%s)", " (journal replay)" if replayed else "",
+                       actor, reason, key, incident_id, is_cand, len(held),
+                       foreign, closed)
 
     def _open_agent_incidents(self, agent_id: str) -> list[dict[str, Any]]:
         return [i for i in self._agent_incidents.get(agent_id, [])
@@ -317,6 +460,8 @@ class HiveReducer:
         """Remove an agent from hive state."""
         self._state.agents.pop(agent_id, None)
         self._agent_incidents.pop(agent_id, None)
+        self._held_ownerless = {k for k in self._held_ownerless
+                                if not k.startswith(f"{agent_id}:")}
         logger.info("Unregistered agent %s from reducer", agent_id)
 
     def update_resources(self, agent_id: str,
@@ -492,7 +637,8 @@ class HiveReducer:
         inc_id = payload.get("incident_id", "") or ""
         if self._reject_conflicting_plan(agent_id, payload):
             return
-        if inc_id and self._ownerless_linked(agent_id, plan_id):
+        if inc_id and (self._ownerless_linked(agent_id, plan_id)
+                       or self._held_latched(agent_id, plan_id)):
             # Ben msg 7547 option (a) (Astra 7562): an ordinary PLAN never
             # sets the owner of a HELD plan; it only records a candidate.
             lst = self.owner_candidates.setdefault(key, [])
@@ -580,6 +726,8 @@ class HiveReducer:
         self._pending_receipts.get(agent_id, {}).pop(rid, None)
         idx = payload.get("step_index")
         if _valid_step_index(idx, self._plan_steps[pkey]):
+            # F-foreign-progress (Astra 7582): remember whose evidence it is
+            self._plan_step_src.setdefault(pkey, {})[idx] = inc_id
             if payload.get("verified") is True:
                 self._plan_verified_steps[pkey].add(idx)
                 self._plan_failed[pkey].discard(idx)
@@ -608,7 +756,7 @@ class HiveReducer:
                             for i in self._open_agent_incidents(agent_id)
                             if i.get("plan_id") == plan_id)
             if linked:
-                logger.warning(
+                (logger.debug if self._quiet else logger.warning)(
                     "Agent %s plan %s is complete but has no proven owner; it "
                     "closes nothing (linked open incidents %s stay open). "
                     "It is HELD in quarantined_plans() (ownerless_linked); "
@@ -624,7 +772,8 @@ class HiveReducer:
                     inc["plan_id"] = plan_id
                 inc["resolved"] = True
                 changed = True
-                logger.info("Agent %s incident %s resolved (all %d plan steps "
+                (logger.debug if self._quiet else logger.info)(
+                            "Agent %s incident %s resolved (all %d plan steps "
                             "verified)", agent_id, inc["incident_id"], n)
         if changed:
             self._recompute_agent_health(agent_id)
