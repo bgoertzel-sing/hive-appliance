@@ -83,6 +83,22 @@ docker run --rm hive-appliance:latest --help
 docker run --rm -v $(pwd)/state:/app/state hive-appliance:latest observe
 ```
 
+## Hive rebind journal
+
+Operator rebinds of held plans are made durable by a write-ahead journal:
+
+```bash
+export HIVE_REBIND_JOURNAL=$(pwd)/state/hive-rebinds.jsonl
+```
+
+Without a journal, `HiveAppliance` refuses rebinds unless you pass
+`volatile_rebinds=True`. After upgrading, older (v1/v2) journal entries are
+reported as unapplied rather than replayed: re-issue any you still want. A
+`<journal>.fence` file means a journal write did not finish cleanly. Rebinds
+stay refused until an operator inspects the journal and calls
+`clear_journal_fence(actor=..., reason=...)`. See
+`docs/POLICY_MULTI_PLAN_SUPERSESSION.md` ("Hive rebind journal").
+
 ## Development
 
 ```bash

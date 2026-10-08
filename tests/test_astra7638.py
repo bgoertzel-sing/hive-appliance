@@ -143,14 +143,17 @@ def test_refused_fsync_rebind_never_applied_after_restart(tmp_path, monkeypatch)
     real, calls = os.fsync, []
 
     def bad_once(fd):
-        calls.append(fd)
-        if len(calls) == 1:
-            raise OSError("EIO")
+        # Astra 7656: fence marker is fsync'd first; fail the journal's append fsync
+        if os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp):
+            calls.append(fd)
+            if len(calls) == 1:
+                raise OSError("EIO")
         return real(fd)
     monkeypatch.setattr(os, "fsync", bad_once)
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.setattr(os, "fsync", real)
     assert os.path.getsize(jp) == 0                   # rolled back
+    assert not os.path.exists(jp + ".fence")          # clean refusal: no fence
     assert h._plan_owner.get("a1:p") is None
     h2 = run(s, journal=jp)
     assert h2._plan_owner.get("a1:p") is None and h2.owner_rebinds == []
@@ -161,9 +164,18 @@ def test_failed_rollback_is_indeterminate_and_fences(tmp_path, monkeypatch):
     jp = str(tmp_path / "rebinds.jsonl")
     h = run(BASE + [PLAN("p", "i", 1)], journal=jp)
 
+    real_fsync = os.fsync
+
+    def journal_fsync(fd):
+        # Astra 7656: the fence marker is made durable first; fail only the
+        # journal's own fsync (and its rollback) so the outcome is uncertain.
+        if os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp):
+            raise OSError("EIO")
+        return real_fsync(fd)
+
     def boom(*a):
         raise OSError("EIO")
-    monkeypatch.setattr(os, "fsync", boom)
+    monkeypatch.setattr(os, "fsync", journal_fsync)
     monkeypatch.setattr(os, "ftruncate", boom)
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.undo()
