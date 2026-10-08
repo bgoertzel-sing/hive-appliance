@@ -1,0 +1,6587 @@
+{
+  "F_foreign_progress": {
+    "exact_7582_witnesses": [
+      {
+        "address": "incident",
+        "restart": false,
+        "events": [
+          {
+            "id": "evt_0863516f80dc41b7",
+            "kind": "incident",
+            "ts": 1791492488.054859,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_04c9712dc6874018",
+            "kind": "incident",
+            "ts": 1791492488.0548713,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a23f1388c24e42c2",
+            "kind": "plan",
+            "ts": 1791492488.0548828,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_f2b0e05ead144c98",
+            "kind": "receipt",
+            "ts": 1791492488.054891,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "x",
+              "plan_id": "",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9090c837d0b648a3",
+            "kind": "plan",
+            "ts": 1791492488.0548987,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after_rebind": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        },
+        "after_new_i": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "address": "incident",
+        "restart": true,
+        "events": [
+          {
+            "id": "evt_5d4c7aba060043e1",
+            "kind": "incident",
+            "ts": 1791492488.0570219,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_96d6858631bf4875",
+            "kind": "incident",
+            "ts": 1791492488.0570295,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_134ab2309e814286",
+            "kind": "plan",
+            "ts": 1791492488.0570388,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_cba2f15e612145b0",
+            "kind": "receipt",
+            "ts": 1791492488.057046,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "x",
+              "plan_id": "",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9a883d751c4d46e6",
+            "kind": "plan",
+            "ts": 1791492488.0570543,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after_rebind": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        },
+        "after_new_i": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "address": "dual",
+        "restart": false,
+        "events": [
+          {
+            "id": "evt_a0cf6b6df3a942f1",
+            "kind": "incident",
+            "ts": 1791492488.0596821,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_09a9a64781774a3a",
+            "kind": "incident",
+            "ts": 1791492488.0596907,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_b557b43f39e44c0d",
+            "kind": "plan",
+            "ts": 1791492488.0597005,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_b271c4b4f9a64615",
+            "kind": "receipt",
+            "ts": 1791492488.0597079,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "x",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_ac55afac26d3451f",
+            "kind": "plan",
+            "ts": 1791492488.0597155,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after_rebind": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        },
+        "after_new_i": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "address": "dual",
+        "restart": true,
+        "events": [
+          {
+            "id": "evt_648b998fabb94bb9",
+            "kind": "incident",
+            "ts": 1791492488.0614557,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_3ff1e1f040c14990",
+            "kind": "incident",
+            "ts": 1791492488.0614634,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_4910b76cfa984197",
+            "kind": "plan",
+            "ts": 1791492488.0614717,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_0223b115b06b4c2f",
+            "kind": "receipt",
+            "ts": 1791492488.0614793,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "x",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_fe5f1befc7d74a72",
+            "kind": "plan",
+            "ts": 1791492488.0614872,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after_rebind": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        },
+        "after_new_i": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "variants": [
+      {
+        "case": "foreign_failure",
+        "restart": false,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "foreign_failure",
+        "restart": true,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "target_then_foreign_failure",
+        "restart": false,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "target_then_foreign_failure",
+        "restart": true,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "foreign_failure_then_target",
+        "restart": false,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "i"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "foreign_failure_then_target",
+        "restart": true,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "i"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "foreign_then_blank",
+        "restart": false,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "i"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "foreign_then_blank",
+        "restart": true,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [],
+            "would_close": [
+              "i"
+            ]
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "j"
+            ],
+            [
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "i"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "blank_then_foreign",
+        "restart": false,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "case": "blank_then_foreign",
+        "restart": true,
+        "preview": [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "hold_reason": "ownerless_linked",
+            "refusal": "",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "effects": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          },
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "allowed": true,
+            "refusal": "",
+            "hold_reason": "ownerless_linked",
+            "candidates": [
+              "i"
+            ],
+            "is_candidate": true,
+            "held_receipts": [],
+            "foreign_steps_discarded": [
+              0
+            ],
+            "would_close": []
+          }
+        ],
+        "after": {
+          "open": [
+            [
+              "i",
+              "j"
+            ],
+            [
+              "i",
+              "j"
+            ]
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "p": "i"
+            },
+            {
+              "a1:p": "i"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [],
+                "foreign_steps_discarded": [
+                  0
+                ]
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [
+                  0
+                ],
+                "replayed": false,
+                "closed": []
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "mixed_three_steps": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {
+          "a1:p": "i"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [],
+            "foreign_steps_discarded": [
+              1
+            ]
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [
+              1
+            ],
+            "replayed": false,
+            "closed": []
+          }
+        ]
+      ]
+    },
+    "unknown_provenance_dropped": true,
+    "passed": true
+  },
+  "incidentless_evidence": {
+    "events": [
+      {
+        "id": "evt_53111627e8064c68",
+        "kind": "incident",
+        "ts": 1791492488.083943,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_a9b7f6f7ea0144e9",
+        "kind": "plan",
+        "ts": 1791492488.0839522,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_ebf64ddf440d4377",
+        "kind": "receipt",
+        "ts": 1791492488.0839596,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "held-plan-only",
+          "plan_id": "p",
+          "incident_id": "",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_08340e23db3a463d",
+        "kind": "plan",
+        "ts": 1791492488.0839674,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "j",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_47319348cf124edb",
+        "kind": "receipt",
+        "ts": 1791492488.0839748,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q0",
+          "plan_id": "q",
+          "incident_id": "",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_72db400836f541a4",
+        "kind": "incident",
+        "ts": 1791492488.083982,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "arbitrary-k",
+          "plan_id": "",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_5a21f11a8b04478b",
+        "kind": "plan",
+        "ts": 1791492488.0839896,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "arbitrary-k",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "preview": [
+      {
+        "plan_id": "p",
+        "incident_id": "arbitrary-k",
+        "allowed": true,
+        "hold_reason": "ownerless_held",
+        "refusal": "",
+        "candidates": [
+          "arbitrary-k"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "effects": {
+          "credited": [],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "effect_counts": {
+          "credited": 0,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "arbitrary-k"
+        ]
+      },
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "arbitrary-k",
+        "allowed": true,
+        "refusal": "",
+        "hold_reason": "ownerless_held",
+        "candidates": [
+          "arbitrary-k"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "arbitrary-k"
+        ]
+      }
+    ],
+    "after": {
+      "open": [
+        [],
+        []
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "q": "j",
+          "p": "arbitrary-k"
+        },
+        {
+          "a1:q": "j",
+          "a1:p": "arbitrary-k"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "arbitrary-k",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_held",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [
+              "arbitrary-k"
+            ],
+            "foreign_steps_discarded": []
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "arbitrary-k",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_held",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": false,
+            "closed": [
+              "arbitrary-k"
+            ]
+          }
+        ]
+      ]
+    },
+    "interpretation": "Plan-only evidence collected while held survives rebind to a newly introduced target. Safety relies on trusted operator proving the same plan/evidence applies to that target; rebind alone is not incident-specific evidence.",
+    "passed": true
+  },
+  "F_hold_expiry": {
+    "sibling_closure": [
+      {
+        "restart": false,
+        "before": {
+          "open": [
+            [
+              "k"
+            ],
+            [
+              "k"
+            ]
+          ],
+          "holds": [
+            {
+              "p": "ownerless_held"
+            },
+            {
+              "a1:p": "ownerless_held"
+            }
+          ],
+          "owners": [
+            {
+              "q": "i"
+            },
+            {
+              "a1:q": "i"
+            }
+          ],
+          "candidates": [
+            {
+              "p": [
+                "i",
+                "k"
+              ]
+            },
+            {
+              "a1:p": [
+                "i",
+                "k"
+              ]
+            }
+          ],
+          "audits": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "open": [
+            [],
+            []
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "q": "i",
+              "p": "k"
+            },
+            {
+              "a1:q": "i",
+              "a1:p": "k"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "k",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_held",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "k"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "k",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_held",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "k"
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      {
+        "restart": true,
+        "before": {
+          "open": [
+            [
+              "k"
+            ],
+            [
+              "k"
+            ]
+          ],
+          "holds": [
+            {
+              "p": "ownerless_held"
+            },
+            {
+              "a1:p": "ownerless_held"
+            }
+          ],
+          "owners": [
+            {
+              "q": "i"
+            },
+            {
+              "a1:q": "i"
+            }
+          ],
+          "candidates": [
+            {
+              "p": [
+                "i",
+                "k"
+              ]
+            },
+            {
+              "a1:p": [
+                "i",
+                "k"
+              ]
+            }
+          ],
+          "audits": [
+            [],
+            []
+          ]
+        },
+        "after": {
+          "open": [
+            [],
+            []
+          ],
+          "holds": [
+            {},
+            {}
+          ],
+          "owners": [
+            {
+              "q": "i",
+              "p": "k"
+            },
+            {
+              "a1:q": "i",
+              "a1:p": "k"
+            }
+          ],
+          "candidates": [
+            {},
+            {}
+          ],
+          "audits": [
+            [
+              {
+                "plan_id": "p",
+                "incident_id": "k",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_held",
+                "pending_before": 0,
+                "effect_counts": {
+                  "credited": 0,
+                  "failure_recorded": 0,
+                  "consumed_no_effect": 0,
+                  "still_held": 0
+                },
+                "effect_ids": {
+                  "credited": [],
+                  "failure_recorded": [],
+                  "consumed_no_effect": [],
+                  "still_held": []
+                },
+                "closed": [
+                  "k"
+                ],
+                "foreign_steps_discarded": []
+              }
+            ],
+            [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "k",
+                "actor": "Astra-7582",
+                "reason": "fixture authority",
+                "candidate": true,
+                "hold_reason": "ownerless_held",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "k"
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    ],
+    "hive_duplicate_resolved": {
+      "open": [
+        "k"
+      ],
+      "hold": {
+        "a1:p": "ownerless_held"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "passed": true
+  },
+  "F_unregister_escape": {
+    "severity": "High",
+    "defect_reproduced": true,
+    "before": {
+      "open": [
+        "j"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "after_unregister": {
+      "open": [],
+      "hold": {},
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "after_reregister_and_PLAN": {
+      "open": [],
+      "hold": {},
+      "owner": {
+        "a1:p": "k"
+      },
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "interpretation": "Unregister deletes hold latch and incidents, but retains registered plan and explicitly foreign j progress. Ordinary PLAN sets k and closes it with no audit or source discard.",
+    "passed": true
+  },
+  "journal_controls": {
+    "fsync_write_ahead": [
+      {
+        "owner_before": {},
+        "audit_before": [],
+        "line": {
+          "actor": "operator-original",
+          "agent_id": "a1",
+          "candidate": true,
+          "incident_id": "i",
+          "op": "owner_rebind",
+          "plan_id": "p",
+          "reason": "case-proof",
+          "ts": 1791492488.0947537,
+          "v": 1
+        }
+      }
+    ],
+    "original": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [
+            0
+          ],
+          "replayed": false,
+          "closed": []
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "restarted_and_double_event_replay": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": false,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": []
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "duplicate_lines": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": false,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": []
+        }
+      ],
+      "pending": [
+        {
+          "actor": "operator-original",
+          "agent_id": "a1",
+          "candidate": true,
+          "incident_id": "i",
+          "op": "owner_rebind",
+          "plan_id": "p",
+          "reason": "case-proof",
+          "ts": 1791492488.0947537,
+          "v": 1
+        }
+      ],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "journal": {
+      "actor": "operator-original",
+      "agent_id": "a1",
+      "candidate": true,
+      "incident_id": "i",
+      "op": "owner_rebind",
+      "plan_id": "p",
+      "reason": "case-proof",
+      "ts": 1791492488.0947537,
+      "v": 1
+    },
+    "unwritable_path_refused_without_mutation": true,
+    "passed": true
+  },
+  "F_journal_order": {
+    "severity": "High",
+    "defect_reproduced": true,
+    "cases": [
+      {
+        "case": "target_success_then_failure",
+        "events": [
+          {
+            "id": "evt_978565ba62d94a5f",
+            "kind": "incident",
+            "ts": 1791492488.0987394,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_0dd50e92c5f640fd",
+            "kind": "incident",
+            "ts": 1791492488.0987473,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_d2d0e2811e1f40a9",
+            "kind": "plan",
+            "ts": 1791492488.0987563,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9bd5f4a270b54b7f",
+            "kind": "receipt",
+            "ts": 1791492488.0986795,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_1de33b953de542a3",
+            "kind": "receipt",
+            "ts": 1791492488.0986886,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_8d3e8993c0f3467e",
+            "kind": "plan",
+            "ts": 1791492488.098765,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          }
+        },
+        "replayed": {
+          "open": [
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": false,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          }
+        }
+      },
+      {
+        "case": "target_success_then_foreign_failure",
+        "events": [
+          {
+            "id": "evt_968147df9a75411f",
+            "kind": "incident",
+            "ts": 1791492488.1012974,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_8f51c496c5144295",
+            "kind": "incident",
+            "ts": 1791492488.1013052,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_c4965adaa48247de",
+            "kind": "plan",
+            "ts": 1791492488.1013143,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_6dd5b104c55646f3",
+            "kind": "receipt",
+            "ts": 1791492488.0986965,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_1a25539289644209",
+            "kind": "receipt",
+            "ts": 1791492488.0987036,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9ebdb284a5f34e74",
+            "kind": "plan",
+            "ts": 1791492488.1013222,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [
+                0
+              ],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": []
+          }
+        },
+        "replayed": {
+          "open": [
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": false,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          }
+        }
+      },
+      {
+        "case": "plan_success_then_failure",
+        "events": [
+          {
+            "id": "evt_57eecef72a7c4100",
+            "kind": "incident",
+            "ts": 1791492488.103824,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9a0cbda133794c3f",
+            "kind": "incident",
+            "ts": 1791492488.1038318,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_4c60a8d5ccf540fd",
+            "kind": "plan",
+            "ts": 1791492488.1038404,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_4f5a1c68a9994656",
+            "kind": "receipt",
+            "ts": 1791492488.098711,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a9397a5704e4457d",
+            "kind": "receipt",
+            "ts": 1791492488.0987182,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a8352a9059724734",
+            "kind": "plan",
+            "ts": 1791492488.1038485,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          }
+        },
+        "replayed": {
+          "open": [
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": false,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          }
+        }
+      }
+    ],
+    "interpretation": "Journal lacks event position. Replay rebinds as soon as initial PLAN creates hold, before evidence that preceded the original operation. An intermediate success closes i permanently; later failure cannot reopen. Original audited rebind did not close i.",
+    "passed": true
+  },
+  "F_journal_refused_fsync": {
+    "severity": "Medium",
+    "defect_reproduced": true,
+    "refused_live": {
+      "open": [
+        "i"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "journal_after_refusal": "{\"actor\": \"operator-original\", \"agent_id\": \"a1\", \"candidate\": true, \"incident_id\": \"i\", \"op\": \"owner_rebind\", \"plan_id\": \"p\", \"reason\": \"case-proof\", \"ts\": 1791492488.1075068, \"v\": 1}\n",
+    "restart": {
+      "open": [],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": false,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": []
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "interpretation": "Write/flush completed before fsync failed. API returns False and no live audit/owner change, but restart accepts the intact entry and applies the refused operation. This is an indeterminate commit, not guaranteed durable refusal.",
+    "passed": true
+  },
+  "F_journal_tail": {
+    "skip_bad_complete_lines_and_tail": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": false,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": []
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "severity": "Medium",
+    "defect_reproduced": true,
+    "tail_append_bytes": "{\"op\":{\"actor\": \"operator-original\", \"agent_id\": \"a1\", \"candidate\": true, \"incident_id\": \"i\", \"op\": \"owner_rebind\", \"plan_id\": \"p\", \"reason\": \"case-proof\", \"ts\": 1791492488.109942, \"v\": 1}\n",
+    "successful_before_restart": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [
+            0
+          ],
+          "replayed": false,
+          "closed": []
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "after_restart": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      }
+    },
+    "interpretation": "Loader skips truncated tail but append does not truncate or delimit it. A later successful, fsynced rebind is concatenated with the torn tail and discarded at next restart.",
+    "invalid_utf8_raises": true,
+    "passed": true
+  },
+  "quiet_guidance_wiring": {
+    "preview": [
+      {
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "hold_reason": "ownerless_linked",
+        "refusal": "",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "effects": {
+          "credited": [],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "effect_counts": {
+          "credited": 0,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      },
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "refusal": "",
+        "hold_reason": "ownerless_linked",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      }
+    ],
+    "hive_INFO_records": [],
+    "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT hold list is Reducer.quarantined_plans() (reasons via quarantine_reasons()): owner_unproven (legacy migration), ownerless_linked and ownerless_held (Astra 7562/7582); owner_unproven alone is NOT the full hold list. legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A held plan stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+    "appliance_wiring": {
+      "default": null,
+      "explicit_path_forwarded": true
+    },
+    "passed": true
+  },
+  "exact_plan_only_witness": {
+    "events": [
+      {
+        "id": "evt_9968dcc5ba7c4ff0",
+        "kind": "incident",
+        "ts": 1791492488.1314204,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_a537a07dc84d46bf",
+        "kind": "incident",
+        "ts": 1791492488.1314301,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_8a18c105d3dc42c6",
+        "kind": "plan",
+        "ts": 1791492488.1314409,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_7b9e90bae0de409d",
+        "kind": "receipt",
+        "ts": 1791492488.131449,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x",
+          "plan_id": "p",
+          "incident_id": "",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f1cc81be889b47f8",
+        "kind": "plan",
+        "ts": 1791492488.1314569,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "trace": [
+      {
+        "open": [
+          [
+            "i"
+          ],
+          [
+            "i"
+          ]
+        ],
+        "holds": [
+          {},
+          {}
+        ],
+        "owners": [
+          {},
+          {}
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {},
+          {}
+        ],
+        "owners": [
+          {},
+          {}
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {
+            "p": "ownerless_linked"
+          },
+          {
+            "a1:p": "ownerless_linked"
+          }
+        ],
+        "owners": [
+          {},
+          {}
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {
+            "p": "ownerless_linked"
+          },
+          {
+            "a1:p": "ownerless_linked"
+          }
+        ],
+        "owners": [
+          {},
+          {}
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {
+            "p": "ownerless_linked"
+          },
+          {
+            "a1:p": "ownerless_linked"
+          }
+        ],
+        "owners": [
+          {},
+          {}
+        ],
+        "candidates": [
+          {
+            "p": [
+              "i"
+            ]
+          },
+          {
+            "a1:p": [
+              "i"
+            ]
+          }
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      }
+    ],
+    "preview": [
+      {
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "hold_reason": "ownerless_linked",
+        "refusal": "",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "effects": {
+          "credited": [],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "effect_counts": {
+          "credited": 0,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      },
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "refusal": "",
+        "hold_reason": "ownerless_linked",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      }
+    ],
+    "rebound": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {
+          "a1:p": "i"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [
+              "i"
+            ],
+            "foreign_steps_discarded": []
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": false,
+            "closed": [
+              "i"
+            ]
+          }
+        ]
+      ]
+    },
+    "restored_local": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {
+          "a1:p": "i"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [
+              "i"
+            ],
+            "foreign_steps_discarded": []
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": false,
+            "closed": [
+              "i"
+            ]
+          }
+        ]
+      ]
+    },
+    "hive_event_replay_after_rebind": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "i",
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {
+          "a1:p": "ownerless_linked"
+        }
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {}
+      ],
+      "candidates": [
+        {},
+        {
+          "a1:p": [
+            "i"
+          ]
+        }
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [
+              "i"
+            ],
+            "foreign_steps_discarded": []
+          }
+        ],
+        []
+      ]
+    },
+    "restart_interpretation": "Fresh empty hive loses everything. Full serialized event replay re-derives holds and candidates but not operator rebind/audit (not events). Local snapshot retains rebind/audit.",
+    "passed": true
+  },
+  "hold_144_schedules": {
+    "schedules": 144,
+    "per_event_checks": 1152,
+    "rows": [
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "plan",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "incident",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "J",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "J",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "P",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "P",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "R",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "I",
+          "R",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "I",
+          "P",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "I",
+          "R",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "P",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "P",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "R",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "J",
+          "R",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "I",
+          "J",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "I",
+          "R",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "J",
+          "I",
+          "R"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "J",
+          "R",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "R",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "P",
+          "R",
+          "J",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "I",
+          "J",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "I",
+          "P",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "J",
+          "I",
+          "P"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "J",
+          "P",
+          "I"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "P",
+          "I",
+          "J"
+        ],
+        "restart": true
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": false
+      },
+      {
+        "address": "dual",
+        "order": [
+          "R",
+          "P",
+          "J",
+          "I"
+        ],
+        "restart": true
+      }
+    ],
+    "never_held_owner_before_late_link": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {
+          "a1:p": "i"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [],
+        []
+      ]
+    },
+    "late_link_then_resend": {
+      "open": [
+        [
+          "i"
+        ],
+        [
+          "i"
+        ]
+      ],
+      "holds": [
+        {
+          "p": "ownerless_linked"
+        },
+        {
+          "a1:p": "ownerless_linked"
+        }
+      ],
+      "owners": [
+        {},
+        {}
+      ],
+      "candidates": [
+        {
+          "p": [
+            "i"
+          ]
+        },
+        {
+          "a1:p": [
+            "i"
+          ]
+        }
+      ],
+      "audits": [
+        [],
+        []
+      ]
+    },
+    "passed": true
+  },
+  "refusals_pending": {
+    "preview": [
+      {
+        "plan_id": "p",
+        "incident_id": "j",
+        "allowed": true,
+        "hold_reason": "ownerless_linked",
+        "refusal": "",
+        "candidates": [
+          "j"
+        ],
+        "is_candidate": true,
+        "held_receipts": [
+          {
+            "id": "x",
+            "plan_id": "",
+            "incident_id": "j",
+            "step_index": 0,
+            "verified": true
+          }
+        ],
+        "effects": {
+          "credited": [
+            {
+              "id": "x",
+              "plan_id": "",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true,
+              "applied_to": "p",
+              "outcome": "credited"
+            }
+          ],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "effect_counts": {
+          "credited": 1,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "j"
+        ]
+      },
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "j",
+        "allowed": true,
+        "refusal": "",
+        "hold_reason": "ownerless_linked",
+        "candidates": [
+          "j"
+        ],
+        "is_candidate": true,
+        "held_receipts": [
+          {
+            "id": "x",
+            "plan_id": "",
+            "incident_id": "j",
+            "step_index": 0,
+            "verified": true
+          }
+        ],
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "j"
+        ]
+      }
+    ],
+    "refusals": [
+      [
+        {
+          "plan_id": "p",
+          "incident_id": "missing",
+          "allowed": false,
+          "hold_reason": "ownerless_linked",
+          "refusal": "unknown target incident",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "effects": {
+            "credited": [],
+            "failure_recorded": [],
+            "consumed_no_effect": [],
+            "still_held": []
+          },
+          "effect_counts": {
+            "credited": 0,
+            "failure_recorded": 0,
+            "consumed_no_effect": 0,
+            "still_held": 0
+          },
+          "foreign_steps_discarded": [],
+          "would_close": []
+        },
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "missing",
+          "allowed": false,
+          "refusal": "unknown target incident",
+          "hold_reason": "ownerless_linked",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "foreign_steps_discarded": [],
+          "would_close": []
+        }
+      ],
+      [
+        {
+          "plan_id": "p",
+          "incident_id": "closed",
+          "allowed": false,
+          "hold_reason": "ownerless_linked",
+          "refusal": "target incident is already resolved",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "effects": {
+            "credited": [],
+            "failure_recorded": [],
+            "consumed_no_effect": [],
+            "still_held": []
+          },
+          "effect_counts": {
+            "credited": 0,
+            "failure_recorded": 0,
+            "consumed_no_effect": 0,
+            "still_held": 0
+          },
+          "foreign_steps_discarded": [],
+          "would_close": []
+        },
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "closed",
+          "allowed": false,
+          "refusal": "target incident is already resolved",
+          "hold_reason": "ownerless_linked",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "foreign_steps_discarded": [],
+          "would_close": []
+        }
+      ],
+      [
+        {
+          "plan_id": "p",
+          "incident_id": "other",
+          "allowed": false,
+          "hold_reason": "ownerless_linked",
+          "refusal": "target incident is linked to another plan",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "effects": {
+            "credited": [],
+            "failure_recorded": [],
+            "consumed_no_effect": [],
+            "still_held": []
+          },
+          "effect_counts": {
+            "credited": 0,
+            "failure_recorded": 0,
+            "consumed_no_effect": 0,
+            "still_held": 0
+          },
+          "foreign_steps_discarded": [],
+          "would_close": []
+        },
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "other",
+          "allowed": false,
+          "refusal": "target incident is linked to another plan",
+          "hold_reason": "ownerless_linked",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "foreign_steps_discarded": [],
+          "would_close": []
+        }
+      ],
+      [
+        {
+          "plan_id": "p",
+          "incident_id": "i",
+          "allowed": false,
+          "hold_reason": "ownerless_linked",
+          "refusal": "target is not a recorded owner candidate",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "effects": {
+            "credited": [],
+            "failure_recorded": [],
+            "consumed_no_effect": [],
+            "still_held": []
+          },
+          "effect_counts": {
+            "credited": 0,
+            "failure_recorded": 0,
+            "consumed_no_effect": 0,
+            "still_held": 0
+          },
+          "foreign_steps_discarded": [],
+          "would_close": []
+        },
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "allowed": false,
+          "refusal": "target is not a recorded owner candidate",
+          "hold_reason": "ownerless_linked",
+          "candidates": [
+            "j"
+          ],
+          "is_candidate": false,
+          "held_receipts": [],
+          "foreign_steps_discarded": [],
+          "would_close": []
+        }
+      ]
+    ],
+    "rebound": {
+      "open": [
+        [
+          "i",
+          "other"
+        ],
+        [
+          "i",
+          "other"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "j"
+        },
+        {
+          "a1:p": "j"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "j",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 1,
+            "effect_counts": {
+              "credited": 1,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [
+                "x"
+              ],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [
+              "j"
+            ],
+            "foreign_steps_discarded": []
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "j",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 1,
+            "held_receipt_ids": [
+              "x"
+            ],
+            "foreign_steps_discarded": [],
+            "replayed": false,
+            "closed": [
+              "j"
+            ]
+          }
+        ]
+      ]
+    },
+    "receipts_after_rebind": {
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "holds": [
+        {},
+        {}
+      ],
+      "owners": [
+        {
+          "p": "i"
+        },
+        {
+          "a1:p": "i"
+        }
+      ],
+      "candidates": [
+        {},
+        {}
+      ],
+      "audits": [
+        [
+          {
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "effect_counts": {
+              "credited": 0,
+              "failure_recorded": 0,
+              "consumed_no_effect": 0,
+              "still_held": 0
+            },
+            "effect_ids": {
+              "credited": [],
+              "failure_recorded": [],
+              "consumed_no_effect": [],
+              "still_held": []
+            },
+            "closed": [],
+            "foreign_steps_discarded": []
+          }
+        ],
+        [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "Astra-7582",
+            "reason": "fixture authority",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": false,
+            "closed": []
+          }
+        ]
+      ]
+    },
+    "passed": true
+  },
+  "retention_bounds": {
+    "per_agent": {
+      "candidates": {
+        "a2:p": [
+          "j"
+        ]
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "op",
+          "reason": "fixture",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": false,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "holds": [
+        "a2:p"
+      ]
+    },
+    "capacity": {
+      "local_holds": 600,
+      "hive_holds": 600,
+      "local_candidate_keys": 256,
+      "hive_candidate_keys": 600,
+      "local_candidate_drop_count": 344,
+      "restored_local_holds": 600,
+      "hive_open": 600
+    },
+    "audit_caps": {
+      "local": 256,
+      "hive": 200,
+      "total": 270,
+      "current_holds": 330
+    },
+    "candidates_per_plan_cap": 8,
+    "resolved_retained_with_one_open": 500,
+    "passed": true
+  },
+  "late_link_warnings": {
+    "warnings": [
+      {
+        "name": "controller.reducer",
+        "level": "WARNING",
+        "message": "Plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner() for p. A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "controller.reducer",
+        "level": "WARNING",
+        "message": "Plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i', 'j'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner() for p. A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i', 'j'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 has 501 incidents (cap 500); open incidents are retained past the cap."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 has 502 incidents (cap 500); open incidents are retained past the cap."
+      }
+    ],
+    "passed": true
+  },
+  "retained_regressions": {
+    "adaptation": {
+      "source": "review7519.py",
+      "old": "assert 'authoritative CURRENT quarantine is owner_unproven' in d['recovery']",
+      "new": "assert 'authoritative CURRENT hold list is Reducer.quarantined_plans()' in d['recovery']",
+      "reason": "Deliberately corrected diagnostic text; all semantic/lifecycle assertions unchanged",
+      "extracted_sha256": "64595d40a76fb7496083349723b15f4284405e80f4feab1a201faeb7eeb29a1a"
+    },
+    "P3-ownerless": {
+      "schedules": 180,
+      "per_event_checks": 1224,
+      "exact_witness_open": [
+        "i",
+        "j"
+      ],
+      "hive_has_snapshot_api": false
+    },
+    "owned_positive": {
+      "controls": [
+        {
+          "addressing": "plan",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "plan",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "incident",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "incident",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "dual",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "dual",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        }
+      ]
+    },
+    "legacy_300": {
+      "stages": [
+        {
+          "rebound": 0,
+          "current": 300,
+          "historical": 256,
+          "roundtrips": 20
+        },
+        {
+          "rebound": 149,
+          "current": 151,
+          "historical": 256,
+          "roundtrips": 20
+        },
+        {
+          "rebound": 300,
+          "current": 0,
+          "historical": 256,
+          "roundtrips": 20
+        }
+      ]
+    },
+    "owned_1440": {
+      "schedules": 1440,
+      "per_event_checks": 15840
+    },
+    "foreign_owned": {
+      "controls": [
+        {
+          "late": false,
+          "local_restore": false,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": false,
+          "local_restore": true,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": true,
+          "local_restore": false,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": true,
+          "local_restore": true,
+          "open": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "H-oracle_mutants": {
+      "explicit_sequence": [
+        "unknown",
+        "unknown",
+        "degraded",
+        "failed",
+        "failed",
+        "failed",
+        "healthy",
+        "degraded"
+      ],
+      "mutations": [
+        {
+          "forced": "healthy",
+          "detected": "health mismatch: hive=healthy expected=degraded"
+        },
+        {
+          "forced": "degraded",
+          "detected": "health mismatch: hive=degraded expected=failed"
+        },
+        {
+          "forced": "failed",
+          "detected": "health mismatch: hive=failed expected=degraded"
+        },
+        {
+          "forced": "unknown",
+          "detected": "health mismatch: hive=unknown expected=degraded"
+        },
+        {
+          "initial_unknown": "health mismatch: hive=healthy expected=unknown"
+        }
+      ],
+      "late_incident_transitions": [
+        "degraded",
+        "healthy"
+      ]
+    },
+    "health_boundaries": {
+      "boundaries": [
+        {
+          "name": "first_resolved",
+          "health": "unknown"
+        },
+        {
+          "name": "two_resolved",
+          "health": "unknown"
+        },
+        {
+          "name": "same_event_open_close",
+          "health": "healthy"
+        },
+        {
+          "name": "resolved_then_open",
+          "health": "degraded"
+        }
+      ],
+      "poisoned_hive_health_values_independent": 4
+    },
+    "F7_mutants": {
+      "completeness": [
+        "test_single_receipt_does_not_resolve",
+        "test_partial_failure_does_not_resolve"
+      ],
+      "failure": []
+    },
+    "passed": true
+  }
+}

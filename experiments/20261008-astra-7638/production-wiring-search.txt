@@ -1,0 +1,8 @@
+COMMAND ['rg', '-n', 'HiveAppliance\\(|rebind_journal', '.', '--glob', '!experiments/**', '--glob', '!tests/**', '--glob', '!docs/ASTRA_REVIEW*']
+./hive/reducer.py:66:        rebind_journal: str | None = None,
+./hive/reducer.py:104:        self._journal_path = rebind_journal
+./hive/reducer.py:106:            self._load_journal(rebind_journal) if rebind_journal else [])
+./hive/appliance.py:9:    hive = HiveAppliance()
+./hive/appliance.py:49:        rebind_journal: str | None = None,
+./hive/appliance.py:52:        # Astra 7582: rebind_journal = durable operator-rebind journal path
+./hive/appliance.py:54:                                   rebind_journal=rebind_journal)
