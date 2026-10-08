@@ -7,10 +7,12 @@ rollup, resource aggregation, and drift detection.
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import logging
 import os
 import time
+import uuid
 from types import SimpleNamespace
 from typing import Any
 
@@ -34,6 +36,13 @@ MAX_HIVE_INCIDENTS = 1000           # total hive-level incident cap
 MAX_HIVE_REBIND_RECORDS = 200      # bounded rebind audit trail
 MAX_HIVE_REBIND_IDS = 50           # receipt ids kept per audit record
 MAX_HIVE_CANDIDATES = 8            # owner candidates kept per held plan
+MAX_HIVE_CANDIDATE_KEYS = 256      # Astra 7638 (Low): held plans with candidates
+MAX_HIVE_JOURNAL_BYTES = 64 * 1024 * 1024   # Astra 7638 (Low): journal admission cap
+
+
+class _JournalIndeterminate(Exception):
+    """Astra 7638 F-journal-refused-fsync: a journal append failed AND its
+    rollback failed, so whether the entry survives a restart is unknown."""
 
 # H1: severity ordering used when merging polled health with reducer state
 _HEALTH_RANK = {
@@ -64,6 +73,7 @@ class HiveReducer:
         correlation_window: float = DEFAULT_CORRELATION_WINDOW,
         correlation_threshold: int = DEFAULT_CORRELATION_THRESHOLD,
         rebind_journal: str | None = None,
+        volatile_rebinds: bool = True,
     ):
         self._state = HiveState()
         self._correlation_window = correlation_window
@@ -90,6 +100,7 @@ class HiveReducer:
         self.owner_candidates: dict[str, list[str]] = {}
         self.owner_rebinds: list[dict[str, Any]] = []
         self.owner_rebinds_total = 0
+        self.owner_candidates_dropped = 0   # Astra 7638 (Low): key cap
         # F-foreign-progress (Astra 7582): incident named by the receipt that
         # last set each step ("agent:plan" -> {idx: incident, '' = plan-only}).
         self._plan_step_src: dict[str, dict[int, str]] = {}
@@ -97,13 +108,24 @@ class HiveReducer:
         # get an owner ONLY via the audited rebind_plan_owner().
         self._held_ownerless: set[str] = set()
         self._quiet = False   # preview simulations log at debug level
-        # Astra 7582 (Medium): durable operator rebind journal (JSONL,
-        # fsync'd write-ahead).  Entries loaded at start are re-applied, with
-        # their original actor/reason, once the replayed event stream makes
-        # the plan held and the target incident open again.
+        # Astra 7582/7638: durable operator rebind journal (JSONL, fsync'd
+        # write-ahead).  Each entry records the event-stream POSITION (count
+        # of events reduced) and a hash chain of the events up to it; after a
+        # restart it is re-applied only at exactly that position and only if
+        # the replayed stream hashes identically (F-journal-order).
         self._journal_path = rebind_journal
+        # volatile_rebinds=False: without a journal, rebinds are REFUSED
+        # rather than silently lost on restart (HiveAppliance default).
+        self._volatile_rebinds = volatile_rebinds
+        self._event_seq = 0
+        self._stream_digest = ""
+        self._journal_unapplied: list[dict[str, Any]] = []
+        self._journal_indeterminate: dict[str, Any] | None = None
+        self._journal_set_aside: list[str] = []
+        self._journal_invalid_lines = 0
         self._journal_pending: list[dict[str, Any]] = (
-            self._load_journal(rebind_journal) if rebind_journal else [])
+            self._open_journal(rebind_journal) if rebind_journal else [])
+        self._replay_journal()
 
     @property
     def state(self) -> HiveState:
@@ -119,10 +141,12 @@ class HiveReducer:
         if event is None:
             return new_incidents
         # N6 (7146): conflicting PLAN re-registration rejected before ANY
-        # mutation (including timestamps).
+        # mutation (including timestamps and the event-stream position: a
+        # rejected PLAN is deterministic on replay and changes no state).
         if event.kind == EventKind.PLAN and self._reject_conflicting_plan(
                 agent_id, event.payload or {}):
             return new_incidents
+        self._advance_stream(agent_id, event)   # Astra 7638 F-journal-order
 
         # Update agent last-event timestamp
         if agent_id in self._state.agents:
@@ -249,7 +273,9 @@ class HiveReducer:
                       inc: dict) -> list[int]:
         key = f"{agent_id}:{plan_id}"
         # F-foreign-progress (Astra 7582): evidence naming another incident
-        # never counts for the new owner; buffered receipts are rechecked by
+        # never counts for the new owner.  Qualification (Astra 7638): a
+        # plan-only receipt names no incident -- it proves a step of THIS
+        # plan and is kept; the operator vouches the plan fits the target; buffered receipts are rechecked by
         # _drain_pending against the new owner (foreign ones are rejected).
         foreign = self._discard_foreign_steps(key, incident_id)
         self._held_ownerless.discard(key)
@@ -276,54 +302,174 @@ class HiveReducer:
                 key, incident_id, foreign)
         return foreign
 
-    # ── Astra 7582: durable rebind journal ──
+    # ── Astra 7582/7638: durable rebind journal ──
+    def _advance_stream(self, agent_id: str, event: Any) -> None:
+        kind = getattr(event.kind, "value", str(event.kind))
+        self._event_seq += 1
+        self._stream_digest = hashlib.sha256(json.dumps(
+            [self._stream_digest, agent_id, str(getattr(event, "id", "")),
+             str(kind)]).encode("utf-8")).hexdigest()
+
     @staticmethod
-    def _load_journal(path: str) -> list[dict[str, Any]]:
+    def _fsync_dir(path: str) -> None:
+        dfd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
+        try:
+            os.fsync(dfd)
+        finally:
+            os.close(dfd)
+
+    def _set_aside_tail(self, fd: int, size: int) -> int:
+        """F-journal-tail (Astra 7638): move an unterminated (torn) last line
+        to <journal>.torn-<ns> and truncate the journal to its last complete
+        line BEFORE any new write.  Returns the new size.  Raises OSError on
+        failure (callers then write nothing)."""
+        data = os.pread(fd, size, 0)
+        keep = data.rfind(b"\n") + 1
+        aside = f"{self._journal_path}.torn-{time.time_ns()}"
+        afd = os.open(aside, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            os.write(afd, data[keep:])
+            os.fsync(afd)
+        finally:
+            os.close(afd)
+        os.ftruncate(fd, keep)
+        os.fsync(fd)
+        self._fsync_dir(aside)
+        self._journal_set_aside.append(aside)
+        logger.error("Rebind journal %s ended with a torn line (%d bytes); set "
+                     "aside to %s before further writes", self._journal_path,
+                     size - keep, aside)
+        return keep
+
+    def _open_journal(self, path: str) -> list[dict[str, Any]]:
+        created = not os.path.exists(path)
+        fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+        try:
+            size = os.fstat(fd).st_size
+            if size and os.pread(fd, 1, size - 1) != b"\n":
+                size = self._set_aside_tail(fd, size)
+            data = os.pread(fd, size, 0) if size else b""
+            if created:
+                os.fsync(fd)
+        finally:
+            os.close(fd)
+        if created:
+            self._fsync_dir(path)          # the new file's directory entry
+        return self._parse_journal(path, data)
+
+    def _parse_journal(self, path: str, data: bytes) -> list[dict[str, Any]]:
         out: list[dict[str, Any]] = []
-        if not os.path.exists(path):
-            return out
-        with open(path, encoding="utf-8") as f:
-            for n, line in enumerate(f, 1):
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    e = json.loads(line)
-                except ValueError:
-                    logger.warning("Rebind journal %s line %d unreadable; skipped", path, n)
-                    continue
-                if (isinstance(e, dict) and e.get("op") == "owner_rebind"
-                        and all(isinstance(e.get(k), str) and e.get(k).strip()
-                                for k in ("agent_id", "plan_id", "incident_id",
-                                          "actor", "reason"))):
-                    out.append(e)
-                else:
-                    logger.warning("Rebind journal %s line %d invalid; skipped", path, n)
+        seen: set[str] = set()
+        for n, raw in enumerate(data.split(b"\n"), 1):
+            if not raw.strip():
+                continue
+            try:
+                e = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                self._journal_invalid_lines += 1
+                logger.warning("Rebind journal %s line %d unreadable; skipped", path, n)
+                continue
+            if not (isinstance(e, dict) and e.get("op") == "owner_rebind"
+                    and all(isinstance(e.get(k), str) and e.get(k).strip()
+                            for k in ("agent_id", "plan_id", "incident_id",
+                                      "actor", "reason"))):
+                self._journal_invalid_lines += 1
+                logger.warning("Rebind journal %s line %d invalid; skipped", path, n)
+                continue
+            seq = e.get("seq")
+            if not (isinstance(seq, int) and not isinstance(seq, bool) and seq >= 0
+                    and isinstance(e.get("stream_digest"), str)):
+                self._mark_unapplied(e, "legacy entry without event-stream "
+                                        "position; not replayed (re-issue the "
+                                        "rebind if still wanted)")
+                continue
+            op_id = str(e.get("op_id") or "")
+            if op_id and op_id in seen:
+                continue                      # duplicate physical line
+            seen.add(op_id)
+            out.append(e)
         return out
 
     def _journal_append(self, entry: dict[str, Any]) -> None:
-        with open(self._journal_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, sort_keys=True) + "\n")
-            f.flush()
-            os.fsync(f.fileno())
+        """Write-ahead append.  OSError = clean refusal (nothing durable);
+        _JournalIndeterminate = write failed and rollback failed too."""
+        data = (json.dumps(entry, sort_keys=True) + "\n").encode("utf-8")
+        fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o600)
+        try:
+            size = os.fstat(fd).st_size
+            if size and os.pread(fd, 1, size - 1) != b"\n":
+                size = self._set_aside_tail(fd, size)   # F-journal-tail
+            if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
+                raise OSError(f"rebind journal would exceed {MAX_HIVE_JOURNAL_BYTES} "
+                              "bytes; rotate/compact it (admission refused)")
+            try:
+                n = os.write(fd, data)
+                if n != len(data):
+                    raise OSError(f"short journal write ({n}/{len(data)} bytes)")
+                os.fsync(fd)
+            except OSError as exc:
+                # F-journal-refused-fsync (Astra 7638): roll the entry back so
+                # a refused rebind can never be applied after a restart.
+                try:
+                    os.ftruncate(fd, size)
+                    os.fsync(fd)
+                except OSError as exc2:
+                    raise _JournalIndeterminate(
+                        f"{exc}; rollback failed: {exc2}") from exc2
+                raise
+        finally:
+            os.close(fd)
 
     def journal_pending(self) -> list[dict[str, Any]]:
-        """Journaled rebinds not (yet) re-applied after a restart."""
+        """Journaled rebinds whose event-stream position is not reached yet."""
         return copy.deepcopy(self._journal_pending)
 
+    def journal_status(self) -> dict[str, Any]:
+        """Astra 7638: operator view of rebind durability."""
+        return copy.deepcopy({
+            "path": self._journal_path,
+            "durable": bool(self._journal_path),
+            "volatile_rebinds_allowed": self._volatile_rebinds,
+            "event_seq": self._event_seq,
+            "pending": len(self._journal_pending),
+            "unapplied": self._journal_unapplied,
+            "indeterminate": self._journal_indeterminate,
+            "set_aside": self._journal_set_aside,
+            "invalid_lines": self._journal_invalid_lines})
+
+    def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
+        self._journal_unapplied.append({
+            k: e.get(k) for k in ("op_id", "agent_id", "plan_id", "incident_id",
+                                  "actor", "reason", "seq")} | {"why": why})
+        del self._journal_unapplied[:-MAX_HIVE_REBIND_RECORDS]
+        logger.error("Journaled hive rebind %s:%s -> %s by %s NOT re-applied: %s",
+                     e.get("agent_id"), e.get("plan_id"), e.get("incident_id"),
+                     e.get("actor"), why)
+
     def _replay_journal(self) -> None:
+        """F-journal-order (Astra 7638): apply an entry exactly at the event
+        position where it originally happened, never earlier or later."""
         if not self._journal_pending:
             return
         keep = []
         for e in self._journal_pending:
-            ok, _, inc = self._rebind_check(e["agent_id"], e["plan_id"],
-                                            e["incident_id"], True)
-            if ok:
-                self._do_rebind(e["agent_id"], e["plan_id"], e["incident_id"],
-                                inc, actor=e["actor"], reason=e["reason"],
-                                replayed=True)
-            else:
+            if e["seq"] > self._event_seq:
                 keep.append(e)
+                continue
+            if e["seq"] < self._event_seq:
+                self._mark_unapplied(e, "original event position already passed")
+            elif e["stream_digest"] != self._stream_digest:
+                self._mark_unapplied(e, "replayed event stream differs from the "
+                                        "one the rebind was made on")
+            else:
+                ok, why, inc = self._rebind_check(e["agent_id"], e["plan_id"],
+                                                  e["incident_id"], True)
+                if not ok:
+                    self._mark_unapplied(e, f"state at original position: {why}")
+                else:
+                    self._do_rebind(e["agent_id"], e["plan_id"], e["incident_id"],
+                                    inc, actor=e["actor"], reason=e["reason"],
+                                    replayed=True)
         self._journal_pending = keep
 
     def _held_receipts(self, agent_id: str, plan_id: str,
@@ -386,18 +532,42 @@ class HiveReducer:
             logger.warning("Refused hive rebind of %s:%s -> %s by %s: %s",
                            agent_id, plan_id, incident_id, actor, why)
             return False
+        if not self._journal_path and not self._volatile_rebinds:
+            logger.error("Refused hive rebind of %s:%s -> %s: no rebind journal "
+                         "configured, so it would be lost on restart (set "
+                         "rebind_journal / HIVE_REBIND_JOURNAL, or pass "
+                         "volatile_rebinds=True)", agent_id, plan_id, incident_id)
+            return False
         if self._journal_path:
-            entry = {"v": 1, "op": "owner_rebind", "agent_id": agent_id,
-                     "plan_id": plan_id, "incident_id": incident_id,
-                     "actor": actor, "reason": reason, "ts": time.time(),
+            if self._journal_indeterminate is not None:
+                logger.error("Refused hive rebind of %s:%s -> %s: rebind journal "
+                             "is fenced after an indeterminate write (%s)",
+                             agent_id, plan_id, incident_id,
+                             self._journal_indeterminate.get("error"))
+                return False
+            entry = {"v": 2, "op": "owner_rebind", "op_id": uuid.uuid4().hex,
+                     "agent_id": agent_id, "plan_id": plan_id,
+                     "incident_id": incident_id, "actor": actor,
+                     "reason": reason, "ts": time.time(),
+                     "seq": self._event_seq,
+                     "stream_digest": self._stream_digest,
                      "candidate": incident_id in self.owner_candidates.get(
                          f"{agent_id}:{plan_id}", [])}
             try:
-                self._journal_append(entry)   # write-ahead; fail closed
+                self._journal_append(entry)   # write-ahead
+            except _JournalIndeterminate as exc:
+                self._journal_indeterminate = {"op_id": entry["op_id"],
+                                               "entry": entry, "error": str(exc)}
+                logger.critical("Hive rebind of %s:%s -> %s NOT applied, but its "
+                                "journal entry may survive a restart (%s); journal "
+                                "fenced: further rebinds refused until an operator "
+                                "inspects %s", agent_id, plan_id, incident_id,
+                                exc, self._journal_path)
+                return False
             except OSError as exc:
                 logger.error("Refused hive rebind of %s:%s -> %s: rebind "
-                             "journal write failed: %s", agent_id, plan_id,
-                             incident_id, exc)
+                             "journal write failed (rolled back): %s", agent_id,
+                             plan_id, incident_id, exc)
                 return False
         self._do_rebind(agent_id, plan_id, incident_id, inc, actor=actor,
                         reason=reason)
@@ -457,11 +627,15 @@ class HiveReducer:
             logger.info("Registered agent %s in reducer", agent_id)
 
     def unregister_agent(self, agent_id: str) -> None:
-        """Remove an agent from hive state."""
+        """Remove an agent from hive health state.
+
+        F-unregister-escape (Astra 7638): unregister is a TEMPORARY removal,
+        not a fresh start.  Plan identity, progress, step provenance, owners,
+        candidates, buffered/deduplicated receipts and the ownerless hold
+        latch are all KEPT, so re-registering can never turn a held plan into
+        an owned one without the audited rebind_plan_owner()."""
         self._state.agents.pop(agent_id, None)
         self._agent_incidents.pop(agent_id, None)
-        self._held_ownerless = {k for k in self._held_ownerless
-                                if not k.startswith(f"{agent_id}:")}
         logger.info("Unregistered agent %s from reducer", agent_id)
 
     def update_resources(self, agent_id: str,
@@ -641,7 +815,14 @@ class HiveReducer:
                        or self._held_latched(agent_id, plan_id)):
             # Ben msg 7547 option (a) (Astra 7562): an ordinary PLAN never
             # sets the owner of a HELD plan; it only records a candidate.
-            lst = self.owner_candidates.setdefault(key, [])
+            if (key not in self.owner_candidates
+                    and len(self.owner_candidates) >= MAX_HIVE_CANDIDATE_KEYS):
+                # Astra 7638 (Low): advisory candidates are capped; the HOLD
+                # itself is never dropped (rebind with allow_non_candidate).
+                self.owner_candidates_dropped += 1
+                lst: list[str] = []
+            else:
+                lst = self.owner_candidates.setdefault(key, [])
             if inc_id not in lst and len(lst) < MAX_HIVE_CANDIDATES:
                 lst.append(inc_id)
             logger.warning("PLAN %s -> %s from %s held (ownerless plan linked "

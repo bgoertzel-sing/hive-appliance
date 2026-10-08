@@ -136,7 +136,19 @@ def test_hive_preview_simulation_is_quiet(caplog):
 
 
 def test_local_recovery_text_names_all_hold_reasons():
+    # Astra 7638 test gap: the recovery text only exists after a legacy
+    # migration, so force one (strip ownership state) and assert it
+    # unconditionally -- no skipped assertion.
     loc, _ = run(HELD_THEN_RESOLVED)
-    rec = loc.migration_diagnostics.get("recovery", "") if hasattr(loc, "migration_diagnostics") else ""
-    if rec:
-        assert "owner_unproven alone is NOT the full hold list" in rec
+    snap = json.loads(json.dumps(loc.snapshot()))
+    for k in ("plan_owner", "owner_unproven", "migration_diagnostics"):
+        snap.pop(k, None)
+    r2 = Reducer()
+    r2.restore_snapshot(snap)
+    rec = r2.migration_diagnostics["recovery"]
+    assert rec
+    assert "owner_unproven alone is NOT the full hold list" in rec
+    assert "authoritative CURRENT hold list is Reducer.quarantined_plans()" in rec
+    for reason in ("owner_unproven", "ownerless_linked", "ownerless_held"):
+        assert reason in rec
+    assert r2.quarantined_plans()       # the migration really held something

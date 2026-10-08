@@ -6,7 +6,9 @@ HivePlanner, SharedStoreAdapter, and HealthDashboard into a single
 coherent control loop.
 
 Usage:
-    hive = HiveAppliance()
+    hive = HiveAppliance(rebind_journal="/var/lib/hive/rebinds.jsonl")
+    # or set HIVE_REBIND_JOURNAL; without a journal, operator owner rebinds
+    # are refused unless volatile_rebinds=True (Astra 7638)
     hive.register_agent("proto2", adapter)
     hive.tick()   # one iteration of the control loop
     hive.run()    # continuous loop in background thread
@@ -14,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+import os
 import threading
 import time
 from typing import Any, Optional
@@ -47,11 +50,17 @@ class HiveAppliance:
         correlation_threshold: int = 2,
         auto_execute: bool = False,
         rebind_journal: str | None = None,
+        volatile_rebinds: bool = False,
     ):
         self.bus = HiveEventBus()
-        # Astra 7582: rebind_journal = durable operator-rebind journal path
+        # Astra 7582/7638: durable operator-rebind journal path (argument or
+        # HIVE_REBIND_JOURNAL).  With neither, rebinds are REFUSED unless
+        # volatile_rebinds=True explicitly accepts losing them on restart.
+        if rebind_journal is None:
+            rebind_journal = os.environ.get("HIVE_REBIND_JOURNAL") or None
         self.reducer = HiveReducer(correlation_threshold=correlation_threshold,
-                                   rebind_journal=rebind_journal)
+                                   rebind_journal=rebind_journal,
+                                   volatile_rebinds=volatile_rebinds)
         self.planner = HivePlanner()
         self.shared_store = SharedStoreAdapter()
         self.dashboard = HealthDashboard()
