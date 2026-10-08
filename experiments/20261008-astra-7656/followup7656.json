@@ -1,0 +1,317 @@
+{
+  "exact_7638_all_fsync_fail": {
+    "live": {
+      "open": [
+        "i"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7656/20261008-astra-7656/journal-followup/exact-7638-fsync.jsonl",
+        "durable": true,
+        "volatile_rebinds_allowed": true,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "indeterminate": {
+          "op_id": "283998207fa34db087a246f18e74ee4b",
+          "entry": {
+            "v": 2,
+            "op": "owner_rebind",
+            "op_id": "283998207fa34db087a246f18e74ee4b",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "ts": 1791496796.3043323,
+            "seq": 4,
+            "stream_digest": "7aca4fc59931ff95fd84e5b972cd6d2497d4db7971a652b424ea9c5e79ff4a93",
+            "candidate": true
+          },
+          "error": "injected fsync failure; rollback failed: injected fsync failure"
+        },
+        "set_aside": [],
+        "invalid_lines": 0
+      },
+      "event_seq": 4,
+      "digest": "7aca4fc59931ff95fd84e5b972cd6d2497d4db7971a652b424ea9c5e79ff4a93"
+    },
+    "restart": {
+      "open": [
+        "i"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7656/20261008-astra-7656/journal-followup/exact-7638-fsync.jsonl",
+        "durable": true,
+        "volatile_rebinds_allowed": true,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "indeterminate": null,
+        "set_aside": [],
+        "invalid_lines": 0
+      },
+      "event_seq": 4,
+      "digest": "7aca4fc59931ff95fd84e5b972cd6d2497d4db7971a652b424ea9c5e79ff4a93"
+    },
+    "qualification": "Process restart sees truncation, but failed rollback fsync does not establish power-loss durability; memory fence is lost."
+  },
+  "rollback_preserves_prior_record": {
+    "events": [
+      {
+        "id": "evt_aa58ada71e194e6e",
+        "kind": "incident",
+        "ts": 1791496796.302194,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_8761f2974415410f",
+        "kind": "plan",
+        "ts": 1791496796.3022113,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_9333978ff5dd42a4",
+        "kind": "receipt",
+        "ts": 1791496796.302221,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_c5102c476df546a1",
+        "kind": "plan",
+        "ts": 1791496796.3022294,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_75aaef2961b4479b",
+        "kind": "incident",
+        "ts": 1791496796.3055906,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "q",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_468c64bf01d64cb1",
+        "kind": "plan",
+        "ts": 1791496796.3056014,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_79651f685b0d4d7e",
+        "kind": "receipt",
+        "ts": 1791496796.305609,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "qrc",
+          "plan_id": "q",
+          "incident_id": "j",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_0462b49feb5b4178",
+        "kind": "plan",
+        "ts": 1791496796.3056161,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "j",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "calls": [
+      {
+        "size": 632,
+        "owner": {
+          "a1:p": "i"
+        }
+      },
+      {
+        "size": 324,
+        "owner": {
+          "a1:p": "i"
+        }
+      }
+    ],
+    "restart": {
+      "open": [
+        "j"
+      ],
+      "hold": {
+        "a1:q": "ownerless_linked"
+      },
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ],
+        "a1:q": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": [],
+        "a1:q": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7656/20261008-astra-7656/journal-followup/prior-record-rollback.jsonl",
+        "durable": true,
+        "volatile_rebinds_allowed": true,
+        "event_seq": 8,
+        "pending": 0,
+        "unapplied": [],
+        "indeterminate": null,
+        "set_aside": [],
+        "invalid_lines": 0
+      },
+      "event_seq": 8,
+      "digest": "5ffe90963f45aa6d10b756e90488ac9671dc0187f6d1d531292c4aab8018c4d5"
+    }
+  },
+  "startup_fsync_boundaries": [
+    {
+      "boundary": "new-file",
+      "fsync_count": 1,
+      "exception": "create-fsync-1",
+      "bytes": 0
+    },
+    {
+      "boundary": "parent-directory",
+      "fsync_count": 2,
+      "exception": "create-fsync-2",
+      "bytes": 0
+    }
+  ],
+  "unapplied_status_retention": {
+    "input_entries": 201,
+    "status_entries": 200,
+    "first_visible": "op-1",
+    "last_visible": "op-200",
+    "pending": 0,
+    "cumulative_unapplied_counter": false,
+    "qualification": "Errors logged and raw journal retained, but journal_status has no truncation/total indicator. This is bounded diagnostic history, not dropped active hold."
+  },
+  "content_hash_classification": {
+    "verdict": "OPEN Medium F-journal-content",
+    "supersedes": "Initial review7656.json High classification",
+    "reason": "Changed-payload witness violates schemas.types.Event immutable-event convention. Digest detects identity/order mismatch, not content corruption. No claimed failure on identical complete serialized events; exact three original orders pass. Medium integrity/assurance gap, not High ordinary replay failure."
+  }
+}

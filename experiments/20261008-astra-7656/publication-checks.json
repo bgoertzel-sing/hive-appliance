@@ -1,0 +1,32 @@
+{
+  "scan": "High-confidence credential patterns on every published byte, plus focused fixture/log review; not exhaustive",
+  "patterns": [
+    "github_token",
+    "private_key",
+    "aws_access_id",
+    "openai_style",
+    "telegram_bot_token"
+  ],
+  "files_scanned": 244,
+  "matches": [],
+  "largest_bytes": 1642610,
+  "excluded": [
+    ".pytest_cache",
+    "__pycache__",
+    "build-prerequisites",
+    "pytest-tmp",
+    "tmp"
+  ],
+  "target_remote": "https://github.com/bgoertzel-sing/hive-appliance.git",
+  "target_branch": "main",
+  "publication_scope": [
+    "docs/ASTRA_REVIEW_7656.md",
+    "experiments/20261008-astra-7656/"
+  ],
+  "test_result": "764 passed; full suite exactly once",
+  "independent_result": "20 assertion groups; reproduced defects not conformance passes; focused followups and static checks exit 0",
+  "gate": "NOT APPROVED",
+  "final_content_hash_severity": "Medium; followup7656.json supersedes initial High label",
+  "source": "144 tracked non-experiment files byte-identical; clean isolated worktree",
+  "prior_evidence": "191 hashes verified"
+}

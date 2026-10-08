@@ -1,0 +1,20 @@
+{
+  "changed_files": [
+    "hive/appliance.py",
+    "hive/reducer.py",
+    "tests/test_astra7582.py",
+    "tests/test_astra7638.py"
+  ],
+  "complete_changed_files_read": true,
+  "full_diff_read": true,
+  "docs": {
+    "appliance_usage": "Updated journal argument/env/explicit volatile opt-out",
+    "README": "No rebind-journal configuration or upgrade guidance",
+    "policy": "Still describes hive owner_candidates/owner_rebinds as in-memory; no v1 migration/full-stream replay, journal defaults/caps/fence procedure",
+    "legacy": "Only code log/test explains v1 rejection and reissue; no operator migration/runbook",
+    "callers": "Other HiveAppliance instantiations are tests; no production instantiation site outside class usage. Existing tests exercise ordinary operations, not old implicit volatile rebind.",
+    "event_identity": "schemas/types.py Event docstring calls events immutable; mutable dataclass/from_dict does not verify content hash",
+    "snapshot": "No HiveReducer.snapshot/restore_snapshot. Local Reducer snapshots do not contain hive global accepted-event position/hash. Event bus log bounded/in-memory; this patch provides no durable globally ordered event archive."
+  },
+  "scope": "No product/docs fixes: review/evidence only"
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "-E",
+      "HiveAppliance\\(|rebind_journal|HIVE_REBIND_JOURNAL|volatile_rebinds",
+      "HEAD",
+      "--",
+      ":!experiments",
+      ":!docs/ASTRA*"
+    ],
+    "exit_code": 0,
+    "stdout": "HEAD:hive/appliance.py:9:    hive = HiveAppliance(rebind_journal=\"/var/lib/hive/rebinds.jsonl\")\nHEAD:hive/appliance.py:10:    # or set HIVE_REBIND_JOURNAL; without a journal, operator owner rebinds\nHEAD:hive/appliance.py:11:    # are refused unless volatile_rebinds=True (Astra 7638)\nHEAD:hive/appliance.py:52:        rebind_journal: str | None = None,\nHEAD:hive/appliance.py:53:        volatile_rebinds: bool = False,\nHEAD:hive/appliance.py:57:        # HIVE_REBIND_JOURNAL).  With neither, rebinds are REFUSED unless\nHEAD:hive/appliance.py:58:        # volatile_rebinds=True explicitly accepts losing them on restart.\nHEAD:hive/appliance.py:59:        if rebind_journal is None:\nHEAD:hive/appliance.py:60:            rebind_journal = os.environ.get(\"HIVE_REBIND_JOURNAL\") or None\nHEAD:hive/appliance.py:62:                                   rebind_journal=rebind_journal,\nHEAD:hive/appliance.py:63:                                   volatile_rebinds=volatile_rebinds)\nHEAD:hive/reducer.py:75:        rebind_journal: str | None = None,\nHEAD:hive/reducer.py:76:        volatile_rebinds: bool = True,\nHEAD:hive/reducer.py:116:        self._journal_path = rebind_journal\nHEAD:hive/reducer.py:117:        # volatile_rebinds=False: without a journal, rebinds are REFUSED\nHEAD:hive/reducer.py:119:        self._volatile_rebinds = volatile_rebinds\nHEAD:hive/reducer.py:127:            self._open_journal(rebind_journal) if rebind_journal else [])\nHEAD:hive/reducer.py:432:            \"volatile_rebinds_allowed\": self._volatile_rebinds,\nHEAD:hive/reducer.py:535:        if not self._journal_path and not self._volatile_rebinds:\nHEAD:hive/reducer.py:538:                         \"rebind_journal / HIVE_REBIND_JOURNAL, or pass \"\nHEAD:hive/reducer.py:539:                         \"volatile_rebinds=True)\", agent_id, plan_id, incident_id)\nHEAD:tests/test_astra7582.py:17:    loc, hive = Reducer(), HiveReducer(rebind_journal=journal)\nHEAD:tests/test_astra7582.py:96:def test_hive_rebind_journal_replayed_after_restart(tmp_path):\nHEAD:tests/test_astra7638.py:26:    h = HiveReducer(rebind_journal=journal, **kw)\nHEAD:tests/test_astra7638.py:60:    a = HiveAppliance(volatile_rebinds=True)\nHEAD:tests/test_astra7638.py:223:    monkeypatch.delenv(\"HIVE_REBIND_JOURNAL\", raising=False)\nHEAD:tests/test_astra7638.py:224:    a = HiveAppliance()\nHEAD:tests/test_astra7638.py:234:    monkeypatch.setenv(\"HIVE_REBIND_JOURNAL\", str(jp))\nHEAD:tests/test_astra7638.py:235:    a = HiveAppliance()\nHEAD:tests/test_astra7638.py:243:    monkeypatch.delenv(\"HIVE_REBIND_JOURNAL\", raising=False)\nHEAD:tests/test_astra7638.py:244:    a = HiveAppliance(volatile_rebinds=True)\nHEAD:tests/test_hive_appliance_m5.py:19:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:27:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:35:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:44:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:53:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:65:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:77:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:88:    hive = HiveAppliance(correlation_threshold=2)\nHEAD:tests/test_hive_appliance_m5.py:109:    hive = HiveAppliance(correlation_threshold=2)\nHEAD:tests/test_hive_appliance_m5.py:126:    hive = HiveAppliance(correlation_threshold=2, auto_execute=True)\nHEAD:tests/test_hive_appliance_m5.py:144:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:159:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:170:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:182:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:193:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:204:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:213:    hive = HiveAppliance(correlation_threshold=2)\nHEAD:tests/test_hive_appliance_m5.py:235:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:244:    hive = HiveAppliance()\nHEAD:tests/test_hive_appliance_m5.py:261:    hive = HiveAppliance(correlation_threshold=2, auto_execute=True)\nHEAD:tests/test_l1_s1_astra6882.py:66:    app = HiveAppliance(poll_interval=0.01)\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "git",
+      "grep",
+      "-n",
+      "-i",
+      "-E",
+      "journal|rebind|snapshot|restore",
+      "HEAD",
+      "--",
+      "README.md",
+      "docs/POLICY_MULTI_PLAN_SUPERSESSION.md",
+      "hive/event_bus.py",
+      "hive/shared_store.py"
+    ],
+    "exit_code": 0,
+    "stdout": "HEAD:README.md:26:- **M3** \u2705 Complete \u2014 State recovery and controlled upgrades (C09\u2013C10): checkpoint/restore, upgrade controller with pre-flight/rollback, CLI commands\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:35:- **Ownerless linked plans are HELD and repaired by audited rebind** (Ben,\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:38:  and rebind workflow\"). History: the 7542 thread used reversed (a)/(b)\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:50:  **Repair:** `preview_rebind()` (side-effect free; reports hold_reason,\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:52:  `rebind_plan_owner(..., actor=, reason=)`, which requires a non-empty actor\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:54:  recorded candidate unless `allow_non_candidate=True`. Each rebind appends an\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:62:  disappears. Hive owner_candidates/owner_rebinds are in-memory (the hive\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:63:  reducer has no snapshot/restore).\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:65:  rebind, both reducers), `tests/test_astra7562.py` (retention, late-link\nHEAD:docs/POLICY_MULTI_PLAN_SUPERSESSION.md:69:  restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,\n",
+    "stderr": ""
+  }
+]
