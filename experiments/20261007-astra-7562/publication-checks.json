@@ -1,0 +1,48 @@
+{
+  "reviewed_pin": "57a62987a8e46fe2fdf45d63c1a9c148d3e12fbd",
+  "secret_scan": "High-confidence credential patterns: no matches. Targeted source/fixture/log review; not an exhaustive secret detector.",
+  "patterns": [
+    "github_token",
+    "private_key",
+    "aws_access_key",
+    "openai_key",
+    "credential_url"
+  ],
+  "hits": [],
+  "files": 302,
+  "largest": [
+    [
+      "experiments/20261007-astra-7562/policy-schedules.json",
+      1642610
+    ],
+    [
+      "experiments/20261007-astra-7562/new-cases.json",
+      1199118
+    ],
+    [
+      "experiments/20261007-astra-7562/review7173.json",
+      849382
+    ],
+    [
+      "experiments/20261007-astra-7562/current-format-sweep.json",
+      425091
+    ],
+    [
+      "experiments/20261007-astra-7562/prior-ordered-format-sweep.json",
+      425091
+    ]
+  ],
+  "excluded": [
+    "tmp",
+    "pytest-tmp",
+    "__pycache__",
+    "third-party build-prerequisites binaries (hashes retained)",
+    "untracked source build/dist/egg artifacts"
+  ],
+  "source_and_helpers_verified": true,
+  "staged_diff_check": {
+    "exit": 2,
+    "only_preserved_source_raw_diff_runner_whitespace": true,
+    "new_report_clean": true
+  }
+}

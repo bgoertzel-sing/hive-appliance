@@ -1,0 +1,263 @@
+[
+  {
+    "event": {
+      "id": "evt_fdf2dbec73b14201",
+      "kind": "incident",
+      "ts": 1791441670.753686,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "i",
+        "plan_id": "p",
+        "severity": "critical",
+        "component": "svc",
+        "symptom": "down",
+        "resolved": false
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i"
+    ],
+    "hive_open": [
+      "i"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791441670.75371,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {},
+      "plan_receipts": {},
+      "plan_failed_steps": {},
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 1,
+      "incidents_open": 1
+    }
+  },
+  {
+    "event": {
+      "id": "evt_87b13ffaef9340fa",
+      "kind": "incident",
+      "ts": 1791441670.7536917,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "j",
+        "plan_id": "p",
+        "severity": "critical",
+        "component": "svc",
+        "symptom": "down",
+        "resolved": false
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791441670.75371,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791441670.7540104,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {},
+      "plan_receipts": {},
+      "plan_failed_steps": {},
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  },
+  {
+    "event": {
+      "id": "evt_9f789d2a2ef841c1",
+      "kind": "plan",
+      "ts": 1791441670.753699,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "p",
+        "incident_id": "",
+        "steps": [
+          {}
+        ]
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791441670.75371,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791441670.7540104,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 1
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  },
+  {
+    "event": {
+      "id": "evt_3aed6bbf6c8e48ce",
+      "kind": "receipt",
+      "ts": 1791441670.7537036,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "x",
+        "plan_id": "p",
+        "step_index": 0,
+        "verified": true,
+        "incident_id": ""
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791441670.75371,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791441670.7540104,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 1
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "x"
+      ],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  }
+]

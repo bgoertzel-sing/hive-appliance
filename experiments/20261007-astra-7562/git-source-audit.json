@@ -1,0 +1,19 @@
+{
+  "pin": "57a62987a8e46fe2fdf45d63c1a9c148d3e12fbd",
+  "origin_main": "57a62987a8e46fe2fdf45d63c1a9c148d3e12fbd",
+  "reviewed_commits": [
+    "57a62987a8e46fe2fdf45d63c1a9c148d3e12fbd Astra 7542 O-ownerless-hold option (a): ownerless plans linked to open incidents are visible via quarantine_reasons() (reason ownerless_linked; local + hive; survives restore), WARNING logged when such a plan completes, repair (later owner-declaring PLAN) documented; ownership never inferred; quarantined_plans() unchanged. tests/test_astra7542.py 7 tests; full suite 725 passed",
+    "c6a5543bad3a42db768674986394b56090f08553 Astra 7542 L-F7-negative-fixtures: F7 negative tests (single receipt / partial failure) now use owned plans with valid step indices and assert ownership, so they fail only on incompleteness; completeness-gate mutant now caught by 2 tests; full suite 718 passed"
+  ],
+  "diff_names": [
+    "controller/reducer.py",
+    "docs/POLICY_MULTI_PLAN_SUPERSESSION.md",
+    "hive/reducer.py",
+    "tests/test_astra7542.py",
+    "tests/test_p0_fixes.py"
+  ],
+  "hive_incident_handler_unchanged_from_0258413": true,
+  "incident_handler_sha256": "ab32f65c8b765b65966df019d682c53fe786e6ba9e4610df32e7c656670ef09f",
+  "decision_input_sha256": "7502cbf3445bae58e1f3738613c2b146d3e85a570c8fe9e0b3023ab848784717",
+  "source_verified_unchanged": true
+}

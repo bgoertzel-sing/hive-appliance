@@ -1,0 +1,3544 @@
+{
+  "disk_recovery": [
+    {
+      "linked": false,
+      "mode": "direct",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "fresh1": {
+            "id": "fresh1",
+            "step_index": 1,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          }
+        },
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {
+            "p": [
+              "i"
+            ]
+          }
+        }
+      },
+      "rebound": true,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {},
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": true,
+              "pending_before": 1,
+              "effect_counts": {
+                "credited": 1,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [
+                  "fresh1"
+                ],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "passed": true
+    },
+    {
+      "linked": false,
+      "mode": "current_twice",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "fresh1": {
+            "id": "fresh1",
+            "step_index": 1,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          }
+        },
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {
+            "p": [
+              "i"
+            ]
+          }
+        }
+      },
+      "rebound": true,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {},
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": true,
+              "pending_before": 1,
+              "effect_counts": {
+                "credited": 1,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [
+                  "fresh1"
+                ],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "passed": true
+    },
+    {
+      "linked": false,
+      "mode": "legacy_twice",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "fresh1": {
+            "id": "fresh1",
+            "step_index": 1,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          }
+        },
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {
+            "p": [
+              "i"
+            ]
+          }
+        }
+      },
+      "rebound": true,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_candidates": {},
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": true,
+              "pending_before": 1,
+              "effect_counts": {
+                "credited": 1,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [
+                  "fresh1"
+                ],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "passed": true
+    },
+    {
+      "linked": true,
+      "mode": "direct",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "rebound": null,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "passed": true
+    },
+    {
+      "linked": true,
+      "mode": "current_twice",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "rebound": null,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "passed": true
+    },
+    {
+      "linked": true,
+      "mode": "legacy_twice",
+      "checkpoint": "ckpt_1791441595_1",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "rebound": null,
+      "after": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_verified_invalidated": 1,
+          "legacy_pending_discarded": 1,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "passed": true
+    }
+  ],
+  "rebind": [
+    {
+      "case": "outside",
+      "before": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "target": "i",
+      "accepted": false,
+      "second": false,
+      "after": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "persisted": true
+    },
+    {
+      "case": "missing",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "missing",
+      "accepted": false,
+      "second": true,
+      "after": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "other"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "other",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 0,
+              "effect_counts": {
+                "credited": 0,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "foreign_link",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "q": "other"
+        },
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "other",
+      "accepted": false,
+      "second": false,
+      "after": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "q": "other"
+        },
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "resolved",
+      "before": {
+        "open": [
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "i",
+      "accepted": false,
+      "second": true,
+      "after": {
+        "open": [
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "other"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "other",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 0,
+              "effect_counts": {
+                "credited": 0,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "foreign_unlinked",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "other",
+      "accepted": true,
+      "second": false,
+      "after": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "other"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "other",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 0,
+              "effect_counts": {
+                "credited": 0,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "twice",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "i",
+      "accepted": true,
+      "second": false,
+      "after": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 0,
+              "effect_counts": {
+                "credited": 0,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "held_successes",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "new0": {
+            "id": "new0",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          },
+          "new1": {
+            "id": "new1",
+            "step_index": 1,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          }
+        },
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "i",
+      "accepted": true,
+      "second": false,
+      "after": {
+        "open": [
+          "other"
+        ],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 2,
+              "effect_counts": {
+                "credited": 2,
+                "failure_recorded": 0,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [
+                  "new0",
+                  "new1"
+                ],
+                "failure_recorded": [],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": [
+                "i"
+              ]
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    },
+    {
+      "case": "held_failure",
+      "before": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": []
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "new0": {
+            "id": "new0",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          },
+          "new1": {
+            "id": "new1",
+            "step_index": 1,
+            "verified": true,
+            "plan_id": "p",
+            "incident_id": ""
+          },
+          "newerfail": {
+            "id": "newerfail",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "p",
+            "incident_id": ""
+          }
+        },
+        "owners": {},
+        "quarantine": [
+          "p"
+        ],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+        }
+      },
+      "target": "i",
+      "accepted": true,
+      "second": false,
+      "after": {
+        "open": [
+          "i",
+          "other"
+        ],
+        "verified": {
+          "p": [
+            1
+          ]
+        },
+        "failed": {
+          "p": [
+            0
+          ]
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {
+          "legacy_ownerless_total": 1,
+          "legacy_ownerless_plans": [
+            "p"
+          ],
+          "legacy_verified_discarded": 0,
+          "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+          "owner_rebinds": [
+            {
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "review7173",
+              "reason": "legacy witness",
+              "candidate": false,
+              "pending_before": 3,
+              "effect_counts": {
+                "credited": 2,
+                "failure_recorded": 1,
+                "consumed_no_effect": 0,
+                "still_held": 0
+              },
+              "effect_ids": {
+                "credited": [
+                  "new0",
+                  "new1"
+                ],
+                "failure_recorded": [
+                  "newerfail"
+                ],
+                "consumed_no_effect": [],
+                "still_held": []
+              },
+              "closed": []
+            }
+          ],
+          "owner_rebinds_total": 1
+        }
+      },
+      "persisted": true
+    }
+  ],
+  "candidate_cap": {
+    "count": 8,
+    "state": {
+      "open": [
+        "i",
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "pending": {},
+      "owners": {},
+      "quarantine": [
+        "p"
+      ],
+      "diagnostics": {
+        "legacy_ownerless_total": 1,
+        "legacy_ownerless_plans": [
+          "p"
+        ],
+        "legacy_verified_discarded": 0,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+        "owner_candidates": {
+          "p": [
+            "candidate0",
+            "candidate1",
+            "candidate2",
+            "candidate3",
+            "candidate4",
+            "candidate5",
+            "candidate6",
+            "candidate7"
+          ]
+        }
+      }
+    },
+    "restore_equal": true
+  },
+  "global_bounds": {
+    "plans": 128,
+    "candidate_plan_keys": 128,
+    "rebind_entries": 128,
+    "legacy_ids": 128,
+    "open": 128,
+    "restored_equal": true
+  },
+  "pending_liveness": [
+    {
+      "case": "invalid_index",
+      "initial": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_a4d9e1fbbbe24fe9",
+            "kind": "incident",
+            "ts": 1791441596.0021594,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "pending": {},
+            "owners": {},
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_23faeba0b9784d93",
+            "kind": "receipt",
+            "ts": 1791441596.0021696,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad",
+              "step_index": null,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "i"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "pending": {
+              "bad": {
+                "id": "bad",
+                "step_index": null,
+                "verified": true,
+                "plan_id": "",
+                "incident_id": "i"
+              }
+            },
+            "owners": {},
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_ac12f0ede693481e",
+            "kind": "plan",
+            "ts": 1791441596.0021787,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_abcc40cd57324c6e",
+            "kind": "receipt",
+            "ts": 1791441596.0021856,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_b945d36c3fe04d96",
+            "kind": "receipt",
+            "ts": 1791441596.0021927,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    },
+    {
+      "case": "unknown_unrelated_plan",
+      "initial": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "stale": {
+            "id": "stale",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "unknown",
+            "incident_id": ""
+          }
+        },
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {
+          "stale": {
+            "id": "stale",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "unknown",
+            "incident_id": ""
+          }
+        },
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_9da22e3e6dd444a2",
+            "kind": "incident",
+            "ts": 1791441596.0022004,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "pending": {},
+            "owners": {},
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_a652d6d626254139",
+            "kind": "plan",
+            "ts": 1791441596.0022073,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_2828f72c190f4bde",
+            "kind": "receipt",
+            "ts": 1791441596.0022142,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "stale",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "unknown",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {
+              "stale": {
+                "id": "stale",
+                "step_index": 0,
+                "verified": true,
+                "plan_id": "unknown",
+                "incident_id": ""
+              }
+            },
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_3283cb64c1cd4acd",
+            "kind": "receipt",
+            "ts": 1791441596.0022209,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {
+              "stale": {
+                "id": "stale",
+                "step_index": 0,
+                "verified": true,
+                "plan_id": "unknown",
+                "incident_id": ""
+              }
+            },
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_a7f8f9ebc3314856",
+            "kind": "receipt",
+            "ts": 1791441596.0022273,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {
+              "stale": {
+                "id": "stale",
+                "step_index": 0,
+                "verified": true,
+                "plan_id": "unknown",
+                "incident_id": ""
+              }
+            },
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    },
+    {
+      "case": "foreign_dual",
+      "initial": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_3b403bf763314e6e",
+            "kind": "incident",
+            "ts": 1791441596.0022342,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "pending": {},
+            "owners": {},
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_70792b411b93438a",
+            "kind": "plan",
+            "ts": 1791441596.0022407,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_73d3afb16d724fbd",
+            "kind": "receipt",
+            "ts": 1791441596.0022473,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "bad",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": "other"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_61fb7a97f18d4a42",
+            "kind": "receipt",
+            "ts": 1791441596.0022538,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_04e62223401b4fb0",
+            "kind": "receipt",
+            "ts": 1791441596.002261,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    },
+    {
+      "case": "foreign_agent",
+      "initial": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_ba702965c52f4d62",
+            "kind": "incident",
+            "ts": 1791441596.0022676,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "pending": {},
+            "owners": {},
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {},
+            "failed": {},
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_37fe26a847db4fb4",
+            "kind": "plan",
+            "ts": 1791441596.002274,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_83b943fa02c74f69",
+            "kind": "receipt",
+            "ts": 1791441596.0022807,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_29627bcb3cf74a10",
+            "kind": "receipt",
+            "ts": 1791441596.0022871,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    },
+    {
+      "case": "multiple_owned_ambiguous",
+      "initial": {
+        "open": [
+          "i"
+        ],
+        "verified": {
+          "p": [
+            0,
+            1
+          ],
+          "q": []
+        },
+        "failed": {
+          "p": [],
+          "q": []
+        },
+        "pending": {
+          "fail": {
+            "id": "fail",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        },
+        "owners": {
+          "p": "i",
+          "q": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ],
+          "q": []
+        },
+        "failed": {
+          "p": [],
+          "q": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i",
+          "q": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_6bf4802dde4f4fd4",
+            "kind": "plan",
+            "ts": 1791441596.0022938,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_a9782135a2ee4966",
+            "kind": "plan",
+            "ts": 1791441596.0023005,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "q",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_b2f4d70446ed4603",
+            "kind": "receipt",
+            "ts": 1791441596.0023074,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "fail",
+              "step_index": 0,
+              "verified": false,
+              "plan_id": "",
+              "incident_id": "i"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {
+              "fail": {
+                "id": "fail",
+                "step_index": 0,
+                "verified": false,
+                "plan_id": "",
+                "incident_id": "i"
+              }
+            },
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_1a71b8fc915d4eb8",
+            "kind": "receipt",
+            "ts": 1791441596.0023136,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {
+              "fail": {
+                "id": "fail",
+                "step_index": 0,
+                "verified": false,
+                "plan_id": "",
+                "incident_id": "i"
+              }
+            },
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_8224275c896f48db",
+            "kind": "receipt",
+            "ts": 1791441596.00232,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {
+              "fail": {
+                "id": "fail",
+                "step_index": 0,
+                "verified": false,
+                "plan_id": "",
+                "incident_id": "i"
+              }
+            },
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_44b5c3316c1d4f3c",
+            "kind": "incident",
+            "ts": 1791441596.0023265,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {
+              "fail": {
+                "id": "fail",
+                "step_index": 0,
+                "verified": false,
+                "plan_id": "",
+                "incident_id": "i"
+              }
+            },
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_ddf3b9eb7f6f4713",
+            "kind": "plan",
+            "ts": 1791441596.005576,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [
+              "i"
+            ],
+            "verified": {
+              "p": [
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [
+                0
+              ],
+              "q": []
+            },
+            "health": "failed",
+            "displayed_open": 1
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_428827db3cbd44aa",
+            "kind": "receipt",
+            "ts": 1791441596.005697,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "fresh0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_d1e7900a6b534ec6",
+            "kind": "receipt",
+            "ts": 1791441596.0058126,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "fresh1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i",
+              "q": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ],
+              "q": []
+            },
+            "failed": {
+              "p": [],
+              "q": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    },
+    {
+      "case": "late_incident_complete",
+      "initial": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "final": {
+        "open": [],
+        "verified": {
+          "p": [
+            0,
+            1
+          ]
+        },
+        "failed": {
+          "p": []
+        },
+        "pending": {},
+        "owners": {
+          "p": "i"
+        },
+        "quarantine": [],
+        "diagnostics": {}
+      },
+      "trace": [
+        {
+          "event": {
+            "id": "evt_dd49d52326e64b54",
+            "kind": "plan",
+            "ts": 1791441596.0023334,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": []
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_8b8e6fda678e4993",
+            "kind": "receipt",
+            "ts": 1791441596.0023398,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "a",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_efee034fd8604e1b",
+            "kind": "receipt",
+            "ts": 1791441596.0023463,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "b",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "unknown",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_408832cebe654c11",
+            "kind": "incident",
+            "ts": 1791441596.002353,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_6eb21327d6de4daf",
+            "kind": "plan",
+            "ts": 1791441596.0064378,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {},
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_157cf29fe1724fb3",
+            "kind": "receipt",
+            "ts": 1791441596.0065458,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "fresh0",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        },
+        {
+          "event": {
+            "id": "evt_ff18921f39884983",
+            "kind": "receipt",
+            "ts": 1791441596.006655,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "fresh1",
+              "step_index": 1,
+              "verified": true,
+              "plan_id": "p",
+              "incident_id": ""
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          "local": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "pending": {},
+            "owners": {
+              "p": "i"
+            },
+            "quarantine": [],
+            "diagnostics": {}
+          },
+          "hive": {
+            "open": [],
+            "verified": {
+              "p": [
+                0,
+                1
+              ]
+            },
+            "failed": {
+              "p": []
+            },
+            "health": "healthy",
+            "displayed_open": 0
+          },
+          "agreement": true
+        }
+      ],
+      "agreement_every_event": true
+    }
+  ],
+  "rejected_full_state": {
+    "before": [
+      {
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1791441596.006817,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "p",
+            "schema_version": "1"
+          },
+          {
+            "id": "other",
+            "ts": 1791441596.0068543,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "state": {},
+        "_seen_incident_ids": [
+          "i",
+          "other"
+        ],
+        "_plan_step_counts": {
+          "p": 2
+        },
+        "_plan_verified": {
+          "p": []
+        },
+        "_plan_failed_steps": {
+          "p": []
+        },
+        "_pending_receipts": {
+          "waiting": {
+            "id": "waiting",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "",
+            "incident_id": "missing"
+          }
+        },
+        "_seen_receipt_ids": [],
+        "_plan_owner": {
+          "p": "i"
+        },
+        "legacy_pending_discarded": 0,
+        "_owner_unproven": [],
+        "migration_diagnostics": {},
+        "rejected_plan_registrations": 0
+      },
+      {
+        "_state": {
+          "agents": {
+            "a": {
+              "agent_id": "a",
+              "health": "failed",
+              "open_incidents": 2,
+              "last_event_ts": 1791441596.0068092,
+              "services": {},
+              "disk_usage_bytes": 0,
+              "cpu_percent": 0.0,
+              "memory_bytes": 0,
+              "last_updated": 1791441596.006922
+            }
+          },
+          "incidents": [],
+          "resources": {
+            "total_disk_bytes": 0,
+            "used_disk_bytes": 0,
+            "total_memory_bytes": 0,
+            "used_memory_bytes": 0,
+            "total_cpu_percent": 0.0,
+            "agent_resources": {},
+            "thresholds": {
+              "disk_warn": 0.8,
+              "disk_critical": 0.95,
+              "cpu_warn": 0.8,
+              "memory_warn": 0.85
+            }
+          },
+          "last_updated": 1791441596.006929,
+          "schema_version": "1"
+        },
+        "_correlation_window": 300.0,
+        "_correlation_threshold": 2,
+        "_agent_incidents": {
+          "a": [
+            {
+              "incident_id": "i",
+              "ts": 1791441596.0067878,
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "p",
+              "resolved": false
+            },
+            {
+              "incident_id": "other",
+              "ts": 1791441596.0067952,
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            }
+          ]
+        },
+        "_seen_hive_incidents": [],
+        "_seen_receipts": [],
+        "_plan_steps": {
+          "a:p": 2
+        },
+        "_plan_verified_steps": {
+          "a:p": []
+        },
+        "_plan_failed": {
+          "a:p": []
+        },
+        "_pending_receipts": {
+          "a": {
+            "waiting": {
+              "id": "waiting",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "missing"
+            }
+          }
+        },
+        "_plan_owner": {
+          "a:p": "i"
+        },
+        "rejected_plan_registrations": 0
+      }
+    ],
+    "after": [
+      {
+        "incidents": [
+          {
+            "id": "i",
+            "ts": 1791441596.006817,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "p",
+            "schema_version": "1"
+          },
+          {
+            "id": "other",
+            "ts": 1791441596.0068543,
+            "severity": "critical",
+            "component": "svc",
+            "symptom": "down",
+            "evidence": [],
+            "resolved": false,
+            "plan_id": "",
+            "schema_version": "1"
+          }
+        ],
+        "state": {},
+        "_seen_incident_ids": [
+          "other",
+          "i"
+        ],
+        "_plan_step_counts": {
+          "p": 2
+        },
+        "_plan_verified": {
+          "p": []
+        },
+        "_plan_failed_steps": {
+          "p": []
+        },
+        "_pending_receipts": {
+          "waiting": {
+            "id": "waiting",
+            "step_index": 0,
+            "verified": true,
+            "plan_id": "",
+            "incident_id": "missing"
+          }
+        },
+        "_seen_receipt_ids": [],
+        "_plan_owner": {
+          "p": "i"
+        },
+        "legacy_pending_discarded": 0,
+        "_owner_unproven": [],
+        "migration_diagnostics": {},
+        "rejected_plan_registrations": 1
+      },
+      {
+        "_state": {
+          "agents": {
+            "a": {
+              "agent_id": "a",
+              "health": "failed",
+              "open_incidents": 2,
+              "last_event_ts": 1791441596.0068092,
+              "services": {},
+              "disk_usage_bytes": 0,
+              "cpu_percent": 0.0,
+              "memory_bytes": 0,
+              "last_updated": 1791441596.006922
+            }
+          },
+          "incidents": [],
+          "resources": {
+            "total_disk_bytes": 0,
+            "used_disk_bytes": 0,
+            "total_memory_bytes": 0,
+            "used_memory_bytes": 0,
+            "total_cpu_percent": 0.0,
+            "agent_resources": {},
+            "thresholds": {
+              "disk_warn": 0.8,
+              "disk_critical": 0.95,
+              "cpu_warn": 0.8,
+              "memory_warn": 0.85
+            }
+          },
+          "last_updated": 1791441596.006929,
+          "schema_version": "1"
+        },
+        "_correlation_window": 300.0,
+        "_correlation_threshold": 2,
+        "_agent_incidents": {
+          "a": [
+            {
+              "incident_id": "i",
+              "ts": 1791441596.0067878,
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "p",
+              "resolved": false
+            },
+            {
+              "incident_id": "other",
+              "ts": 1791441596.0067952,
+              "symptom": "down",
+              "severity": "critical",
+              "plan_id": "",
+              "resolved": false
+            }
+          ]
+        },
+        "_seen_hive_incidents": [],
+        "_seen_receipts": [],
+        "_plan_steps": {
+          "a:p": 2
+        },
+        "_plan_verified_steps": {
+          "a:p": []
+        },
+        "_plan_failed": {
+          "a:p": []
+        },
+        "_pending_receipts": {
+          "a": {
+            "waiting": {
+              "id": "waiting",
+              "step_index": 0,
+              "verified": true,
+              "plan_id": "",
+              "incident_id": "missing"
+            }
+          }
+        },
+        "_plan_owner": {
+          "a:p": "i"
+        },
+        "rejected_plan_registrations": 1
+      }
+    ],
+    "changed": [
+      [
+        "rejected_plan_registrations"
+      ],
+      [
+        "rejected_plan_registrations"
+      ]
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "fixture_correction": "Original historical INCIDENT linked p, enabling genuine legacy owner reconstruction. Use authentic PLAN-before-unlinked-INCIDENT history, as retained 300-plan fixture does. No product change; original run/traceback preserved.",
+  "ordinary_event_sources": [
+    {
+      "event_source": "",
+      "assigned_hive_namespace": "a1",
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "audit": {}
+    },
+    {
+      "event_source": "untrusted-other-agent",
+      "assigned_hive_namespace": "a1",
+      "open": [
+        [
+          "j"
+        ],
+        [
+          "j"
+        ]
+      ],
+      "audit": {}
+    }
+  ],
+  "bus_namespace_control": {
+    "envelope": "a2",
+    "claimed_event_source": "a1",
+    "hive_owners": {
+      "a2:p": "i"
+    },
+    "original_agent_open": [
+      "i"
+    ]
+  },
+  "legacy_contrast": {
+    "preview": {
+      "plan_id": "p",
+      "incident_id": "i",
+      "allowed": true,
+      "refusal": "",
+      "candidates": [
+        "i"
+      ],
+      "is_candidate": true,
+      "held_receipts": [
+        {
+          "id": "x",
+          "plan_id": "p",
+          "incident_id": "",
+          "step_index": 0,
+          "verified": true
+        }
+      ],
+      "effects": {
+        "credited": [
+          {
+            "id": "x",
+            "plan_id": "p",
+            "incident_id": "",
+            "step_index": 0,
+            "verified": true,
+            "applied_to": "p",
+            "outcome": "credited"
+          }
+        ],
+        "failure_recorded": [],
+        "consumed_no_effect": [],
+        "still_held": []
+      },
+      "effect_counts": {
+        "credited": 1,
+        "failure_recorded": 0,
+        "consumed_no_effect": 0,
+        "still_held": 0
+      },
+      "would_close": [
+        "i"
+      ]
+    },
+    "audit": [
+      {
+        "plan_id": "p",
+        "incident_id": "i",
+        "actor": "Astra-7562",
+        "reason": "fixture ownership evidence",
+        "candidate": true,
+        "pending_before": 1,
+        "effect_counts": {
+          "credited": 1,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "effect_ids": {
+          "credited": [
+            "x"
+          ],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "closed": [
+          "i"
+        ]
+      }
+    ],
+    "current_reasons": {}
+  },
+  "event_store": {
+    "last_plan": {
+      "id": "evt_93803677937241ff",
+      "kind": "plan",
+      "ts": 1791441723.4054434,
+      "source": "planner",
+      "subject": "i",
+      "payload": {
+        "id": "p",
+        "ts": 1791441723.4054034,
+        "incident_id": "i",
+        "steps": [
+          {}
+        ],
+        "status": "proposed",
+        "principal": "",
+        "grant": "",
+        "expiry": 0.0,
+        "digest": "",
+        "attempt_id": "",
+        "schema_version": "2"
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "owner_rebinds": [],
+    "qualification": "Ordinary event persistence exists; no operator actor/reason/preview/effect audit"
+  },
+  "passed": true
+}
