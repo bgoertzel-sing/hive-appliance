@@ -1,8 +1,11 @@
 """Astra 7542 O-ownerless-hold, option (a) (Ben 2026-10-08: "(a) is best for
 a first try"): a complete-but-ownerless plan linked to an open incident still
 closes nothing, but is now VISIBLE (quarantine_reasons() -> ownerless_linked,
-local + hive, survives restore), logs a warning, and has a documented repair:
-a later PLAN that declares incident_id.  Ownership is never inferred.
+local + hive, survives restore) and logs a warning.  SUPERSEDED IN PART by
+Astra 7562 D-option-conformance (Ben msg 7547 option (a)): the plan is HELD in
+quarantined_plans() and a re-sent owner-declaring PLAN records only an owner
+candidate; repair is the audited rebind (tests/test_astra7562_hold.py).
+Ownership is never inferred.
 """
 import json
 import logging
@@ -23,7 +26,8 @@ def test_witness_reported_ownerless_linked_both_reducers():
     assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
     assert loc.quarantine_reasons() == {"p": "ownerless_linked"}
     assert hive.quarantine_reasons() == {"a1:p": "ownerless_linked"}
-    assert loc.quarantined_plans() == []          # rebind list unchanged
+    assert loc.quarantined_plans() == ["p"]       # HELD (msg 7547 option (a))
+    assert hive.quarantined_plans() == ["a1:p"]
 
 
 def test_reason_survives_restore_after_every_event():
@@ -59,17 +63,21 @@ def test_owned_plan_never_reported():
     assert loc.quarantine_reasons() == {} and hive.quarantine_reasons() == {}
 
 
-def test_documented_repair_later_owner_declaring_plan():
+def test_resent_owner_declaring_plan_is_candidate_only():
     stream = WITNESS + [PLAN("p", "i", 1)]
     loc, hive = both(stream)
-    assert lo(loc) == ["j"] and ho(hive) == ["j"]         # owner closed only
-    assert loc._plan_owner["p"] == "i" and hive._plan_owner["a1:p"] == "i"
-    assert loc.quarantine_reasons() == {} and hive.quarantine_reasons() == {}
+    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]   # closes nothing
+    assert "p" not in loc._plan_owner and "a1:p" not in hive._plan_owner
+    assert loc.migration_diagnostics["owner_candidates"]["p"] == ["i"]
+    assert hive.owner_candidates["a1:p"] == ["i"]
+    assert loc.quarantine_reasons() == {"p": "ownerless_linked"}
+    assert hive.quarantine_reasons() == {"a1:p": "ownerless_linked"}
     r = Reducer()
     for e in stream:
         r.reduce(e)
         r = rt(r)
-    assert lo(r) == ["j"] and r.quarantine_reasons() == {}
+    assert lo(r) == ["i", "j"] and r.quarantined_plans() == ["p"]
+    assert r.migration_diagnostics["owner_candidates"]["p"] == ["i"]
 
 
 def test_owner_unproven_reason_still_reported():

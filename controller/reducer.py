@@ -254,7 +254,8 @@ class Reducer:
 
     def _rebind_check(self, plan_id: str, incident_id: str,
                       allow_non_candidate: bool):
-        if plan_id not in self._owner_unproven:
+        if (plan_id not in self._owner_unproven
+                and not self._ownerless_linked(plan_id)):
             return False, "plan is not quarantined", None
         if not incident_id:
             return False, "no target incident", None
@@ -311,6 +312,7 @@ class Reducer:
             effects = self._group_effects(out)
         return copy.deepcopy({
             "plan_id": plan_id, "incident_id": incident_id, "allowed": ok,
+            "hold_reason": self.quarantine_reasons().get(plan_id, ""),
             "refusal": why, "candidates": cands,
             "is_candidate": incident_id in cands, "held_receipts": held,
             "effects": effects,
@@ -320,7 +322,9 @@ class Reducer:
     def rebind_plan_owner(self, plan_id: str, incident_id: str, *, actor: str,
                           reason: str, allow_non_candidate: bool = False) -> bool:
         """N6 (7146) / N9 (7160, 7173): explicit TRUSTED-OPERATOR owner rebind
-        for a plan quarantined by legacy migration (lost owner).
+        for a HELD plan: quarantined by legacy migration (owner_unproven) or
+        a registered ownerless plan linked to an open incident
+        (ownerless_linked; Ben msg 7547 option (a), Astra 7562).
 
         This is an authority override, not proof of lost history: the caller
         supplies the ownership evidence.  Never expose it as an ordinary event
@@ -347,6 +351,8 @@ class Reducer:
             return False
         cands = (self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, [])
         is_cand = incident_id in cands
+        hold = ("owner_unproven" if plan_id in self._owner_unproven
+                else "ownerless_linked")
         before = {i.id for i in self.open_incidents()}
         out: dict[str, Any] = {}
         self._apply_rebind(plan_id, incident_id, inc, out)
@@ -358,15 +364,16 @@ class Reducer:
         d["owner_rebinds_total"] = _as_int(d.get("owner_rebinds_total", len(recs))) + 1
         recs.append({"plan_id": plan_id, "incident_id": incident_id,
                      "actor": actor, "reason": reason, "candidate": is_cand,
+                     "hold_reason": hold,
                      "pending_before": len(out), "effect_counts": counts,
                      "effect_ids": {k: [str(r["id"]) for r in v][:MAX_EFFECT_IDS]
                                     for k, v in eff.items()},
                      "closed": closed})
         del recs[:-MAX_DIAG_ENTRIES]
-        logger.warning("Operator rebind by %s (%s): plan %s owner set to incident "
-                       "%s (candidate=%s, pending_before=%d, effects=%s, closed=%s)",
-                       actor, reason, plan_id, incident_id, is_cand, len(out),
-                       counts, closed)
+        logger.warning("Operator rebind by %s (%s): plan %s [%s] owner set to "
+                       "incident %s (candidate=%s, pending_before=%d, effects=%s, "
+                       "closed=%s)", actor, reason, plan_id, hold, incident_id,
+                       is_cand, len(out), counts, closed)
         return True
 
     def _handle_plan(self, event: Event) -> None:
@@ -390,9 +397,14 @@ class Reducer:
         inc_id = p.get("incident_id", "") or ""
         if self._reject_conflicting_plan(p):
             return
-        if inc_id and plan_id in self._owner_unproven:
-            # N6 (7146): a lost legacy owner is NOT re-established by an
-            # ordinary PLAN; it is recorded as a candidate for operator rebind.
+        held = ("owner unproven after legacy migration"
+                if plan_id in self._owner_unproven else
+                "ownerless plan linked to an open incident"
+                if self._ownerless_linked(plan_id) else "")
+        if inc_id and held:
+            # N6 (7146) / Ben msg 7547 option (a) (Astra 7562): an ordinary
+            # PLAN never sets the owner of a HELD plan; it is only recorded
+            # as a candidate for a previewed, audited operator rebind.
             d = self.migration_diagnostics
             cmap = d.setdefault("owner_candidates", {})
             if plan_id not in cmap and len(cmap) >= MAX_DIAG_ENTRIES:
@@ -401,8 +413,9 @@ class Reducer:
                 lst = cmap.setdefault(plan_id, [])
                 if inc_id not in lst and len(lst) < 8:
                     lst.append(inc_id)
-            logger.warning("PLAN %s -> %s held: owner lost in legacy migration; "
-                           "use rebind_plan_owner()", plan_id, inc_id)
+            logger.warning("PLAN %s -> %s held (%s): recorded as owner "
+                           "candidate only; use preview_rebind() then "
+                           "rebind_plan_owner()", plan_id, inc_id, held)
             return
         if plan_id not in self._plan_step_counts:
             self._plan_step_counts[plan_id] = len(steps)
@@ -530,16 +543,17 @@ class Reducer:
         # empty incident_id) never closes anything, not even incidents that
         # link to it via inc.plan_id -- linkage alone is not ownership.
         if not owner:
-            # O-ownerless-hold (Astra 7542, option (a)): make the stuck plan
-            # visible instead of silently doing nothing.
+            # Ben msg 7547 option (a) (Astra 7562): the stuck plan is HELD
+            # in quarantined_plans() and repaired by audited rebind.
             linked = sorted(i.id for i in self.incidents
                             if not i.resolved and i.plan_id == plan_id)
             if linked:
                 logger.warning(
                     "Plan %s is complete but has no proven owner; it closes "
-                    "nothing (linked open incidents %s stay open). Repair: "
-                    "send a PLAN for %s that declares incident_id. See "
-                    "quarantine_reasons() (ownerless_linked).", plan_id, linked,
+                    "nothing (linked open incidents %s stay open). It is HELD "
+                    "in quarantined_plans() (ownerless_linked); repair with "
+                    "preview_rebind()/rebind_plan_owner() for %s. A re-sent "
+                    "PLAN only records an owner candidate.", plan_id, linked,
                     plan_id)
             return
         for inc in self.incidents:
@@ -549,28 +563,36 @@ class Reducer:
                 inc.resolved = True
 
     def quarantined_plans(self) -> list[str]:
-        """Authoritative CURRENT quarantine (owner_unproven), sorted.  Use
-        this, not migration_diagnostics["legacy_ownerless_plans"] (a capped
-        historical sample), to enumerate plans awaiting an operator rebind."""
-        return sorted(self._owner_unproven)
+        """Authoritative CURRENT hold list, sorted: every plan awaiting an
+        operator preview_rebind()/rebind_plan_owner() -- owner_unproven
+        (legacy migration) AND ownerless_linked (Ben msg 7547 option (a),
+        Astra 7562).  Use this, not migration_diagnostics
+        ["legacy_ownerless_plans"] (a capped historical sample)."""
+        return sorted(self.quarantine_reasons())
+
+    def _ownerless_linked(self, plan_id: str) -> bool:
+        return (bool(plan_id) and plan_id in self._plan_step_counts
+                and plan_id not in self._owner_unproven
+                and not self._plan_owner.get(plan_id)
+                and any(not i.resolved and i.plan_id == plan_id
+                        for i in self.incidents))
 
     def quarantine_reasons(self) -> dict[str, str]:
-        """Plans held for an ownership reason, with that reason.
+        """Held plans (same keys as quarantined_plans()) with their reason.
 
         NOT every plan that cannot close an incident: owned-but-incomplete or
         failed plans are intentionally absent.  Result is a derived view with
         no global size cap (Astra 7562 O-bound, Low): one entry per held plan.
 
-        - ``owner_unproven``: owner lost in legacy migration; repair with
-          preview_rebind()/rebind_plan_owner() (same set as quarantined_plans()).
-        - ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
+        - ``owner_unproven``: owner lost in legacy migration.
+        - ``ownerless_linked`` (Ben msg 7547 option (a), Astra 7562): a
           registered plan with NO owner that an open incident links to via
-          plan_id.  Linkage is never treated as ownership; repair by sending a
-          later PLAN for the same plan id that declares ``incident_id``.
+          plan_id.  Linkage is never treated as ownership.  A re-sent PLAN
+          declaring incident_id only records an owner candidate.
 
-        Derived from durable state, so it survives snapshot/restore.
-        quarantined_plans() is unchanged (owner_unproven only) because its
-        entries are rebind candidates and ownerless_linked plans are not.
+        Both are repaired the same way: preview_rebind() then the audited
+        rebind_plan_owner().  Derived from durable state, so it survives
+        snapshot/restore.
         """
         out = {pid: "owner_unproven" for pid in self._owner_unproven}
         for inc in self.incidents:
@@ -762,7 +784,8 @@ class Reducer:
                 "a lost owner.")
         # N7 (7133): persisted + cumulative across later snapshot/restore
         # N10 (7173): bounds enforced on EVERY restore (incl. upgraded ones)
-        self._normalize_diagnostics(diag, self._owner_unproven)
+        self._normalize_diagnostics(diag, set(self._owner_unproven)
+                                    | set(self.quarantine_reasons()))
         self.migration_diagnostics = diag
         self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
 
