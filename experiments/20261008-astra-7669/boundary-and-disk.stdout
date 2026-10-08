@@ -1,0 +1,151 @@
+{
+  "n8_total": 14,
+  "n8_passed": 14,
+  "agreement": 14,
+  "linked_stale": {
+    "events": [
+      {
+        "id": "evt_feb65fffdcb04d51",
+        "kind": "plan",
+        "ts": 1791499343.020763,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_b80e3c16203e4e0a",
+        "kind": "receipt",
+        "ts": 1791499343.0207713,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "old0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_7916a6c598e14be6",
+        "kind": "receipt",
+        "ts": 1791499343.020779,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "failure",
+          "step_index": 0,
+          "verified": false,
+          "plan_id": "",
+          "incident_id": "i"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_b9ff81506c8e403a",
+        "kind": "incident",
+        "ts": 1791499343.0207868,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "p"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791499343.020819,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {
+        "@inc:i": {
+          "failure": {
+            "id": "failure",
+            "step_index": 0,
+            "verified": false,
+            "plan_id": "",
+            "incident_id": "i"
+          }
+        }
+      },
+      "seen_receipt_ids": [
+        "old0"
+      ],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "checkpoint": "ckpt_1791499343_1",
+    "current": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          1
+        ]
+      },
+      "pending": {},
+      "owner": {
+        "p": "i"
+      },
+      "quarantine": [],
+      "diag": {
+        "legacy_verified_invalidated": 1,
+        "legacy_pending_discarded": 1,
+        "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT hold list is Reducer.quarantined_plans() (reasons via quarantine_reasons()): owner_unproven (legacy migration), ownerless_linked and ownerless_held (Astra 7562/7582); owner_unproven alone is NOT the full hold list. legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A held plan stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner."
+      }
+    },
+    "baseline_open": [
+      "i"
+    ],
+    "baseline_verified": {
+      "p": [
+        1
+      ]
+    },
+    "baseline_failed": {
+      "p": [
+        0
+      ]
+    }
+  }
+}

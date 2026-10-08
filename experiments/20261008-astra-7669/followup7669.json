@@ -1,0 +1,432 @@
+{
+  "rollback_preserves_prior_record": {
+    "calls": [
+      {
+        "size": 796,
+        "owner": {
+          "a1:p": "i"
+        }
+      },
+      {
+        "size": 406,
+        "owner": {
+          "a1:p": "i"
+        }
+      }
+    ],
+    "restart": {
+      "open": [
+        "j"
+      ],
+      "hold": {
+        "a1:q": "ownerless_linked"
+      },
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ],
+        "a1:q": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": [],
+        "a1:q": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/prior-record.jsonl",
+        "durable": true,
+        "volatile_rebinds_allowed": true,
+        "event_seq": 8,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "indeterminate": null,
+        "fence_marker": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/prior-record.jsonl.fence",
+        "aborted": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0,
+        "set_aside": [],
+        "invalid_lines": 0
+      },
+      "event_seq": 8,
+      "digest": "91be1c95ada2acb29e2b46c2c065811ee82e32800cb23d66f6e4fbb479a09a27"
+    },
+    "events": [
+      {
+        "id": "evt_cfe44c21097242a1",
+        "kind": "incident",
+        "ts": 1791499534.4901314,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_fb661e1675ea400d",
+        "kind": "plan",
+        "ts": 1791499534.4901507,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_a85013d698b04b1d",
+        "kind": "receipt",
+        "ts": 1791499534.49016,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_1210855a2cdc42e3",
+        "kind": "plan",
+        "ts": 1791499534.490168,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f4ecfc1560a34dcf",
+        "kind": "incident",
+        "ts": 1791499534.4901755,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "q",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_21c3894f48ab4d76",
+        "kind": "plan",
+        "ts": 1791499534.490183,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_c7a521ebe87e4e00",
+        "kind": "receipt",
+        "ts": 1791499534.49019,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "qrc",
+          "plan_id": "q",
+          "incident_id": "j",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_37b3e53296ca4726",
+        "kind": "plan",
+        "ts": 1791499534.4901974,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "j",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "passed": true
+  },
+  "startup_fsync_boundaries": {
+    "cases": [
+      {
+        "at": 1,
+        "calls": [
+          "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/startup-1.jsonl"
+        ],
+        "error": "startup fsync"
+      },
+      {
+        "at": 2,
+        "calls": [
+          "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/startup-2.jsonl",
+          "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669"
+        ],
+        "error": "startup fsync"
+      }
+    ],
+    "passed": true
+  },
+  "abort_content_corruption": {
+    "verdict": "OPEN Medium F-abort-content",
+    "defect_reproduced": true,
+    "original_abort_op": "1f957c4c5ba44d2884167bab4080f268",
+    "edited_abort": {
+      "actor": "reviewer",
+      "entry_hash": "1f8912043b0ce22b62773bb844afb8c45c207cae350573b671f5f152056dee63",
+      "fence_error": "fence marker found at startup: a rebind journal write did not finish cleanly before shutdown",
+      "op": "abort_rebind",
+      "op_id": "0f957c4c5ba44d2884167bab4080f268",
+      "reason": "cancel this uncertain rebind",
+      "ts": 1791499534.50541,
+      "v": 3
+    },
+    "before_corruption": {
+      "open": [
+        "i"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl",
+        "durable": true,
+        "volatile_rebinds_allowed": true,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [
+          {
+            "op_id": "1f957c4c5ba44d2884167bab4080f268",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "seq": 4,
+            "why": "aborted by operator (clear_journal_fence)"
+          }
+        ],
+        "unapplied_total": 1,
+        "unapplied_omitted": 0,
+        "indeterminate": null,
+        "fence_marker": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl.fence",
+        "aborted": [
+          "1f957c4c5ba44d2884167bab4080f268"
+        ],
+        "fence_clearances": [],
+        "plans_refused_cap": 0,
+        "set_aside": [],
+        "invalid_lines": 0
+      },
+      "event_seq": 4,
+      "digest": "94ae882decafe49d74bf7d52ab02ecccbb5ce9c737bbec711412618a3c585da8"
+    },
+    "restarts": [
+      {
+        "open": [],
+        "hold": {},
+        "owner": {
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl",
+          "durable": true,
+          "volatile_rebinds_allowed": true,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "indeterminate": null,
+          "fence_marker": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl.fence",
+          "aborted": [
+            "0f957c4c5ba44d2884167bab4080f268"
+          ],
+          "fence_clearances": [],
+          "plans_refused_cap": 0,
+          "set_aside": [],
+          "invalid_lines": 0
+        },
+        "event_seq": 4,
+        "digest": "94ae882decafe49d74bf7d52ab02ecccbb5ce9c737bbec711412618a3c585da8"
+      },
+      {
+        "open": [],
+        "hold": {},
+        "owner": {
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl",
+          "durable": true,
+          "volatile_rebinds_allowed": true,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "indeterminate": null,
+          "fence_marker": "/tmp/hive-astra-7669/20261008-astra-7669/journal-followup7669/abort-content.jsonl.fence",
+          "aborted": [
+            "0f957c4c5ba44d2884167bab4080f268"
+          ],
+          "fence_clearances": [],
+          "plans_refused_cap": 0,
+          "set_aside": [],
+          "invalid_lines": 0
+        },
+        "event_seq": 4,
+        "digest": "94ae882decafe49d74bf7d52ab02ecccbb5ce9c737bbec711412618a3c585da8"
+      }
+    ],
+    "scope": "One hex character in abort op_id changed; no hashes recomputed. Parser detects mismatch but honors edited abort id and replays original cancelled rebind. Corruption detection assurance, not malicious-store threat.",
+    "passed": true
+  },
+  "complete_matching_fence_clear": {
+    "complete_matching_entry": {
+      "actor": "operator-original",
+      "agent_id": "a1",
+      "candidate": true,
+      "entry_hash": "5d56ba9526b945c35e23b6996a1b1b27d534e3a9cbb8dc459b55207577800175",
+      "incident_id": "i",
+      "op": "owner_rebind",
+      "op_id": "0f5db9f427a84aefbe062f7d2e2748ca",
+      "plan_id": "p",
+      "reason": "case-proof",
+      "seq": 4,
+      "stream_digest": "0d295215f0c79ad323eee007cb199a710e361f6380204dcc8bf8c069131b0b34",
+      "ts": 1791499534.5116744,
+      "v": 3
+    },
+    "cancelled_durable": true,
+    "two_restarts_held": true,
+    "passed": true
+  }
+}

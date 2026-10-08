@@ -1,0 +1,29 @@
+{
+  "source_files": 146,
+  "source_clean": true,
+  "pinned_bytes_verified": true,
+  "prior_manifest": "verified 243 artifact/report hashes; complete manifest coverage\n",
+  "guard_active": true,
+  "notes": {
+    "changed_files": [
+      "README.md",
+      "docs/POLICY_MULTI_PLAN_SUPERSESSION.md",
+      "hive/reducer.py",
+      "tests/test_astra7638.py",
+      "tests/test_astra7656.py"
+    ],
+    "diff_read": "Complete five-file diff; changed paths and interacting reducer paths inspected",
+    "documentation": {
+      "configuration": "CLOSED prior Low: README and policy journal argument/env/default/volatile opt-out",
+      "migration": "CLOSED prior Low: v1 AND v2 explicitly rejected/reissued; authentic 647fac6 record exercised",
+      "replay": "Full ordered stream required; snapshot/partial restore explicitly unsupported",
+      "integrity": "Plain unkeyed SHA-256 explicitly corruption/naive-edit detection, not hostile rewrite resistance; appropriate scope, but fence/abort corruption paths fail that scope",
+      "recovery_inaccuracies": "OPEN Low: marker STAYS claim false after successful unlink+failed dir fsync; any torn-tail step failure leaves original untouched claim false after ftruncate+failed journal fsync",
+      "audit": "Abort JSONL durably retains actor/reason; live fence_clearances list not reconstructed on restart"
+    },
+    "authored_test_changes": "Both fsync tests now target journal descriptor so they still reach original append/rollback boundary after fence added; assertions preserved plus no-fence assertion. Does not weaken original proof. Fence fsync failure not separately covered by authored tests found; independent all_fsync_fail/fence_fsync plus creation dir fault now cover it.",
+    "snapshot_severity": "Documented unsupported path: fail-closed pending/unapplied, availability/recovery limitation; not newly demonstrated incorrect closure. No durable global event archive/checkpoint solution in patch.",
+    "resource_scope": "Actual 10000 tracked-plan admission proven; arbitrary incident/pending receipt counts and oversized old journal reading remain outside this cap; no OOM claim.",
+    "scope": "No production/test source edits; report/evidence only"
+  }
+}
