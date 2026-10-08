@@ -1,0 +1,85 @@
+--- retained-review7669.py
++++ review7678.py
+@@ -1,4 +1,4 @@
+-"""Sole independent 7669 review. A reproduced defect is an assertion, not a safety pass."""
++"""Sole independent 7678 review (7669 exact witnesses retained). A reproduced defect is an assertion, not a safety pass."""
+ import copy,hashlib,json,os,sys,traceback,stat
+ from pathlib import Path
+ from unittest.mock import patch
+@@ -8,7 +8,7 @@
+ exec(compile(src[:src.index('\nout={}\n')],str(E/'review7656.py'),'exec'),q)
+ I,P,R,hnew,hfeed,hop,hb,v,events,HiveReducer,HiveEvent,Event=[q[k] for k in ['I','P','R','hnew','hfeed','hop','hb','v','events','HiveReducer','HiveEvent','Event']]
+ import hive.reducer as hr
+-T=E/'journal-7669';T.mkdir(exist_ok=True)
++T=E/'journal-7678';T.mkdir(exist_ok=True)
+ def save(n,o):(E/n).write_text(json.dumps(o,indent=2,default=str)+'\n')
+ def history():return [I('i','p'),P(),R(i='i'),P(i='i')]
+ def fresh(name,s=None):
+@@ -101,13 +101,13 @@
+   assert ok==(mode=='close_after_commit')
+   if not ok:held(h)
+   n=hfeed(hnew(jp),s)
+-  if mode in ['close_after_commit','remove_directory_fsync']:
++  if mode == 'close_after_commit':
+    assert n._plan_owner=={'a1:p':'i'} and hop(n)==[]
+   else:held(n)
+   if mode=='truncate_before':assert n.journal_status()['indeterminate'] and jp.stat().st_size>0
+-  if mode=='remove_directory_fsync':assert h.journal_status()['indeterminate']['persisted'] is False and n.journal_status()['indeterminate'] is None
+-  rows.append(dict(mode=mode,returned=ok,trace=trace,fence_exists=Path(fp).exists(),journal_bytes=jp.stat().st_size,live=v(h),restart=v(n),defect_reproduced=mode=='remove_directory_fsync'))
+- row.update(cases=rows,exact7656_failed_fsync_and_truncate='CLOSED; durable marker survives restart',close_after_durable_write='CLOSED; returns True consistently',verdict='OPEN Medium F-fence-remove-dir-fsync: False live, absent marker, fresh replay closes i')
++  if mode=='remove_directory_fsync':assert h.journal_status()['indeterminate']['persisted'] is False and h.journal_status()['indeterminate']['marker_present'] is False and h.journal_status()['indeterminate']['abort_durable'] is True and n.journal_status()['indeterminate'] is None and n.journal_status()['aborted']
++  rows.append(dict(mode=mode,returned=ok,trace=trace,fence_exists=Path(fp).exists(),journal_bytes=jp.stat().st_size,live=v(h),restart=v(n),defect_reproduced=False))
++ row.update(cases=rows,exact7656_failed_fsync_and_truncate='CLOSED; durable marker survives restart',close_after_durable_write='CLOSED; returns True consistently',verdict='CLOSED Medium exact7669 F-fence-remove-dir-fsync: False live, durable abort, fresh replay held')
+ 
+ def crashes(row):
+  rows=[]
+@@ -144,7 +144,7 @@
+   else:held(n)
+   if mode in ['after_fence_before_append','after_append_before_remove','during_rollback']:assert n.journal_status()['indeterminate']
+   rows.append(dict(mode=mode,restart=v(n),fence_exists=Path(fp).exists(),journal_bytes=jp.stat().st_size))
+- row.update(cases=rows,scope='BaseException abrupt control-flow termination then fresh reducer, no physical power-loss claim. Post-unlink crash is commit ambiguity; explicit fsync error/refusal is separate reproduced defect.')
++ row.update(cases=rows,scope='BaseException abrupt control-flow termination then fresh reducer, no physical power-loss claim. Post-unlink crash is commit ambiguity; explicit fsync error/refusal now durably cancelled.')
+ 
+ def fenced(name):
+  jp,s,h=fresh(name);real_sync=os.fsync
+@@ -227,16 +227,15 @@
+   with ExitStack() as stack:
+    if mode=='unreadable_open':stack.enter_context(patch.object(builtins,'open',opened))
+    n=hfeed(hnew(jp),s)
+-  if mode in ['edited_op_id','missing_entry']:assert n._plan_owner=={'a1:p':'i'} and hop(n)==[]
+-  else:held(n)
++  held(n)
++  assert n.journal_status()['indeterminate']['scope']=='all'
+   assert n.journal_status()['indeterminate']
+   assert not hb(n)
+   before=v(n)
+-  if mode not in ['edited_op_id','missing_entry']:
+-   assert n.clear_journal_fence('reviewer','unreadable marker inspected')
+-   for _ in range(2):held(hfeed(hnew(jp),s))
+-  rows.append(dict(mode=mode,original_op_id=expected,restart=before,defect_reproduced=mode in ['edited_op_id','missing_entry']))
+- row.update(cases=rows,verdict='OPEN Medium F-fence-content: parseable corrupt marker op_id is trusted without matching embedded entry; uncertain entry replays even while indeterminate status present')
++  assert n.clear_journal_fence('reviewer','unreadable marker inspected')
++  for _ in range(2):held(hfeed(hnew(jp),s))
++  rows.append(dict(mode=mode,original_op_id=expected,restart=before,defect_reproduced=False))
++ row.update(cases=rows,verdict='CLOSED Medium exact7669 F-fence-content: all seven corrupt/unreadable markers fence all; clearance cancels last entry')
+ 
+ def tail_faults(row):
+  rows=[]
+@@ -286,7 +285,7 @@
+     if mode!='journal_fsync':assert jp.read_bytes()==fragment
+     else:assert jp.read_bytes()==b'' and aside[0]['hex']==fragment.hex()
+    rows.append(dict(phase=phase,mode=mode,result=result,error=error,journal_hex=jp.read_bytes().hex(),aside=aside,trace=traces))
+- row.update(cases=rows,verdict='CLOSED Low exact short-write loss; loops safely to completion or refuses before truncation',documentation_qualification='After verified durable aside, ftruncate may succeed then journal fsync fail: original journal has already changed. Blanket docs any-step-fails => untouched is false; bytes remain in durable aside.')
++ row.update(cases=rows,verdict='CLOSED Low exact short-write loss; loops safely to completion or refuses before truncation',documentation_qualification='After verified durable aside, ftruncate may succeed then journal fsync fail: original journal has already changed. Updated docs correctly distinguish this post-truncate outcome; bytes remain in durable aside.')
+ 
+ def observability(row):
+  rows=[]
+@@ -345,6 +344,6 @@
+  r={}
+  try:fn(r);r['passed']=True
+  except Exception as ex:r.update(passed=False,error=repr(ex),traceback=traceback.format_exc())
+- out[name]=r;print(name,r['passed'],r.get('error',''),flush=True);save('review7669.json',out)
+-save('review7669-summary.json',dict(groups=len(out),passed=sum(r['passed'] for r in out.values()),failed=[k for k,v in out.items() if not v['passed']],note='Includes explicitly asserted defect reproductions, not safety approvals'))
++ out[name]=r;print(name,r['passed'],r.get('error',''),flush=True);save('review7678.json',out)
++save('review7678-summary.json',dict(groups=len(out),passed=sum(r['passed'] for r in out.values()),failed=[k for k,v in out.items() if not v['passed']],note='Includes explicitly asserted defect reproductions, not safety approvals'))
+ sys.exit(not all(r['passed'] for r in out.values()))

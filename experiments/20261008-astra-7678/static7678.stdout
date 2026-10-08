@@ -1,0 +1,35 @@
+{
+  "source_files": 148,
+  "source_clean": true,
+  "pinned_bytes_verified": true,
+  "prior_manifest": "verified 315 artifact/report hashes; complete manifest coverage\n",
+  "guard_active": true,
+  "notes": {
+    "changed_files": [
+      "README.md",
+      "docs/POLICY_MULTI_PLAN_SUPERSESSION.md",
+      "hive/reducer.py",
+      "tests/test_astra7669.py"
+    ],
+    "diff_read": "Complete four-file diff and interacting reducer paths inspected; README/policy/test file archived",
+    "documentation": {
+      "recovery_exact": "CLOSED Low exact7669 marker STAYS and any-step untouched overclaims replaced with accurate cases",
+      "snapshot": "Still unsupported, full original ordered stream required; retained suffix-only/synthetic hydrate fail-closed, no native snapshot API",
+      "integrity": "Unkeyed SHA-256 correctly scoped to accidental/naive corruption, not malicious writer recomputing hashes; temporal ordering assumption not enforced by a journal chain",
+      "legacy_fence": "Policy explicitly says legacy-format markers fence every journaled rebind; two-entry v1 witness confirms until clearance",
+      "diagnostics": "abort_durable and marker_present/persisted are accurate in reproduced single and compound faults; textual MAY replay warning clear, no durable warning when both repairs fail",
+      "remaining_source_comment": "Internal _journal_append docstring still says indeterminate fence stays on disk; stale comment, not accurate protocol description; user-facing two exact previous overclaims fixed"
+    },
+    "authored_tests": "8 added tests, no prior tests modified. Full suite 782 passed. In-memory held check present but not whole-business-state equality; independent witness confirms only _journal_indeterminate and _journal_aborted change. No authored lost-newline cancellation or forward-record cancellation witness. Claimed restart-never-applies test-module header overbroad for documented compound failure.",
+    "gate": "NOT APPROVED",
+    "findings": {
+      "exact7669": "All four exact OPEN witnesses closed; F-abort-content residual via torn-tail cancellation remains Medium",
+      "new_medium": [
+        "F-journal-refused-compound",
+        "F-abort-tail",
+        "F-abort-order-scope (reordered-storage qualification)"
+      ]
+    },
+    "scope": "No production/test source edits; report/evidence only"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "cap_helper": {
+    "and len(h.owner_candidates)==600": "and len(h.owner_candidates)==256 and h.owner_candidates_dropped==344",
+    "hive_candidate_keys=600": "hive_candidate_keys=256",
+    "assert h.preview_rebind('a1','p599','i599')['allowed']": "assert not h.preview_rebind('a1','p599','i599')['allowed'];assert h.preview_rebind('a1','p599','i599',True)['allowed']"
+  },
+  "cap_helper_sha256": "2dbf86bc3f2e6bf8a1fcc21e912fe9a1128abe81ef0595dc36264d5cf0f4412d",
+  "legacy300": {
+    "source": "review7519.py",
+    "old": "assert 'authoritative CURRENT quarantine is owner_unproven' in d['recovery']",
+    "new": "assert 'authoritative CURRENT hold list is Reducer.quarantined_plans()' in d['recovery']",
+    "reason": "Deliberately corrected diagnostic text; all semantic/lifecycle assertions unchanged",
+    "extracted_sha256": "64595d40a76fb7496083349723b15f4284405e80f4feab1a201faeb7eeb29a1a"
+  },
+  "primary_adaptation": "witness-adaptation.diff: same7669 fault injection/event witnesses; expected fixed outcomes and all-marker clearance assertions updated",
+  "retained_helpers": "Historical mains are definition inputs, NOT additional scripts to execute; unchanged run_primary executes old semantic harnesses exactly once"
+}
