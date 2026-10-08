@@ -33,7 +33,16 @@ accident.
   closure) is superseded by this decision. Those Astra artifacts are left
   unchanged as a record.
 - **Ownerless linked plans are visible, not silent** (Astra 7542
-  O-ownerless-hold, option (a); Ben 2026-10-08 "(a) is best for a first try").
+  O-ownerless-hold). **PROVENANCE CORRECTION (Astra 7562
+  D-option-conformance):** the recorded decision (Ben, Telegram msg 7547,
+  2026-10-07, "option (a)") is to HOLD such plans in quarantined_plans() and
+  repair them through previewed, audited preview_rebind()/rebind_plan_owner(),
+  with a re-sent PLAN recording only an ownership candidate. The re-send
+  repair described below is the alternative that decision rejected; it was
+  built under reversed (a)/(b) labels in the 7542 thread (Ben's 2026-10-08
+  "(a) is best for a first try" was answered against those reversed labels).
+  Which behaviour stands is PENDING Ben's choice; this entry describes the
+  code as built at this commit, not an approved policy.
   A registered plan with no owner that an open incident links to is reported
   by `Reducer.quarantine_reasons()` / `HiveReducer.quarantine_reasons()` with
   reason `ownerless_linked`, and a WARNING is logged when such a plan
@@ -42,9 +51,15 @@ accident.
   **Repair:** send a later PLAN for the same plan id that declares
   `incident_id`; that sets the immutable owner, and the already-verified
   receipts then close that owner (only). Ownership is never inferred from
-  linkage. Full hold/rebind (option (b)) is deferred unless (a) causes
-  problems in practice.
-- Tests: `tests/test_astra7542.py` (ownerless_linked visibility/repair),
+  linkage.
+  **Qualifications (Astra 7562):** the WARNING fires when the plan completes
+  while linked, and also when a linking INCIDENT arrives after the plan is
+  already complete. quarantine_reasons() also lists incomplete linked
+  ownerless plans; it has no global size cap (one entry per held plan). The
+  hive reducer never prunes OPEN incidents past MAX_AGENT_INCIDENTS (only
+  resolved history is trimmed), so no hold silently disappears.
+- Tests: `tests/test_astra7562.py` (retention, late-link warning),
+  `tests/test_astra7542.py` (ownerless_linked visibility/repair),
   `tests/test_astra7519.py` (ownerless negative controls incl.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).

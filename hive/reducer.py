@@ -139,7 +139,11 @@ class HiveReducer:
         self._state.last_updated = time.time()
 
     def quarantine_reasons(self) -> dict[str, str]:
-        """Plans ("agent:plan_id") that cannot close an incident, with reason.
+        """Plans ("agent:plan_id") held for an ownership reason, with reason.
+
+        Not every plan that cannot close an incident (owned-but-incomplete or
+        failed plans are absent).  Derived view, no global size cap; complete
+        because open incidents are never pruned (Astra 7562 O-retention).
 
         ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
         registered plan with no owner that an open incident links to.  Linkage
@@ -261,7 +265,16 @@ class HiveReducer:
                     dropped += 1
                     continue
                 kept.append(i)
-            self._agent_incidents[agent_id] = kept[-MAX_AGENT_INCIDENTS:] if dropped < overflow else kept
+            # O-retention (Astra 7562): OPEN incidents are never pruned, even
+            # past the cap -- each may be an unresolved ownership hold that
+            # quarantine_reasons() must keep reporting.  Only resolved history
+            # is trimmed; the list may exceed the cap while opens exceed it.
+            if dropped < overflow:
+                logger.warning(
+                    "Agent %s has %d incidents (cap %d); open incidents are "
+                    "retained past the cap.", agent_id, len(kept),
+                    MAX_AGENT_INCIDENTS)
+            self._agent_incidents[agent_id] = kept
 
         # Update agent health
         self._recompute_agent_health(agent_id)
@@ -271,6 +284,13 @@ class HiveReducer:
         owned = {k[len(pre):] for k, o in self._plan_owner.items()
                  if k.startswith(pre) and o == identity}
         self._drain_pending(agent_id, owned)
+        # Late-link (Astra 7562): an incident that links to an already
+        # complete OWNERLESS plan gets the same WARNING as the in-order case.
+        # _maybe_resolve_plan never closes anything for an ownerless plan.
+        lpid = incidents_list[-1].get("plan_id") if incidents_list else ""
+        if (lpid and f"{agent_id}:{lpid}" in self._plan_steps
+                and not self._plan_owner.get(f"{agent_id}:{lpid}")):
+            self._maybe_resolve_plan(agent_id, lpid, identity)
 
         # Attempt cross-agent correlation
         correlated = self._correlate_incidents(symptom, event.ts)

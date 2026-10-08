@@ -165,6 +165,14 @@ class Reducer:
             # another trigger.  A mere payload link to an ownerless plan does
             # not (old evidence must not auto-close a newly reported incident).
             self._drain_pending(set(owned))
+            # Late-link (Astra 7562): linking to an already complete OWNERLESS
+            # plan emits the same WARNING as the in-order case.  For an
+            # ownerless plan _maybe_resolve only logs; it closes nothing.
+            lp = incident.plan_id
+            if (lp and lp in self._plan_step_counts
+                    and lp not in self._owner_unproven
+                    and not self._plan_owner.get(lp)):
+                self._maybe_resolve(lp)
 
     def _owned_plans(self, inc_id: str) -> list[str]:
         return sorted(p for p, o in self._plan_owner.items() if o == inc_id)
@@ -547,7 +555,11 @@ class Reducer:
         return sorted(self._owner_unproven)
 
     def quarantine_reasons(self) -> dict[str, str]:
-        """Every plan that cannot currently close an incident, with a reason.
+        """Plans held for an ownership reason, with that reason.
+
+        NOT every plan that cannot close an incident: owned-but-incomplete or
+        failed plans are intentionally absent.  Result is a derived view with
+        no global size cap (Astra 7562 O-bound, Low): one entry per held plan.
 
         - ``owner_unproven``: owner lost in legacy migration; repair with
           preview_rebind()/rebind_plan_owner() (same set as quarantined_plans()).
