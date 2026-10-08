@@ -41,6 +41,7 @@ MAX_HIVE_JOURNAL_BYTES = 64 * 1024 * 1024   # Astra 7638 (Low): journal admissio
 MAX_HIVE_PLANS = 10000             # Astra 7656 (Low): overall tracked-plan admission cap
 MAX_HIVE_UNAPPLIED_RECORDS = 10000  # Astra 7656 (Low): retained unapplied dispositions
 JOURNAL_VERSION = 3                # Astra 7656: content-hashed stream + entry hash
+FENCE_VERSION = 2                  # Astra 7669: self-hashed fence marker
 
 
 class _JournalIndeterminate(Exception):
@@ -130,6 +131,8 @@ class HiveReducer:
         # fence clearance audit, plans refused by the overall plan cap.
         self._journal_unapplied_total = 0
         self._journal_last_rebind_op = ""
+        # Astra 7669: corrupt/unverifiable journal records (line, why)
+        self._journal_corrupt: list[dict[str, Any]] = []
         self._journal_aborted: set[str] = set()
         self.journal_fence_clearances: list[dict[str, Any]] = []
         self.plans_refused_cap = 0
@@ -390,15 +393,28 @@ class HiveReducer:
                      size - keep, aside)
         return keep
 
-    # ── Astra 7656: durable fence marker (<journal>.fence) ──
+    # ── Astra 7656/7669: durable, self-hashed fence marker (<journal>.fence) ──
     def _fence_path(self, path: str | None = None) -> str:
         return f"{path or self._journal_path}.fence"
 
+    @staticmethod
+    def _hash_without(d: dict[str, Any], key: str) -> str:
+        return hashlib.sha256(json.dumps(
+            {k: v for k, v in d.items() if k != key},
+            sort_keys=True, default=str).encode("utf-8")).hexdigest()
+
+    def _marker_bytes(self, entry: dict[str, Any]) -> bytes:
+        m = {"v": FENCE_VERSION, "op_id": entry["op_id"], "entry": entry}
+        m["marker_hash"] = self._hash_without(m, "marker_hash")
+        return json.dumps(m, sort_keys=True).encode("utf-8")
+
     def _load_fence(self, path: str) -> None:
         """A fence marker left on disk means a rebind write did not finish
-        cleanly (committed, rolled back or unknown).  Fence the journal: that
-        entry is not replayed and new rebinds are refused until an operator
-        calls clear_journal_fence()."""
+        cleanly.  Astra 7669 F-fence-content: the marker is trusted ONLY if it
+        parses, has the current format, its own marker_hash matches and it
+        embeds a hash-valid entry with the same op_id.  Its scope is narrowed
+        to that single entry in _parse_journal only if that entry is the LAST
+        journaled rebind; any other marker fences EVERY journaled rebind."""
         fp = self._fence_path(path)
         tmp = fp + ".tmp"
         if os.path.exists(tmp):
@@ -412,23 +428,39 @@ class HiveReducer:
             return
         op_id: str | None = None
         entry = None
+        problem = ""
         try:
             with open(fp, "rb") as f:
                 m = json.loads(f.read().decode("utf-8"))
-            if isinstance(m, dict) and isinstance(m.get("op_id"), str) and m["op_id"]:
-                op_id, entry = m["op_id"], m.get("entry")
-        except (OSError, UnicodeDecodeError, ValueError):
-            pass
+        except (OSError, UnicodeDecodeError, ValueError) as exc:
+            problem = f"UNREADABLE fence marker ({type(exc).__name__})"
+        else:
+            e = m.get("entry") if isinstance(m, dict) else None
+            if not isinstance(m, dict):
+                problem = "UNTRUSTED fence marker: not a JSON object"
+            elif m.get("v") != FENCE_VERSION:
+                problem = f"UNTRUSTED fence marker: format v{m.get('v')} (need v{FENCE_VERSION})"
+            elif m.get("marker_hash") != self._hash_without(m, "marker_hash"):
+                problem = "UNTRUSTED fence marker: marker hash mismatch"
+            elif not (isinstance(m.get("op_id"), str) and m["op_id"]
+                      and isinstance(e, dict) and e.get("op_id") == m["op_id"]
+                      and e.get("entry_hash") == self._entry_hash(e)):
+                problem = ("UNTRUSTED fence marker: does not embed a valid entry "
+                           "with the same op_id")
+            else:
+                op_id, entry = m["op_id"], e
         self._journal_indeterminate = {
-            "op_id": op_id, "entry": entry, "persisted": True, "marker": fp,
-            "found_at_startup": True,
-            "error": ("fence marker found at startup: a rebind journal write did "
-                      "not finish cleanly before shutdown" if op_id else
-                      "UNREADABLE fence marker found at startup: no journaled "
-                      "rebind is replayed until an operator clears it")}
-        logger.critical("Rebind journal %s is FENCED (%s): entry %s not replayed "
-                        "and rebinds refused until clear_journal_fence()",
-                        path, fp, op_id or "<all>")
+            "op_id": op_id, "entry": entry, "marker_valid": not problem,
+            "marker_problem": problem, "scope": "all",
+            "persisted": True, "marker_present": True, "abort_durable": None,
+            "marker": fp, "found_at_startup": True,
+            "error": (problem + ": no journaled rebind is replayed until an "
+                      "operator clears it") if problem else
+                     ("fence marker found at startup: a rebind journal write "
+                      "did not finish cleanly before shutdown")}
+        logger.critical("Rebind journal %s is FENCED (%s): %s; rebinds refused "
+                        "until clear_journal_fence()", path, fp,
+                        problem or f"entry {op_id} uncertain")
 
     @staticmethod
     def _write_all(fd: int, data: bytes) -> None:
@@ -440,8 +472,11 @@ class HiveReducer:
             off += n
 
     def _drop_fence(self, cause: BaseException) -> None:
-        """Remove the fence marker after a clean outcome; if that fails the
-        fence must stay authoritative (live AND after restart)."""
+        """Remove the fence marker after a clean REFUSAL (the entry is not in
+        the journal).  If removal fails, raise _JournalIndeterminate so the
+        journal stays fenced in memory; a marker that survives on disk fences
+        it after restart too.  Either way nothing can replay: the entry was
+        never written or its rollback was fsync'd."""
         try:
             os.unlink(self._fence_path())
             self._fsync_dir(self._fence_path())
@@ -449,19 +484,18 @@ class HiveReducer:
             pass
         except OSError as exc2:
             raise _JournalIndeterminate(
-                f"{cause}; fence marker could not be removed: {exc2}") from exc2
+                f"{cause}; fence marker removal failed or is not durable: {exc2}") from exc2
 
-    def _write_fence(self, entry: dict[str, Any]) -> None:
-        """Make the fence marker durable BEFORE the journal append, so a crash
-        or failed rollback leaves the uncertain entry fenced on restart."""
+    def _put_marker(self, entry: dict[str, Any]) -> None:
+        """tmp write + fsync + rename + directory fsync.  On failure before
+        the rename the tmp file is removed and nothing is in place; a failing
+        directory fsync after the rename raises with the marker in place."""
         fp = self._fence_path()
         tmp = fp + ".tmp"
-        data = json.dumps({"v": 1, "op_id": entry["op_id"], "entry": entry},
-                          sort_keys=True).encode("utf-8")
         try:
             fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             try:
-                self._write_all(fd, data)
+                self._write_all(fd, self._marker_bytes(entry))
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -471,12 +505,78 @@ class HiveReducer:
                 os.unlink(tmp)
             except OSError:
                 pass
-            raise                          # nothing journaled: clean refusal
-        try:
-            self._fsync_dir(fp)
-        except OSError as exc:
-            self._drop_fence(exc)
             raise
+        self._fsync_dir(fp)
+
+    def _write_fence(self, entry: dict[str, Any]) -> None:
+        """Make the fence marker durable BEFORE the journal append, so a crash
+        or failed rollback leaves the uncertain entry fenced on restart."""
+        fp = self._fence_path()
+        try:
+            self._put_marker(entry)
+        except OSError as exc:
+            if os.path.exists(fp):         # renamed, directory fsync failed
+                self._drop_fence(exc)
+            raise                          # nothing journaled: clean refusal
+
+    def _commit_unconfirmed(self, entry: dict[str, Any], what: str) -> "_JournalIndeterminate":
+        """Astra 7669 F-fence-remove-dir-fsync: the entry IS durably in the
+        journal but its fence marker removal failed or may not be durable, so
+        the marker cannot be relied on to stop a restart from replaying a
+        rebind we report as NOT applied.  Write a durable abort record for it
+        (the journal file's own fsync does not depend on the directory).  If
+        that fails too, re-write the marker.  The caller keeps the journal
+        fenced in memory either way."""
+        rec = {"v": JOURNAL_VERSION, "op": "abort_rebind", "op_id": entry["op_id"],
+               "actor": "hive-reducer",
+               "reason": "automatic: entry committed but fence marker removal "
+                         "unconfirmed; cancelled so a restart cannot apply a "
+                         "rebind reported as not applied",
+               "ts": time.time(), "fence_error": what, "target_in_journal": True}
+        rec["entry_hash"] = self._entry_hash(rec)
+        abort_durable, marker_restored, notes = False, None, []
+        try:
+            self._journal_append(rec, guard=False)
+            abort_durable = True
+            self._journal_aborted.add(entry["op_id"])
+        except (OSError, _JournalIndeterminate) as exc:
+            notes.append(f"abort record failed: {exc}")
+            try:
+                self._put_marker(entry)
+                marker_restored = True
+            except OSError as exc2:
+                marker_restored = False
+                notes.append(f"fence marker re-write failed: {exc2}")
+        if abort_durable:
+            tail = "durable abort record written: it will not be replayed"
+        elif marker_restored:
+            tail = "fence marker re-written durably: it stays fenced after restart"
+        else:
+            tail = ("abort record AND marker re-write failed: the entry MAY "
+                    "replay after a restart unless an operator intervenes")
+        err = _JournalIndeterminate(
+            f"entry committed but {what}; {tail}" + (f" ({'; '.join(notes)})" if notes else ""))
+        err.abort_durable = abort_durable
+        err.marker_restored = marker_restored
+        return err
+
+    def _scan_rebind_ops(self) -> list[str]:
+        """op_ids of owner_rebind lines currently in the journal file, in order."""
+        ops: list[str] = []
+        try:
+            with open(self._journal_path, "rb") as f:
+                data = f.read()
+        except OSError:
+            return ops
+        for raw in data.split(b"\n"):
+            try:
+                e = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                continue
+            if (isinstance(e, dict) and e.get("op") == "owner_rebind"
+                    and isinstance(e.get("op_id"), str) and e["op_id"]):
+                ops.append(e["op_id"])
+        return ops
 
     def _open_journal(self, path: str) -> list[dict[str, Any]]:
         self._load_fence(path)             # Astra 7656: durable fence first
@@ -495,8 +595,22 @@ class HiveReducer:
             self._fsync_dir(path)          # the new file's directory entry
         return self._parse_journal(path, data)
 
+    def _abort_ok(self, e: dict[str, Any]) -> bool:
+        return (e.get("entry_hash") == self._entry_hash(e)
+                and isinstance(e.get("op_id"), str)
+                and all(isinstance(e.get(k), str) and e.get(k).strip()
+                        for k in ("actor", "reason"))
+                and isinstance(e.get("target_in_journal", True), bool))
+
     def _parse_journal(self, path: str, data: bytes) -> list[dict[str, Any]]:
-        recs: list[dict[str, Any]] = []
+        """Astra 7669: an untrustworthy record (unreadable/invalid line, an
+        abort record whose hash fails or that names no earlier journaled
+        rebind, a rebind whose hash fails) may have been the cancellation of
+        ANY earlier rebind, so every rebind BEFORE it is not replayed
+        (fail-closed); rebinds after it are unaffected."""
+        recs: list[tuple[int, dict[str, Any]]] = []
+        corrupt: list[tuple[int, str]] = []
+        seen_ops: set[str] = set()
         for n, raw in enumerate(data.split(b"\n"), 1):
             if not raw.strip():
                 continue
@@ -504,15 +618,22 @@ class HiveReducer:
                 e = json.loads(raw.decode("utf-8"))
             except (UnicodeDecodeError, ValueError):
                 self._journal_invalid_lines += 1
-                logger.warning("Rebind journal %s line %d unreadable; skipped", path, n)
+                corrupt.append((n, "unreadable line"))
+                logger.error("Rebind journal %s line %d unreadable", path, n)
                 continue
             if isinstance(e, dict) and e.get("op") == "abort_rebind":
-                # Operator abort (clear_journal_fence).  Aborting is the safe
-                # direction, so it is honoured even if its own hash is off.
-                if e.get("entry_hash") != self._entry_hash(e):
-                    logger.warning("Rebind journal %s line %d: abort record hash "
-                                   "mismatch (honoured anyway: fail-closed)", path, n)
-                if isinstance(e.get("op_id"), str) and e["op_id"]:
+                if not self._abort_ok(e):
+                    corrupt.append((n, "abort record fails its hash/format check"))
+                    logger.critical("Rebind journal %s line %d: corrupt abort "
+                                    "record; earlier rebinds not replayed", path, n)
+                    continue
+                if e.get("target_in_journal", True) and e["op_id"] not in seen_ops:
+                    corrupt.append((n, "abort record names no earlier journaled rebind"))
+                    logger.critical("Rebind journal %s line %d: abort record names "
+                                    "no earlier rebind; earlier rebinds not "
+                                    "replayed", path, n)
+                    continue
+                if e["op_id"]:
                     self._journal_aborted.add(e["op_id"])
                 continue
             if not (isinstance(e, dict) and e.get("op") == "owner_rebind"
@@ -520,16 +641,30 @@ class HiveReducer:
                             for k in ("agent_id", "plan_id", "incident_id",
                                       "actor", "reason"))):
                 self._journal_invalid_lines += 1
-                logger.warning("Rebind journal %s line %d invalid; skipped", path, n)
+                corrupt.append((n, "invalid record"))
+                logger.error("Rebind journal %s line %d invalid", path, n)
                 continue
-            recs.append(e)
-            # Astra 7656: the fence marker is written before the append, so
-            # the only entry that can be uncertain is the LAST one.
-            self._journal_last_rebind_op = str(e.get("op_id") or "")
+            if e.get("v") == JOURNAL_VERSION and e.get("entry_hash") != self._entry_hash(e):
+                corrupt.append((n, "rebind entry fails its hash check"))
+            recs.append((n, e))
+            op = str(e.get("op_id") or "")
+            seen_ops.add(op)
+            self._journal_last_rebind_op = op
+        self._journal_corrupt = [{"line": n, "why": w} for n, w in corrupt
+                                 ][-MAX_HIVE_REBIND_RECORDS:]
+        last_bad = max((n for n, _ in corrupt), default=0)
+        fence = self._journal_indeterminate
+        if fence is not None and fence.get("found_at_startup"):
+            if (fence.get("marker_valid") and fence.get("op_id")
+                    and fence["op_id"] == self._journal_last_rebind_op):
+                fence["scope"] = "entry"
+            elif fence.get("marker_valid"):
+                fence["error"] = ("UNTRUSTED fence marker: it does not name the "
+                                  "last journaled rebind; no journaled rebind is "
+                                  "replayed until an operator clears it")
         out: list[dict[str, Any]] = []
         seen: set[str] = set()
-        fence = self._journal_indeterminate
-        for e in recs:
+        for n, e in recs:
             op_id = str(e.get("op_id") or "")
             if op_id and op_id in seen:
                 continue                      # duplicate physical line
@@ -548,12 +683,20 @@ class HiveReducer:
                                         "line was edited or corrupted; not replayed")
                 continue
             if op_id in self._journal_aborted:
-                self._mark_unapplied(e, "aborted by operator (clear_journal_fence)")
+                self._mark_unapplied(e, "aborted (clear_journal_fence or automatic "
+                                        "cancellation)")
                 continue
-            if fence is not None and fence.get("op_id") in (None, op_id):
+            if n < last_bad:
+                self._mark_unapplied(e, f"a corrupt/unverifiable journal record "
+                                        f"follows it (line {last_bad}) and may be "
+                                        "its cancellation; not replayed -- inspect, "
+                                        "re-issue if still wanted")
+                continue
+            if fence is not None and (fence.get("scope") != "entry"
+                                      or fence.get("op_id") == op_id):
                 self._mark_unapplied(e, "journal fenced: this entry's write did not "
-                                        "finish cleanly (indeterminate); not "
-                                        "replayed -- inspect, then "
+                                        "finish cleanly or the fence marker is "
+                                        "untrusted; not replayed -- inspect, then "
                                         "clear_journal_fence()")
                 continue
             out.append(e)
@@ -615,14 +758,23 @@ class HiveReducer:
                                self._journal_path,
                                "commit" if committed else "refusal", exc)
         if guard:
+            # Astra 7669: after a durable commit, an unlink failure OR an
+            # unlink whose directory fsync fails leaves the marker's on-disk
+            # state unknown -> durable abort record + in-memory fence.
+            fp = self._fence_path()
             try:
-                os.unlink(self._fence_path())
-                self._fsync_dir(self._fence_path())
+                os.unlink(fp)
+            except FileNotFoundError:
+                pass
             except OSError as exc:
-                raise _JournalIndeterminate(
-                    f"entry committed but its fence marker could not be removed "
-                    f"({exc}); not applied now and not replayed after restart "
-                    "until clear_journal_fence()") from exc
+                raise self._commit_unconfirmed(
+                    entry, f"its fence marker could not be removed ({exc})") from exc
+            try:
+                self._fsync_dir(fp)
+            except OSError as exc:
+                raise self._commit_unconfirmed(
+                    entry, "its fence marker was unlinked but the directory "
+                           f"fsync failed, so the removal may not be durable ({exc})") from exc
 
     def journal_pending(self) -> list[dict[str, Any]]:
         """Journaled rebinds whose event-stream position is not reached yet."""
@@ -646,6 +798,7 @@ class HiveReducer:
             "fence_marker": self._fence_path() if self._journal_path else None,
             "aborted": sorted(self._journal_aborted),
             "fence_clearances": self.journal_fence_clearances,
+            "corrupt_records": self._journal_corrupt,
             "plans_refused_cap": self.plans_refused_cap,
             "set_aside": self._journal_set_aside,
             "invalid_lines": self._journal_invalid_lines})
@@ -670,35 +823,56 @@ class HiveReducer:
         fence = self._journal_indeterminate
         if fence is None or not self._journal_path:
             return False
-        op_id = fence.get("op_id") or ""
-        if not op_id:
-            # Unreadable marker: fail closed -- abort the last journaled
-            # rebind (the only entry whose write can be the uncertain one).
-            op_id = self._journal_last_rebind_op
-        rec = {"v": JOURNAL_VERSION, "op": "abort_rebind", "op_id": op_id,
-               "actor": actor, "reason": reason, "ts": time.time(),
-               "fence_error": str(fence.get("error"))}
-        rec["entry_hash"] = self._entry_hash(rec)
-        try:
-            self._journal_append(rec, guard=False)
-        except _JournalIndeterminate as exc:
-            raise OSError(f"abort record not durable: {exc}") from exc
+        # Astra 7669: abort the marker's entry only if the marker is trusted;
+        # for an untrusted marker (or one not naming the last journaled
+        # rebind) also abort the last journaled rebind -- the only entry
+        # whose write can be the uncertain one.
+        ops_in = self._scan_rebind_ops()
+        last = ops_in[-1] if ops_in else ""
+        targets: list[str] = []
+        if fence.get("marker_valid", True) and fence.get("op_id"):
+            targets.append(fence["op_id"])
+        # A LIVE fence names exactly the entry this process was writing.  A
+        # fence found at startup is narrowed to its entry only when the
+        # marker is trusted AND names the last journaled rebind; otherwise
+        # fail closed and also abort the last journaled rebind.
+        narrow = (fence.get("marker_valid", True) and fence.get("op_id")
+                  and (not fence.get("found_at_startup") or fence["op_id"] == last))
+        if not narrow and last and last not in targets:
+            targets.append(last)
+        if not targets:
+            targets.append("")
+        recs = []
+        for op_id in targets:
+            rec = {"v": JOURNAL_VERSION, "op": "abort_rebind", "op_id": op_id,
+                   "actor": actor, "reason": reason, "ts": time.time(),
+                   "fence_error": str(fence.get("error")),
+                   "target_in_journal": bool(op_id) and op_id in ops_in}
+            rec["entry_hash"] = self._entry_hash(rec)
+            try:
+                self._journal_append(rec, guard=False)   # abort BEFORE unlink
+            except _JournalIndeterminate as exc:
+                raise OSError(f"abort record not durable: {exc}") from exc
+            recs.append(rec)
         try:
             os.unlink(self._fence_path())
         except FileNotFoundError:
             pass
-        self._fsync_dir(self._fence_path())
-        if op_id:
-            self._journal_aborted.add(op_id)
-            self._journal_pending = [e for e in self._journal_pending
-                                     if e.get("op_id") != op_id]
+        self._fsync_dir(self._fence_path())   # raises -> stays fenced in memory
+        for op_id in targets:
+            if op_id:
+                self._journal_aborted.add(op_id)
+                self._journal_pending = [e for e in self._journal_pending
+                                         if e.get("op_id") != op_id]
+        op_id = ",".join(t for t in targets if t)
+        rec = recs[-1]
         self._journal_indeterminate = None
         self.journal_fence_clearances.append(
             {"op_id": op_id, "actor": actor, "reason": reason, "ts": rec["ts"],
              "fence_error": rec["fence_error"]})
         del self.journal_fence_clearances[:-MAX_HIVE_REBIND_RECORDS]
         logger.warning("Rebind journal fence cleared by %s (%s): entry %s aborted",
-                       actor, reason, op_id or "<unreadable marker>")
+                       actor, reason, op_id or "<no journaled rebind>")
         return True
 
     def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
@@ -823,14 +997,20 @@ class HiveReducer:
             try:
                 self._journal_append(entry)   # write-ahead
             except _JournalIndeterminate as exc:
+                present = os.path.exists(self._fence_path())
                 self._journal_indeterminate = {
                     "op_id": entry["op_id"], "entry": entry, "error": str(exc),
-                    "marker": self._fence_path(),
-                    "persisted": os.path.exists(self._fence_path()),
+                    "marker": self._fence_path(), "marker_valid": True,
+                    "marker_problem": "", "scope": "entry",
+                    # Astra 7669: presence in the directory listing, NOT a
+                    # durability claim; abort_durable says whether a durable
+                    # abort record covers the entry.
+                    "persisted": present, "marker_present": present,
+                    "abort_durable": getattr(exc, "abort_durable", None),
                     "found_at_startup": False}
                 logger.critical("Hive rebind of %s:%s -> %s NOT applied, but its "
                                 "journal entry may survive a restart (%s); journal "
-                                "fenced (marker on disk): further rebinds refused "
+                                "fenced in memory: further rebinds refused "
                                 "until an operator inspects %s and calls "
                                 "clear_journal_fence()", agent_id, plan_id, incident_id,
                                 exc, self._journal_path)

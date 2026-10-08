@@ -87,32 +87,66 @@ accident.
   conflicting PLANs (7146 N6) do not advance the position. Snapshot or partial
   (suffix) restore is NOT supported: entries stay pending or are reported as
   unapplied.
-- **Entry integrity.** Each entry carries `entry_hash` (SHA-256 of its other
-  fields). An edited or corrupted line is reported unapplied ("entry content
-  hash mismatch") and is not replayed. This detects accidental and naive
-  edits. It is NOT a keyed MAC: someone with write access who recomputes the
-  hash is not detected, so protect the journal with file permissions.
+- **Entry integrity.** Each rebind entry and each `abort_rebind` record
+  carries `entry_hash` (SHA-256 of its other fields). A rebind line that fails
+  its hash is reported unapplied ("entry content hash mismatch"). Any record
+  that cannot be verified -- an unreadable or invalid line, an abort record
+  that fails its hash/format check, or an abort record that names no earlier
+  journaled rebind -- might have been the cancellation of an earlier rebind,
+  so EVERY rebind before it is not replayed (fail-closed; reported unapplied
+  and listed in `journal_status()["corrupt_records"]`). Rebinds after it are
+  unaffected. These checks detect accidental and naive edits. They are NOT a
+  keyed MAC: someone with write access who recomputes the hashes is not
+  detected, so protect the journal and marker with file permissions.
 - **Write protocol and fence.** Before each append, a fence marker
-  `<journal>.fence` (containing the entry) is written, fsync'd and renamed into
-  place. The entry is then appended and fsync'd. On success the marker is
-  removed. If the write or fsync fails, the entry is truncated away (clean
-  refusal) and the marker removed. If the rollback or the marker removal
-  fails, the outcome is indeterminate: the marker STAYS on disk. While a
-  marker exists (live or found at startup), that entry is not replayed and all
-  new rebinds are refused (`journal_status()["indeterminate"]`). An unreadable
-  marker fences every journaled rebind. A leftover `<journal>.fence.tmp` (never
-  renamed into place) means the append never started; it is deleted.
+  `<journal>.fence` is written to a temp file, fsync'd, renamed into place and
+  its directory fsync'd. The marker (format v2) embeds the entry and its own
+  `marker_hash`. The entry is then appended and fsync'd; on success the
+  marker is unlinked and the directory fsync'd. Outcomes:
+  - Append write/fsync fails and the truncate-rollback is fsync'd: clean
+    refusal, the marker is removed. If that removal fails the journal stays
+    fenced in memory; nothing can replay because the entry is not in the
+    journal.
+  - Rollback fails: indeterminate. The marker is left in place (it was made
+    durable before the append) and the journal is fenced in memory.
+  - Entry committed but the marker unlink fails, OR the unlink succeeds and
+    the directory fsync fails (so the removal may or may not survive a
+    crash): the rebind is reported NOT applied, the journal is fenced in
+    memory, and a durable `abort_rebind` record for the entry is appended
+    (the journal file's own fsync), so a restart does not apply it whatever
+    happened to the marker. If that abort record also cannot be made
+    durable, the marker is re-written; `journal_status()["indeterminate"]`
+    reports `abort_durable` and `marker_present`. Only if BOTH fail can the
+    entry replay after a restart, and the status says so explicitly.
+  - `marker_present`/`persisted` report presence in the directory listing at
+    that moment, not a durability guarantee.
+  While fenced (live, or a marker found at startup), new rebinds are refused.
+  At startup a marker is trusted only if it parses, has format v2, its
+  `marker_hash` matches, it embeds a hash-valid entry with the same `op_id`,
+  and that entry is the LAST journaled rebind; then only that entry is held
+  back. Any other marker (unreadable, edited, legacy format, or naming a
+  different entry) fences EVERY journaled rebind. A leftover
+  `<journal>.fence.tmp` (never renamed into place) means the append never
+  started; it is deleted.
 - **Clearing a fence.** Inspect the journal and the marker, then call
-  `clear_journal_fence(actor=..., reason=...)`. It appends a durable
-  `abort_rebind` record for the uncertain entry (or, for an unreadable marker,
-  the last journaled rebind), removes the marker, and records the clearance in
-  `journal_status()["fence_clearances"]`. The aborted entry is never replayed.
-  Re-issue the rebind afterwards if it is still wanted.
+  `clear_journal_fence(actor=..., reason=...)`. It FIRST appends durable
+  `abort_rebind` records -- for the marker's entry if the marker is trusted,
+  and, if the marker is untrusted or does not name the last journaled
+  rebind, also for the last journaled rebind -- and only then removes the
+  marker, so losing the removal cannot bring the entry back. If an abort
+  record or the directory fsync after the removal fails, it raises and the
+  journal stays fenced in memory. The clearance is recorded in
+  `journal_status()["fence_clearances"]`. Aborted entries are never replayed;
+  re-issue the rebind afterwards if it is still wanted.
 - **Torn tail.** An unterminated last line is copied to
   `<journal>.torn-<ns>`. The copy is fully written, fsync'd, read back and
   compared, and its directory entry fsync'd, BEFORE the journal is truncated.
-  This happens at startup and before every append. If any step fails, the
-  journal is left untouched and the rebind is refused.
+  This happens at startup and before every append. If a step fails BEFORE the
+  truncate, the journal bytes are untouched and the rebind is refused (or
+  startup raises). If the truncate succeeds but the journal's following fsync
+  fails, the journal may already be truncated (on disk the old length may or
+  may not survive a crash); the fragment is preserved in the verified,
+  durable aside file and the rebind is refused.
 - **Legacy entries.** v1 (no position) and v2 (id-only stream hash, no
   entry hash) entries are NOT replayed after upgrading. They appear in
   `unapplied` with "legacy entry (format vN)". Migration: review them, then
@@ -127,5 +161,6 @@ accident.
   `unapplied_omitted`. `journal_unapplied()` returns all retained dispositions
   (up to `MAX_HIVE_UNAPPLIED_RECORDS`). Holds, open incidents and plan
   provenance below these caps are deliberately never dropped.
-- Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`.
+- Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
+  `tests/test_astra7669.py`.
 
