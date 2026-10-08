@@ -1,0 +1,756 @@
+diff --git a/controller/reducer.py b/controller/reducer.py
+index 69f982f..6e63ff9 100644
+--- a/controller/reducer.py
++++ b/controller/reducer.py
+@@ -165,6 +165,14 @@ class Reducer:
+             # another trigger.  A mere payload link to an ownerless plan does
+             # not (old evidence must not auto-close a newly reported incident).
+             self._drain_pending(set(owned))
++            # Late-link (Astra 7562): linking to an already complete OWNERLESS
++            # plan emits the same WARNING as the in-order case.  For an
++            # ownerless plan _maybe_resolve only logs; it closes nothing.
++            lp = incident.plan_id
++            if (lp and lp in self._plan_step_counts
++                    and lp not in self._owner_unproven
++                    and not self._plan_owner.get(lp)):
++                self._maybe_resolve(lp)
+ 
+     def _owned_plans(self, inc_id: str) -> list[str]:
+         return sorted(p for p, o in self._plan_owner.items() if o == inc_id)
+@@ -246,7 +254,8 @@ class Reducer:
+ 
+     def _rebind_check(self, plan_id: str, incident_id: str,
+                       allow_non_candidate: bool):
+-        if plan_id not in self._owner_unproven:
++        if (plan_id not in self._owner_unproven
++                and not self._ownerless_linked(plan_id)):
+             return False, "plan is not quarantined", None
+         if not incident_id:
+             return False, "no target incident", None
+@@ -303,6 +312,7 @@ class Reducer:
+             effects = self._group_effects(out)
+         return copy.deepcopy({
+             "plan_id": plan_id, "incident_id": incident_id, "allowed": ok,
++            "hold_reason": self.quarantine_reasons().get(plan_id, ""),
+             "refusal": why, "candidates": cands,
+             "is_candidate": incident_id in cands, "held_receipts": held,
+             "effects": effects,
+@@ -312,7 +322,9 @@ class Reducer:
+     def rebind_plan_owner(self, plan_id: str, incident_id: str, *, actor: str,
+                           reason: str, allow_non_candidate: bool = False) -> bool:
+         """N6 (7146) / N9 (7160, 7173): explicit TRUSTED-OPERATOR owner rebind
+-        for a plan quarantined by legacy migration (lost owner).
++        for a HELD plan: quarantined by legacy migration (owner_unproven) or
++        a registered ownerless plan linked to an open incident
++        (ownerless_linked; Ben msg 7547 option (a), Astra 7562).
+ 
+         This is an authority override, not proof of lost history: the caller
+         supplies the ownership evidence.  Never expose it as an ordinary event
+@@ -339,6 +351,8 @@ class Reducer:
+             return False
+         cands = (self.migration_diagnostics.get("owner_candidates") or {}).get(plan_id, [])
+         is_cand = incident_id in cands
++        hold = ("owner_unproven" if plan_id in self._owner_unproven
++                else "ownerless_linked")
+         before = {i.id for i in self.open_incidents()}
+         out: dict[str, Any] = {}
+         self._apply_rebind(plan_id, incident_id, inc, out)
+@@ -350,15 +364,16 @@ class Reducer:
+         d["owner_rebinds_total"] = _as_int(d.get("owner_rebinds_total", len(recs))) + 1
+         recs.append({"plan_id": plan_id, "incident_id": incident_id,
+                      "actor": actor, "reason": reason, "candidate": is_cand,
++                     "hold_reason": hold,
+                      "pending_before": len(out), "effect_counts": counts,
+                      "effect_ids": {k: [str(r["id"]) for r in v][:MAX_EFFECT_IDS]
+                                     for k, v in eff.items()},
+                      "closed": closed})
+         del recs[:-MAX_DIAG_ENTRIES]
+-        logger.warning("Operator rebind by %s (%s): plan %s owner set to incident "
+-                       "%s (candidate=%s, pending_before=%d, effects=%s, closed=%s)",
+-                       actor, reason, plan_id, incident_id, is_cand, len(out),
+-                       counts, closed)
++        logger.warning("Operator rebind by %s (%s): plan %s [%s] owner set to "
++                       "incident %s (candidate=%s, pending_before=%d, effects=%s, "
++                       "closed=%s)", actor, reason, plan_id, hold, incident_id,
++                       is_cand, len(out), counts, closed)
+         return True
+ 
+     def _handle_plan(self, event: Event) -> None:
+@@ -382,9 +397,14 @@ class Reducer:
+         inc_id = p.get("incident_id", "") or ""
+         if self._reject_conflicting_plan(p):
+             return
+-        if inc_id and plan_id in self._owner_unproven:
+-            # N6 (7146): a lost legacy owner is NOT re-established by an
+-            # ordinary PLAN; it is recorded as a candidate for operator rebind.
++        held = ("owner unproven after legacy migration"
++                if plan_id in self._owner_unproven else
++                "ownerless plan linked to an open incident"
++                if self._ownerless_linked(plan_id) else "")
++        if inc_id and held:
++            # N6 (7146) / Ben msg 7547 option (a) (Astra 7562): an ordinary
++            # PLAN never sets the owner of a HELD plan; it is only recorded
++            # as a candidate for a previewed, audited operator rebind.
+             d = self.migration_diagnostics
+             cmap = d.setdefault("owner_candidates", {})
+             if plan_id not in cmap and len(cmap) >= MAX_DIAG_ENTRIES:
+@@ -393,8 +413,9 @@ class Reducer:
+                 lst = cmap.setdefault(plan_id, [])
+                 if inc_id not in lst and len(lst) < 8:
+                     lst.append(inc_id)
+-            logger.warning("PLAN %s -> %s held: owner lost in legacy migration; "
+-                           "use rebind_plan_owner()", plan_id, inc_id)
++            logger.warning("PLAN %s -> %s held (%s): recorded as owner "
++                           "candidate only; use preview_rebind() then "
++                           "rebind_plan_owner()", plan_id, inc_id, held)
+             return
+         if plan_id not in self._plan_step_counts:
+             self._plan_step_counts[plan_id] = len(steps)
+@@ -522,16 +543,17 @@ class Reducer:
+         # empty incident_id) never closes anything, not even incidents that
+         # link to it via inc.plan_id -- linkage alone is not ownership.
+         if not owner:
+-            # O-ownerless-hold (Astra 7542, option (a)): make the stuck plan
+-            # visible instead of silently doing nothing.
++            # Ben msg 7547 option (a) (Astra 7562): the stuck plan is HELD
++            # in quarantined_plans() and repaired by audited rebind.
+             linked = sorted(i.id for i in self.incidents
+                             if not i.resolved and i.plan_id == plan_id)
+             if linked:
+                 logger.warning(
+                     "Plan %s is complete but has no proven owner; it closes "
+-                    "nothing (linked open incidents %s stay open). Repair: "
+-                    "send a PLAN for %s that declares incident_id. See "
+-                    "quarantine_reasons() (ownerless_linked).", plan_id, linked,
++                    "nothing (linked open incidents %s stay open). It is HELD "
++                    "in quarantined_plans() (ownerless_linked); repair with "
++                    "preview_rebind()/rebind_plan_owner() for %s. A re-sent "
++                    "PLAN only records an owner candidate.", plan_id, linked,
+                     plan_id)
+             return
+         for inc in self.incidents:
+@@ -541,24 +563,36 @@ class Reducer:
+                 inc.resolved = True
+ 
+     def quarantined_plans(self) -> list[str]:
+-        """Authoritative CURRENT quarantine (owner_unproven), sorted.  Use
+-        this, not migration_diagnostics["legacy_ownerless_plans"] (a capped
+-        historical sample), to enumerate plans awaiting an operator rebind."""
+-        return sorted(self._owner_unproven)
++        """Authoritative CURRENT hold list, sorted: every plan awaiting an
++        operator preview_rebind()/rebind_plan_owner() -- owner_unproven
++        (legacy migration) AND ownerless_linked (Ben msg 7547 option (a),
++        Astra 7562).  Use this, not migration_diagnostics
++        ["legacy_ownerless_plans"] (a capped historical sample)."""
++        return sorted(self.quarantine_reasons())
++
++    def _ownerless_linked(self, plan_id: str) -> bool:
++        return (bool(plan_id) and plan_id in self._plan_step_counts
++                and plan_id not in self._owner_unproven
++                and not self._plan_owner.get(plan_id)
++                and any(not i.resolved and i.plan_id == plan_id
++                        for i in self.incidents))
+ 
+     def quarantine_reasons(self) -> dict[str, str]:
+-        """Every plan that cannot currently close an incident, with a reason.
++        """Held plans (same keys as quarantined_plans()) with their reason.
+ 
+-        - ``owner_unproven``: owner lost in legacy migration; repair with
+-          preview_rebind()/rebind_plan_owner() (same set as quarantined_plans()).
+-        - ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
++        NOT every plan that cannot close an incident: owned-but-incomplete or
++        failed plans are intentionally absent.  Result is a derived view with
++        no global size cap (Astra 7562 O-bound, Low): one entry per held plan.
++
++        - ``owner_unproven``: owner lost in legacy migration.
++        - ``ownerless_linked`` (Ben msg 7547 option (a), Astra 7562): a
+           registered plan with NO owner that an open incident links to via
+-          plan_id.  Linkage is never treated as ownership; repair by sending a
+-          later PLAN for the same plan id that declares ``incident_id``.
++          plan_id.  Linkage is never treated as ownership.  A re-sent PLAN
++          declaring incident_id only records an owner candidate.
+ 
+-        Derived from durable state, so it survives snapshot/restore.
+-        quarantined_plans() is unchanged (owner_unproven only) because its
+-        entries are rebind candidates and ownerless_linked plans are not.
++        Both are repaired the same way: preview_rebind() then the audited
++        rebind_plan_owner().  Derived from durable state, so it survives
++        snapshot/restore.
+         """
+         out = {pid: "owner_unproven" for pid in self._owner_unproven}
+         for inc in self.incidents:
+@@ -750,7 +784,8 @@ class Reducer:
+                 "a lost owner.")
+         # N7 (7133): persisted + cumulative across later snapshot/restore
+         # N10 (7173): bounds enforced on EVERY restore (incl. upgraded ones)
+-        self._normalize_diagnostics(diag, self._owner_unproven)
++        self._normalize_diagnostics(diag, set(self._owner_unproven)
++                                    | set(self.quarantine_reasons()))
+         self.migration_diagnostics = diag
+         self.legacy_pending_discarded = int(diag.get("legacy_pending_discarded", 0))
+ 
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index 7a8db82..5451383 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -32,19 +32,39 @@ accident.
+   `experiments/*/new_cases.py` (which wanted the failed plan q retried before
+   closure) is superseded by this decision. Those Astra artifacts are left
+   unchanged as a record.
+-- **Ownerless linked plans are visible, not silent** (Astra 7542
+-  O-ownerless-hold, option (a); Ben 2026-10-08 "(a) is best for a first try").
+-  A registered plan with no owner that an open incident links to is reported
+-  by `Reducer.quarantine_reasons()` / `HiveReducer.quarantine_reasons()` with
+-  reason `ownerless_linked`, and a WARNING is logged when such a plan
+-  completes. `quarantined_plans()` is unchanged (owner_unproven rebind
+-  candidates only); `rebind_plan_owner()` still refuses these plans.
+-  **Repair:** send a later PLAN for the same plan id that declares
+-  `incident_id`; that sets the immutable owner, and the already-verified
+-  receipts then close that owner (only). Ownership is never inferred from
+-  linkage. Full hold/rebind (option (b)) is deferred unless (a) causes
+-  problems in practice.
+-- Tests: `tests/test_astra7542.py` (ownerless_linked visibility/repair),
++- **Ownerless linked plans are HELD and repaired by audited rebind** (Ben,
++  Telegram msg 7547, 2026-10-07, "option (a)"; implemented after Astra 7562
++  D-option-conformance on Ben's 2026-10-08 instruction "implement the hold
++  and rebind workflow"). History: the 7542 thread used reversed (a)/(b)
++  labels and first shipped a re-send repair (57a6298/1a4f740); that path is
++  REMOVED.
++  A registered plan with no owner that an open incident links to via
++  plan_id is HELD: it is listed by `quarantined_plans()` and by
++  `quarantine_reasons()` with reason `ownerless_linked` (local `Reducer` and
++  `HiveReducer`, keys `plan_id` / `agent:plan_id`), and a WARNING is logged
++  when such a plan completes or when a linking INCIDENT arrives after it is
++  complete. Linkage is never treated as ownership; the plan closes nothing.
++  **Re-sent PLAN:** a later PLAN declaring `incident_id` for a held plan does
++  NOT set the owner; it only records an owner CANDIDATE (local:
++  `migration_diagnostics["owner_candidates"]`; hive: `owner_candidates`).
++  **Repair:** `preview_rebind()` (side-effect free; reports hold_reason,
++  candidates, held receipts, would_close) then the trusted-operator
++  `rebind_plan_owner(..., actor=, reason=)`, which requires a non-empty actor
++  and reason, an existing OPEN target not linked to another plan, and a
++  recorded candidate unless `allow_non_candidate=True`. Each rebind appends an
++  audit record (actor, reason, candidate, hold_reason, held receipts, closed)
++  and then closes the new owner only. The same workflow already applied to
++  `owner_unproven` (legacy migration) plans.
++  **Qualifications (Astra 7562):** quarantine_reasons() also lists incomplete
++  linked ownerless plans; it has no global size cap (one entry per held
++  plan). The hive reducer never prunes OPEN incidents past
++  MAX_AGENT_INCIDENTS (only resolved history is trimmed), so no hold silently
++  disappears. Hive owner_candidates/owner_rebinds are in-memory (the hive
++  reducer has no snapshot/restore).
++- Tests: `tests/test_astra7562_hold.py` (hold/candidate/preview/audited
++  rebind, both reducers), `tests/test_astra7562.py` (retention, late-link
++  warning), `tests/test_astra7542.py` (ownerless_linked visibility; re-send
++  is candidate-only),
+   `tests/test_astra7519.py` (ownerless negative controls incl.
+   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+diff --git a/hive/reducer.py b/hive/reducer.py
+index bf41848..8c1efca 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -6,6 +6,7 @@ rollup, resource aggregation, and drift detection.
+ """
+ from __future__ import annotations
+ 
++import copy
+ import logging
+ import time
+ from types import SimpleNamespace
+@@ -28,6 +29,9 @@ DEFAULT_CORRELATION_WINDOW = 300.0  # seconds
+ DEFAULT_CORRELATION_THRESHOLD = 2   # min agents for cross-agent incident
+ MAX_AGENT_INCIDENTS = 500           # per-agent incident history cap
+ MAX_HIVE_INCIDENTS = 1000           # total hive-level incident cap
++MAX_HIVE_REBIND_RECORDS = 200      # bounded rebind audit trail
++MAX_HIVE_REBIND_IDS = 50           # receipt ids kept per audit record
++MAX_HIVE_CANDIDATES = 8            # owner candidates kept per held plan
+ 
+ # H1: severity ordering used when merging polled health with reducer state
+ _HEALTH_RANK = {
+@@ -77,6 +81,12 @@ class HiveReducer:
+         self._plan_owner: dict[str, str] = {}
+         # N6 (7133): conflicting PLAN re-registrations rejected
+         self.rejected_plan_registrations = 0
++        # Ben msg 7547 option (a) (Astra 7562): owner candidates proposed by a
++        # re-sent PLAN for a HELD plan ("agent:plan_id" -> [incident ids]) and
++        # the bounded audit trail of operator rebinds.
++        self.owner_candidates: dict[str, list[str]] = {}
++        self.owner_rebinds: list[dict[str, Any]] = []
++        self.owner_rebinds_total = 0
+ 
+     @property
+     def state(self) -> HiveState:
+@@ -139,11 +149,17 @@ class HiveReducer:
+         self._state.last_updated = time.time()
+ 
+     def quarantine_reasons(self) -> dict[str, str]:
+-        """Plans ("agent:plan_id") that cannot close an incident, with reason.
++        """Plans ("agent:plan_id") held for an ownership reason, with reason.
+ 
+-        ``ownerless_linked`` (O-ownerless-hold, Astra 7542 option (a)): a
++        Not every plan that cannot close an incident (owned-but-incomplete or
++        failed plans are absent).  Derived view, no global size cap; complete
++        because open incidents are never pruned (Astra 7562 O-retention).
++
++        ``ownerless_linked`` (Ben msg 7547 option (a), Astra 7562): a
+         registered plan with no owner that an open incident links to.  Linkage
+-        is never ownership; repair with a later PLAN declaring incident_id.
++        is never ownership.  The plan is HELD (quarantined_plans()); a re-sent
++        PLAN declaring incident_id only records an owner candidate; repair is
++        preview_rebind() then the audited rebind_plan_owner().
+         """
+         out: dict[str, str] = {}
+         for agent_id, incs in self._agent_incidents.items():
+@@ -156,6 +172,122 @@ class HiveReducer:
+                     out[key] = "ownerless_linked"
+         return dict(sorted(out.items()))
+ 
++    def quarantined_plans(self) -> list[str]:
++        """CURRENT hold list ("agent:plan_id"), sorted: every plan awaiting an
++        operator preview_rebind()/rebind_plan_owner()."""
++        return sorted(self.quarantine_reasons())
++
++    def _ownerless_linked(self, agent_id: str, plan_id: str) -> bool:
++        key = f"{agent_id}:{plan_id}"
++        return (bool(plan_id) and key in self._plan_steps
++                and not self._plan_owner.get(key)
++                and any(i.get("plan_id") == plan_id
++                        for i in self._open_agent_incidents(agent_id)))
++
++    def _rebind_check(self, agent_id: str, plan_id: str, incident_id: str,
++                      allow_non_candidate: bool):
++        if not self._ownerless_linked(agent_id, plan_id):
++            return False, "plan is not quarantined", None
++        if not incident_id:
++            return False, "no target incident", None
++        inc = next((i for i in self._agent_incidents.get(agent_id, [])
++                    if i["incident_id"] == incident_id), None)
++        if inc is None:
++            return False, "unknown target incident", None
++        if inc.get("resolved"):
++            return False, "target incident is already resolved", inc
++        if inc.get("plan_id") and inc["plan_id"] != plan_id:
++            return False, "target incident is linked to another plan", inc
++        cands = self.owner_candidates.get(f"{agent_id}:{plan_id}", [])
++        if incident_id not in cands and not allow_non_candidate:
++            return False, "target is not a recorded owner candidate", inc
++        return True, "", inc
++
++    def _apply_rebind(self, agent_id: str, plan_id: str, incident_id: str,
++                      inc: dict) -> None:
++        key = f"{agent_id}:{plan_id}"
++        self._plan_owner[key] = incident_id
++        if not inc.get("plan_id"):
++            inc["plan_id"] = plan_id
++        self.owner_candidates.pop(key, None)
++        self._drain_pending(agent_id, {plan_id})
++
++    def _held_receipts(self, agent_id: str, plan_id: str,
++                       incident_id: str) -> list[dict[str, Any]]:
++        out = []
++        for rid, rp in self._pending_receipts.get(agent_id, {}).items():
++            pid = rp.get("plan_id") or ""
++            if pid == plan_id or (not pid and (rp.get("incident_id") or "") == incident_id):
++                out.append({"id": rid, "plan_id": pid,
++                            "incident_id": rp.get("incident_id") or "",
++                            "step_index": rp.get("step_index"),
++                            "verified": rp.get("verified")})
++        return out
++
++    def preview_rebind(self, agent_id: str, plan_id: str, incident_id: str,
++                       allow_non_candidate: bool = False) -> dict[str, Any]:
++        """Side-effect-free preview of rebind_plan_owner() (simulated on a
++        deep copy).  Result is deep-copied; never aliases live state."""
++        ok, why, _ = self._rebind_check(agent_id, plan_id, incident_id,
++                                        allow_non_candidate)
++        key = f"{agent_id}:{plan_id}"
++        cands = list(self.owner_candidates.get(key, []))
++        would_close: list[str] = []
++        if ok:
++            sim = copy.deepcopy(self)
++            before = {i["incident_id"] for i in sim._open_agent_incidents(agent_id)}
++            _, _, sinc = sim._rebind_check(agent_id, plan_id, incident_id, True)
++            sim._apply_rebind(agent_id, plan_id, incident_id, sinc)
++            would_close = sorted(before - {i["incident_id"] for i in
++                                           sim._open_agent_incidents(agent_id)})
++        return copy.deepcopy({
++            "agent_id": agent_id, "plan_id": plan_id,
++            "incident_id": incident_id, "allowed": ok, "refusal": why,
++            "hold_reason": self.quarantine_reasons().get(key, ""),
++            "candidates": cands, "is_candidate": incident_id in cands,
++            "held_receipts": self._held_receipts(agent_id, plan_id, incident_id),
++            "would_close": would_close})
++
++    def rebind_plan_owner(self, agent_id: str, plan_id: str, incident_id: str,
++                          *, actor: str, reason: str,
++                          allow_non_candidate: bool = False) -> bool:
++        """TRUSTED-OPERATOR owner rebind for a HELD ownerless_linked plan (Ben
++        msg 7547 option (a), Astra 7562).  Same contract as the local
++        Reducer.rebind_plan_owner(): non-empty actor and reason; target exists,
++        is OPEN, not linked to another plan, and is a recorded owner candidate
++        unless allow_non_candidate=True.  Appends an audit record to
++        owner_rebinds (bounded).  Returns True if applied."""
++        if not (isinstance(actor, str) and actor.strip()):
++            raise ValueError("rebind_plan_owner requires a non-empty actor")
++        if not (isinstance(reason, str) and reason.strip()):
++            raise ValueError("rebind_plan_owner requires a non-empty reason")
++        ok, why, inc = self._rebind_check(agent_id, plan_id, incident_id,
++                                          allow_non_candidate)
++        if not ok:
++            logger.warning("Refused hive rebind of %s:%s -> %s by %s: %s",
++                           agent_id, plan_id, incident_id, actor, why)
++            return False
++        key = f"{agent_id}:{plan_id}"
++        is_cand = incident_id in self.owner_candidates.get(key, [])
++        held = self._held_receipts(agent_id, plan_id, incident_id)
++        before = {i["incident_id"] for i in self._open_agent_incidents(agent_id)}
++        self._apply_rebind(agent_id, plan_id, incident_id, inc)
++        closed = sorted(before - {i["incident_id"] for i in
++                                  self._open_agent_incidents(agent_id)})
++        self.owner_rebinds_total += 1
++        self.owner_rebinds.append({
++            "agent_id": agent_id, "plan_id": plan_id,
++            "incident_id": incident_id, "actor": actor, "reason": reason,
++            "candidate": is_cand, "hold_reason": "ownerless_linked",
++            "pending_before": len(held),
++            "held_receipt_ids": [str(r["id"]) for r in held][:MAX_HIVE_REBIND_IDS],
++            "closed": closed})
++        del self.owner_rebinds[:-MAX_HIVE_REBIND_RECORDS]
++        logger.warning("Operator hive rebind by %s (%s): %s owner set to "
++                       "incident %s (candidate=%s, held=%d, closed=%s)", actor,
++                       reason, key, incident_id, is_cand, len(held), closed)
++        return True
++
+     def _open_agent_incidents(self, agent_id: str) -> list[dict[str, Any]]:
+         return [i for i in self._agent_incidents.get(agent_id, [])
+                 if not i.get("resolved")]
+@@ -261,7 +393,16 @@ class HiveReducer:
+                     dropped += 1
+                     continue
+                 kept.append(i)
+-            self._agent_incidents[agent_id] = kept[-MAX_AGENT_INCIDENTS:] if dropped < overflow else kept
++            # O-retention (Astra 7562): OPEN incidents are never pruned, even
++            # past the cap -- each may be an unresolved ownership hold that
++            # quarantine_reasons() must keep reporting.  Only resolved history
++            # is trimmed; the list may exceed the cap while opens exceed it.
++            if dropped < overflow:
++                logger.warning(
++                    "Agent %s has %d incidents (cap %d); open incidents are "
++                    "retained past the cap.", agent_id, len(kept),
++                    MAX_AGENT_INCIDENTS)
++            self._agent_incidents[agent_id] = kept
+ 
+         # Update agent health
+         self._recompute_agent_health(agent_id)
+@@ -271,6 +412,13 @@ class HiveReducer:
+         owned = {k[len(pre):] for k, o in self._plan_owner.items()
+                  if k.startswith(pre) and o == identity}
+         self._drain_pending(agent_id, owned)
++        # Late-link (Astra 7562): an incident that links to an already
++        # complete OWNERLESS plan gets the same WARNING as the in-order case.
++        # _maybe_resolve_plan never closes anything for an ownerless plan.
++        lpid = incidents_list[-1].get("plan_id") if incidents_list else ""
++        if (lpid and f"{agent_id}:{lpid}" in self._plan_steps
++                and not self._plan_owner.get(f"{agent_id}:{lpid}")):
++            self._maybe_resolve_plan(agent_id, lpid, identity)
+ 
+         # Attempt cross-agent correlation
+         correlated = self._correlate_incidents(symptom, event.ts)
+@@ -344,6 +492,17 @@ class HiveReducer:
+         inc_id = payload.get("incident_id", "") or ""
+         if self._reject_conflicting_plan(agent_id, payload):
+             return
++        if inc_id and self._ownerless_linked(agent_id, plan_id):
++            # Ben msg 7547 option (a) (Astra 7562): an ordinary PLAN never
++            # sets the owner of a HELD plan; it only records a candidate.
++            lst = self.owner_candidates.setdefault(key, [])
++            if inc_id not in lst and len(lst) < MAX_HIVE_CANDIDATES:
++                lst.append(inc_id)
++            logger.warning("PLAN %s -> %s from %s held (ownerless plan linked "
++                           "to an open incident): recorded as owner candidate "
++                           "only; use preview_rebind() then rebind_plan_owner()",
++                           plan_id, inc_id, agent_id)
++            return
+         if key not in self._plan_steps:
+             self._plan_steps[key] = len(steps)
+             self._plan_verified_steps[key] = set()
+@@ -444,7 +603,7 @@ class HiveReducer:
+         # P3-ownerless (Astra 7519): the immutable owner is the SOLE completion
+         # authority; an ownerless plan never closes linked incidents.
+         if not owner:
+-            # O-ownerless-hold (Astra 7542, option (a)): surface, don't hide.
++            # Ben msg 7547 option (a) (Astra 7562): HELD, repaired by rebind.
+             linked = sorted(i["incident_id"]
+                             for i in self._open_agent_incidents(agent_id)
+                             if i.get("plan_id") == plan_id)
+@@ -452,8 +611,9 @@ class HiveReducer:
+                 logger.warning(
+                     "Agent %s plan %s is complete but has no proven owner; it "
+                     "closes nothing (linked open incidents %s stay open). "
+-                    "Repair: send a PLAN that declares incident_id. See "
+-                    "quarantine_reasons() (ownerless_linked).", agent_id,
++                    "It is HELD in quarantined_plans() (ownerless_linked); "
++                    "repair with preview_rebind()/rebind_plan_owner(). A "
++                    "re-sent PLAN only records an owner candidate.", agent_id,
+                     plan_id, linked)
+             return
+         changed = False
+diff --git a/tests/test_astra7542.py b/tests/test_astra7542.py
+index b898e12..a29d1e9 100644
+--- a/tests/test_astra7542.py
++++ b/tests/test_astra7542.py
+@@ -1,8 +1,11 @@
+ """Astra 7542 O-ownerless-hold, option (a) (Ben 2026-10-08: "(a) is best for
+ a first try"): a complete-but-ownerless plan linked to an open incident still
+ closes nothing, but is now VISIBLE (quarantine_reasons() -> ownerless_linked,
+-local + hive, survives restore), logs a warning, and has a documented repair:
+-a later PLAN that declares incident_id.  Ownership is never inferred.
++local + hive, survives restore) and logs a warning.  SUPERSEDED IN PART by
++Astra 7562 D-option-conformance (Ben msg 7547 option (a)): the plan is HELD in
++quarantined_plans() and a re-sent owner-declaring PLAN records only an owner
++candidate; repair is the audited rebind (tests/test_astra7562_hold.py).
++Ownership is never inferred.
+ """
+ import json
+ import logging
+@@ -23,7 +26,8 @@ def test_witness_reported_ownerless_linked_both_reducers():
+     assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
+     assert loc.quarantine_reasons() == {"p": "ownerless_linked"}
+     assert hive.quarantine_reasons() == {"a1:p": "ownerless_linked"}
+-    assert loc.quarantined_plans() == []          # rebind list unchanged
++    assert loc.quarantined_plans() == ["p"]       # HELD (msg 7547 option (a))
++    assert hive.quarantined_plans() == ["a1:p"]
+ 
+ 
+ def test_reason_survives_restore_after_every_event():
+@@ -59,17 +63,21 @@ def test_owned_plan_never_reported():
+     assert loc.quarantine_reasons() == {} and hive.quarantine_reasons() == {}
+ 
+ 
+-def test_documented_repair_later_owner_declaring_plan():
++def test_resent_owner_declaring_plan_is_candidate_only():
+     stream = WITNESS + [PLAN("p", "i", 1)]
+     loc, hive = both(stream)
+-    assert lo(loc) == ["j"] and ho(hive) == ["j"]         # owner closed only
+-    assert loc._plan_owner["p"] == "i" and hive._plan_owner["a1:p"] == "i"
+-    assert loc.quarantine_reasons() == {} and hive.quarantine_reasons() == {}
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]   # closes nothing
++    assert "p" not in loc._plan_owner and "a1:p" not in hive._plan_owner
++    assert loc.migration_diagnostics["owner_candidates"]["p"] == ["i"]
++    assert hive.owner_candidates["a1:p"] == ["i"]
++    assert loc.quarantine_reasons() == {"p": "ownerless_linked"}
++    assert hive.quarantine_reasons() == {"a1:p": "ownerless_linked"}
+     r = Reducer()
+     for e in stream:
+         r.reduce(e)
+         r = rt(r)
+-    assert lo(r) == ["j"] and r.quarantine_reasons() == {}
++    assert lo(r) == ["i", "j"] and r.quarantined_plans() == ["p"]
++    assert r.migration_diagnostics["owner_candidates"]["p"] == ["i"]
+ 
+ 
+ def test_owner_unproven_reason_still_reported():
+diff --git a/tests/test_astra7562.py b/tests/test_astra7562.py
+new file mode 100644
+index 0000000..0f0ca1d
+--- /dev/null
++++ b/tests/test_astra7562.py
+@@ -0,0 +1,74 @@
++"""Astra 7562 follow-ups that do not depend on the pending option decision:
++O-retention (hive never prunes OPEN incidents, so ownerless_linked holds never
++vanish at capacity) and late-link WARNING (incident linking to an already
++complete ownerless plan logs like the in-order case, closes nothing).
++"""
++import logging
++
++from hive import reducer as hr
++from tests.test_astra7160 import PLAN, RC, both, ho, lo
++from tests.test_astra7519 import INCL
++
++
++def _held(n):
++    s = []
++    for k in range(n):
++        s += [INCL(f"i{k}", f"p{k}"), PLAN(f"p{k}", "", 1)]
++    return s
++
++
++def test_hive_retains_all_open_incidents_past_cap():
++    from hive.reducer import HiveReducer
++    from hive.types import HiveEvent
++    n = hr.MAX_AGENT_INCIDENTS + 100
++    hive = HiveReducer()
++    hive.register_agent("a1")
++    for e in _held(n):
++        hive.reduce(HiveEvent(source_agent="a1", original_event=e))
++    reasons = hive.quarantine_reasons()
++    assert len(reasons) == n
++    assert reasons["a1:p0"] == "ownerless_linked"          # oldest kept
++    assert len(ho(hive)) == n
++
++
++def test_hive_still_trims_resolved_history_at_cap():
++    from hive.reducer import HiveReducer
++    from hive.types import HiveEvent
++    cap = hr.MAX_AGENT_INCIDENTS
++    hive = HiveReducer()
++    hive.register_agent("a1")
++    for k in range(cap + 50):
++        hive.reduce(HiveEvent(source_agent="a1",
++                              original_event=INCL(f"r{k}", "", resolved=True)))
++    hive.reduce(HiveEvent(source_agent="a1", original_event=INCL("open")))
++    assert len(hive._agent_incidents["a1"]) == cap
++    assert ho(hive) == ["open"]
++
++
++def _warn(caplog):
++    return [r.getMessage() for r in caplog.records
++            if "no proven owner" in r.getMessage()]
++
++
++def test_late_link_warning_both_reducers(caplog):
++    stream = [PLAN("p", "", 1), RC("x", "p", 0), INCL("i", "p"), INCL("j", "p")]
++    with caplog.at_level(logging.WARNING):
++        loc, hive = both(stream)
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]   # closes nothing
++    msgs = _warn(caplog)
++    assert any(m.startswith("Plan p") for m in msgs)
++    assert any(m.startswith("Agent a1 plan p") for m in msgs)
++    assert loc.quarantine_reasons() == {"p": "ownerless_linked"}
++    assert hive.quarantine_reasons() == {"a1:p": "ownerless_linked"}
++
++
++def test_no_late_link_warning_for_incomplete_plan(caplog):
++    with caplog.at_level(logging.WARNING):
++        loc, hive = both([PLAN("p", "", 2), RC("x", "p", 0), INCL("i", "p")])
++    assert lo(loc) == ["i"] and not _warn(caplog)
++
++
++def test_late_link_to_owned_plan_unchanged():
++    loc, hive = both([PLAN("p", "i", 1), RC("x", "p", 0), INCL("i", "p"),
++                      INCL("j", "p")])
++    assert lo(loc) == ["j"] and ho(hive) == ["j"]           # owner only
+diff --git a/tests/test_astra7562_hold.py b/tests/test_astra7562_hold.py
+new file mode 100644
+index 0000000..e1c5605
+--- /dev/null
++++ b/tests/test_astra7562_hold.py
+@@ -0,0 +1,117 @@
++"""Astra 7562 D-option-conformance: the RECORDED decision (Ben, Telegram msg
++7547, option (a)) for a registered OWNERLESS plan linked to an open incident:
++HOLD it in quarantined_plans() (local + hive), let a re-sent owner-declaring
++PLAN record only an owner CANDIDATE, and repair through the side-effect-free
++preview_rebind() and the audited rebind_plan_owner().  Both reducers.
++"""
++import json
++
++import pytest
++
++from controller.reducer import Reducer
++from tests.test_astra7160 import PLAN, RC, both, ho, lo
++from tests.test_astra7519 import INCL, WITNESS
++
++CAND = WITNESS + [PLAN("p", "i", 1)]          # i proposed as owner candidate
++
++
++def rt(r):
++    r2 = Reducer()
++    r2.restore_snapshot(json.loads(json.dumps(r.snapshot())))
++    return r2
++
++
++def _state(loc, hive):
++    return (json.dumps(loc.snapshot(), sort_keys=True, default=str),
++            lo(loc), ho(hive), dict(hive._plan_owner),
++            json.dumps(hive.owner_candidates, sort_keys=True),
++            list(hive.owner_rebinds))
++
++
++def test_held_in_quarantined_plans_both_reducers():
++    loc, hive = both(WITNESS)
++    assert loc.quarantined_plans() == ["p"]
++    assert hive.quarantined_plans() == ["a1:p"]
++    assert rt(loc).quarantined_plans() == ["p"]
++
++
++def test_preview_is_side_effect_free_and_reports_hold():
++    loc, hive = both(CAND)
++    before = _state(loc, hive)
++    pv = loc.preview_rebind("p", "i")
++    hv = hive.preview_rebind("a1", "p", "i")
++    assert _state(loc, hive) == before
++    for v in (pv, hv):
++        assert v["allowed"] and v["refusal"] == ""
++        assert v["hold_reason"] == "ownerless_linked"
++        assert v["is_candidate"] and v["candidates"] == ["i"]
++        assert v["would_close"] == ["i"]
++
++
++def test_rebind_closes_owner_only_with_audit_both_reducers():
++    loc, hive = both(CAND)
++    assert loc.rebind_plan_owner("p", "i", actor="op", reason="7562 test")
++    assert hive.rebind_plan_owner("a1", "p", "i", actor="op", reason="7562 test")
++    assert lo(loc) == ["j"] and ho(hive) == ["j"]
++    assert loc._plan_owner["p"] == "i" and hive._plan_owner["a1:p"] == "i"
++    assert loc.quarantined_plans() == [] and hive.quarantined_plans() == []
++    la = loc.migration_diagnostics["owner_rebinds"][-1]
++    ha = hive.owner_rebinds[-1]
++    for a in (la, ha):
++        assert a["actor"] == "op" and a["reason"] == "7562 test"
++        assert a["candidate"] is True and a["hold_reason"] == "ownerless_linked"
++    assert ha["closed"] == ["i"] and hive.owner_rebinds_total == 1
++    r = rt(loc)
++    assert lo(r) == ["j"] and r.quarantined_plans() == []
++
++
++def test_non_candidate_refused_unless_explicit():
++    loc, hive = both(WITNESS)                      # no candidate recorded
++    assert not loc.rebind_plan_owner("p", "i", actor="op", reason="r")
++    assert not hive.rebind_plan_owner("a1", "p", "i", actor="op", reason="r")
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
++    assert "not a recorded owner candidate" in loc.preview_rebind("p", "i")["refusal"]
++    assert "not a recorded owner candidate" in hive.preview_rebind("a1", "p", "i")["refusal"]
++    assert loc.rebind_plan_owner("p", "j", actor="op", reason="r",
++                                 allow_non_candidate=True)
++    assert hive.rebind_plan_owner("a1", "p", "j", actor="op", reason="r",
++                                  allow_non_candidate=True)
++    assert lo(loc) == ["i"] and ho(hive) == ["i"]
++    assert hive.owner_rebinds[-1]["candidate"] is False
++
++
++def test_actor_and_reason_required():
++    loc, hive = both(CAND)
++    for kw in ({"actor": "", "reason": "r"}, {"actor": "op", "reason": " "}):
++        with pytest.raises(ValueError):
++            loc.rebind_plan_owner("p", "i", **kw)
++        with pytest.raises(ValueError):
++            hive.rebind_plan_owner("a1", "p", "i", **kw)
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
++
++
++def test_refusals_unknown_resolved_and_other_plan_targets():
++    stream = CAND + [INCL("k", "q"), PLAN("q", "", 2)]
++    loc, hive = both(stream, plans=("p", "q"))
++    for tgt in ("nope", "k"):
++        assert not loc.rebind_plan_owner("p", tgt, actor="op", reason="r",
++                                         allow_non_candidate=True)
++        assert not hive.rebind_plan_owner("a1", "p", tgt, actor="op", reason="r",
++                                          allow_non_candidate=True)
++    assert lo(loc) == ["i", "j", "k"] and ho(hive) == ["i", "j", "k"]
++
++
++def test_owned_or_unlinked_plan_is_not_held_or_rebindable():
++    loc, hive = both([INCL("i", "p"), PLAN("p", "i", 2), RC("x", "p", 0)])
++    assert loc.quarantined_plans() == [] and hive.quarantined_plans() == []
++    assert loc.preview_rebind("p", "i")["refusal"] == "plan is not quarantined"
++    assert hive.preview_rebind("a1", "p", "i")["refusal"] == "plan is not quarantined"
++    loc, hive = both([INCL("i"), PLAN("p", "", 1), RC("x", "p", 0)])
++    assert loc.quarantined_plans() == [] and hive.quarantined_plans() == []
++
++
++def test_second_resend_does_not_rebind_and_candidates_dedupe():
++    loc, hive = both(CAND + [PLAN("p", "i", 1), PLAN("p", "j", 1)])
++    assert lo(loc) == ["i", "j"] and ho(hive) == ["i", "j"]
++    assert loc.migration_diagnostics["owner_candidates"]["p"] == ["i", "j"]
++    assert hive.owner_candidates["a1:p"] == ["i", "j"]

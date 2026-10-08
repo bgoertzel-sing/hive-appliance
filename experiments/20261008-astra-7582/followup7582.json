@@ -1,0 +1,240 @@
+{
+  "foreign_receipt_owned_controls": [
+    {
+      "address": "incident",
+      "result": {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {},
+          {}
+        ],
+        "owners": [
+          {
+            "p": "i"
+          },
+          {
+            "a1:p": "i"
+          }
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      "verified": [
+        [],
+        []
+      ]
+    },
+    {
+      "address": "dual",
+      "result": {
+        "open": [
+          [
+            "i",
+            "j"
+          ],
+          [
+            "i",
+            "j"
+          ]
+        ],
+        "holds": [
+          {},
+          {}
+        ],
+        "owners": [
+          {
+            "p": "i"
+          },
+          {
+            "a1:p": "i"
+          }
+        ],
+        "candidates": [
+          {},
+          {}
+        ],
+        "audits": [
+          [],
+          []
+        ]
+      },
+      "verified": [
+        [],
+        []
+      ]
+    }
+  ],
+  "receipt_audit_caps": {
+    "local": {
+      "plan_id": "p",
+      "incident_id": "j",
+      "actor": "Astra-7582",
+      "reason": "fixture authority",
+      "candidate": true,
+      "hold_reason": "ownerless_linked",
+      "pending_before": 60,
+      "effect_counts": {
+        "credited": 60,
+        "failure_recorded": 0,
+        "consumed_no_effect": 0,
+        "still_held": 0
+      },
+      "effect_ids": {
+        "credited": [
+          "held0",
+          "held1",
+          "held2",
+          "held3",
+          "held4",
+          "held5",
+          "held6",
+          "held7",
+          "held8",
+          "held9",
+          "held10",
+          "held11",
+          "held12",
+          "held13",
+          "held14",
+          "held15",
+          "held16",
+          "held17",
+          "held18",
+          "held19",
+          "held20",
+          "held21",
+          "held22",
+          "held23",
+          "held24",
+          "held25",
+          "held26",
+          "held27",
+          "held28",
+          "held29",
+          "held30",
+          "held31"
+        ],
+        "failure_recorded": [],
+        "consumed_no_effect": [],
+        "still_held": []
+      },
+      "closed": [
+        "j"
+      ]
+    },
+    "hive": {
+      "agent_id": "a1",
+      "plan_id": "p",
+      "incident_id": "j",
+      "actor": "Astra-7582",
+      "reason": "fixture authority",
+      "candidate": true,
+      "hold_reason": "ownerless_linked",
+      "pending_before": 60,
+      "held_receipt_ids": [
+        "held0",
+        "held1",
+        "held2",
+        "held3",
+        "held4",
+        "held5",
+        "held6",
+        "held7",
+        "held8",
+        "held9",
+        "held10",
+        "held11",
+        "held12",
+        "held13",
+        "held14",
+        "held15",
+        "held16",
+        "held17",
+        "held18",
+        "held19",
+        "held20",
+        "held21",
+        "held22",
+        "held23",
+        "held24",
+        "held25",
+        "held26",
+        "held27",
+        "held28",
+        "held29",
+        "held30",
+        "held31",
+        "held32",
+        "held33",
+        "held34",
+        "held35",
+        "held36",
+        "held37",
+        "held38",
+        "held39",
+        "held40",
+        "held41",
+        "held42",
+        "held43",
+        "held44",
+        "held45",
+        "held46",
+        "held47",
+        "held48",
+        "held49"
+      ],
+      "closed": [
+        "j"
+      ]
+    },
+    "preview_receipt_counts": [
+      60,
+      60
+    ]
+  },
+  "hive_preview_log_side_effect": {
+    "messages": [
+      {
+        "level": "INFO",
+        "message": "Agent a1 incident i resolved (all 1 plan steps verified)"
+      }
+    ],
+    "live_open": [
+      [
+        "i",
+        "j"
+      ],
+      [
+        "i",
+        "j"
+      ]
+    ],
+    "would_close": [
+      "i"
+    ],
+    "severity": "Low"
+  },
+  "stale_restore_guidance": {
+    "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT quarantine is owner_unproven (persisted in the snapshot; enumerate it with Reducer.quarantined_plans()). legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A plan in owner_unproven stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+    "owner_unproven": [],
+    "current_quarantine": [
+      "p"
+    ],
+    "severity": "Low"
+  }
+}
