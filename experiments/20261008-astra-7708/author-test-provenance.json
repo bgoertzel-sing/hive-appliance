@@ -1,0 +1,8 @@
+{
+  "pin": "8945bdcb06415a11a5647fbb0e4decc59e021784",
+  "commit": "commit 8945bdcb06415a11a5647fbb0e4decc59e021784\nAuthor:     ProtoMegaBot2 <protomega2@protohive>\nAuthorDate: Fri Oct 9 02:16:39 2026 +0000\nCommit:     ProtoMegaBot2 <protomega2@protohive>\nCommitDate: Fri Oct 9 02:16:39 2026 +0000\n\n    Astra 7701: identity anchor written+fsync'd BEFORE journal; journal without matching anchor (incl. header-only/empty) always fences, never adopted; any pre-v5 artifact (.fence/.fence.tmp, v1-v4/owner_rebind/abort_rebind records) fences before create/adopt with MIGRATION message, clearance moves markers aside; docs: rollback of journal+.id together not detected, never restore either alone; tests\n",
+  "search_scope": "Tracked docs and experiments at reviewed pin; exact SHA or 808 passed",
+  "matches": [],
+  "conclusion": "No authored test log tied to exactly 8945bdc was found. Commit message says tests but does not establish full-suite execution. Author execution on exact pin is UNVERIFIED; independent 808-pass suite is direct evidence.",
+  "remote_compute": false
+}

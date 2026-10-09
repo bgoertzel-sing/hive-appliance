@@ -1,0 +1,5520 @@
+{
+  "archive_restore": {
+    "cases": [
+      {
+        "mode": "append_archived_prefix",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 3: hash chain broken (a record was reordered, removed or inserted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6005785,
+                  "line": 3
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 3,
+                    "why": "hash chain broken (a record was reordered, removed or inserted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 3: hash chain broken (a record was reordered, removed or inserted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6013954,
+                  "line": 3
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 3,
+                    "why": "hash chain broken (a record was reordered, removed or inserted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ],
+        "hashes_recomputed": false,
+        "anchor_retained": true
+      },
+      {
+        "mode": "archived_whole_file",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 4: unterminated (torn) last line; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6025724,
+                  "line": 4
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced (line 4: unterminated (torn) last line); not replayed -- inspect, clear_journal_fence(), re-issue if still wanted"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 4,
+                    "why": "unterminated (torn) last line"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 4: unterminated (torn) last line; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.603416,
+                  "line": 4
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced (line 4: unterminated (torn) last line); not replayed -- inspect, clear_journal_fence(), re-issue if still wanted"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 4,
+                    "why": "unterminated (torn) last line"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ],
+        "hashes_recomputed": false,
+        "anchor_retained": true
+      },
+      {
+        "mode": "replace_with_old_valid_journal",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "b4c68b61542c46f38019c791223a6be9",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.604555
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1022,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "b4c68b61542c46f38019c791223a6be9",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6053162
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1022,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ],
+        "hashes_recomputed": false,
+        "anchor_retained": true
+      },
+      {
+        "mode": "replace_with_archived_clean_prefix",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "b4c68b61542c46f38019c791223a6be9",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6064086
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1022,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+                "durable": true,
+                "journal_id": "b4c68b61542c46f38019c791223a6be9",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6071744
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "655a268533d94e0ea7a714ace9dcc840",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: journal header id b4c68b61542c46f38019c791223a6be9 does not match the identity anchor 107bd774599b4ab1a1f5054a23e55f65 (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1022,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ],
+        "hashes_recomputed": false,
+        "anchor_retained": true
+      }
+    ],
+    "joint_rollback": {
+      "view": {
+        "open": [],
+        "hold": {},
+        "owner": {
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/identity-restore.jsonl",
+          "durable": true,
+          "journal_id": "b4c68b61542c46f38019c791223a6be9",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 3,
+          "bytes": 1022,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "plans_refused_cap": 0
+        },
+        "event_seq": 4,
+        "digest": "b460e1b310563acdd0894d411fa8db0d477409212c2125612052b25a1a52e252"
+      },
+      "last_result": null,
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "joint_rollback_requires_documentation": true,
+    "verdict": "Prior single-file rollback witness CLOSED; two-file rollback remains possible",
+    "passed": true
+  },
+  "runtime_integrity": {
+    "cases": [
+      {
+        "mode": "prefix_edit_next_rebind",
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "89b77fb94ca6467a99ca6012ac07da63",
+          "detail": "refused; see log and journal_status()"
+        },
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_next_rebind.jsonl",
+              "durable": true,
+              "journal_id": "1ab510141dd74f5fb8e5d3ad27a48dbf",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "0e60ba148df76a34d583581c01420694b53bcff17f36664faff075c58a0064bb"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "dca822005f604f7db9eab730d4cb3cfe",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_next_rebind.jsonl",
+              "durable": true,
+              "journal_id": "1ab510141dd74f5fb8e5d3ad27a48dbf",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "journal is 1025 bytes, expected 1025, or its content differs from what this process wrote: it was changed outside this process; rebind a1:q -> j refused (nothing written)",
+                "found_at_startup": false,
+                "ts": 1791515386.6150615,
+                "op_id": "89b77fb94ca6467a99ca6012ac07da63",
+                "applied": false
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "0e60ba148df76a34d583581c01420694b53bcff17f36664faff075c58a0064bb"
+          },
+          "last_result": {
+            "status": "refused",
+            "applied": false,
+            "durable": false,
+            "op_id": "89b77fb94ca6467a99ca6012ac07da63",
+            "detail": "refused; see log and journal_status()"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_next_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 2: record hash mismatch (edited or corrupted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6154578,
+                  "line": 2
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 2,
+                    "why": "record hash mismatch (edited or corrupted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "0e60ba148df76a34d583581c01420694b53bcff17f36664faff075c58a0064bb"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_next_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 2: record hash mismatch (edited or corrupted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6166317,
+                  "line": 2
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 2,
+                    "why": "record hash mismatch (edited or corrupted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "0e60ba148df76a34d583581c01420694b53bcff17f36664faff075c58a0064bb"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "prefix_edit_verify",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_verify.jsonl",
+              "durable": true,
+              "journal_id": "319d26171308464188a778fd8640420a",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "b4fa1201c75257844f85b9a3247c7d96c7180df514cc1a7537f6b997a69855e1"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "770b8daecb4e4f7794f8d4165dca51c4",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_verify.jsonl",
+              "durable": true,
+              "journal_id": "319d26171308464188a778fd8640420a",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "verify_journal: journal is 1026 bytes, expected 1026, or its content differs from what this process wrote: it was changed outside this process",
+                "found_at_startup": false,
+                "ts": 1791515386.6231668
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "b4fa1201c75257844f85b9a3247c7d96c7180df514cc1a7537f6b997a69855e1"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "770b8daecb4e4f7794f8d4165dca51c4",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_verify.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 2: record hash mismatch (edited or corrupted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.623642,
+                  "line": 2
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 2,
+                    "why": "record hash mismatch (edited or corrupted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "b4fa1201c75257844f85b9a3247c7d96c7180df514cc1a7537f6b997a69855e1"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-prefix_edit_verify.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 2: record hash mismatch (edited or corrupted); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6249664,
+                  "line": 2
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 2,
+                    "why": "record hash mismatch (edited or corrupted)"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "b4fa1201c75257844f85b9a3247c7d96c7180df514cc1a7537f6b997a69855e1"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "missing_journal",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl",
+              "durable": true,
+              "journal_id": "9d5f38c09fa74abc9496fa119613063f",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1024,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "604648724c2da87ed9b896299f42a2513682c6d64d7b2f4e6a8c23922ba1356b"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "8f4abfd2aad94e43927a09faa68858f7",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl",
+              "durable": true,
+              "journal_id": "9d5f38c09fa74abc9496fa119613063f",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "journal cannot be opened ([Errno 2] No such file or directory: '/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl')",
+                "found_at_startup": false,
+                "ts": 1791515386.631343
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1024,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "604648724c2da87ed9b896299f42a2513682c6d64d7b2f4e6a8c23922ba1356b"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "8f4abfd2aad94e43927a09faa68858f7",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is missing but the identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl.id names journal 9d5f38c09fa74abc9496fa119613063f: the journal was removed, or its creation was interrupted after the anchor was written; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6316147
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "604648724c2da87ed9b896299f42a2513682c6d64d7b2f4e6a8c23922ba1356b"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is missing but the identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_journal.jsonl.id names journal 9d5f38c09fa74abc9496fa119613063f: the journal was removed, or its creation was interrupted after the anchor was written; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6326623
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "604648724c2da87ed9b896299f42a2513682c6d64d7b2f4e6a8c23922ba1356b"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "missing_anchor",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl",
+              "durable": true,
+              "journal_id": "ddee9f125d5b433da695dc5205a4d428",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "449df1c8db89ae371b9701450cae2267687e2a47b6a32a1aa6cef2fd5a175339"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "13239660263a4a468978d209e93751a7",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl",
+              "durable": true,
+              "journal_id": "ddee9f125d5b433da695dc5205a4d428",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "verify_journal: identity anchor names journal None, not ddee9f125d5b433da695dc5205a4d428: the journal was replaced",
+                "found_at_startup": false,
+                "ts": 1791515386.6394253
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "449df1c8db89ae371b9701450cae2267687e2a47b6a32a1aa6cef2fd5a175339"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "13239660263a4a468978d209e93751a7",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl",
+                "durable": true,
+                "journal_id": "ddee9f125d5b433da695dc5205a4d428",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl.id is missing for journal ddee9f125d5b433da695dc5205a4d428 (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.639852
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "13239660263a4a468978d209e93751a7",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced: identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl.id is missing for journal ddee9f125d5b433da695dc5205a4d428 (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "449df1c8db89ae371b9701450cae2267687e2a47b6a32a1aa6cef2fd5a175339"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl",
+                "durable": true,
+                "journal_id": "ddee9f125d5b433da695dc5205a4d428",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl.id is missing for journal ddee9f125d5b433da695dc5205a4d428 (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6411
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "13239660263a4a468978d209e93751a7",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced: identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-missing_anchor.jsonl.id is missing for journal ddee9f125d5b433da695dc5205a4d428 (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "449df1c8db89ae371b9701450cae2267687e2a47b6a32a1aa6cef2fd5a175339"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "bad_anchor",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl",
+              "durable": true,
+              "journal_id": "8d204683666e42d6ba4a0f89e2fef911",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "8d39c76dc282e58c3b7c565e949f2b905bf87af038ba908e51eb52c976e7c9bc"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "12beacfbc3804ba3a6f19b43f570ed33",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl",
+              "durable": true,
+              "journal_id": "8d204683666e42d6ba4a0f89e2fef911",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "verify_journal: identity anchor unreadable (identity anchor unreadable (Expecting property name enclosed in double quotes: line 1 column 2 (char 1)))",
+                "found_at_startup": false,
+                "ts": 1791515386.6473293
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "8d39c76dc282e58c3b7c565e949f2b905bf87af038ba908e51eb52c976e7c9bc"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "12beacfbc3804ba3a6f19b43f570ed33",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl.id: identity anchor unreadable (Expecting property name enclosed in double quotes: line 1 column 2 (char 1)); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6476314
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "8d39c76dc282e58c3b7c565e949f2b905bf87af038ba908e51eb52c976e7c9bc"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-bad_anchor.jsonl.id: identity anchor unreadable (Expecting property name enclosed in double quotes: line 1 column 2 (char 1)); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.648706
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "8d39c76dc282e58c3b7c565e949f2b905bf87af038ba908e51eb52c976e7c9bc"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "changed_anchor",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl",
+              "durable": true,
+              "journal_id": "5bb5a6753870409b8fbcf5663f69d172",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "346027f02dd089b9864772848b08a84589af928f5fc19c02a3f2ed9573017746"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "a04a4c744a3245539a7e7018f6b86436",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl",
+              "durable": true,
+              "journal_id": "5bb5a6753870409b8fbcf5663f69d172",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "verify_journal: identity anchor names journal changed, not 5bb5a6753870409b8fbcf5663f69d172: the journal was replaced",
+                "found_at_startup": false,
+                "ts": 1791515386.6552482
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1025,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "346027f02dd089b9864772848b08a84589af928f5fc19c02a3f2ed9573017746"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "a04a4c744a3245539a7e7018f6b86436",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl",
+                "durable": true,
+                "journal_id": "5bb5a6753870409b8fbcf5663f69d172",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id 5bb5a6753870409b8fbcf5663f69d172 does not match the identity anchor changed (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6556342
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "a04a4c744a3245539a7e7018f6b86436",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced: journal header id 5bb5a6753870409b8fbcf5663f69d172 does not match the identity anchor changed (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "346027f02dd089b9864772848b08a84589af928f5fc19c02a3f2ed9573017746"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl",
+                "durable": true,
+                "journal_id": "5bb5a6753870409b8fbcf5663f69d172",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal header id 5bb5a6753870409b8fbcf5663f69d172 does not match the identity anchor changed (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl.id): an older or archived journal was put in place of the current one; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6568463
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "a04a4c744a3245539a7e7018f6b86436",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced: journal header id 5bb5a6753870409b8fbcf5663f69d172 does not match the identity anchor changed (/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-changed_anchor.jsonl.id): an older or archived journal was put in place of the current one; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "346027f02dd089b9864772848b08a84589af928f5fc19c02a3f2ed9573017746"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "suffix_append",
+        "result": false,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-suffix_append.jsonl",
+              "durable": true,
+              "journal_id": "780b6982f2d2476eb4b94628c92f8ca3",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "d7ac14b6d9b4e989bed656bc34d8d1b2c7687b86b176eb390033723e2c45990b"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "e54a542e755b4454a3a091537e579b01",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-suffix_append.jsonl",
+              "durable": true,
+              "journal_id": "780b6982f2d2476eb4b94628c92f8ca3",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "changed",
+                "error": "verify_journal: journal is 1027 bytes, expected 1026, or its content differs from what this process wrote: it was changed outside this process",
+                "found_at_startup": false,
+                "ts": 1791515386.6630065
+              },
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "d7ac14b6d9b4e989bed656bc34d8d1b2c7687b86b176eb390033723e2c45990b"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "e54a542e755b4454a3a091537e579b01",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-suffix_append.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 4: unreadable line; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6634874,
+                  "line": 4
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "e54a542e755b4454a3a091537e579b01",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced (line 4: unreadable line); not replayed -- inspect, clear_journal_fence(), re-issue if still wanted"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 4,
+                    "why": "unreadable line"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "d7ac14b6d9b4e989bed656bc34d8d1b2c7687b86b176eb390033723e2c45990b"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-suffix_append.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "corrupt",
+                  "error": "line 4: unreadable line; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6647034,
+                  "line": 4
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "e54a542e755b4454a3a091537e579b01",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "journal fenced (line 4: unreadable line); not replayed -- inspect, clear_journal_fence(), re-issue if still wanted"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 4,
+                    "why": "unreadable line"
+                  }
+                ],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "d7ac14b6d9b4e989bed656bc34d8d1b2c7687b86b176eb390033723e2c45990b"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "mode": "unchanged",
+        "result": true,
+        "before": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-unchanged.jsonl",
+              "durable": true,
+              "journal_id": "f2c8165e0f674a79a8679c919270c816",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "962c9931f0214cf9286b45775d8c2fbbfe55cf3c8fea9dacae40d71c19193d61"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "dc33bb40b71a461e81c905ca2e1e9fc9",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "after": {
+          "view": {
+            "open": [
+              "j"
+            ],
+            "hold": {
+              "a1:q": "ownerless_linked"
+            },
+            "owner": {
+              "a1:p": "i"
+            },
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": false,
+                "closed": [
+                  "i"
+                ]
+              }
+            ],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ],
+              "a1:q": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": [],
+              "a1:q": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-unchanged.jsonl",
+              "durable": true,
+              "journal_id": "f2c8165e0f674a79a8679c919270c816",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 8,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1026,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 8,
+            "digest": "962c9931f0214cf9286b45775d8c2fbbfe55cf3c8fea9dacae40d71c19193d61"
+          },
+          "last_result": {
+            "status": "applied",
+            "applied": true,
+            "durable": true,
+            "op_id": "dc33bb40b71a461e81c905ca2e1e9fc9",
+            "detail": "pending and commit records fsync'd"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "restart": [
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-unchanged.jsonl",
+                "durable": true,
+                "journal_id": "f2c8165e0f674a79a8679c919270c816",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "962c9931f0214cf9286b45775d8c2fbbfe55cf3c8fea9dacae40d71c19193d61"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/runtime7701-unchanged.jsonl",
+                "durable": true,
+                "journal_id": "f2c8165e0f674a79a8679c919270c816",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "962c9931f0214cf9286b45775d8c2fbbfe55cf3c8fea9dacae40d71c19193d61"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "passed": true
+  },
+  "startup_identity": {
+    "cases": [
+      {
+        "mode": "journal_missing_id_present",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "identity",
+                "error": "journal is missing but the identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl.id names journal 84f698aae5dd4cb2a04e6ab801f1bde3: the journal was removed, or its creation was interrupted after the anchor was written; no journaled rebind is replayed",
+                "found_at_startup": true,
+                "ts": 1791515386.677266
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "ba5908d1fc3cbe107a0164d464f6f415bc9cc3ca2527117bffa3ca3745773952"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is missing but the identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl.id names journal 84f698aae5dd4cb2a04e6ab801f1bde3: the journal was removed, or its creation was interrupted after the anchor was written; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6779757
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "ba5908d1fc3cbe107a0164d464f6f415bc9cc3ca2527117bffa3ca3745773952"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is missing but the identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl.id names journal 84f698aae5dd4cb2a04e6ab801f1bde3: the journal was removed, or its creation was interrupted after the anchor was written; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6785386
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "ba5908d1fc3cbe107a0164d464f6f415bc9cc3ca2527117bffa3ca3745773952"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ],
+        "recovered": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-journal_missing_id_present.jsonl",
+              "durable": true,
+              "journal_id": "9f859a336a9344e29e5e2f2a876f3eae",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 2,
+              "bytes": 857,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "ba5908d1fc3cbe107a0164d464f6f415bc9cc3ca2527117bffa3ca3745773952"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      },
+      {
+        "mode": "id_missing_committed_journal",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl",
+              "durable": true,
+              "journal_id": "9965238a6c4543b8b2fe338f15f148ad",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "identity",
+                "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                "found_at_startup": true,
+                "ts": 1791515386.688804
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [
+                {
+                  "op_id": "919bc4a23192484aac02e9eef98db062",
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "seq": 4,
+                  "why": "journal fenced: identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; not replayed"
+                }
+              ],
+              "unapplied_total": 1,
+              "unapplied_omitted": 0,
+              "records": 3,
+              "bytes": 1024,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "a802de6075d35784e3a57534f77718efd4fa78fd72e162aff7672487c317dbda"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl",
+                "durable": true,
+                "journal_id": "9965238a6c4543b8b2fe338f15f148ad",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.6898077
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "919bc4a23192484aac02e9eef98db062",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a802de6075d35784e3a57534f77718efd4fa78fd72e162aff7672487c317dbda"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl",
+                "durable": true,
+                "journal_id": "9965238a6c4543b8b2fe338f15f148ad",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.690661
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "919bc4a23192484aac02e9eef98db062",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 4,
+                    "why": "journal fenced: identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl.id is missing for journal 9965238a6c4543b8b2fe338f15f148ad (3 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a802de6075d35784e3a57534f77718efd4fa78fd72e162aff7672487c317dbda"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ],
+        "recovered": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_committed_journal.jsonl",
+              "durable": true,
+              "journal_id": "7c6c33ed78ab45d6910463a947d10f15",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 2,
+              "bytes": 1042,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "a802de6075d35784e3a57534f77718efd4fa78fd72e162aff7672487c317dbda"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      },
+      {
+        "mode": "id_missing_header_only",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl",
+              "durable": true,
+              "journal_id": "2e3015bd07784cb8af02908fab265a2a",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "identity",
+                "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl.id is missing for journal 2e3015bd07784cb8af02908fab265a2a (1 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                "found_at_startup": true,
+                "ts": 1791515386.7017066
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 1,
+              "bytes": 201,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "507bc6458335963d1f6c3a268f781fbd103ddbdc2e45dcf05823655691f49818"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl",
+                "durable": true,
+                "journal_id": "2e3015bd07784cb8af02908fab265a2a",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl.id is missing for journal 2e3015bd07784cb8af02908fab265a2a (1 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7025614
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "507bc6458335963d1f6c3a268f781fbd103ddbdc2e45dcf05823655691f49818"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl",
+                "durable": true,
+                "journal_id": "2e3015bd07784cb8af02908fab265a2a",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl.id is missing for journal 2e3015bd07784cb8af02908fab265a2a (1 record(s)): the anchor is always written before its journal, so it was removed or this journal does not belong here; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7032297
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "507bc6458335963d1f6c3a268f781fbd103ddbdc2e45dcf05823655691f49818"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ],
+        "recovered": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-id_missing_header_only.jsonl",
+              "durable": true,
+              "journal_id": "b2d1e1b76002477f82982c716af3d630",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 2,
+              "bytes": 1030,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "507bc6458335963d1f6c3a268f781fbd103ddbdc2e45dcf05823655691f49818"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      },
+      {
+        "mode": "empty_journal_id_present",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "identity",
+                "error": "journal is an empty file (identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl.id names journal 8403f7d687784b47bdeb561f58efec68): this version never leaves an empty journal; no journaled rebind is replayed",
+                "found_at_startup": true,
+                "ts": 1791515386.7125227
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "78c844441cfc3bd108df9ac734f3a3a813926b6de7bdf8d611723b0be8ec2aa0"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is an empty file (identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl.id names journal 8403f7d687784b47bdeb561f58efec68): this version never leaves an empty journal; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7133284
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "78c844441cfc3bd108df9ac734f3a3a813926b6de7bdf8d611723b0be8ec2aa0"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is an empty file (identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl.id names journal 8403f7d687784b47bdeb561f58efec68): this version never leaves an empty journal; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7139492
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "78c844441cfc3bd108df9ac734f3a3a813926b6de7bdf8d611723b0be8ec2aa0"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ],
+        "recovered": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-empty_journal_id_present.jsonl",
+              "durable": true,
+              "journal_id": "54cb25a8a96e4ce89c0acef8b2a9422d",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 2,
+              "bytes": 944,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "78c844441cfc3bd108df9ac734f3a3a813926b6de7bdf8d611723b0be8ec2aa0"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      },
+      {
+        "mode": "both_missing",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-both_missing.jsonl",
+              "durable": true,
+              "journal_id": "817830134c0540258fa8115fa320e072",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 1,
+              "bytes": 201,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "62ad7f23bb96c83bc39b87ef04abffcd0426c2337a546802d261d6b7c7d24798"
+          },
+          "last_result": null,
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": [
+                "i"
+              ]
+            }
+          ]
+        },
+        "result": {
+          "status": "applied",
+          "applied": true,
+          "durable": true,
+          "op_id": "991470135e5c4ae3b042c2c559f73a42",
+          "detail": "pending and commit records fsync'd"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-both_missing.jsonl",
+                "durable": true,
+                "journal_id": "817830134c0540258fa8115fa320e072",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "62ad7f23bb96c83bc39b87ef04abffcd0426c2337a546802d261d6b7c7d24798"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-both_missing.jsonl",
+                "durable": true,
+                "journal_id": "817830134c0540258fa8115fa320e072",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "62ad7f23bb96c83bc39b87ef04abffcd0426c2337a546802d261d6b7c7d24798"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ],
+        "recovered": null
+      },
+      {
+        "mode": "legacy_marker_header_adoption",
+        "first": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791515386.732195,
+                "artifacts": [
+                  "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "c2a1ff4fc8c079b6ac7de1c1730e2ad4837d921c39ba9c5b5cd2ab95512ef1eb"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        "result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "later": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791515386.732896,
+                  "artifacts": [
+                    "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c2a1ff4fc8c079b6ac7de1c1730e2ad4837d921c39ba9c5b5cd2ab95512ef1eb"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7334723,
+                  "artifacts": [
+                    "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl.fence"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c2a1ff4fc8c079b6ac7de1c1730e2ad4837d921c39ba9c5b5cd2ab95512ef1eb"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ],
+        "recovered": {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/startup7708-legacy_marker_header_adoption.jsonl",
+              "durable": true,
+              "journal_id": "5b33e2b8fcd64f80b79a32a4bf44ccb5",
+              "volatile_rebinds_allowed": true,
+              "healthy": true,
+              "fence": null,
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 2,
+              "bytes": 1138,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "c2a1ff4fc8c079b6ac7de1c1730e2ad4837d921c39ba9c5b5cd2ab95512ef1eb"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      }
+    ],
+    "passed": true
+  },
+  "clean_prefixes": {
+    "cases": [
+      {
+        "records": 0,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-0.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is an empty file (identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-0.jsonl.id names journal dcb70f902dc847ec8e10cfb3bbb96b1f): this version never leaves an empty journal; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7491312
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-0.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "identity",
+                  "error": "journal is an empty file (identity anchor /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-0.jsonl.id names journal dcb70f902dc847ec8e10cfb3bbb96b1f): this version never leaves an empty journal; no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791515386.7502992
+                },
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "records": 1,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-1.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 199,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-1.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 199,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "records": 2,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-2.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "09777c8f8ee4430c997a2f715ae4efd3",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "no commit record: the rebind was refused or its write did not complete; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 2,
+                "bytes": 681,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i",
+                "j"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked",
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-2.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "09777c8f8ee4430c997a2f715ae4efd3",
+                    "agent_id": "a1",
+                    "plan_id": "p",
+                    "incident_id": "i",
+                    "actor": "operator-original",
+                    "reason": "case-proof",
+                    "seq": 8,
+                    "why": "no commit record: the rebind was refused or its write did not complete; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 2,
+                "bytes": 681,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "records": 3,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-3.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-3.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "records": 4,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-4.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "0be795697bf84cd0812cf182d8fe5f63",
+                    "agent_id": "a1",
+                    "plan_id": "q",
+                    "incident_id": "j",
+                    "actor": "operator-original",
+                    "reason": "second-proof",
+                    "seq": 8,
+                    "why": "no commit record: the rebind was refused or its write did not complete; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 4,
+                "bytes": 1508,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [
+                "j"
+              ],
+              "hold": {
+                "a1:q": "ownerless_linked"
+              },
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-4.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [
+                  {
+                    "op_id": "0be795697bf84cd0812cf182d8fe5f63",
+                    "agent_id": "a1",
+                    "plan_id": "q",
+                    "incident_id": "j",
+                    "actor": "operator-original",
+                    "reason": "second-proof",
+                    "seq": 8,
+                    "why": "no commit record: the rebind was refused or its write did not complete; not replayed"
+                  }
+                ],
+                "unapplied_total": 1,
+                "unapplied_omitted": 0,
+                "records": 4,
+                "bytes": 1508,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "records": 5,
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i",
+                "a1:q": "j"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                },
+                {
+                  "agent_id": "a1",
+                  "plan_id": "q",
+                  "incident_id": "j",
+                  "actor": "operator-original",
+                  "reason": "second-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "j"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-5.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 5,
+                "bytes": 1851,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              },
+              {
+                "agent_id": "a1",
+                "plan_id": "q",
+                "incident_id": "j",
+                "actor": "operator-original",
+                "reason": "second-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "j"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i",
+                "a1:q": "j"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                },
+                {
+                  "agent_id": "a1",
+                  "plan_id": "q",
+                  "incident_id": "j",
+                  "actor": "operator-original",
+                  "reason": "second-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "j"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ],
+                "a1:q": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": [],
+                "a1:q": []
+              },
+              "journal_status": {
+                "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/prefix7701-5.jsonl",
+                "durable": true,
+                "journal_id": "dcb70f902dc847ec8e10cfb3bbb96b1f",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 8,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 5,
+                "bytes": 1851,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "plans_refused_cap": 0
+              },
+              "event_seq": 8,
+              "digest": "4b77b697eaa6f2eac86f575a0317994da66d41bb0b87441772cd484bf97ffcc1"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              },
+              {
+                "agent_id": "a1",
+                "plan_id": "q",
+                "incident_id": "j",
+                "actor": "operator-original",
+                "reason": "second-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "j"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "passed": true
+  },
+  "legacy4": {
+    "source": "/tmp/hive-astra-7708-source/experiments/20261008-astra-7694/journal-followup7694/commit-never-written.jsonl",
+    "sha256": "81a1519eef5aedd1afe581a402202140d814a616853f66f1d988dadedda2c6eb",
+    "before": {
+      "view": {
+        "open": [
+          "i"
+        ],
+        "hold": {
+          "a1:p": "ownerless_linked"
+        },
+        "owner": {},
+        "audit": [],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/legacy4-authentic.jsonl",
+          "durable": true,
+          "journal_id": "",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "legacy",
+            "error": "pre-v5 rebind journal artifact(s) present: /tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/legacy4-authentic.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+            "found_at_startup": true,
+            "ts": 1791515386.764908,
+            "artifacts": [
+              "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/legacy4-authentic.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending')"
+            ]
+          },
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 0,
+          "bytes": 0,
+          "corrupt_records": [
+            {
+              "line": 1,
+              "why": "legacy journal format v4 (op 'rebind_pending')"
+            }
+          ],
+          "fence_clearances": [],
+          "plans_refused_cap": 0
+        },
+        "event_seq": 4,
+        "digest": "a2fa140f16d89e987a3e94fbbc06c6a1a68199764c44fc528749e934cb9a9718"
+      },
+      "last_result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": false,
+          "closed": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "after": {
+      "view": {
+        "open": [
+          "i"
+        ],
+        "hold": {
+          "a1:p": "ownerless_linked"
+        },
+        "owner": {},
+        "audit": [],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7708/20261008-astra-7708/journal-followup7694/legacy4-authentic.jsonl",
+          "durable": true,
+          "journal_id": "d3b604e3bf5845d38d700371ec4b0444",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "dc009e0aa6724c18a24f9c39cdefb6d5",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "replayed event stream differs from the one the rebind was made on"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 4,
+          "bytes": 1957,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "plans_refused_cap": 0
+        },
+        "event_seq": 4,
+        "digest": "22e3dbea759cf2664da1356e1897088edcd2ec99c7e9a67090e9a41eedf324ac"
+      },
+      "last_result": null,
+      "audit": []
+    },
+    "passed": true
+  }
+}

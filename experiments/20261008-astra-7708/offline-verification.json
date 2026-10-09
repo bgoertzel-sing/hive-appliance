@@ -1,0 +1,9 @@
+{
+  "guard": "\"\"\"Deny external Python socket connects during isolated review tests.\"\"\"\nimport ipaddress\nimport socket\n\n_connect = socket.socket.connect\n_connect_ex = socket.socket.connect_ex\n\ndef permitted(address):\n    if isinstance(address, str):\n        return True\n    host = address[0]\n    if host == 'localhost':\n        return True\n    try:\n        return ipaddress.ip_address(host).is_loopback\n    except ValueError:\n        return False\n\ndef connect(self, address):\n    if not permitted(address):\n        raise OSError('External network disabled for review7195')\n    return _connect(self, address)\n\ndef connect_ex(self, address):\n    if not permitted(address):\n        return 101\n    return _connect_ex(self, address)\n\nsocket.socket.connect = connect\nsocket.socket.connect_ex = connect_ex\n",
+  "limitations": "Python socket guard, not OS network namespace; git fetch/push are authorized publication network operations. No paid or remote compute.",
+  "wheels": {
+    "packaging-26.0-py3-none-any.whl": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+    "wheel-0.46.3-py3-none-any.whl": "4b399d56c9d9338230118d705d9737a2a468ccca63d5e813e2a4fc7815d8bc4d",
+    "setuptools-82.0.1-py3-none-any.whl": "a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb"
+  }
+}

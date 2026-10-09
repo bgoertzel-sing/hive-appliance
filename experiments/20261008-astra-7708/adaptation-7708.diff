@@ -1,0 +1,99 @@
+--- 7701/followup7694.py
++++ 7708/followup7694.py
+@@ -290,7 +290,7 @@
+  rows=[]
+  for mode in ['invalid_utf8','invalid_json','json_array','empty_object','edited_op_id','missing_entry','valid_nonlast','legacy_v1']:
+   p,s,h=fresh('marker-'+mode,two());assert hb(h) and bindq(h);fp=Path(str(p)+'.fence');r=records(p)[1]
+-  vals={'invalid_utf8':b'\xff','invalid_json':b'{oops','json_array':b'[]','empty_object':b'{}','edited_op_id':json.dumps(dict(v=2,op_id='changed-id',entry=r,marker_hash='bad')).encode(),'missing_entry':b'{"v":2,"op_id":"changed-id"}','valid_nonlast':json.dumps(dict(v=2,op_id=r['op_id'],entry=r)).encode(),'legacy_v1':json.dumps(dict(v=1,op_id=r['op_id'],entry=r)).encode()};fp.write_bytes(vals[mode]);n=hfeed(hnew(p),s);assert not n._plan_owner and n.journal_status()['fence']['kind']=='legacy_marker';assert not hb(n);assert n.clear_journal_fence('reviewer','inspect old marker');assert not fp.exists()
++  vals={'invalid_utf8':b'\xff','invalid_json':b'{oops','json_array':b'[]','empty_object':b'{}','edited_op_id':json.dumps(dict(v=2,op_id='changed-id',entry=r,marker_hash='bad')).encode(),'missing_entry':b'{"v":2,"op_id":"changed-id"}','valid_nonlast':json.dumps(dict(v=2,op_id=r['op_id'],entry=r)).encode(),'legacy_v1':json.dumps(dict(v=1,op_id=r['op_id'],entry=r)).encode()};fp.write_bytes(vals[mode]);n=hfeed(hnew(p),s);assert not n._plan_owner and n.journal_status()['fence']['kind']=='legacy';assert not hb(n);assert n.clear_journal_fence('reviewer','inspect old marker');assert not fp.exists()
+   for x in restarts(p,s):assert not x._plan_owner and x.journal_status()['healthy']
+   rows.append(dict(mode=mode,cleared=v(n)))
+  row.update(cases=rows,interpretation='Presence alone fences all, so old marker hash/trust narrowing no longer applicable')
+--- 7701/focused7701.py
++++ 7708/focused7701.py
+@@ -43,30 +43,24 @@
+ class Crash(BaseException):pass
+ def startup(row):
+  rows=[]
+- # Stop exactly between durable journal creation and anchor creation.
+- p=T/'create-anchor-crash.jsonl'
+- with patch.object(HiveReducer,'_write_anchor',side_effect=Crash('before anchor')):
+-  try:hnew(p)
+-  except Crash:pass
+-  else:raise AssertionError('not interrupted')
+- assert p.exists() and not anchor(p).exists() and len(records(p))==1
+- h=hfeed(hnew(p),history());assert h.journal_status()['healthy'] and anchor(p).exists()
+- r=hb(h);assert r and r.durable
+- rows.append(dict(mode='crash_between_journal_and_anchor',restart=snapshot(h),returned=r.as_dict(),verdict='OPEN Medium explicit crash-fencing requirement: silently adopts header-only journal and permits durable rebind'))
+  for mode in ['journal_missing_id_present','id_missing_committed_journal','id_missing_header_only','empty_journal_id_present','both_missing','legacy_marker_header_adoption']:
+-  p,s,h=fresh('startup7701-'+mode)
++  p,s,h=fresh('startup7708-'+mode)
+   if mode=='id_missing_committed_journal':assert hb(h)
+   if mode in ['journal_missing_id_present','both_missing']:p.unlink()
+   if mode in ['id_missing_committed_journal','id_missing_header_only','both_missing','legacy_marker_header_adoption']:anchor(p).unlink()
+   if mode=='empty_journal_id_present':p.write_bytes(b'')
+   if mode=='legacy_marker_header_adoption':Path(str(p)+'.fence').write_bytes(b'legacy fence')
+-  z=hfeed(hnew(p),s);first=snapshot(z)
+-  expected=mode in ['id_missing_header_only','both_missing','legacy_marker_header_adoption']
++  z=hfeed(hnew(p),s);first=snapshot(z);expected=mode=='both_missing'
+   assert z.journal_status()['healthy']==expected
+-  r=hb(z)
+-  assert bool(r)==expected
++  r=hb(z);assert bool(r)==expected
+   later=restarts(p,s)
+-  rows.append(dict(mode=mode,first=first,result=r.as_dict(),later=[snapshot(x) for x in later]))
++  for n in later:assert n.journal_status()['healthy']==expected
++  recovered=None
++  if not expected:
++   assert z.clear_journal_fence('reviewer','inspect interrupted creation')
++   n=hfeed(hnew(p),s);assert n.journal_status()['healthy'] and not n._plan_owner
++   recovered=snapshot(n)
++  rows.append(dict(mode=mode,first=first,result=r.as_dict(),later=[snapshot(x) for x in later],recovered=recovered))
+  row['cases']=rows
+ def prefixes(row):
+  p,s,h=fresh('prefix7701-base',two());assert hb(h) and bindq(h);lines=p.read_bytes().splitlines(keepends=True);a=anchor(p).read_bytes();rows=[]
+--- 7701/clearance7701.py
++++ 7708/clearance7701.py
+@@ -16,6 +16,8 @@
+  with patch.object(os,'write',refuse):assert bindq(h).status=='refused'
+  assert len(records(p))==4
+  h._set_fence('review_fault','inspect pending-only suffix')
++ 
++ for suffix in ['.fence','.fence.tmp']:Path(str(p)+suffix).write_bytes(b'legacy marker retained for crash matrix')
+  old=p.read_bytes();oldid=anchor(p).read_bytes();oldowner=copy.deepcopy(h._plan_owner);trace=[];triggered=False
+  real={k:getattr(os,k) for k in ['open','write','fsync','replace','unlink']}
+  def wrapper(kind):
+--- 7701/marker7701.py
++++ 7708/marker7701.py
+@@ -5,20 +5,22 @@
+ ns={'__file__':str(E/'focused7701.py'),'__name__':'defs'};src=(E/'focused7701.py').read_text();exec(compile(src[:src.index('\nout={}\n')],str(E/'focused7701.py'),'exec'),ns)
+ for k in ['hnew','hfeed','history','snapshot','anchor','hb']:globals()[k]=ns[k]
+ T=ns['T'];rows=[]
+-for mode in ['no_journal_no_anchor','empty_journal_no_anchor','header_no_anchor','header_with_anchor']:
+- p=T/('marker7701-'+mode+'.jsonl')
++for mode in [m+s for m in ['no_journal_no_anchor','empty_journal_no_anchor','header_no_anchor','header_with_anchor'] for s in ['.fence','.fence.tmp']]:
++ suffix='.fence.tmp' if mode.endswith('.fence.tmp') else '.fence';mode=mode[:-len(suffix)];tag=mode+suffix
++ p=T/('marker7708-'+tag+'.jsonl')
+  if mode.startswith('header'):
+   hnew(p)
+   if mode=='header_no_anchor':anchor(p).unlink()
+  elif mode=='empty_journal_no_anchor':p.write_bytes(b'')
+- marker=Path(str(p)+'.fence');marker.write_bytes(b'legacy unresolved write fence')
+- h=hfeed(hnew(p),history());before=snapshot(h);r=hb(h)
+- bypass=mode!='header_with_anchor'
++ marker=Path(str(p)+suffix);marker.write_bytes(b'legacy unresolved write fence')
++ disk={str(x):x.read_bytes() for x in p.parent.glob(p.name+'*')};h=hfeed(hnew(p),history());before=snapshot(h);r=hb(h)
++ bypass=False
+  assert h.journal_status()['healthy']==bypass and bool(r)==bypass
+  if bypass:assert r.status=='applied' and r.durable is True
+  assert marker.exists()
+  later=[hfeed(hnew(p),history()) for _ in range(2)]
+- for z in later:assert not z.journal_status()['healthy'] and z.journal_status()['fence']['kind']=='legacy_marker' and not z._plan_owner
+- rows.append(dict(mode=mode,bypass=bypass,before=before,result=r.as_dict(),live=snapshot(h),restarts=[snapshot(z) for z in later]))
+-(E/'marker7701.json').write_text(json.dumps(dict(cases=rows,verdict='OPEN Medium F-legacy-marker-startup-bypass: creation/adoption early return skips extant legacy fence; durable APPLIED live then two restarts fence/hold without any post-return disk edit.'),indent=2,default=str)+'\n')
+-print('three bypasses and matched existing-anchor fence control reproduced')
++ for z in later:assert not z.journal_status()['healthy'] and z.journal_status()['fence']['kind']=='legacy' and not z._plan_owner
++ assert disk=={str(x):x.read_bytes() for x in p.parent.glob(p.name+'*')}
++ rows.append(dict(suffix=suffix,mode=mode,bypass=bypass,before=before,result=r.as_dict(),live=snapshot(h),restarts=[snapshot(z) for z in later]))
++(E/'marker7701.json').write_text(json.dumps(dict(cases=rows,verdict='CLOSED: eight variants fence before any creation; unchanged bytes over two restarts.'),indent=2,default=str)+'\n')
++print('eight marker variants fenced; no disk changes')

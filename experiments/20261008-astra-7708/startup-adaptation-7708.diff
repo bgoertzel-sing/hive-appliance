@@ -1,0 +1,26 @@
+--- initial/startup7701.py
++++ corrected/startup7708.py
+@@ -8,7 +8,7 @@
+ for k in ['hnew','hfeed','history','snapshot','anchor','Crash','fpath','hb']:globals()[k]=ns[k]
+ T=ns['T']
+ def case(name,target=None,side='before',error=Crash):
+- p=T/('initial7701-'+name+'.jsonl');real={k:getattr(os,k) for k in ['open','write','fsync','replace']};trace=[];triggered=False;caught=None
++ stream=history();p=T/('initial7708-'+name+'.jsonl');real={k:getattr(os,k) for k in ['open','write','fsync','replace']};trace=[];triggered=False;caught=None
+  def wrap(kind):
+   def call(*a,**kw):
+    nonlocal triggered
+@@ -29,11 +29,11 @@
+  if target is not None:assert triggered
+  disk_before=dict(journal_exists=p.exists(),anchor_exists=anchor(p).exists(),journal=p.read_text() if p.exists() else None,anchor=anchor(p).read_text() if anchor(p).exists() else None)
+  if h is not None and target is not None:assert not h.journal_status()['healthy']
+- n=hfeed(hnew(p),history());held_before=snapshot(n);r=hb(n)
+- return dict(name=name,target=target,side=side,error_type=error.__name__,caught=caught,trace=trace,interrupted_live=snapshot(h) if h else None,before_restart=disk_before,restart=held_before,rebind=r.as_dict(),second_restart=snapshot(hfeed(hnew(p),history())))
++ n=hfeed(hnew(p),stream);held_before=snapshot(n);r=hb(n)
++ return dict(name=name,target=target,side=side,error_type=error.__name__,caught=caught,trace=trace,interrupted_live=snapshot(h) if h else None,before_restart=disk_before,restart=held_before,rebind=r.as_dict(),second_restart=snapshot(hfeed(hnew(p),stream)))
+ base=case('success');rows=[base]
+ for t in base['trace']:
+  for side in ['before','after']:
+   for error in [Crash,OSError]:rows.append(case(str(t['index'])+'-'+side+'-'+error.__name__,t['index'],side,error))
+-(E/'startup7701.json').write_text(json.dumps(dict(operations=len(base['trace']),injections=len(rows)-1,cases=rows,scope='OS/syscall simulation; creation retry/adoption is observed, NOT claimed to meet required persistent-fence gate.'),indent=2,default=str)+'\n')
++(E/'startup7708.json').write_text(json.dumps(dict(operations=len(base['trace']),injections=len(rows)-1,cases=rows,scope='OS/syscall simulation; creation retry/adoption is observed, NOT claimed to meet required persistent-fence gate.'),indent=2,default=str)+'\n')
+ print(json.dumps(dict(operations=len(base['trace']),injections=len(rows)-1)))
