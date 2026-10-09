@@ -1,0 +1,35 @@
+{
+  "scope": "Interpretation overlay, not changes to raw execution results",
+  "notes": [
+    {
+      "artifact": "followup7694.json.v5_fault_matrix.verdict",
+      "inherited_text": "No False-return replay in 24 v4 fault cases; commit rollback uncertainty returns True ...",
+      "current_interpretation": "Obsolete inherited verdict string. Actual v5 returned values are structured dicts. Refused never replays; uncertain is falsy, applied in memory and may replay or hold. All 24 assertions pass with explicit status-based expectations."
+    },
+    {
+      "artifact": "followup7694.json.native_tails_order_edits and crash/marker text",
+      "current_interpretation": "v4 labels are inherited descriptions; executed JOURNAL_VERSION is 5 and adaptation preserves header and updates record offsets."
+    },
+    {
+      "artifact": "review7694-summary.json; followup7694-summary.json",
+      "current_interpretation": "Initial failures retained unchanged. Completion evidence is retained-retry7701.json for six primary groups and legacy-final7701.json for default/legacy. Do not treat initial summaries as final combined result."
+    }
+  ],
+  "findings": {
+    "closed_medium": [
+      "F-applied-without-durable-commit",
+      "F-journal-rollback-anchor"
+    ],
+    "closed_low": [
+      "F-runtime-integrity-overclaim"
+    ],
+    "open_medium": [
+      "F-startup-identity-adoption",
+      "F-legacy-marker-startup-bypass"
+    ],
+    "open_low": [
+      "F-joint-rollback-doc-scope"
+    ]
+  },
+  "gate": "NOT APPROVED"
+}

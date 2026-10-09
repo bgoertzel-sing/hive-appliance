@@ -1,0 +1,221 @@
+{
+  "uncertain_result": {
+    "status": "uncertain",
+    "applied": true,
+    "durable": null,
+    "op_id": "8ddd7863977540e6beccfa2c61b7dfe8",
+    "detail": "applied in memory; commit record durability unknown (zero-byte commit; rollback failed: rollback unavailable); journal fenced; after a restart it is replayed or the plan is held again"
+  },
+  "before": {
+    "view": {
+      "open": [],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": false,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-followup7694/observable7701.jsonl",
+        "durable": true,
+        "journal_id": "950932323b2b4c008d241ed1aa57a006",
+        "volatile_rebinds_allowed": true,
+        "healthy": false,
+        "fence": {
+          "kind": "commit_uncertain",
+          "error": "rebind a1:p -> i APPLIED but its commit record may not be durable (zero-byte commit; rollback failed: rollback unavailable): after a restart it is either replayed or the plan is held again",
+          "found_at_startup": false,
+          "ts": 1791510426.5269947,
+          "op_id": "8ddd7863977540e6beccfa2c61b7dfe8",
+          "applied": true,
+          "durable": null
+        },
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 2,
+        "bytes": 682,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 4,
+      "digest": "048454c1293d64a077b399cc278e983bb84f018fea6974489904315a1778afb5"
+    },
+    "last_result": {
+      "status": "uncertain",
+      "applied": true,
+      "durable": null,
+      "op_id": "8ddd7863977540e6beccfa2c61b7dfe8",
+      "detail": "applied in memory; commit record durability unknown (zero-byte commit; rollback failed: rollback unavailable); journal fenced; after a restart it is replayed or the plan is held again"
+    },
+    "audit": [
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "i",
+        "actor": "operator-original",
+        "reason": "case-proof",
+        "candidate": true,
+        "hold_reason": "ownerless_linked",
+        "pending_before": 0,
+        "held_receipt_ids": [],
+        "foreign_steps_discarded": [],
+        "replayed": false,
+        "closed": [
+          "i"
+        ]
+      }
+    ]
+  },
+  "appliance_status": {
+    "running": false,
+    "tick_count": 0,
+    "total_events": 0,
+    "total_incidents": 0,
+    "agents": [],
+    "dashboard": {
+      "hive_health": "unknown",
+      "agent_count": 0,
+      "healthy_count": 0,
+      "degraded_count": 0,
+      "failed_count": 0,
+      "agents": {},
+      "open_incidents": [],
+      "open_incident_count": 0,
+      "resolved_incident_count": 0,
+      "resource_alerts": [],
+      "resources": {
+        "disk_usage": 0.0,
+        "memory_usage": 0.0,
+        "cpu_total": 0.0
+      },
+      "last_updated": 1791510426.5271823
+    },
+    "rebind_journal_healthy": false
+  },
+  "after_later_refusal": {
+    "view": {
+      "open": [],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": false,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-followup7694/observable7701.jsonl",
+        "durable": true,
+        "journal_id": "950932323b2b4c008d241ed1aa57a006",
+        "volatile_rebinds_allowed": true,
+        "healthy": false,
+        "fence": {
+          "kind": "commit_uncertain",
+          "error": "rebind a1:p -> i APPLIED but its commit record may not be durable (zero-byte commit; rollback failed: rollback unavailable): after a restart it is either replayed or the plan is held again",
+          "found_at_startup": false,
+          "ts": 1791510426.5269947,
+          "op_id": "8ddd7863977540e6beccfa2c61b7dfe8",
+          "applied": true,
+          "durable": null
+        },
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 2,
+        "bytes": 682,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 4,
+      "digest": "048454c1293d64a077b399cc278e983bb84f018fea6974489904315a1778afb5"
+    },
+    "last_result": {
+      "status": "refused",
+      "applied": false,
+      "durable": false,
+      "op_id": "",
+      "detail": "refused; see log and journal_status()"
+    },
+    "audit": [
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "i",
+        "actor": "operator-original",
+        "reason": "case-proof",
+        "candidate": true,
+        "hold_reason": "ownerless_linked",
+        "pending_before": 0,
+        "held_receipt_ids": [],
+        "foreign_steps_discarded": [],
+        "replayed": false,
+        "closed": [
+          "i"
+        ]
+      }
+    ]
+  },
+  "volatile_result": {
+    "status": "applied",
+    "applied": true,
+    "durable": false,
+    "op_id": "",
+    "detail": "volatile_rebinds: not journaled, lost on restart"
+  },
+  "interpretation": "Structured API/fence distinguish uncertainty. Appliance summary only says unhealthy; owner_rebinds audit describes memory effects, lacks durability/status/op_id. last_rebind_result is transient and can be overwritten; fence retains uncertainty until clearance."
+}

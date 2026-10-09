@@ -1,0 +1,2531 @@
+{
+  "F_journal_content": {
+    "verdict": "CLOSED Medium exact7656 witness",
+    "original_events": [
+      {
+        "id": "evt_118db7a25ff344c6",
+        "kind": "incident",
+        "ts": 1791510170.467003,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_2d5a5db821e044f4",
+        "kind": "incident",
+        "ts": 1791510170.4670107,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_094e3fef81484c47",
+        "kind": "plan",
+        "ts": 1791510170.4670181,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e4dbf31528f54133",
+        "kind": "receipt",
+        "ts": 1791510170.4670234,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "yes",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_2562eff184474078",
+        "kind": "receipt",
+        "ts": 1791510170.4670274,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "no",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f658e761635c448c",
+        "kind": "plan",
+        "ts": 1791510170.467032,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "changed_events": [
+      {
+        "id": "evt_118db7a25ff344c6",
+        "kind": "incident",
+        "ts": 1791510170.467003,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_2d5a5db821e044f4",
+        "kind": "incident",
+        "ts": 1791510170.4670107,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "j",
+          "plan_id": "p",
+          "resolved": false,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_094e3fef81484c47",
+        "kind": "plan",
+        "ts": 1791510170.4670181,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e4dbf31528f54133",
+        "kind": "receipt",
+        "ts": 1791510170.4670234,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "yes",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_2562eff184474078",
+        "kind": "receipt",
+        "ts": 1791510170.4670274,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "no",
+          "plan_id": "p",
+          "incident_id": "i",
+          "step_index": 0,
+          "verified": true
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f658e761635c448c",
+        "kind": "plan",
+        "ts": 1791510170.467032,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "changed_replay": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-7694/exact-content.jsonl",
+        "durable": true,
+        "journal_id": "fd197dd428984f36bdd655e147a3620b",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 6,
+        "pending": 0,
+        "unapplied": [
+          {
+            "op_id": "faedb4cecb3142f1a819ffc2e2eea89c",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "seq": 6,
+            "why": "replayed event stream differs from the one the rebind was made on"
+          }
+        ],
+        "unapplied_total": 1,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1024,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 6,
+      "digest": "2b854dd7188d8b7a2b8ffa8b64636c6466a319aba038f6628d4bff452cb0dad0"
+    },
+    "edited_entry_replay": {
+      "open": [
+        "i",
+        "j"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": []
+      },
+      "failed": {
+        "a1:p": [
+          0
+        ]
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-7694/exact-content.jsonl",
+        "durable": true,
+        "journal_id": "",
+        "volatile_rebinds_allowed": true,
+        "healthy": false,
+        "fence": {
+          "kind": "corrupt",
+          "error": "line 2: record hash mismatch (edited or corrupted); no journaled rebind is replayed",
+          "found_at_startup": true,
+          "ts": 1791510170.4844098,
+          "line": 2
+        },
+        "event_seq": 6,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 0,
+        "bytes": 0,
+        "corrupt_records": [
+          {
+            "line": 2,
+            "why": "record hash mismatch (edited or corrupted)"
+          }
+        ],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 6,
+      "digest": "824c4c098ca443a22dd5ae5f2420a1bdd8800379f9ac01edc484f696773f68a5"
+    },
+    "passed": true
+  },
+  "canonical_hashing": {
+    "equivalent_encoding_replay": {
+      "open": [],
+      "hold": {},
+      "owner": {
+        "a1:p": "i"
+      },
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-7694/canonical.jsonl",
+        "durable": true,
+        "journal_id": "f106efec99ec434685e5b1bf6d51c1a3",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1052,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 4,
+      "digest": "728b8ff1f991d81f80ecee23cec2db56bb8a1c0b87261dd2951e5160ac095779"
+    },
+    "edited_field_digests": {
+      "ts": "2361e6e53fd15a1a2787681c67bd8e4eccc39e513bd67ed2e74eab5ebed92e09",
+      "source": "1211fecf9cd16fc448df88c2bf9b1ed9980725fdfe080759986d19d0b484a90c",
+      "subject": "20813dd1cac81fa85880d8c977905b698942e740c7cca69fdf4e0ecb4a517048",
+      "schema_version": "bbf6b01a9b934e313024019b7c9b848e8973cc5a3037abfa7c4a7b27347610ab",
+      "severity": "ce77aed7064bba45b846f9d82e5cbd32a8a6c24178926b8313563c0a1cce7f15"
+    },
+    "unicode_scope": "JSON escaped versus literal same Unicode code points; NFC/NFD are different event content, not promised semantic normalization",
+    "json_domain": "JSON string-key payload objects; repr fallback for non-JSON mixed key objects not cross-language canonicalization",
+    "passed": true
+  },
+  "aggregate_real_10000": {
+    "verdict": "CLOSED Low tracked-plan admission",
+    "boundary": [
+      {
+        "attempted": 9999,
+        "tracked": 9999,
+        "held": {
+          "a1:p": "ownerless_linked"
+        },
+        "refused": 0
+      },
+      {
+        "attempted": 10000,
+        "tracked": 10000,
+        "held": {
+          "a1:p": "ownerless_linked"
+        },
+        "refused": 0
+      },
+      {
+        "attempted": 10001,
+        "tracked": 10000,
+        "held": {
+          "a1:p": "ownerless_linked"
+        },
+        "refused": 1
+      }
+    ],
+    "retained_plan_keys_sha256": "b1325f259829006330284db670eaf03f720c688590ee592e0d1cfe8ce441b9b7",
+    "after_existing_rebind": {
+      "tracked": 10000,
+      "open": [
+        "refused"
+      ]
+    },
+    "scope": "Caps tracked plans, not arbitrary incident/receipt counts or legacy oversized journal loading; no claim of universal memory bound",
+    "passed": true
+  },
+  "retained_unregister": {
+    "verdict": "CLOSED prior High exact witness",
+    "cases": [
+      {
+        "mode": "reducer",
+        "events": [
+          {
+            "id": "evt_e90b69a367d340e8",
+            "kind": "incident",
+            "ts": 1791510171.4358535,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a832f05de9254cc6",
+            "kind": "plan",
+            "ts": 1791510171.4358625,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_d25dde29e393482f",
+            "kind": "receipt",
+            "ts": 1791510171.4358678,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j-evidence",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "suffix": [
+          {
+            "id": "evt_2c819a457a8c46f7",
+            "kind": "incident",
+            "ts": 1791510171.435872,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "k",
+              "plan_id": "",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_d402ebda8a6f428a",
+            "kind": "plan",
+            "ts": 1791510171.4358766,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "k",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "before": {
+          "open": [
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 3,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 3,
+          "digest": "93ed4bfa293edbc5e98e194f1638883a74e69700b9839e18a932a59a37a4b4ad"
+        },
+        "after_unregister": {
+          "open": [],
+          "hold": {
+            "a1:p": "ownerless_held"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 3,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 3,
+          "digest": "93ed4bfa293edbc5e98e194f1638883a74e69700b9839e18a932a59a37a4b4ad"
+        },
+        "after_reregister": {
+          "open": [
+            "k"
+          ],
+          "hold": {
+            "a1:p": "ownerless_held"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 5,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 5,
+          "digest": "9baee8430c4764dd950570460f38758023e14268294b2cf80977287d186083f3"
+        },
+        "preview": {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "k",
+          "allowed": true,
+          "refusal": "",
+          "hold_reason": "ownerless_held",
+          "candidates": [
+            "k"
+          ],
+          "is_candidate": true,
+          "held_receipts": [],
+          "foreign_steps_discarded": [
+            0
+          ],
+          "would_close": []
+        },
+        "after_fresh_evidence": {
+          "open": [],
+          "hold": {},
+          "owner": {
+            "a1:p": "k"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "k",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_held",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [
+                0
+              ],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 7,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 7,
+          "digest": "696beeb40dd58b0a0e5f98db292d805e5a77a3ed8a5bcec30d2e49b14ffc3b5d"
+        }
+      },
+      {
+        "mode": "appliance",
+        "events": [
+          {
+            "id": "evt_794ea084641e4bb5",
+            "kind": "incident",
+            "ts": 1791510171.4371157,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_5ab14744ba2a4d71",
+            "kind": "plan",
+            "ts": 1791510171.4371216,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_f422fe527c5f44dd",
+            "kind": "receipt",
+            "ts": 1791510171.437126,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j-evidence",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "suffix": [
+          {
+            "id": "evt_d9b88ebe3cfd44f7",
+            "kind": "incident",
+            "ts": 1791510171.4371307,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "k",
+              "plan_id": "",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a734ee73180a4b40",
+            "kind": "plan",
+            "ts": 1791510171.4371355,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "k",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "before": {
+          "open": [
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 3,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 3,
+          "digest": "b4b91acf369e651c9bbbcdfdd16990ee99a62bc6a00512d054978c91345ebae7"
+        },
+        "after_unregister": {
+          "open": [],
+          "hold": {
+            "a1:p": "ownerless_held"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 3,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 3,
+          "digest": "b4b91acf369e651c9bbbcdfdd16990ee99a62bc6a00512d054978c91345ebae7"
+        },
+        "after_reregister": {
+          "open": [
+            "k"
+          ],
+          "hold": {
+            "a1:p": "ownerless_held"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 5,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 5,
+          "digest": "aaf74f50e1836400bffbfe35fc7265b7a90fbcebba98719ed03827836cde3d08"
+        },
+        "preview": {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "k",
+          "allowed": true,
+          "refusal": "",
+          "hold_reason": "ownerless_held",
+          "candidates": [
+            "k"
+          ],
+          "is_candidate": true,
+          "held_receipts": [],
+          "foreign_steps_discarded": [
+            0
+          ],
+          "would_close": []
+        },
+        "after_fresh_evidence": {
+          "open": [],
+          "hold": {},
+          "owner": {
+            "a1:p": "k"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "k",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_held",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [
+                0
+              ],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": null,
+            "durable": false,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 7,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 7,
+          "digest": "59845469e921ff1bd0a3c36dcc60fd11c654f9de590cdfb96302a886802922dd"
+        }
+      }
+    ],
+    "passed": true
+  },
+  "retained_journal_order": {
+    "verdict": "CLOSED exact three original orders; content boundary separately tested",
+    "cases": [
+      {
+        "case": "target_success_then_failure",
+        "events": [
+          {
+            "id": "evt_4bfcca177aab4a03",
+            "kind": "incident",
+            "ts": 1791510171.4456434,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_86fb7e04a2444c3c",
+            "kind": "incident",
+            "ts": 1791510171.4456475,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_09ea31c3fa7a4bc2",
+            "kind": "plan",
+            "ts": 1791510171.4456537,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_53f8188f909d4577",
+            "kind": "receipt",
+            "ts": 1791510171.4456007,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_83bbaeae34094fd6",
+            "kind": "receipt",
+            "ts": 1791510171.445608,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_e6566d0989d044cd",
+            "kind": "plan",
+            "ts": 1791510171.4456584,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "93d88824e16e4fe0ba0d4a3a0d688e75",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1025,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "d896c48ec3d5126436f8fa5b6728aa79836ea67438d6a809799ae6d844fb3499"
+        },
+        "replay": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "93d88824e16e4fe0ba0d4a3a0d688e75",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1025,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "d896c48ec3d5126436f8fa5b6728aa79836ea67438d6a809799ae6d844fb3499"
+        },
+        "identity_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "93d88824e16e4fe0ba0d4a3a0d688e75",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "68068629079c45528644ccdb4aa461fd",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1025,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "b47276357eb45788788b0bd6bd680b03202b93d8583afcdea3f218723169b118"
+        },
+        "order_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "93d88824e16e4fe0ba0d4a3a0d688e75",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "68068629079c45528644ccdb4aa461fd",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1025,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "243c91128edaf08cb968f81d0c19bcdb6caf2a23c15af9934a428c7cb218875a"
+        }
+      },
+      {
+        "case": "target_success_then_foreign_failure",
+        "events": [
+          {
+            "id": "evt_f942eb1e9a4745f7",
+            "kind": "incident",
+            "ts": 1791510171.453038,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_98b60f70f01745c8",
+            "kind": "incident",
+            "ts": 1791510171.4530435,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_29c1d0506862429a",
+            "kind": "plan",
+            "ts": 1791510171.4530494,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_a5866146bff349fd",
+            "kind": "receipt",
+            "ts": 1791510171.4456124,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "i",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_10718373ef594190",
+            "kind": "receipt",
+            "ts": 1791510171.4456167,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "j",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_b611b4407fb0488a",
+            "kind": "plan",
+            "ts": 1791510171.4530542,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [
+                0
+              ],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_foreign_failure.jsonl",
+            "durable": true,
+            "journal_id": "d386ca6b374e4d7a8837e891379260b4",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1026,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "2fba8583687cb5688a0d1ee251b6c057425109fc1faad1b87d0d2aaa882a11ef"
+        },
+        "replay": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [
+                0
+              ],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_foreign_failure.jsonl",
+            "durable": true,
+            "journal_id": "d386ca6b374e4d7a8837e891379260b4",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1026,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "2fba8583687cb5688a0d1ee251b6c057425109fc1faad1b87d0d2aaa882a11ef"
+        },
+        "identity_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_foreign_failure.jsonl",
+            "durable": true,
+            "journal_id": "d386ca6b374e4d7a8837e891379260b4",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "958da3cbad224631a7e24a3e0f9f6590",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1026,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "fb9a9769c2c78067b204cae08a023fb3dd6d5cc7d1f337875ae850493c9dd894"
+        },
+        "order_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/target_success_then_foreign_failure.jsonl",
+            "durable": true,
+            "journal_id": "d386ca6b374e4d7a8837e891379260b4",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "958da3cbad224631a7e24a3e0f9f6590",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1026,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "a170125dd93581d5f7be476c717d6903a7609c516aff1059260579d4f7668ad1"
+        }
+      },
+      {
+        "case": "plan_success_then_failure",
+        "events": [
+          {
+            "id": "evt_1a8b86f385e74f72",
+            "kind": "incident",
+            "ts": 1791510171.4593697,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "i",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_25442ce4b8a146a1",
+            "kind": "incident",
+            "ts": 1791510171.4593747,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "j",
+              "plan_id": "p",
+              "resolved": false,
+              "component": "svc",
+              "symptom": "down",
+              "severity": "critical"
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_540935ae5dae4d5d",
+            "kind": "plan",
+            "ts": 1791510171.45938,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_7e9fe6b60af44374",
+            "kind": "receipt",
+            "ts": 1791510171.4456208,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "yes",
+              "plan_id": "p",
+              "incident_id": "",
+              "step_index": 0,
+              "verified": true
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_9b53d2412b20485e",
+            "kind": "receipt",
+            "ts": 1791510171.4456246,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "no",
+              "plan_id": "p",
+              "incident_id": "",
+              "step_index": 0,
+              "verified": false
+            },
+            "severity": "info",
+            "schema_version": "1"
+          },
+          {
+            "id": "evt_640ea0605ebf4a75",
+            "kind": "plan",
+            "ts": 1791510171.4593842,
+            "source": "",
+            "subject": "",
+            "payload": {
+              "id": "p",
+              "incident_id": "i",
+              "steps": [
+                {}
+              ]
+            },
+            "severity": "info",
+            "schema_version": "1"
+          }
+        ],
+        "original": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": false,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/plan_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "b6d122c040704026ada2fdeaccb7c874",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1024,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "6e3907efa4bd531bf0781aa57b89e894f6fd042a253be337b7d42fc005581143"
+        },
+        "replay": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {},
+          "owner": {
+            "a1:p": "i"
+          },
+          "audit": [
+            {
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "candidate": true,
+              "hold_reason": "ownerless_linked",
+              "pending_before": 0,
+              "held_receipt_ids": [],
+              "foreign_steps_discarded": [],
+              "replayed": true,
+              "closed": []
+            }
+          ],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/plan_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "b6d122c040704026ada2fdeaccb7c874",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1024,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "6e3907efa4bd531bf0781aa57b89e894f6fd042a253be337b7d42fc005581143"
+        },
+        "identity_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": []
+          },
+          "failed": {
+            "a1:p": [
+              0
+            ]
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/plan_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "b6d122c040704026ada2fdeaccb7c874",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "6f971f8ce83f42c7bbb6b06ecc89006e",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1024,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "99c8cf98e82e9e40de545e11696f3908eb28f4ccb54d157600bc1e4fc2e4433f"
+        },
+        "order_mismatch": {
+          "open": [
+            "i",
+            "j"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/plan_success_then_failure.jsonl",
+            "durable": true,
+            "journal_id": "b6d122c040704026ada2fdeaccb7c874",
+            "volatile_rebinds_allowed": true,
+            "healthy": true,
+            "fence": null,
+            "event_seq": 6,
+            "pending": 0,
+            "unapplied": [
+              {
+                "op_id": "6f971f8ce83f42c7bbb6b06ecc89006e",
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "seq": 6,
+                "why": "replayed event stream differs from the one the rebind was made on"
+              }
+            ],
+            "unapplied_total": 1,
+            "unapplied_omitted": 0,
+            "records": 3,
+            "bytes": 1024,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "plans_refused_cap": 0
+          },
+          "event_seq": 6,
+          "digest": "66d5143a9b4149ac208228d0e1a8f0e20aa82bf6c6d76aafaeebafd46ec28d38"
+        }
+      }
+    ],
+    "passed": true
+  },
+  "retained_rejected_and_partial": {
+    "rejected_PLAN": {
+      "events": [
+        {
+          "id": "evt_b4b0c55f38e44439",
+          "kind": "incident",
+          "ts": 1791510171.469276,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "owned",
+            "plan_id": "",
+            "resolved": false,
+            "component": "svc",
+            "symptom": "down",
+            "severity": "critical"
+          },
+          "severity": "info",
+          "schema_version": "1"
+        },
+        {
+          "id": "evt_7f9c6cc8b3d74dc8",
+          "kind": "plan",
+          "ts": 1791510171.4692903,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "ownedp",
+            "incident_id": "owned",
+            "steps": [
+              {}
+            ]
+          },
+          "severity": "info",
+          "schema_version": "1"
+        },
+        {
+          "id": "evt_f8c793d4adb54e13",
+          "kind": "incident",
+          "ts": 1791510171.4692948,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "i",
+            "plan_id": "p",
+            "resolved": false,
+            "component": "svc",
+            "symptom": "down",
+            "severity": "critical"
+          },
+          "severity": "info",
+          "schema_version": "1"
+        },
+        {
+          "id": "evt_47aed471292446f2",
+          "kind": "plan",
+          "ts": 1791510171.4692993,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "p",
+            "incident_id": "",
+            "steps": [
+              {}
+            ]
+          },
+          "severity": "info",
+          "schema_version": "1"
+        },
+        {
+          "id": "evt_c3e1e4baa3384efd",
+          "kind": "receipt",
+          "ts": 1791510171.4693038,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "x",
+            "plan_id": "p",
+            "incident_id": "i",
+            "step_index": 0,
+            "verified": true
+          },
+          "severity": "info",
+          "schema_version": "1"
+        },
+        {
+          "id": "evt_f03281e1da98470f",
+          "kind": "plan",
+          "ts": 1791510171.469308,
+          "source": "",
+          "subject": "",
+          "payload": {
+            "id": "p",
+            "incident_id": "i",
+            "steps": [
+              {}
+            ]
+          },
+          "severity": "info",
+          "schema_version": "1"
+        }
+      ],
+      "rejected": {
+        "id": "evt_4c47c88e99ba416e",
+        "kind": "plan",
+        "ts": 1791510171.4729943,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "ownedp",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      "only_changed_field": "rejected_plan_registrations +1 (existing diagnostic exception)",
+      "stream_position_unchanged": true,
+      "restart": {
+        "open": [
+          "owned"
+        ],
+        "hold": {},
+        "owner": {
+          "a1:ownedp": "owned",
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:ownedp": [],
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:ownedp": [],
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/conflicting-plan.jsonl",
+          "durable": true,
+          "journal_id": "46751ba35e6e4d05815c91f3b9431237",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 6,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 3,
+          "bytes": 1026,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "plans_refused_cap": 0
+        },
+        "event_seq": 6,
+        "digest": "cc26aa2c5ee3475108f1e39e7114b15953a97775698390a02fa24979e601a8f6"
+      }
+    },
+    "partial_suffix": {
+      "open": [
+        "extra1",
+        "extra2",
+        "i"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {},
+      "audit": [],
+      "pending": [],
+      "verified": {
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/conflicting-plan.jsonl",
+        "durable": true,
+        "journal_id": "46751ba35e6e4d05815c91f3b9431237",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 6,
+        "pending": 0,
+        "unapplied": [
+          {
+            "op_id": "ed870a699b2d45cca3e32acf6f42e271",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "seq": 6,
+            "why": "replayed event stream differs from the one the rebind was made on"
+          }
+        ],
+        "unapplied_total": 1,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1026,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 6,
+      "digest": "d0659b9378d4a8c34e785339330a8367bf817bc8f23cdc13b606252fac22fe45"
+    },
+    "synthetic_snapshot_without_stream_metadata": {
+      "open": [
+        "i",
+        "owned"
+      ],
+      "hold": {
+        "a1:p": "ownerless_linked"
+      },
+      "owner": {
+        "a1:ownedp": "owned"
+      },
+      "audit": [],
+      "pending": [
+        {
+          "actor": "operator-original",
+          "agent_id": "a1",
+          "candidate": true,
+          "incident_id": "i",
+          "op": "rebind_pending",
+          "op_id": "ed870a699b2d45cca3e32acf6f42e271",
+          "plan_id": "p",
+          "prev": "6f32750032bcd8afc5f399d1e8a65cdc539281208d6665b96090dcae2e9d80db",
+          "reason": "case-proof",
+          "rec_hash": "b119659644c79db5ac009c1676744f09b4ee783e86fb8c178b1d5360acfca5a2",
+          "seq": 6,
+          "stream_digest": "cc26aa2c5ee3475108f1e39e7114b15953a97775698390a02fa24979e601a8f6",
+          "ts": 1791510171.4732099,
+          "v": 5
+        }
+      ],
+      "verified": {
+        "a1:ownedp": [],
+        "a1:p": [
+          0
+        ]
+      },
+      "failed": {
+        "a1:ownedp": [],
+        "a1:p": []
+      },
+      "journal_status": {
+        "path": "/tmp/hive-astra-7701/20261008-astra-7701/journal-cases/conflicting-plan.jsonl",
+        "durable": true,
+        "journal_id": "46751ba35e6e4d05815c91f3b9431237",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 0,
+        "pending": 1,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1026,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "plans_refused_cap": 0
+      },
+      "event_seq": 0,
+      "digest": ""
+    },
+    "native_snapshot_api": false,
+    "native_restore_api": false,
+    "interpretation": "No native hive reducer snapshot/restore API. Snapshot-only/partial reconstruction cannot replay authorization. Pending remains visible until position reached, then mismatch is unapplied; full original ordered replay required. Synthetic hydrate only demonstrates missing metadata, not a supported restore path.",
+    "passed": true
+  },
+  "retained_recovery_text": {
+    "authored_test_real_assertions_pass": true,
+    "empty_recovery_mutant_detected": true,
+    "passed": true
+  },
+  "retained_foreign": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7638-final.py\", line 30, in foreign\n    assert rebind(l,h)==[True,True];assert opens(l,h)==[['i','j'],['i','j']]\nAssertionError\n"
+  },
+  "retained_incidentless": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7638-final.py\", line 64, in incidentless\n    assert opens(l,h)==[['arbitrary-k'],['arbitrary-k']];pv,hv=preview(l,h,'arbitrary-k');assert pv['would_close']==hv['would_close']==['arbitrary-k'];assert rebind(l,h,'arbitrary-k')==[True,True]\nAssertionError\n"
+  },
+  "retained_hold": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7638-final.py\", line 75, in hold\n    before=view(l,h);assert rebind(l,h,'k')==[True,True];assert opens(l,h)==[[],[]];rows.append(dict(restart=restart,before=before,after=view(l,h)))\nAssertionError\n"
+  },
+  "retained_quiet_guidance": {
+    "preview": [
+      {
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "hold_reason": "ownerless_linked",
+        "refusal": "",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "effects": {
+          "credited": [],
+          "failure_recorded": [],
+          "consumed_no_effect": [],
+          "still_held": []
+        },
+        "effect_counts": {
+          "credited": 0,
+          "failure_recorded": 0,
+          "consumed_no_effect": 0,
+          "still_held": 0
+        },
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      },
+      {
+        "agent_id": "a1",
+        "plan_id": "p",
+        "incident_id": "i",
+        "allowed": true,
+        "refusal": "",
+        "hold_reason": "ownerless_linked",
+        "candidates": [
+          "i"
+        ],
+        "is_candidate": true,
+        "held_receipts": [],
+        "foreign_steps_discarded": [],
+        "would_close": [
+          "i"
+        ]
+      }
+    ],
+    "hive_INFO_records": [],
+    "recovery": "Discarded legacy evidence is not replayed; affected plan steps must be re-proven by fresh, uniquely identified receipts. The authoritative CURRENT hold list is Reducer.quarantined_plans() (reasons via quarantine_reasons()): owner_unproven (legacy migration), ownerless_linked and ownerless_held (Astra 7562/7582); owner_unproven alone is NOT the full hold list. legacy_ownerless_plans is only a capped HISTORICAL SAMPLE of plans quarantined at migration (see legacy_ownerless_total); it is not updated by rebinds and must not be used to enumerate actionable plans. A held plan stays quarantined until an operator calls rebind_plan_owner(plan_id, incident_id, actor=..., reason=...) after preview_rebind(); targets must be open and a recorded owner candidate unless allow_non_candidate=True. An ordinary PLAN does not re-establish a lost owner.",
+    "appliance_wiring": {
+      "default": null,
+      "explicit_path_forwarded": true
+    },
+    "passed": true
+  },
+  "retained_plan_only_witness": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7582.py\", line 42, in witness\n    assert rebind(l,h)==[True,True];assert opens(l,h)==[['j'],['j']];assert not l.quarantined_plans() and not h.quarantined_plans()\nAssertionError\n"
+  },
+  "retained_hold_144_schedules": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7582.py\", line 61, in schedules\n    assert opens(l,h)==[['i','j'],['i','j']];pv,hv=preview(l,h);assert pv['would_close']==hv['would_close']==['i'];assert rebind(l,h)==[True,True];assert opens(l,h)==[['j'],['j']]\nAssertionError\n"
+  },
+  "retained_refusals_pending": {
+    "passed": false,
+    "error": "AssertionError()",
+    "traceback": "Traceback (most recent call last):\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7694.py\", line 69, in <module>\n    try:fn(r);r['passed']=True\n  File \"/tmp/hive-astra-7701/20261008-astra-7701/review7582.py\", line 79, in refusals_and_pending\n    b=copy.deepcopy((vars(l),vars(h)));p=preview(l,h,target,allow);assert not p[0]['allowed'] and not p[1]['allowed'];assert rebind(l,h,target,allow)==[False,False];assert (vars(l),vars(h))==b;checks.append(p)\nAssertionError\n"
+  },
+  "retained_late_link_warnings": {
+    "warnings": [
+      {
+        "name": "controller.reducer",
+        "level": "WARNING",
+        "message": "Plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner() for p. A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "controller.reducer",
+        "level": "WARNING",
+        "message": "Plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i', 'j'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner() for p. A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i', 'j'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 has 501 incidents (cap 500); open incidents are retained past the cap."
+      },
+      {
+        "name": "hive.reducer",
+        "level": "WARNING",
+        "message": "Agent a1 has 502 incidents (cap 500); open incidents are retained past the cap."
+      }
+    ],
+    "passed": true
+  },
+  "retained_regressions": {
+    "adaptation": {
+      "source": "review7519.py",
+      "old": "assert 'authoritative CURRENT quarantine is owner_unproven' in d['recovery']",
+      "new": "assert 'authoritative CURRENT hold list is Reducer.quarantined_plans()' in d['recovery']",
+      "reason": "Deliberately corrected diagnostic text; all semantic/lifecycle assertions unchanged",
+      "extracted_sha256": "64595d40a76fb7496083349723b15f4284405e80f4feab1a201faeb7eeb29a1a"
+    },
+    "P3-ownerless": {
+      "schedules": 180,
+      "per_event_checks": 1224,
+      "exact_witness_open": [
+        "i",
+        "j"
+      ],
+      "hive_has_snapshot_api": false
+    },
+    "owned_positive": {
+      "controls": [
+        {
+          "addressing": "plan",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "plan",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "incident",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "incident",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "dual",
+          "restart": false,
+          "open": [
+            "j"
+          ]
+        },
+        {
+          "addressing": "dual",
+          "restart": true,
+          "open": [
+            "j"
+          ]
+        }
+      ]
+    },
+    "legacy_300": {
+      "stages": [
+        {
+          "rebound": 0,
+          "current": 300,
+          "historical": 256,
+          "roundtrips": 20
+        },
+        {
+          "rebound": 149,
+          "current": 151,
+          "historical": 256,
+          "roundtrips": 20
+        },
+        {
+          "rebound": 300,
+          "current": 0,
+          "historical": 256,
+          "roundtrips": 20
+        }
+      ]
+    },
+    "owned_1440": {
+      "schedules": 1440,
+      "per_event_checks": 15840
+    },
+    "foreign_owned": {
+      "controls": [
+        {
+          "late": false,
+          "local_restore": false,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": false,
+          "local_restore": true,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": true,
+          "local_restore": false,
+          "open": [
+            "i"
+          ]
+        },
+        {
+          "late": true,
+          "local_restore": true,
+          "open": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "H-oracle_mutants": {
+      "explicit_sequence": [
+        "unknown",
+        "unknown",
+        "degraded",
+        "failed",
+        "failed",
+        "failed",
+        "healthy",
+        "degraded"
+      ],
+      "mutations": [
+        {
+          "forced": "healthy",
+          "detected": "health mismatch: hive=healthy expected=degraded"
+        },
+        {
+          "forced": "degraded",
+          "detected": "health mismatch: hive=degraded expected=failed"
+        },
+        {
+          "forced": "failed",
+          "detected": "health mismatch: hive=failed expected=degraded"
+        },
+        {
+          "forced": "unknown",
+          "detected": "health mismatch: hive=unknown expected=degraded"
+        },
+        {
+          "initial_unknown": "health mismatch: hive=healthy expected=unknown"
+        }
+      ],
+      "late_incident_transitions": [
+        "degraded",
+        "healthy"
+      ]
+    },
+    "health_boundaries": {
+      "boundaries": [
+        {
+          "name": "first_resolved",
+          "health": "unknown"
+        },
+        {
+          "name": "two_resolved",
+          "health": "unknown"
+        },
+        {
+          "name": "same_event_open_close",
+          "health": "healthy"
+        },
+        {
+          "name": "resolved_then_open",
+          "health": "degraded"
+        }
+      ],
+      "poisoned_hive_health_values_independent": 4
+    },
+    "F7_mutants": {
+      "completeness": [
+        "test_single_receipt_does_not_resolve",
+        "test_partial_failure_does_not_resolve"
+      ],
+      "failure": []
+    },
+    "passed": true
+  }
+}

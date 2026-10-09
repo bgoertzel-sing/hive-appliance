@@ -1,0 +1,279 @@
+[
+  {
+    "event": {
+      "id": "evt_1e076588fe194b18",
+      "kind": "incident",
+      "ts": 1791510172.0243716,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "i",
+        "plan_id": "p",
+        "severity": "critical",
+        "component": "svc",
+        "symptom": "down",
+        "resolved": false
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i"
+    ],
+    "hive_open": [
+      "i"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791510172.024398,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {},
+      "plan_receipts": {},
+      "plan_failed_steps": {},
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "plan_step_src": {},
+      "held_ownerless": [],
+      "migration_diagnostics": {},
+      "incidents_total": 1,
+      "incidents_open": 1
+    }
+  },
+  {
+    "event": {
+      "id": "evt_4c59028f099548db",
+      "kind": "incident",
+      "ts": 1791510172.0243776,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "j",
+        "plan_id": "p",
+        "severity": "critical",
+        "component": "svc",
+        "symptom": "down",
+        "resolved": false
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791510172.024398,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791510172.0248082,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {},
+      "plan_receipts": {},
+      "plan_failed_steps": {},
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "plan_step_src": {},
+      "held_ownerless": [],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  },
+  {
+    "event": {
+      "id": "evt_c27de7a726874a9f",
+      "kind": "plan",
+      "ts": 1791510172.024385,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "p",
+        "incident_id": "",
+        "steps": [
+          {}
+        ]
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791510172.024398,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791510172.0248082,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 1
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "plan_step_src": {},
+      "held_ownerless": [
+        "p"
+      ],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  },
+  {
+    "event": {
+      "id": "evt_6372edb3a9984029",
+      "kind": "receipt",
+      "ts": 1791510172.02439,
+      "source": "",
+      "subject": "",
+      "payload": {
+        "id": "x",
+        "plan_id": "p",
+        "step_index": 0,
+        "verified": true,
+        "incident_id": ""
+      },
+      "severity": "info",
+      "schema_version": "1"
+    },
+    "local_open": [
+      "i",
+      "j"
+    ],
+    "hive_open": [
+      "i",
+      "j"
+    ],
+    "local_snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1791510172.024398,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "j",
+          "ts": 1791510172.0248082,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 1
+      },
+      "plan_receipts": {
+        "p": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "x"
+      ],
+      "plan_owner": {},
+      "pending_format": "arrival-v1",
+      "owner_unproven": [],
+      "plan_step_src": {
+        "p": {
+          "0": ""
+        }
+      },
+      "held_ownerless": [
+        "p"
+      ],
+      "migration_diagnostics": {},
+      "incidents_total": 2,
+      "incidents_open": 2
+    }
+  }
+]

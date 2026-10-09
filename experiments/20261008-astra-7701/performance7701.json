@@ -1,0 +1,142 @@
+{
+  "cases": [
+    {
+      "padding_bytes": 0,
+      "file_bytes": 1853,
+      "file_sha256": "469bac31761b719ad5526fd9bdf78cd6ed106708989ef8e1f7e6959afec0b7e8",
+      "startup_seconds": null,
+      "verify_seconds": [
+        9.085051715373993e-05,
+        2.5063753128051758e-05,
+        2.1577812731266022e-05,
+        2.1101906895637512e-05,
+        2.0543113350868225e-05
+      ],
+      "verify_median": 2.1577812731266022e-05,
+      "first_rebind_seconds": 0.007499038241803646,
+      "second_rebind_seconds": 0.007992883212864399,
+      "per_record_writes": [
+        {
+          "op": "rebind_pending",
+          "seconds": 0.003356296569108963
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.004001246765255928
+        },
+        {
+          "op": "rebind_pending",
+          "seconds": 0.003841630183160305
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.003996197134256363
+        }
+      ]
+    },
+    {
+      "padding_bytes": 1048576,
+      "file_bytes": 1050451,
+      "file_sha256": "82c0f3ab340ccc850886415048d9094bb22a1beb03af03fd0011f883dd2bcd01",
+      "startup_seconds": 0.024628324434161186,
+      "verify_seconds": [
+        0.004446947015821934,
+        0.001419934444129467,
+        0.004378720186650753,
+        0.0013699373230338097,
+        0.0013416744768619537
+      ],
+      "verify_median": 0.001419934444129467,
+      "first_rebind_seconds": 0.02031919453293085,
+      "second_rebind_seconds": 0.011655213311314583,
+      "per_record_writes": [
+        {
+          "op": "rebind_pending",
+          "seconds": 0.01136962603777647
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.008760211057960987
+        },
+        {
+          "op": "rebind_pending",
+          "seconds": 0.005833649076521397
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.005658433772623539
+        }
+      ]
+    },
+    {
+      "padding_bytes": 16777216,
+      "file_bytes": 16779090,
+      "file_sha256": "da44ecd794b86b42eec781e3882a74d82631ff21b85824ca82d9dd6f8c93748d",
+      "startup_seconds": 0.1844212980940938,
+      "verify_seconds": [
+        0.021034058183431625,
+        0.019513064064085484,
+        0.02057328075170517,
+        0.021779829636216164,
+        0.021865636110305786
+      ],
+      "verify_median": 0.021034058183431625,
+      "first_rebind_seconds": 0.05172434262931347,
+      "second_rebind_seconds": 0.044098895974457264,
+      "per_record_writes": [
+        {
+          "op": "rebind_pending",
+          "seconds": 0.03047321457415819
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.021068760193884373
+        },
+        {
+          "op": "rebind_pending",
+          "seconds": 0.020993934012949467
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.02294537890702486
+        }
+      ]
+    },
+    {
+      "padding_bytes": 66060288,
+      "file_bytes": 66062162,
+      "file_sha256": "036f6a2dbf32e8188a6371acfba19df0134370c44ade6da4580478c4998bb8a6",
+      "startup_seconds": 0.8583908230066299,
+      "verify_seconds": [
+        0.07931275479495525,
+        0.08370925206691027,
+        0.08111162483692169,
+        0.07938356325030327,
+        0.08345581218600273
+      ],
+      "verify_median": 0.08111162483692169,
+      "first_rebind_seconds": 0.17940161284059286,
+      "second_rebind_seconds": 0.16455315612256527,
+      "per_record_writes": [
+        {
+          "op": "rebind_pending",
+          "seconds": 0.09510694444179535
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.08411762490868568
+        },
+        {
+          "op": "rebind_pending",
+          "seconds": 0.08120205346494913
+        },
+        {
+          "op": "rebind_commit",
+          "seconds": 0.08320456743240356
+        }
+      ]
+    }
+  ],
+  "cap": 67108864,
+  "method": "Warm OS page cache on this host, five verifies and two rebinds per size; no throughput SLA claimed. Padding is valid hash-covered header JSON; no bypass of verification. Two whole-file scans per rebind."
+}

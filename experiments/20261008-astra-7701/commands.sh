@@ -1,0 +1,54 @@
+#!/bin/sh
+set -eu
+export HIVE_SRC=/tmp/hive-astra-7701-source
+export PYTHONDONTWRITEBYTECODE=1
+export PIP_NO_INDEX=1
+export PIP_FIND_LINKS=/tmp/hive-astra-7701/20261008-astra-7701/build-prerequisites
+export PYTHONPATH=/tmp/hive-astra-7701/20261008-astra-7701/guard
+export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+# Exact underlying argv/cwds, originally executed through runner with exclusive logs.
+# Reproduction uses a NEW disposable directory; never run against published evidence.
+cd /tmp/hive-astra-7701-source
+/usr/bin/python3 -m pytest tests/ -v -p no:cacheprovider --basetemp=/tmp/hive-astra-7701/20261008-astra-7701/pytest-tmp
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/review7694.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/review7195.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/followup7694.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/review7173.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/boundary_and_disk.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/mechanism_probes.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/probes.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/older-regressions.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/independent.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/new_cases.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/semantic_7133.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/focused7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/retry_retained7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/retry_retained7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/clearance7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/performance7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/legacy_final7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/startup7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/observability7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/static7701.py
+cd /tmp/hive-astra-7701/20261008-astra-7701
+/usr/bin/python3 /tmp/hive-astra-7701/20261008-astra-7701/marker7701.py

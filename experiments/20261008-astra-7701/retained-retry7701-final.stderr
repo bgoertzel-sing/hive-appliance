@@ -1,0 +1,10 @@
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-1.jsonl line 1: legacy or unknown record format v1 (op 'owner_rebind')
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-1.jsonl is FENCED (corrupt): line 1: legacy or unknown record format v1 (op 'owner_rebind'); no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-2.jsonl line 1: legacy or unknown record format v2 (op 'owner_rebind')
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-2.jsonl is FENCED (corrupt): line 1: legacy or unknown record format v2 (op 'owner_rebind'); no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-3.jsonl line 1: legacy or unknown record format v3 (op 'owner_rebind')
+Rebind journal /tmp/hive-astra-7701/20261008-astra-7701/legacy-retry7701/legacy-3.jsonl is FENCED (corrupt): line 1: legacy or unknown record format v3 (op 'owner_rebind'); no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Traceback (most recent call last):
+  File "/tmp/hive-astra-7701/20261008-astra-7701/retry_retained7701.py", line 28, in <module>
+    assert all(x['passed'] for x in out.values()),[(k,x.get('error')) for k,x in out.items() if not x['passed']]
+AssertionError: [('legacy_default', 'AttributeError("\'dict\' object has no attribute \'as_dict\'")')]
