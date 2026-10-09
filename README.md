@@ -97,8 +97,11 @@ commit record, and only committed rebinds replay. Each journal starts with a
 header carrying a random id, also stored in `<journal>.id`; a mismatch (an old
 journal swapped back, or a journal without its `.id`) fences it; any pre-v5
 artifact (old `.fence` files, v1-v4 records) fences before anything is created.
-Rolling back the journal AND its `.id` together is NOT detected: never restore
-backups of either file on its own (see the policy doc). `rebind_plan_owner()` returns a `RebindResult`
+Rolling back the journal AND its `.id` together, or cutting whole records off
+the journal's end, is NOT detected at restart (a cut can only drop rebinds).
+Never restore backups of either file on its own; after an unavoidable joint
+restore call `reset_journal(actor, reason)` before replay and re-issue only the
+rebinds still wanted (see the policy doc). `rebind_plan_owner()` returns a `RebindResult`
 (`applied` / `refused` / `uncertain`; only `applied` is truthy). If any journal record cannot
 be verified (torn, edited, reordered, legacy v1-v4 format), the whole journal is
 fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds

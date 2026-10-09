@@ -180,6 +180,7 @@ class HiveReducer:
         # committed rebinds this process holds APPLIED (live or replayed)
         self._journal_applied: list[dict[str, Any]] = []
         self.journal_fence_clearances: list[dict[str, Any]] = []
+        self.journal_resets: list[dict[str, Any]] = []   # Astra 7708
         self.plans_refused_cap = 0
         self._journal_pending: list[dict[str, Any]] = (
             self._open_journal(rebind_journal) if rebind_journal else [])
@@ -851,6 +852,7 @@ class HiveReducer:
             "bytes": self._journal_size,
             "corrupt_records": self._journal_corrupt,
             "fence_clearances": self.journal_fence_clearances,
+            "journal_resets": self.journal_resets,
             "plans_refused_cap": self.plans_refused_cap})
 
     def journal_unapplied(self) -> list[dict[str, Any]]:
@@ -930,6 +932,84 @@ class HiveReducer:
                        "archived to %s, %d applied rebind(s) re-journaled",
                        actor, reason, archive or "<missing>", (len(recs) - 2) // 2)
         return True
+
+    def reset_journal(self, actor: str, reason: str) -> dict[str, Any]:
+        """Astra 7708 F-joint-rollback-doc-scope: operator command that forces
+        a FRESH journal and identity, discarding every journaled rebind.
+
+        For recovery after the journal and its <journal>.id may have been
+        rolled back together (a self-consistent older pair, which startup
+        cannot detect and clear_journal_fence() leaves alone because it is
+        healthy).  Must be called on a freshly constructed reducer BEFORE any
+        event is reduced (before event replay / serving); otherwise raises
+        RuntimeError and changes nothing.  Works whether or not the journal is
+        fenced.  The old journal and anchor are kept byte-for-byte as
+        <file>.reset-<ns> (fsync'd); then a new anchor (new random id) and a
+        new journal (header + journal_reset record, no rebinds) are written.
+        No journaled rebind is carried over: re-issue, after replay, only the
+        rebinds still wanted.  Raises OSError on a write failure (a crash or
+        failure part-way leaves an id mismatch, which fences at the next
+        start; nothing old is replayed)."""
+        if not (isinstance(actor, str) and actor.strip()):
+            raise ValueError("reset_journal requires a non-empty actor")
+        if not (isinstance(reason, str) and reason.strip()):
+            raise ValueError("reset_journal requires a non-empty reason")
+        if not self._journal_path:
+            raise ValueError("reset_journal: no rebind journal is configured")
+        if self._event_seq != 0 or self._journal_applied:
+            raise RuntimeError(
+                "reset_journal must be called on a freshly constructed reducer "
+                "before any event is reduced (before event replay/serving): "
+                "rebinds already applied in memory cannot be discarded")
+        path = self._journal_path
+        stamp = time.time_ns()
+        archived: dict[str, str] = {}
+        for src in (path, self._id_path(path)):
+            try:
+                with open(src, "rb") as f:
+                    old = f.read()
+            except FileNotFoundError:
+                continue
+            dst = f"{src}.reset-{stamp}"
+            self._write_file_durably(dst, old)
+            archived[src] = dst
+        now = time.time()
+        jid = uuid.uuid4().hex
+        hdr = self._header_record(jid)
+        rst = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
+               "reason": reason, "ts": now, "fence_error": "",
+               "forced_fresh": True, "archived": archived.get(path, ""),
+               "archived_journal_id": self._journal_id, "prev": hdr["rec_hash"]}
+        rst["rec_hash"] = self._rec_hash(rst)
+        lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8")
+                 for r in (hdr, rst)]
+        data = b"".join(lines)
+        # Anchor first (as at creation): a crash between the two leaves the
+        # old journal under a new anchor -> id mismatch -> fenced, not replayed.
+        self._write_anchor(path, jid)
+        self._replace_durably(path, data)
+        for sfx in self.LEGACY_MARKER_SUFFIXES:
+            lp = path + sfx
+            if os.path.lexists(lp):
+                os.replace(lp, f"{lp}.cleared-{stamp}")
+                self._fsync_dir(lp)
+        discarded = list(self._journal_pending)
+        for e in discarded:
+            self._mark_unapplied(e, f"discarded by reset_journal ({actor}: {reason})")
+        self._journal_pending = []
+        fence = self._journal_fence
+        self._set_journal_state(data, rst["rec_hash"], lines[-1], 2, jid)
+        self._journal_corrupt = []
+        self._journal_fence = None
+        info = {"actor": actor, "reason": reason, "ts": now, "archived": archived,
+                "journal_id": jid, "rebinds_discarded": len(discarded),
+                "was_fenced": None if fence is None else fence.get("kind")}
+        self.journal_resets.append(info)
+        del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
+        logger.warning("Rebind journal RESET by %s (%s): fresh journal %s, old "
+                       "files archived %s, %d journaled rebind(s) discarded",
+                       actor, reason, jid, archived, len(discarded))
+        return copy.deepcopy(info)
 
     def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
         self._journal_unapplied_total += 1

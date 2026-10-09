@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -116,13 +116,34 @@ accident.
   can come back. Only the identity anchor ties the journal to "now"; nothing
   records which pair is the latest. Therefore: never restore backups of the
   journal or its `.id` file at all while the hive is in service, and never
-  restore either one on its own. If a restore is unavoidable, restore both
-  together and then, before serving, call `clear_journal_fence()` (or start a
-  fresh journal) and re-issue only the rebinds still wanted.
+  restore either one on its own. `clear_journal_fence()` does NOT help here:
+  a restored pair is healthy, so it returns False and changes nothing
+  (Astra 7708). If a restore is unavoidable: stop service; restore both
+  together; construct the reducer and, BEFORE any event is reduced (before
+  event replay / serving), call `reset_journal(actor=..., reason=...)`. It
+  works whether or not the journal is fenced, keeps the old journal and
+  anchor byte-for-byte as `<file>.reset-<ns>` for inspection, writes a new
+  anchor (new random id) and then a new journal holding no rebinds, and
+  discards every journaled rebind. Then replay the full original event
+  stream and re-issue, with `rebind_plan_owner()`, only the reviewed rebinds
+  still wanted. `reset_journal()` raises `RuntimeError` (changing nothing)
+  once any event has been reduced, because rebinds already applied in memory
+  cannot be discarded; forcing a fence after replay is not a substitute,
+  since clearance keeps applied rebinds. A crash part-way through a reset
+  leaves the old journal under a new anchor, which fences at the next start.
 - **Record integrity and chain.** Every record carries `prev` (the
   `rec_hash` of the record before it, `""` for the header) and its own
-  `rec_hash` (SHA-256 of all its other fields). A reordered, removed,
-  inserted or edited record therefore breaks the chain. These hashes detect
+  `rec_hash` (SHA-256 of all its other fields). A reordered, inserted or
+  edited record, a record removed from the MIDDLE, or a torn last line
+  therefore breaks the chain or fails verification.
+  **Cutting complete records off the END is NOT detected at restart (Astra
+  7708):** a journal truncated back to an earlier record boundary that keeps
+  its header (same `journal_id`, so the anchor still matches) is a valid,
+  self-consistent prefix and is accepted as healthy. This can only DROP
+  rebinds (a lost commit, or a pending record left without its commit, is
+  not replayed, so the plan is held again; no refused or discarded rebind
+  can come back this way). Only a running process notices it (whole-file
+  check before its next write or at `verify_journal()`). These hashes detect
   accidental and naive edits; they are NOT a keyed MAC (someone with write
   access who recomputes every hash is not detected), so protect the journal
   with file permissions.
@@ -173,8 +194,11 @@ accident.
     the journal must be byte-for-byte what this process last wrote or
     verified: its size and a SHA-256 of the WHOLE file, re-read (Astra 7694).
     `verify_journal()` runs the same check on demand. Between writes nothing
-    is watched continuously; an edit is caught at the next write,
-    `verify_journal()` call or restart. Otherwise (changed, truncated,
+    is watched continuously; an edit is caught at the next write or
+    `verify_journal()` call by the running process. At restart only what
+    the file itself proves is checked (chain, hashes, header vs anchor):
+    an edit or torn line is caught, a clean cut at a record boundary is not
+    (see above). Otherwise (changed, truncated,
     removed or torn from outside) nothing is written and the journal is
     fenced (`changed`).
   - A journal that cannot be created or read at startup is fenced
@@ -207,5 +231,5 @@ accident.
   provenance below these caps are deliberately never dropped.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
-  `tests/test_astra7701.py`.
+  `tests/test_astra7701.py`, `tests/test_astra7708.py`.
 
