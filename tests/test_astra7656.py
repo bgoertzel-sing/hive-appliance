@@ -90,20 +90,22 @@ def test_legacy_fence_marker_fences_everything(tmp_path):
     open(jp + ".fence", "wb").write(b"\x00garbage")
     h2 = run(S, journal=jp)
     assert h2._plan_owner.get("a1:p") is None
-    assert h2.journal_status()["fence"]["kind"] == "legacy_marker"
+    assert h2.journal_status()["fence"]["kind"] == "legacy"   # Astra 7701
     assert h2.clear_journal_fence(actor="op", reason="inspected")
     assert not os.path.exists(jp + ".fence")
     h3 = run(S, journal=jp)                            # nothing re-journaled
     assert h3._plan_owner.get("a1:p") is None and h3.journal_status()["healthy"]
 
 
-def test_stale_tmp_marker_is_ignored(tmp_path):
+def test_stale_tmp_marker_now_fences(tmp_path):
+    # Astra 7701: any pre-v5 artifact, incl. a stale .fence.tmp, fences
     jp = str(tmp_path / "rebinds.jsonl")
     h = run(S, journal=jp)
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     open(jp + ".fence.tmp", "w").write("{}")           # never renamed into place
     h2 = run(S, journal=jp)
-    assert h2._plan_owner.get("a1:p") == "i"
+    assert h2._plan_owner.get("a1:p") is None
+    assert h2.journal_status()["fence"]["kind"] == "legacy"
 
 
 def test_clean_refusal_leaves_no_fence(tmp_path, monkeypatch):

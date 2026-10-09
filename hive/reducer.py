@@ -454,7 +454,11 @@ class HiveReducer:
     # journal_id; the chain starts from it.  The current journal_id is also
     # stored, fsync'd, in a separate identity anchor file <journal>.id.  A
     # journal whose header does not match the anchor (an older or archived
-    # journal swapped back in) fences the whole journal.
+    # journal swapped back in) fences the whole journal.  Astra 7701: the
+    # anchor is always written BEFORE its journal, so a journal without a
+    # matching anchor (even header-only) always fences; and any pre-v5
+    # artifact fences before anything is created or adopted.
+    LEGACY_MARKER_SUFFIXES = (".fence", ".fence.tmp")
     @staticmethod
     def _id_path(path: str) -> str:
         return f"{path}.id"
@@ -510,14 +514,16 @@ class HiveReducer:
         self._journal_id = jid
 
     def _create_journal(self, path: str) -> None:
-        """New journal: header first (renamed into place), then the anchor.
-        A crash between the two leaves a header-only journal without an
-        anchor, which _open_journal() adopts (it holds no rebinds)."""
+        """New journal (Astra 7701): the identity anchor is written and fsync'd
+        (file, rename, directory) FIRST; only then is the journal header
+        renamed into place.  A crash between the two leaves an anchor without
+        a journal, which fences at the next start.  There is never a journal
+        without its anchor, so a journal without one is never adopted."""
         jid = uuid.uuid4().hex
         hdr = self._header_record(jid)
         data = (json.dumps(hdr, sort_keys=True) + "\n").encode("utf-8")
-        self._replace_durably(path, data)
         self._write_anchor(path, jid)
+        self._replace_durably(path, data)
         self._set_journal_state(data, hdr["rec_hash"], data, 1, jid)
 
     def _fence_identity(self, out: list[dict[str, Any]], why: str) -> list:
@@ -527,20 +533,67 @@ class HiveReducer:
                         found_at_startup=True)
         return []
 
+    def _legacy_artifacts(self, path: str, data: bytes
+                          ) -> "tuple[list[str], dict[str, Any] | None]":
+        """Astra 7701 F-legacy-marker-startup-bypass: every pre-v5 artifact --
+        old fence marker files (<journal>.fence, <journal>.fence.tmp) and a
+        journal holding any v1-v4 record (incl. cancelled/abort records)."""
+        found = [path + sfx for sfx in self.LEGACY_MARKER_SUFFIXES
+                 if os.path.lexists(path + sfx)]
+        first = None
+        for n, raw in enumerate(data.split(b"\n"), 1):
+            if not raw.strip():
+                continue
+            try:
+                r = json.loads(raw.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                continue
+            if not isinstance(r, dict):
+                continue
+            v, op = r.get("v"), r.get("op")
+            if (isinstance(v, int) and not isinstance(v, bool)
+                    and 1 <= v < JOURNAL_VERSION) or op in ("owner_rebind",
+                                                           "abort_rebind"):
+                first = {"line": n, "why": f"legacy journal format v{v} "
+                                           f"(op {op!r})"}
+                found.append(f"{path} (pre-v5 journal: line {n} is format v{v}, "
+                             f"op {op!r})")
+                break
+        return found, first
+
+    def _fence_legacy(self, found: list[str], first: dict[str, Any] | None) -> list:
+        if first is not None:
+            self._journal_corrupt = [first]
+        self._set_fence(
+            "legacy", "pre-v5 rebind journal artifact(s) present: "
+            + "; ".join(found) + ". MIGRATION: nothing in them is replayed and "
+            "new rebinds are refused. Inspect them, then call "
+            "clear_journal_fence(actor=..., reason=...) -- it archives the old "
+            "journal byte-for-byte, moves old fence files aside and starts a new "
+            "v5 journal -- and re-issue each rebind still wanted with "
+            "rebind_plan_owner()", found_at_startup=True, artifacts=list(found))
+        return []
+
     def _open_journal(self, path: str) -> list[dict[str, Any]]:
-        """Startup.  Read-only apart from creating a new journal (or the
-        anchor of a header-only one): a damaged journal is never trimmed or
-        repaired, so whatever fenced it fences it again after every restart
-        until clear_journal_fence()."""
+        """Startup.  Read-only apart from creating a brand-new journal: a
+        damaged journal is never trimmed or repaired, so whatever fenced it
+        fences it again after every restart until clear_journal_fence().
+        Order (Astra 7701): (1) any pre-v5 artifact fences before anything is
+        created or adopted; (2) a journal is created only when neither the
+        journal nor its anchor exists (anchor first); (3) a journal without a
+        matching anchor ALWAYS fences, whatever it contains."""
         idp = self._id_path(path)
         try:
-            exists = os.path.exists(path)
+            exists = os.path.lexists(path)
             data = b""
             if exists:
                 with open(path, "rb") as f:
                     data = f.read()
+            legacy, first = self._legacy_artifacts(path, data)
+            if legacy:
+                return self._fence_legacy(legacy, first)
             anchor = self._read_anchor(path)
-            if not data and anchor is None:
+            if not exists and anchor is None:
                 self._create_journal(path)
                 return []
         except OSError as exc:
@@ -552,39 +605,30 @@ class HiveReducer:
             self._set_fence("identity", f"{idp}: {exc}; no journaled rebind is "
                             "replayed", found_at_startup=True)
             return []
+        if not exists:
+            return self._fence_identity([], (
+                f"journal is missing but the identity anchor {idp} names journal "
+                f"{anchor}: the journal was removed, or its creation was "
+                "interrupted after the anchor was written"))
         if not data:
             return self._fence_identity([], (
-                f"journal is {'missing' if not exists else 'empty'} but the "
-                f"identity anchor {idp} names journal {anchor}: it was removed "
-                "or replaced"))
+                "journal is an empty file (" + ("no identity anchor" if anchor
+                is None else f"identity anchor {idp} names journal {anchor}")
+                + "): this version never leaves an empty journal"))
         out = self._parse_journal(path, data)
         if self._journal_fence is not None:
             return []
         if anchor is None:
-            if self._journal_records == 1:          # header only: adopt it
-                try:
-                    self._write_anchor(path, self._journal_id)
-                except OSError as exc:
-                    self._set_fence("unwritable", f"identity anchor {idp} cannot "
-                                    f"be written ({exc})", found_at_startup=True)
-                return []
             return self._fence_identity(out, (
                 f"identity anchor {idp} is missing for journal "
-                f"{self._journal_id}, which holds records"))
+                f"{self._journal_id} ({self._journal_records} record(s)): the "
+                "anchor is always written before its journal, so it was removed "
+                "or this journal does not belong here"))
         if anchor != self._journal_id:
             return self._fence_identity(out, (
                 f"journal header id {self._journal_id} does not match the "
                 f"identity anchor {anchor} ({idp}): an older or archived "
                 "journal was put in place of the current one"))
-        lp = self._legacy_fence_path(path)
-        if os.path.exists(lp):
-            why = (f"legacy fence marker {lp} present (a pre-v4 journal write "
-                   "did not finish cleanly)")
-            for e in out:
-                self._mark_unapplied(e, f"journal fenced: {why}; not replayed")
-            self._set_fence("legacy_marker", why + "; no journaled rebind is "
-                            "replayed", found_at_startup=True)
-            return []
         return out
 
     def _check_record(self, r: Any, n: int, tip: str,
@@ -866,10 +910,14 @@ class HiveReducer:
         # mismatch, which fences again at the next start (safe).
         self._replace_durably(path, data)
         self._write_anchor(path, jid)
-        lp = self._legacy_fence_path()
-        if os.path.exists(lp):
-            os.unlink(lp)
-            self._fsync_dir(lp)
+        # Astra 7701: old fence files are moved aside (kept as evidence) only
+        # after the new journal and anchor are durable; a crash before this
+        # leaves them in place, which fences again at the next start (safe).
+        for sfx in self.LEGACY_MARKER_SUFFIXES:
+            lp = path + sfx
+            if os.path.lexists(lp):
+                os.replace(lp, f"{lp}.cleared-{stamp}")
+                self._fsync_dir(lp)
         self._set_journal_state(data, tip, lines[-1], len(recs), jid)
         self._journal_corrupt = []
         self._journal_fence = None

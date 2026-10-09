@@ -126,14 +126,16 @@ def test_missing_or_bad_anchor_or_journal_fences(tmp_path):
     assert run(S, journal=jp)._plan_owner.get("a1:p") == "i"
 
 
-def test_header_only_journal_without_anchor_is_adopted(tmp_path):
-    # crash between creating the journal and writing its anchor
+def test_header_only_journal_without_anchor_now_fences(tmp_path):
+    # Astra 7701: a journal without a matching anchor fences, whatever it holds
     jp = str(tmp_path / "rebinds.jsonl")
     run(S, journal=jp)
     os.unlink(jp + ".id")
     h = run(S, journal=jp)
-    assert h.journal_status()["healthy"] is True and os.path.exists(jp + ".id")
-    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+    st = h.journal_status()
+    assert st["healthy"] is False and st["fence"]["kind"] == "identity"
+    assert not os.path.exists(jp + ".id")               # nothing adopted
+    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
 
 
 def test_journal_without_header_is_fenced(tmp_path):

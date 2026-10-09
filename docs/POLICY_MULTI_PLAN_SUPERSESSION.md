@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -101,9 +101,24 @@ accident.
   the anchor (an older or archived journal -- even a valid one -- was put back
   in place of the current one), or the anchor is missing, unreadable, or names
   a journal that has been removed, the whole journal is fenced
-  (`fence.kind == "identity"`). Keep `<journal>.id` next to the journal and
-  back up / restore the two together. A header-only journal without an anchor
-  (crash between creating the two) is adopted, since it holds no rebinds.
+  (`fence.kind == "identity"`). Keep `<journal>.id` next to the journal.
+  A new journal is created anchor FIRST (Astra 7701): the `.id` file is
+  written, fsync'd and renamed into place and its directory fsync'd, and only
+  then is the journal header created. A journal without a matching anchor --
+  even a header-only one -- therefore always fences and is never adopted; a
+  crash between the two leaves an anchor without a journal, which also fences
+  (clear it with `clear_journal_fence()`). A journal is created only when
+  neither the journal nor its anchor exists; an empty journal file fences.
+- **Rollback of BOTH files is NOT detected (Astra 7701).** If the journal and
+  its `<journal>.id` are rolled back together (e.g. both restored from the same
+  older backup or snapshot), the pair is self-consistent and startup accepts
+  it: an authorization that was later discarded (e.g. by a fence clearance)
+  can come back. Only the identity anchor ties the journal to "now"; nothing
+  records which pair is the latest. Therefore: never restore backups of the
+  journal or its `.id` file at all while the hive is in service, and never
+  restore either one on its own. If a restore is unavoidable, restore both
+  together and then, before serving, call `clear_journal_fence()` (or start a
+  fresh journal) and re-issue only the rebinds still wanted.
 - **Record integrity and chain.** Every record carries `prev` (the
   `rec_hash` of the record before it, `""` for the header) and its own
   `rec_hash` (SHA-256 of all its other fields). A reordered, removed,
@@ -119,8 +134,17 @@ accident.
   The journal is reported unhealthy (`journal_status()["healthy"]` False,
   `fence` says why, `corrupt_records` gives the line) and every new rebind is
   refused. The journal is never trimmed or repaired, so it fences again after
-  every restart until an operator clears it. A leftover legacy
-  `<journal>.fence` file also fences everything.
+  every restart until an operator clears it.
+- **Legacy artifacts fence first (Astra 7701).** Before anything is created or
+  adopted at startup, any pre-v5 artifact fences the whole journal
+  (`fence.kind == "legacy"`, with a MIGRATION message and the list of
+  artifacts): an old fence marker file (`<journal>.fence` or
+  `<journal>.fence.tmp`), or a journal holding any v1-v4 record (including
+  `owner_rebind` and cancelled `abort_rebind` records). Nothing is created,
+  adopted or replayed, and rebinds are refused, at every restart until
+  `clear_journal_fence()`, which archives the old journal byte-for-byte and,
+  once the new journal and anchor are durable, moves old fence files aside to
+  `<file>.cleared-<ns>`.
 - **Result of `rebind_plan_owner()` (Astra 7694).** A `RebindResult`:
   `status` is `"applied"` (truthy; with a journal, its commit record is
   durable), `"refused"` (falsy) or `"uncertain"` (falsy: applied in memory,
@@ -167,8 +191,9 @@ accident.
   over: re-issue them if still wanted. Any failure raises and the journal
   stays fenced. Clearances are listed in
   `journal_status()["fence_clearances"]`.
-- **Upgrading (behaviour change).** v1-v4 journals are legacy format and
-  fence the whole journal at the first start after upgrading: nothing in them
+- **Upgrading (behaviour change).** v1-v4 journals and old fence marker
+  files are legacy artifacts and fence the whole journal at the first start
+  after upgrading: nothing in them
   is replayed. Review the journal, clear the fence, and re-issue each rebind
   that is still wanted with `rebind_plan_owner()`.
 - **Caps and observability.** `MAX_HIVE_JOURNAL_BYTES` (64 MiB, append
@@ -181,5 +206,6 @@ accident.
   (up to `MAX_HIVE_UNAPPLIED_RECORDS`). Holds, open incidents and plan
   provenance below these caps are deliberately never dropped.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
-  `tests/test_astra7678.py`, `tests/test_astra7694.py`.
+  `tests/test_astra7678.py`, `tests/test_astra7694.py`,
+  `tests/test_astra7701.py`.
 
