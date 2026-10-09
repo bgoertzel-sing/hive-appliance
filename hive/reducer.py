@@ -102,6 +102,18 @@ def _valid_step_index(idx: Any, count: int) -> bool:
     return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
 
 
+class _NotRegularFile(ValueError):
+    """Astra 7741: a journal/anchor directory entry exists but is not a
+    regular file (symlink -- dangling or not --, directory, fifo, ...).  It is
+    never read through, never treated as absent and never overwritten at
+    startup: the journal fences and the entry is left untouched."""
+
+    def __init__(self, path: str, what: str, mode: int) -> None:
+        self.path, self.what = path, what
+        super().__init__(f"{what} {path} exists but is not a regular file "
+                         f"({_stat.filemode(mode)})")
+
+
 class HiveReducer:
     """Processes HiveEvents and maintains HiveState.
 
@@ -524,13 +536,49 @@ class HiveReducer:
         h["rec_hash"] = HiveReducer._rec_hash(h)
         return h
 
-    def _read_anchor(self, path: str) -> str | None:
-        """journal_id named by the identity anchor; None if it does not exist;
-        ValueError if it exists but is unreadable or malformed."""
+    @staticmethod
+    def _read_regular(path: str, what: str) -> "bytes | None":
+        """Astra 7741: strict read of a journal-namespace file.  None ONLY if
+        os.lstat() reports ENOENT for the entry itself.  An existing entry that
+        is not a regular file (incl. a dangling or valid symlink, a directory)
+        raises _NotRegularFile; it is never followed.  Every other error
+        (EIO, EACCES, ENOTDIR, the entry vanishing or changing between lstat
+        and open) raises OSError -- never "absent"."""
         try:
-            with open(self._id_path(path), "rb") as f:
-                raw = f.read()
+            st = os.lstat(path)
         except FileNotFoundError:
+            return None
+        if not _stat.S_ISREG(st.st_mode):
+            raise _NotRegularFile(path, what, st.st_mode)
+        try:
+            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        except FileNotFoundError as exc:
+            raise OSError(errno.ESTALE, f"{what} vanished between lstat and "
+                          f"open ({exc})", path) from exc
+        try:
+            fst = os.fstat(fd)
+            if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
+                    or fst.st_dev != st.st_dev):
+                raise OSError(errno.ESTALE, f"{what} changed while it was being "
+                              "opened", path)
+            chunks = []
+            while True:
+                b = os.read(fd, 1 << 20)
+                if not b:
+                    break
+                chunks.append(b)
+            return b"".join(chunks)
+        finally:
+            os.close(fd)
+
+    def _read_anchor(self, path: str) -> str | None:
+        """journal_id named by the identity anchor; None ONLY if the .id entry
+        itself does not exist (lstat ENOENT; Astra 7741 -- a dangling symlink
+        is NOT absent).  _NotRegularFile (a ValueError) if the entry is a
+        symlink/directory/other; ValueError if unreadable or malformed;
+        OSError on any other metadata/read error."""
+        raw = self._read_regular(self._id_path(path), "identity anchor")
+        if raw is None:
             return None
         try:
             a = json.loads(raw.decode("utf-8"))
@@ -540,6 +588,21 @@ class HiveReducer:
                 and isinstance(a.get("journal_id"), str) and a["journal_id"]):
             raise ValueError("identity anchor malformed or legacy format")
         return a["journal_id"]
+
+    def _move_aside_if_not_regular(self, path: str, dst: str) -> bool:
+        """Astra 7741: an existing non-regular entry (symlink, directory, ...)
+        is renamed aside intact (kept as evidence, never followed or deleted)
+        before an explicit operator command writes a regular file there.
+        True if moved.  lstat errors other than ENOENT propagate."""
+        try:
+            st = os.lstat(path)
+        except FileNotFoundError:
+            return False
+        if _stat.S_ISREG(st.st_mode):
+            return False
+        os.replace(path, dst)
+        self._fsync_dir(dst)
+        return True
 
     def _replace_durably(self, path: str, data: bytes) -> None:
         """Write a temp file durably, rename it over path, fsync the dir."""
@@ -635,7 +698,10 @@ class HiveReducer:
         Order (Astra 7701): (1) any pre-v5 artifact fences before anything is
         created or adopted; (2) a journal is created only when neither the
         journal nor its anchor exists (anchor first); (3) a journal without a
-        matching anchor ALWAYS fences, whatever it contains."""
+        matching anchor ALWAYS fences, whatever it contains.  Astra 7741: every
+        presence decision is strict (lstat; only ENOENT is absent) and the
+        journal and anchor must be regular files -- a symlink (dangling or
+        not) or directory fences and is never overwritten."""
         idp = self._id_path(path)
         try:
             try:
@@ -658,11 +724,11 @@ class HiveReducer:
                                                "presence_error": ierr}
                                               if ierr else {}))
                 return []
-            exists = self._lexists_strict(path)
-            data = b""
-            if exists:
-                with open(path, "rb") as f:
-                    data = f.read()
+            # Astra 7741: strict -- only an lstat ENOENT is "no journal"; a
+            # symlink/directory journal entry fences (_NotRegularFile)
+            raw = self._read_regular(path, "rebind journal")
+            exists = raw is not None
+            data = raw if raw is not None else b""
             legacy, first = self._legacy_artifacts(path, data)
             if legacy:
                 return self._fence_legacy(legacy, first)
@@ -674,6 +740,14 @@ class HiveReducer:
             self._set_fence("unwritable", f"rebind journal cannot be created or "
                             f"read ({exc}); no journaled rebind is replayed",
                             found_at_startup=True)
+            return []
+        except _NotRegularFile as exc:          # Astra 7741
+            self._set_fence("identity", f"{exc}: it is not followed, not "
+                            "treated as absent and left untouched; nothing is "
+                            "created, adopted or replayed. Inspect it, then "
+                            "call clear_journal_fence() or reset_journal() "
+                            "(both move it aside intact)",
+                            found_at_startup=True, artifacts=[exc.path])
             return []
         except ValueError as exc:
             self._set_fence("identity", f"{idp}: {exc}; no journaled rebind is "
@@ -812,6 +886,8 @@ class HiveReducer:
         this process last wrote or verified (size AND SHA-256 of the whole
         file, re-read).  Returns (size, sha256 object of the verified bytes);
         raises _JournalChanged."""
+        if not _stat.S_ISREG(os.fstat(fd).st_mode):      # Astra 7741
+            raise _JournalChanged("journal is not a regular file")
         try:
             anchor = self._read_anchor(self._journal_path)
         except (OSError, ValueError) as exc:
@@ -844,7 +920,8 @@ class HiveReducer:
         if self._journal_fence is not None:
             return False
         try:
-            fd = os.open(self._journal_path, os.O_RDONLY)
+            fd = os.open(self._journal_path,
+                         os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
         except OSError as exc:
             self._set_fence("changed", f"journal cannot be opened ({exc})")
             return False
@@ -867,9 +944,14 @@ class HiveReducer:
         rec["rec_hash"] = self._rec_hash(rec)
         data = (json.dumps(rec, sort_keys=True) + "\n").encode("utf-8")
         try:
-            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND)
+            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND
+                         | getattr(os, "O_NOFOLLOW", 0))
         except FileNotFoundError as exc:
             raise _JournalChanged(f"journal file is missing ({exc})") from exc
+        except OSError as exc:
+            if exc.errno == errno.ELOOP:            # Astra 7741: now a symlink
+                raise _JournalChanged(f"journal entry is a symlink ({exc})") from exc
+            raise
         try:
             size, sha = self._verify_on_disk(fd)
             if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
@@ -956,14 +1038,18 @@ class HiveReducer:
             return False
         path = self._journal_path
         stamp = time.time_ns()
+        # Astra 7741: strict read; a non-regular journal entry is moved aside
+        # intact as the archive instead of being read through or replaced
+        archive = f"{path}.fenced-{stamp}"
         try:
-            with open(path, "rb") as f:
-                old: bytes | None = f.read()
-        except FileNotFoundError:
-            old = None
-        archive = f"{path}.fenced-{stamp}" if old is not None else ""
+            old: bytes | None = self._read_regular(path, "rebind journal")
+            moved = False
+        except _NotRegularFile:
+            old, moved = None, self._move_aside_if_not_regular(path, archive)
         if old is not None:
             self._write_file_durably(archive, old)
+        elif not moved:
+            archive = ""
         now = time.time()
         jid = uuid.uuid4().hex                 # Astra 7694: new identity
         hdr = self._header_record(jid)
@@ -993,6 +1079,8 @@ class HiveReducer:
         # journal rename and the anchor rename leaves a journal/anchor id
         # mismatch, which fences again at the next start (safe).
         self._replace_durably(path, data)
+        self._move_aside_if_not_regular(self._id_path(path),
+                                        f"{self._id_path(path)}.cleared-{stamp}")
         self._write_anchor(path, jid)
         # Astra 7701: old fence files are moved aside (kept as evidence) only
         # after the new journal and anchor are durable; a crash before this
@@ -1118,10 +1206,15 @@ class HiveReducer:
                 self._fsync_dir(dst)
             step = "archive old anchor"
             try:
-                with open(idp, "rb") as f:
-                    old_anchor: bytes | None = f.read()
-            except FileNotFoundError:
+                old_anchor: bytes | None = self._read_regular(
+                    idp, "identity anchor")        # Astra 7741: strict
+            except _NotRegularFile:
                 old_anchor = None
+                dst = f"{idp}.reset-{stamp}"
+                if self._move_aside_if_not_regular(idp, dst):
+                    archived[idp] = dst
+                    done.append(f"old anchor entry (not a regular file) moved "
+                                f"to {dst}")
             if old_anchor is not None:
                 dst = f"{idp}.reset-{stamp}"
                 self._write_file_durably(dst, old_anchor)
@@ -1209,7 +1302,8 @@ class HiveReducer:
                 {"actor": actor, "reason": reason, "ts": now, "status": "failed",
                  "failed_step": step, "error": repr(exc), "archived": archived,
                  "intent_present": present, "completed_steps": list(done),
-                 "intent_durable": durable, "rebinds_discarded": len(discarded)})
+                 "intent_durable": durable, "rebinds_discarded": len(discarded),
+                 **({"presence_error": perr} if perr else {})})
             del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
             raise
         self._set_journal_state(data, rst["rec_hash"], lines[-1], 2, jid)

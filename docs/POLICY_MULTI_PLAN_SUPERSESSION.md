@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -164,7 +164,19 @@ accident.
   be inspected, and the message and `completed_steps` list only the steps
   that actually completed (e.g. "old journal renamed to ..."); it never
   claims the old pair is unchanged after the old journal was moved, nor that
-  the marker was unlinked unless the unlink succeeded (Astra 7734). Limits: if the
+  the marker was unlinked unless the unlink succeeded (Astra 7734). The
+  failed-reset `journal_resets` entry carries the same `presence_error` as
+  the fence. The journal and its `.id` anchor are read strictly as well:
+  only an `lstat` ENOENT on the entry itself means "absent" (a dangling
+  symlink is NOT absent), and both must be regular files. A symlink
+  (dangling or valid), directory or other entry type fences at startup
+  (`identity`, listed in `artifacts`), is never followed and never
+  overwritten; nothing is created, adopted or replayed. Other metadata or
+  read errors fence `unwritable`. `clear_journal_fence()` and
+  `reset_journal()` move such an entry aside intact (`.cleared-<ns>` /
+  `.reset-<ns>`) before writing a regular file. At runtime the journal is
+  opened with `O_NOFOLLOW` and must still be a regular file, otherwise it
+  fences `changed` (Astra 7741). Limits: if the
   process dies or the error hits before that confirmation, the old journal
   and `.id` are unchanged on disk, but something may already have changed: a
   marker, possibly empty or partial, can exist without being durable and may
@@ -277,5 +289,5 @@ accident.
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
   `tests/test_astra7718.py`, `tests/test_astra7727.py`,
-  `tests/test_astra7734.py`.
+  `tests/test_astra7734.py`, `tests/test_astra7741.py`.
 

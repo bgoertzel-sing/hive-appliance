@@ -8,7 +8,6 @@
       is built from the steps that actually completed (completed_steps).
 Audit: reset/clear/startup use a strict presence check (only ENOENT = absent).
 """
-import builtins
 import errno
 import os
 
@@ -121,15 +120,15 @@ def test_handler_lstat_eio_after_journal_moved_reports_unknown(tmp_path, monkeyp
     # Astra metadata7734 case 1
     jp, h = _pair(tmp_path, "m1")
     ip, idp = jp + ".reset-intent", jp + ".id"
-    real_open = builtins.open
+    real_open = os.open
     broke = [False]
 
-    def opn(p, *a, **k):
+    def opn(p, *a, **k):        # anchor read uses os.open since Astra 7741
         if os.fspath(p) == idp and not broke[0]:
             broke[0] = True
             raise OSError(errno.EIO, "injected anchor read")
         return real_open(p, *a, **k)
-    monkeypatch.setattr(builtins, "open", opn)
+    monkeypatch.setattr(os, "open", opn)
     real_lstat = os.lstat
 
     def lst(p, *a, **k):
