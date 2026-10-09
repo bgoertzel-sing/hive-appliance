@@ -55,11 +55,11 @@ def test_refused_rebind_with_torn_tail_never_revives(tmp_path, monkeypatch):
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.undo()
     assert h.journal_status()["healthy"] is True and _held(h)
-    assert len(_lines(jp)) == 1                        # pending only, rolled back
+    assert len(_lines(jp)) == 2                        # header + pending, rolled back
     h2 = run(S, journal=jp)
     assert _held(h2) and "no commit" in h2.journal_status()["unapplied"][0]["why"]
     with open(jp, "ab") as f:
-        f.write(_lines(jp)[0][:-1])                    # forged, torn copy
+        f.write(_lines(jp)[1][:-1])                    # forged, torn copy
     assert _held(run(S, journal=jp))
 
 
@@ -96,8 +96,10 @@ def test_commit_write_and_rollback_fail_is_applied_not_refused(tmp_path, monkeyp
         raise OSError("EIO")
     monkeypatch.setattr(os, "fsync", commit_fails)
     monkeypatch.setattr(os, "ftruncate", boom)
-    # never a refusal that a restart could contradict
-    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+    # never a refusal that a restart could contradict; Astra 7694: and never
+    # a durable success either -- an explicit, falsy UNCERTAIN result
+    r = h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+    assert not r and r.status == "uncertain" and r.applied and r.durable is None
     monkeypatch.undo()
     st = h.journal_status()
     assert h._plan_owner.get("a1:p") == "i"
@@ -109,7 +111,7 @@ def test_commit_write_and_rollback_fail_is_applied_not_refused(tmp_path, monkeyp
     h2 = run(S, journal=jp)
     assert h2._plan_owner.get("a1:p") == "i" and h2.journal_status()["healthy"]
     # restart outcome B: the commit was lost -> plan held, never a phantom
-    open(jp, "wb").write(data.splitlines(keepends=True)[0])
+    open(jp, "wb").write(b"".join(data.splitlines(keepends=True)[:2]))
     assert _held(run(S, journal=jp))
     # outcome C: the commit was torn -> whole journal fenced
     open(jp, "wb").write(data[:-3])
@@ -151,12 +153,12 @@ def test_commit_before_its_pending_fences_whole_journal(tmp_path):
     jp = str(tmp_path / "rebinds.jsonl")
     h = run(S, journal=jp)
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    a, b = _lines(jp)
-    open(jp, "wb").write(b + a)
+    hd, a, b = _lines(jp)
+    open(jp, "wb").write(hd + b + a)
     h2 = run(S, journal=jp)
     st = h2.journal_status()
     assert _held(h2) and st["healthy"] is False
-    assert st["corrupt_records"][0]["line"] == 1
+    assert st["corrupt_records"][0]["line"] == 2
 
 
 def test_reordered_rebinds_fence_whole_journal(tmp_path):
@@ -168,14 +170,14 @@ def test_reordered_rebinds_fence_whole_journal(tmp_path):
     h = run(s, journal=jp)
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     assert h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
-    L = _lines(jp)
+    H, *L = _lines(jp)                                # header stays first
     assert len(L) == 4
     for bad in (L[2:] + L[:2], [L[0], L[2], L[1], L[3]], L[:1] + L[2:]):
-        open(jp, "wb").write(b"".join(bad))
+        open(jp, "wb").write(H + b"".join(bad))
         h2 = run(s, journal=jp)
         assert h2.journal_status()["healthy"] is False
         assert h2.owner_rebinds == []
-    open(jp, "wb").write(b"".join(L))                  # intact: both replay
+    open(jp, "wb").write(H + b"".join(L))                  # intact: both replay
     h3 = run(s, journal=jp)
     assert h3._plan_owner.get("a1:p") == "i" and h3._plan_owner.get("a1:q") == "k"
 
@@ -194,7 +196,7 @@ def test_rehashed_forged_commit_without_chain_fences(tmp_path, monkeypatch):
     monkeypatch.setattr(os, "fsync", second_fails)
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.undo()
-    p = json.loads(_lines(jp)[0])
+    p = json.loads(_lines(jp)[1])
     c = {"v": hr.JOURNAL_VERSION, "op": "rebind_commit", "op_id": p["op_id"],
          "pending_hash": p["rec_hash"], "ts": 0, "prev": "wrong"}
     c["rec_hash"] = hr.HiveReducer._rec_hash(c)

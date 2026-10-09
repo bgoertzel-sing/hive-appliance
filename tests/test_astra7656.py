@@ -74,8 +74,8 @@ def test_crash_between_pending_and_commit_not_replayed(tmp_path):
     h = run(S, journal=jp)
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     lines = open(jp).read().splitlines(keepends=True)
-    assert len(lines) == 2
-    open(jp, "w").write(lines[0])                      # crash before the commit
+    assert len(lines) == 3
+    open(jp, "w").write("".join(lines[:2]))                      # crash before the commit
     h2 = run(S, journal=jp)
     assert h2._plan_owner.get("a1:p") is None
     assert h2.journal_status()["healthy"] is True      # a clean prefix
@@ -109,6 +109,7 @@ def test_stale_tmp_marker_is_ignored(tmp_path):
 def test_clean_refusal_leaves_no_fence(tmp_path, monkeypatch):
     jp = str(tmp_path / "rebinds.jsonl")
     h = run(S, journal=jp)
+    before = open(jp, "rb").read()
     real, n = os.fsync, []
 
     def jfsync(fd):
@@ -124,7 +125,7 @@ def test_clean_refusal_leaves_no_fence(tmp_path, monkeypatch):
     monkeypatch.undo()
     assert not os.path.exists(jp + ".fence")
     assert h.journal_status()["healthy"] is True
-    assert os.path.getsize(jp) == 0                    # rolled back
+    assert open(jp, "rb").read() == before           # rolled back
     assert len(n) == 2                                 # append fsync + rollback fsync
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     h2 = run(S, journal=jp)
@@ -178,8 +179,9 @@ def test_torn_journal_is_never_trimmed(tmp_path):
 # ------------------------------------------------ 4 unapplied accounting
 def test_unapplied_total_and_omitted_reported(tmp_path):
     jp = tmp_path / "rebinds.jsonl"
-    tip = ""
-    with open(jp, "w") as f:
+    run(BASE, journal=str(jp))                         # header + identity anchor
+    tip = json.loads(jp.read_text().splitlines()[-1])["rec_hash"]
+    with open(jp, "a") as f:
         for k in range(201):                           # pending, never committed
             r = {"v": hr.JOURNAL_VERSION, "op": "rebind_pending", "op_id": f"o{k}",
                  "agent_id": "a1", "plan_id": "p", "incident_id": "i",

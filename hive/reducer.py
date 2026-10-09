@@ -40,7 +40,7 @@ MAX_HIVE_CANDIDATE_KEYS = 256      # Astra 7638 (Low): held plans with candidate
 MAX_HIVE_JOURNAL_BYTES = 64 * 1024 * 1024   # Astra 7638 (Low): journal admission cap
 MAX_HIVE_PLANS = 10000             # Astra 7656 (Low): overall tracked-plan admission cap
 MAX_HIVE_UNAPPLIED_RECORDS = 10000  # Astra 7656 (Low): retained unapplied dispositions
-JOURNAL_VERSION = 4                # Astra 7678: chained pending/commit records
+JOURNAL_VERSION = 5                # Astra 7694: journal_header + identity anchor
 
 
 class _JournalIndeterminate(Exception):
@@ -49,8 +49,42 @@ class _JournalIndeterminate(Exception):
 
 
 class _JournalChanged(Exception):
-    """Astra 7678: the journal file no longer ends where this process last
-    wrote it (changed, truncated or removed outside this process)."""
+    """Astra 7678/7694: the journal file (or its identity anchor) is no longer
+    byte-for-byte what this process last wrote or verified."""
+
+
+class RebindResult:
+    """Astra 7694 F-applied-without-durable-commit: structured outcome of
+    HiveReducer.rebind_plan_owner().
+
+    status   "applied"   -- applied in memory AND (with a journal) its commit
+                            record is durable, so a restart replays it.
+             "refused"   -- not applied; nothing that could replay it is durable.
+             "uncertain" -- applied in memory, but whether its commit record
+                            is durable is UNKNOWN (commit write and rollback
+                            both failed).  After a restart it may be replayed
+                            or the plan may be held again.  The journal is
+                            fenced.  NOT a durable authorization.
+    applied  bool: applied in this process's memory.
+    durable  True / False / None (unknown).
+    bool(result) is True ONLY for status "applied", so code that treats a
+    truthy result as durable authorization never accepts "uncertain"."""
+    __slots__ = ("status", "applied", "durable", "op_id", "detail")
+
+    def __init__(self, status: str, *, applied: bool, durable: bool | None,
+                 op_id: str = "", detail: str = "") -> None:
+        self.status, self.applied, self.durable = status, applied, durable
+        self.op_id, self.detail = op_id, detail
+
+    def __bool__(self) -> bool:
+        return self.status == "applied"
+
+    def as_dict(self) -> dict[str, Any]:
+        return {k: getattr(self, k) for k in self.__slots__}
+
+    def __repr__(self) -> str:
+        return (f"RebindResult({self.status!r}, applied={self.applied}, "
+                f"durable={self.durable}, op_id={self.op_id!r})")
 
 # H1: severity ordering used when merging polled health with reducer state
 _HEALTH_RANK = {
@@ -139,6 +173,10 @@ class HiveReducer:
         self._journal_tip = ""          # rec_hash of the last record
         self._journal_last = b""        # last record line as written
         self._journal_records = 0
+        self._journal_sha = hashlib.sha256(b"").hexdigest()  # of bytes on disk
+        self._journal_id = ""           # Astra 7694: journal_header identity
+        self._rebind_op_id = ""
+        self.last_rebind_result: RebindResult | None = None
         # committed rebinds this process holds APPLIED (live or replayed)
         self._journal_applied: list[dict[str, Any]] = []
         self.journal_fence_clearances: list[dict[str, Any]] = []
@@ -411,28 +449,135 @@ class HiveReducer:
                         "it and calls clear_journal_fence()",
                         self._journal_path, kind, error)
 
-    def _open_journal(self, path: str) -> list[dict[str, Any]]:
-        """Startup.  Read-only apart from creating a missing journal: a
-        damaged journal is never trimmed or repaired, so whatever fenced it
-        fences it again after every restart until clear_journal_fence()."""
+    # ── Astra 7694: journal identity ──
+    # The first record is a hashed "journal_header" carrying a random
+    # journal_id; the chain starts from it.  The current journal_id is also
+    # stored, fsync'd, in a separate identity anchor file <journal>.id.  A
+    # journal whose header does not match the anchor (an older or archived
+    # journal swapped back in) fences the whole journal.
+    @staticmethod
+    def _id_path(path: str) -> str:
+        return f"{path}.id"
+
+    @staticmethod
+    def _header_record(jid: str) -> dict[str, Any]:
+        h = {"v": JOURNAL_VERSION, "op": "journal_header", "journal_id": jid,
+             "ts": time.time(), "prev": ""}
+        h["rec_hash"] = HiveReducer._rec_hash(h)
+        return h
+
+    def _read_anchor(self, path: str) -> str | None:
+        """journal_id named by the identity anchor; None if it does not exist;
+        ValueError if it exists but is unreadable or malformed."""
         try:
-            if not os.path.exists(path):
-                fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
-                try:
-                    os.fsync(fd)
-                finally:
-                    os.close(fd)
-                self._fsync_dir(path)          # the new file's directory entry
-            with open(path, "rb") as f:
-                data = f.read()
+            with open(self._id_path(path), "rb") as f:
+                raw = f.read()
+        except FileNotFoundError:
+            return None
+        try:
+            a = json.loads(raw.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise ValueError(f"identity anchor unreadable ({exc})") from exc
+        if not (isinstance(a, dict) and a.get("v") == JOURNAL_VERSION
+                and isinstance(a.get("journal_id"), str) and a["journal_id"]):
+            raise ValueError("identity anchor malformed or legacy format")
+        return a["journal_id"]
+
+    def _replace_durably(self, path: str, data: bytes) -> None:
+        """Write a temp file durably, rename it over path, fsync the dir."""
+        tmp = f"{path}.new-{time.time_ns()}"
+        self._write_file_durably(tmp, data)
+        try:
+            os.replace(tmp, path)
+        except OSError:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+        self._fsync_dir(path)
+
+    def _write_anchor(self, path: str, jid: str) -> None:
+        self._replace_durably(self._id_path(path), (json.dumps(
+            {"v": JOURNAL_VERSION, "journal_id": jid}, sort_keys=True)
+            + "\n").encode("utf-8"))
+
+    def _set_journal_state(self, data: bytes, tip: str, last: bytes,
+                           records: int, jid: str) -> None:
+        self._journal_size, self._journal_tip = len(data), tip
+        self._journal_last, self._journal_records = last, records
+        self._journal_sha = hashlib.sha256(data).hexdigest()
+        self._journal_id = jid
+
+    def _create_journal(self, path: str) -> None:
+        """New journal: header first (renamed into place), then the anchor.
+        A crash between the two leaves a header-only journal without an
+        anchor, which _open_journal() adopts (it holds no rebinds)."""
+        jid = uuid.uuid4().hex
+        hdr = self._header_record(jid)
+        data = (json.dumps(hdr, sort_keys=True) + "\n").encode("utf-8")
+        self._replace_durably(path, data)
+        self._write_anchor(path, jid)
+        self._set_journal_state(data, hdr["rec_hash"], data, 1, jid)
+
+    def _fence_identity(self, out: list[dict[str, Any]], why: str) -> list:
+        for e in out:
+            self._mark_unapplied(e, f"journal fenced: {why}; not replayed")
+        self._set_fence("identity", why + "; no journaled rebind is replayed",
+                        found_at_startup=True)
+        return []
+
+    def _open_journal(self, path: str) -> list[dict[str, Any]]:
+        """Startup.  Read-only apart from creating a new journal (or the
+        anchor of a header-only one): a damaged journal is never trimmed or
+        repaired, so whatever fenced it fences it again after every restart
+        until clear_journal_fence()."""
+        idp = self._id_path(path)
+        try:
+            exists = os.path.exists(path)
+            data = b""
+            if exists:
+                with open(path, "rb") as f:
+                    data = f.read()
+            anchor = self._read_anchor(path)
+            if not data and anchor is None:
+                self._create_journal(path)
+                return []
         except OSError as exc:
             self._set_fence("unwritable", f"rebind journal cannot be created or "
                             f"read ({exc}); no journaled rebind is replayed",
                             found_at_startup=True)
             return []
+        except ValueError as exc:
+            self._set_fence("identity", f"{idp}: {exc}; no journaled rebind is "
+                            "replayed", found_at_startup=True)
+            return []
+        if not data:
+            return self._fence_identity([], (
+                f"journal is {'missing' if not exists else 'empty'} but the "
+                f"identity anchor {idp} names journal {anchor}: it was removed "
+                "or replaced"))
         out = self._parse_journal(path, data)
+        if self._journal_fence is not None:
+            return []
+        if anchor is None:
+            if self._journal_records == 1:          # header only: adopt it
+                try:
+                    self._write_anchor(path, self._journal_id)
+                except OSError as exc:
+                    self._set_fence("unwritable", f"identity anchor {idp} cannot "
+                                    f"be written ({exc})", found_at_startup=True)
+                return []
+            return self._fence_identity(out, (
+                f"identity anchor {idp} is missing for journal "
+                f"{self._journal_id}, which holds records"))
+        if anchor != self._journal_id:
+            return self._fence_identity(out, (
+                f"journal header id {self._journal_id} does not match the "
+                f"identity anchor {anchor} ({idp}): an older or archived "
+                "journal was put in place of the current one"))
         lp = self._legacy_fence_path(path)
-        if self._journal_fence is None and os.path.exists(lp):
+        if os.path.exists(lp):
             why = (f"legacy fence marker {lp} present (a pre-v4 journal write "
                    "did not finish cleanly)")
             for e in out:
@@ -456,11 +601,17 @@ class HiveReducer:
             return ("hash chain broken (a record was reordered, removed or "
                     "inserted)")
         op, op_id = r.get("op"), r.get("op_id")
+        if op == "journal_header":
+            if n == 1 and isinstance(r.get("journal_id"), str) and r["journal_id"]:
+                return ""
+            return "journal_header record that is not a valid first record"
+        if n == 1:
+            return "first record is not a journal_header"
         if op == "journal_reset":
-            if n == 1 and all(isinstance(r.get(k), str) and r[k].strip()
+            if n == 2 and all(isinstance(r.get(k), str) and r[k].strip()
                               for k in ("actor", "reason")):
                 return ""
-            return "journal_reset record that is not a valid first record"
+            return "journal_reset record that does not directly follow the header"
         if not (isinstance(op_id, str) and op_id):
             return "record without op_id"
         if op == "rebind_pending":
@@ -493,7 +644,7 @@ class HiveReducer:
         an unterminated (torn) last line."""
         pend: dict[str, dict[str, Any]] = {}
         done: set[str] = set()
-        tip, last, problem = "", b"", None
+        tip, last, problem, jid = "", b"", None, ""
         lines = data.split(b"\n")
         torn = bool(data) and not data.endswith(b"\n")
         lines = lines[:-1]                      # after the final newline / torn
@@ -511,6 +662,8 @@ class HiveReducer:
                 pend[r["op_id"]] = r
             elif r["op"] == "rebind_commit":
                 done.add(r["op_id"])
+            elif r["op"] == "journal_header":
+                jid = r["journal_id"]
             tip, last = r["rec_hash"], raw + b"\n"
         if problem is None and torn:
             problem = (len(lines) + 1, "unterminated (torn) last line")
@@ -525,8 +678,7 @@ class HiveReducer:
             self._set_fence("corrupt", f"line {n}: {why}; no journaled rebind "
                             "is replayed", found_at_startup=True, line=n)
             return []
-        self._journal_size, self._journal_tip = len(data), tip
-        self._journal_last, self._journal_records = last, len(lines)
+        self._set_journal_state(data, tip, last, len(lines), jid)
         out = []
         for op_id, e in pend.items():
             if op_id in done:
@@ -535,6 +687,57 @@ class HiveReducer:
                 self._mark_unapplied(e, "no commit record: the rebind was refused "
                                         "or its write did not complete; not replayed")
         return out
+
+    def _verify_on_disk(self, fd: int) -> "tuple[int, Any]":
+        """Astra 7694 F-runtime-integrity-overclaim: the identity anchor must
+        still name this journal, and the journal must be byte-for-byte what
+        this process last wrote or verified (size AND SHA-256 of the whole
+        file, re-read).  Returns (size, sha256 object of the verified bytes);
+        raises _JournalChanged."""
+        try:
+            anchor = self._read_anchor(self._journal_path)
+        except (OSError, ValueError) as exc:
+            raise _JournalChanged(f"identity anchor unreadable ({exc})") from exc
+        if anchor != self._journal_id:
+            raise _JournalChanged(f"identity anchor names journal {anchor}, not "
+                                  f"{self._journal_id}: the journal was replaced")
+        size = os.fstat(fd).st_size
+        h, off = hashlib.sha256(), 0
+        while off < size:
+            b = os.pread(fd, min(1 << 20, size - off), off)
+            if not b:
+                break
+            h.update(b)
+            off += len(b)
+        if size != self._journal_size or off != size or (
+                h.hexdigest() != self._journal_sha):
+            raise _JournalChanged(
+                f"journal is {size} bytes, expected {self._journal_size}, or its "
+                "content differs from what this process wrote: it was changed "
+                "outside this process")
+        return size, h
+
+    def verify_journal(self) -> bool:
+        """Astra 7694: re-verify the journal on disk now (anchor + full-file
+        digest).  Fences it and returns False on any difference; True if
+        healthy (or no journal is configured)."""
+        if not self._journal_path:
+            return True
+        if self._journal_fence is not None:
+            return False
+        try:
+            fd = os.open(self._journal_path, os.O_RDONLY)
+        except OSError as exc:
+            self._set_fence("changed", f"journal cannot be opened ({exc})")
+            return False
+        try:
+            self._verify_on_disk(fd)
+        except (_JournalChanged, OSError) as exc:
+            self._set_fence("changed", f"verify_journal: {exc}")
+            return False
+        finally:
+            os.close(fd)
+        return True
 
     def _journal_write(self, rec: dict[str, Any]) -> None:
         """Append one chained record.  Returns only once it is durable.
@@ -550,14 +753,7 @@ class HiveReducer:
         except FileNotFoundError as exc:
             raise _JournalChanged(f"journal file is missing ({exc})") from exc
         try:
-            size = os.fstat(fd).st_size
-            last = self._journal_last
-            if size != self._journal_size or (
-                    last and os.pread(fd, len(last), size - len(last)) != last):
-                raise _JournalChanged(
-                    f"journal is {size} bytes, expected {self._journal_size} "
-                    "ending with the last record this process wrote: it was "
-                    "changed outside this process")
+            size, sha = self._verify_on_disk(fd)
             if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
                 raise OSError(f"rebind journal would exceed {MAX_HIVE_JOURNAL_BYTES} "
                               "bytes; rotate/compact it (admission refused)")
@@ -579,6 +775,8 @@ class HiveReducer:
                 logger.warning("Rebind journal %s close error: %s",
                                self._journal_path, exc)
         self._journal_size += len(data)
+        sha.update(data)
+        self._journal_sha = sha.hexdigest()
         self._journal_tip = rec["rec_hash"]
         self._journal_last = data
         self._journal_records += 1
@@ -593,6 +791,7 @@ class HiveReducer:
         return copy.deepcopy({
             "path": self._journal_path,
             "durable": bool(self._journal_path),
+            "journal_id": self._journal_id,
             "volatile_rebinds_allowed": self._volatile_rebinds,
             "healthy": self._journal_fence is None,
             "fence": self._journal_fence,
@@ -644,11 +843,14 @@ class HiveReducer:
         if old is not None:
             self._write_file_durably(archive, old)
         now = time.time()
+        jid = uuid.uuid4().hex                 # Astra 7694: new identity
+        hdr = self._header_record(jid)
         reset = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
                  "reason": reason, "ts": now, "fence_error": str(fence.get("error")),
-                 "archived": archive, "prev": ""}
+                 "archived": archive, "archived_journal_id": self._journal_id,
+                 "prev": hdr["rec_hash"]}
         reset["rec_hash"] = self._rec_hash(reset)
-        recs, tip = [reset], reset["rec_hash"]
+        recs, tip = [hdr, reset], reset["rec_hash"]
         for e in list(self._journal_applied) + list(self._journal_pending):
             pr = {k: v for k, v in e.items() if k not in ("prev", "rec_hash")}
             pr["prev"] = tip
@@ -659,35 +861,26 @@ class HiveReducer:
             recs += [pr, cr]
         lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in recs]
         data = b"".join(lines)
-        tmp = f"{path}.new-{stamp}"
-        self._write_file_durably(tmp, data)
-        try:
-            os.replace(tmp, path)
-        except OSError:
-            try:
-                os.unlink(tmp)
-            except OSError:
-                pass
-            raise
-        # A failing directory fsync raises: the journal on disk after a crash
-        # is then the old (fenced) one or the new one -- both safe.
-        self._fsync_dir(path)
+        # A failure raises and the journal stays fenced.  A crash between the
+        # journal rename and the anchor rename leaves a journal/anchor id
+        # mismatch, which fences again at the next start (safe).
+        self._replace_durably(path, data)
+        self._write_anchor(path, jid)
         lp = self._legacy_fence_path()
         if os.path.exists(lp):
             os.unlink(lp)
             self._fsync_dir(lp)
-        self._journal_size, self._journal_tip = len(data), tip
-        self._journal_last, self._journal_records = lines[-1], len(recs)
+        self._set_journal_state(data, tip, lines[-1], len(recs), jid)
         self._journal_corrupt = []
         self._journal_fence = None
         self.journal_fence_clearances.append(
             {"actor": actor, "reason": reason, "ts": now, "archived": archive,
              "fence_kind": fence.get("kind"), "fence_error": str(fence.get("error")),
-             "rebinds_rejournaled": (len(recs) - 1) // 2})
+             "journal_id": jid, "rebinds_rejournaled": (len(recs) - 2) // 2})
         del self.journal_fence_clearances[:-MAX_HIVE_REBIND_RECORDS]
         logger.warning("Rebind journal fence cleared by %s (%s): old journal "
                        "archived to %s, %d applied rebind(s) re-journaled",
-                       actor, reason, archive or "<missing>", (len(recs) - 1) // 2)
+                       actor, reason, archive or "<missing>", (len(recs) - 2) // 2)
         return True
 
     def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
@@ -770,7 +963,33 @@ class HiveReducer:
 
     def rebind_plan_owner(self, agent_id: str, plan_id: str, incident_id: str,
                           *, actor: str, reason: str,
-                          allow_non_candidate: bool = False) -> bool:
+                          allow_non_candidate: bool = False) -> RebindResult:
+        """Operator owner rebind; see _rebind_plan_owner() for the contract.
+        Astra 7694: returns a RebindResult -- "applied" (truthy; durable when
+        a journal is configured), "refused" (falsy) or "uncertain" (falsy:
+        applied in memory, commit durability unknown, journal fenced)."""
+        self._rebind_op_id = ""
+        r = self._rebind_plan_owner(agent_id, plan_id, incident_id, actor=actor,
+                                    reason=reason,
+                                    allow_non_candidate=allow_non_candidate)
+        if not isinstance(r, RebindResult):
+            if r:
+                r = RebindResult(
+                    "applied", applied=True, durable=bool(self._journal_path),
+                    op_id=self._rebind_op_id,
+                    detail="pending and commit records fsync'd" if self._journal_path
+                    else "volatile_rebinds: not journaled, lost on restart")
+            else:
+                r = RebindResult("refused", applied=False, durable=False,
+                                 op_id=self._rebind_op_id,
+                                 detail="refused; see log and journal_status()")
+        self.last_rebind_result = r
+        return r
+
+    def _rebind_plan_owner(self, agent_id: str, plan_id: str, incident_id: str,
+                           *, actor: str, reason: str,
+                           allow_non_candidate: bool = False
+                           ) -> "bool | RebindResult":
         """TRUSTED-OPERATOR owner rebind for a HELD ownerless_linked plan (Ben
         msg 7547 option (a), Astra 7562).  Same contract as the local
         Reducer.rebind_plan_owner(): non-empty actor and reason; target exists,
@@ -812,6 +1031,7 @@ class HiveReducer:
                      "candidate": incident_id in self.owner_candidates.get(
                          f"{agent_id}:{plan_id}", [])}
             what = f"{agent_id}:{plan_id} -> {incident_id}"
+            self._rebind_op_id = entry["op_id"]
             for step in ("pending", "commit"):
                 rec = entry if step == "pending" else {
                     "v": JOURNAL_VERSION, "op": "rebind_commit",
@@ -836,8 +1056,9 @@ class HiveReducer:
                             applied=False)
                         return False
                     # The commit MAY be durable, so a restart may replay it.
-                    # Never report a refusal a restart could contradict: apply
-                    # it now and fence (restart: replayed, or the plan held).
+                    # Never report a refusal a restart could contradict, nor a
+                    # durable success it may not honour (Astra 7694): apply it
+                    # in memory, fence, and return an explicit UNCERTAIN.
                     self._do_rebind(agent_id, plan_id, incident_id, inc,
                                     actor=actor, reason=reason)
                     self._journal_applied.append(entry)
@@ -845,8 +1066,13 @@ class HiveReducer:
                         "commit_uncertain", f"rebind {what} APPLIED but its commit "
                         f"record may not be durable ({exc}): after a restart it "
                         "is either replayed or the plan is held again",
-                        op_id=entry["op_id"], applied=True)
-                    return True
+                        op_id=entry["op_id"], applied=True, durable=None)
+                    return RebindResult(
+                        "uncertain", applied=True, durable=None,
+                        op_id=entry["op_id"],
+                        detail=f"applied in memory; commit record durability "
+                        f"unknown ({exc}); journal fenced; after a restart it "
+                        "is replayed or the plan is held again")
                 except OSError as exc:
                     logger.error("Refused hive rebind of %s: %s record write "
                                  "failed and was rolled back durably (%s)%s", what,

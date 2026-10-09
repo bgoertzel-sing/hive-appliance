@@ -141,6 +141,7 @@ def test_refused_fsync_rebind_never_applied_after_restart(tmp_path, monkeypatch)
     jp = str(tmp_path / "rebinds.jsonl")
     s = BASE + [PLAN("p", "i", 1)]
     h = run(s, journal=jp)
+    before = open(jp, "rb").read()
     real, calls = os.fsync, []
 
     def bad_once(fd):
@@ -153,7 +154,7 @@ def test_refused_fsync_rebind_never_applied_after_restart(tmp_path, monkeypatch)
     monkeypatch.setattr(os, "fsync", bad_once)
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.setattr(os, "fsync", real)
-    assert os.path.getsize(jp) == 0                   # rolled back
+    assert open(jp, "rb").read() == before          # rolled back
     assert not os.path.exists(jp + ".fence")          # clean refusal: no fence
     assert h._plan_owner.get("a1:p") is None
     h2 = run(s, journal=jp)
@@ -254,7 +255,7 @@ def test_appliance_uses_env_journal(monkeypatch, tmp_path):
     a.reducer.register_agent("a1")
     feed(a.reducer, S_HELD)
     assert a.reducer.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    assert jp.read_text().count("\n") == 2            # pending + commit
+    assert jp.read_text().count("\n") == 3            # header + pending + commit
 
 
 def test_appliance_explicit_volatile_opt_out(monkeypatch):
@@ -281,6 +282,7 @@ def test_candidate_keys_capped_hold_kept(monkeypatch):
 def test_journal_size_cap_refuses_cleanly(monkeypatch, tmp_path):
     jp = tmp_path / "rebinds.jsonl"
     h = run(S_HELD, journal=str(jp))
+    before = jp.read_bytes()
     monkeypatch.setattr(hr, "MAX_HIVE_JOURNAL_BYTES", 10)
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    assert jp.read_bytes() == b"" and h._plan_owner.get("a1:p") is None
+    assert jp.read_bytes() == before and h._plan_owner.get("a1:p") is None

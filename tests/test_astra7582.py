@@ -99,7 +99,8 @@ def test_hive_rebind_journal_replayed_after_restart(tmp_path):
     assert hive.rebind_plan_owner("a1", "p", "i", actor="alice", reason="ticket-1",
                                   allow_non_candidate=True)
     lines = [json.loads(x) for x in open(jp) if x.strip()]
-    assert [x["op"] for x in lines] == ["rebind_pending", "rebind_commit"]
+    assert [x["op"] for x in lines] == ["journal_header", "rebind_pending",
+                                      "rebind_commit"]
     # restart: fresh reducer, same journal, replayed event stream
     _, h2 = run(FOREIGN, journal=jp)
     assert h2._plan_owner.get("a1:p") == "i"
@@ -110,7 +111,7 @@ def test_hive_rebind_journal_replayed_after_restart(tmp_path):
     assert ho(h2) == ["i", "j"]       # foreign evidence still not credited to i
     assert h2._plan_verified_steps.get("a1:p") == {1}
     # replay never re-writes the journal
-    assert len([x for x in open(jp) if x.strip()]) == 2
+    assert len([x for x in open(jp) if x.strip()]) == 3
 
 
 def test_hive_rebind_fails_closed_when_journal_unwritable(tmp_path):
