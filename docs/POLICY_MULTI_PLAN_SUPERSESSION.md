@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -121,16 +121,37 @@ accident.
   (Astra 7708). If a restore is unavoidable: stop service; restore both
   together; construct the reducer and, BEFORE any event is reduced (before
   event replay / serving), call `reset_journal(actor=..., reason=...)`. It
-  works whether or not the journal is fenced, keeps the old journal and
-  anchor byte-for-byte as `<file>.reset-<ns>` for inspection, writes a new
-  anchor (new random id) and then a new journal holding no rebinds, and
-  discards every journaled rebind. Then replay the full original event
+  works whether or not the journal is fenced, keeps the old journal (renamed
+  aside) and anchor (copied) byte-for-byte as `<file>.reset-<ns>` for
+  inspection, writes a new anchor (new random id) and then a new journal
+  holding no rebinds, and discards every journaled rebind. Then replay the full original event
   stream and re-issue, with `rebind_plan_owner()`, only the reviewed rebinds
   still wanted. `reset_journal()` raises `RuntimeError` (changing nothing)
   once any event has been reduced, because rebinds already applied in memory
   cannot be discarded; forcing a fence after replay is not a substitute,
-  since clearance keeps applied rebinds. A crash part-way through a reset
-  leaves the old journal under a new anchor, which fences at the next start.
+  since clearance keeps applied rebinds.
+- **Reset is fail-closed (Astra 7718).** `reset_journal()` commits to its
+  decision before touching the disk: (1) in memory it discards every pending
+  journaled rebind and fences the journal (`reset_in_progress`); (2) it
+  creates a durable reset-intent marker `<journal>.reset-intent` (written,
+  fsync'd, directory fsync'd); (3) it renames the old journal aside and
+  copies the old anchor; (4) it writes the new anchor, then the new journal;
+  (5) it moves old fence files aside and finally removes the marker (directory
+  fsync'd) -- only that completes the reset. While the marker exists, every
+  start fences (`reset_incomplete`, `journal_status()["reset_in_progress"]`)
+  before anything is created, adopted or replayed. Any error during the
+  reset leaves the running process fenced (`reset_failed`, with
+  `failed_step`), the discarded rebinds stay discarded (event replay applies
+  none), and the failure is recorded in `journal_resets` with
+  `status: "failed"`. To finish, retry `reset_journal()` (before any event) or
+  call `clear_journal_fence()`: after a failed or interrupted reset clearance
+  re-journals NO rebind and removes the marker only once the new pair is
+  durable. Limits: if the process dies (or the error hits) before the marker
+  itself is durable, nothing has changed on disk and the old pair is intact --
+  the error is raised with `intent_durable: false`; keep the service stopped
+  and retry `reset_journal()` before any replay. If only the final marker
+  removal fails, the new pair is complete; a surviving marker just fences
+  the next start.
 - **Record integrity and chain.** Every record carries `prev` (the
   `rec_hash` of the record before it, `""` for the header) and its own
   `rec_hash` (SHA-256 of all its other fields). A reordered, inserted or
@@ -231,5 +252,6 @@ accident.
   provenance below these caps are deliberately never dropped.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
-  `tests/test_astra7701.py`, `tests/test_astra7708.py`.
+  `tests/test_astra7701.py`, `tests/test_astra7708.py`,
+  `tests/test_astra7718.py`.
 

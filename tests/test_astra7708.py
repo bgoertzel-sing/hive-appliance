@@ -104,4 +104,6 @@ def test_crash_between_new_anchor_and_new_journal_fences(tmp_path, monkeypatch):
     monkeypatch.undo()
     for _ in range(2):
         h2 = run(S, journal=jp)                          # old journal, new anchor
-        assert h2.journal_status()["fence"]["kind"] == "identity" and _held(h2)
+        # Astra 7718: the durable reset-intent marker fences first
+        assert h2.journal_status()["fence"]["kind"] == "reset_incomplete"
+        assert _held(h2)

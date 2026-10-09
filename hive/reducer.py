@@ -181,6 +181,9 @@ class HiveReducer:
         self._journal_applied: list[dict[str, Any]] = []
         self.journal_fence_clearances: list[dict[str, Any]] = []
         self.journal_resets: list[dict[str, Any]] = []   # Astra 7708
+        # Astra 7718: True after a failed/interrupted reset_journal(): no
+        # pre-reset rebind may be replayed or re-journaled by clearance.
+        self._reset_discard = False
         self.plans_refused_cap = 0
         self._journal_pending: list[dict[str, Any]] = (
             self._open_journal(rebind_journal) if rebind_journal else [])
@@ -585,6 +588,16 @@ class HiveReducer:
         matching anchor ALWAYS fences, whatever it contains."""
         idp = self._id_path(path)
         try:
+            if os.path.lexists(self._reset_intent_path(path)):
+                self._reset_discard = True       # Astra 7718
+                self._set_fence(
+                    "reset_incomplete", f"reset-intent marker "
+                    f"{self._reset_intent_path(path)} present: a reset_journal() "
+                    "was interrupted or failed; nothing is created, adopted or "
+                    "replayed. Retry reset_journal(actor=..., reason=...) before "
+                    "any event (or call clear_journal_fence(), which re-journals "
+                    "no rebind)", found_at_startup=True)
+                return []
             exists = os.path.lexists(path)
             data = b""
             if exists:
@@ -853,6 +866,8 @@ class HiveReducer:
             "corrupt_records": self._journal_corrupt,
             "fence_clearances": self.journal_fence_clearances,
             "journal_resets": self.journal_resets,
+            "reset_in_progress": bool(self._journal_path) and os.path.lexists(
+                self._reset_intent_path(self._journal_path)),
             "plans_refused_cap": self.plans_refused_cap})
 
     def journal_unapplied(self) -> list[dict[str, Any]]:
@@ -897,7 +912,13 @@ class HiveReducer:
                  "prev": hdr["rec_hash"]}
         reset["rec_hash"] = self._rec_hash(reset)
         recs, tip = [hdr, reset], reset["rec_hash"]
-        for e in list(self._journal_applied) + list(self._journal_pending):
+        # Astra 7718: after a failed/interrupted reset nothing is carried over
+        carry = [] if self._reset_discard else (
+            list(self._journal_applied) + list(self._journal_pending))
+        if self._reset_discard:
+            reset["after_failed_reset"] = True
+            reset["rec_hash"] = tip = self._rec_hash(reset)
+        for e in carry:
             pr = {k: v for k, v in e.items() if k not in ("prev", "rec_hash")}
             pr["prev"] = tip
             pr["rec_hash"] = tip = self._rec_hash(pr)
@@ -920,6 +941,15 @@ class HiveReducer:
             if os.path.lexists(lp):
                 os.replace(lp, f"{lp}.cleared-{stamp}")
                 self._fsync_dir(lp)
+        # Astra 7718: a reset-intent marker is removed only once the new
+        # (rebind-free) pair is durable
+        ip = self._reset_intent_path(path)
+        if os.path.lexists(ip):
+            os.unlink(ip)
+            self._fsync_dir(ip)
+        if self._reset_discard:
+            self._journal_pending = []
+            self._reset_discard = False
         self._set_journal_state(data, tip, lines[-1], len(recs), jid)
         self._journal_corrupt = []
         self._journal_fence = None
@@ -933,23 +963,39 @@ class HiveReducer:
                        actor, reason, archive or "<missing>", (len(recs) - 2) // 2)
         return True
 
+    @staticmethod
+    def _reset_intent_path(path: str) -> str:
+        return f"{path}.reset-intent"
+
     def reset_journal(self, actor: str, reason: str) -> dict[str, Any]:
-        """Astra 7708 F-joint-rollback-doc-scope: operator command that forces
-        a FRESH journal and identity, discarding every journaled rebind.
+        """Astra 7708/7718: operator command that forces a FRESH journal and
+        identity, discarding every journaled rebind.
 
         For recovery after the journal and its <journal>.id may have been
         rolled back together (a self-consistent older pair, which startup
         cannot detect and clear_journal_fence() leaves alone because it is
         healthy).  Must be called on a freshly constructed reducer BEFORE any
-        event is reduced (before event replay / serving); otherwise raises
-        RuntimeError and changes nothing.  Works whether or not the journal is
-        fenced.  The old journal and anchor are kept byte-for-byte as
-        <file>.reset-<ns> (fsync'd); then a new anchor (new random id) and a
-        new journal (header + journal_reset record, no rebinds) are written.
-        No journaled rebind is carried over: re-issue, after replay, only the
-        rebinds still wanted.  Raises OSError on a write failure (a crash or
-        failure part-way leaves an id mismatch, which fences at the next
-        start; nothing old is replayed)."""
+        event is reduced; otherwise raises RuntimeError and changes nothing.
+
+        Fail-closed order (Astra 7718):
+          1. in memory: every pending journaled rebind is discarded and the
+             journal is fenced ("reset_in_progress") before any disk work;
+          2. a durable reset-intent marker <journal>.reset-intent is created
+             (O_EXCL, fsync'd, directory fsync'd).  While it exists, startup
+             fences ("reset_incomplete") before anything else, replays
+             nothing, and clear_journal_fence() re-journals no rebind;
+          3. the old journal is renamed aside to <journal>.reset-<ns> (dir
+             fsync'd); the old anchor is copied to <journal>.id.reset-<ns>;
+          4. new anchor, then new journal (header + journal_reset record);
+          5. old fence files moved aside; the marker is removed (dir fsync'd)
+             -- only this makes the reset complete and the journal healthy.
+        Any error or crash leaves the journal fenced: live as "reset_failed"
+        (pending stays discarded; replay and clearance carry nothing), on
+        disk via the marker.  Retry reset_journal() (or clear_journal_fence())
+        to finish.  Boundary: if step 2 itself fails, no durable evidence
+        exists and the old pair is unchanged on disk -- the failure is raised
+        and reported (intent_durable=False); keep the service stopped and
+        retry before any replay."""
         if not (isinstance(actor, str) and actor.strip()):
             raise ValueError("reset_journal requires a non-empty actor")
         if not (isinstance(reason, str) and reason.strip()):
@@ -962,48 +1008,102 @@ class HiveReducer:
                 "before any event is reduced (before event replay/serving): "
                 "rebinds already applied in memory cannot be discarded")
         path = self._journal_path
+        idp, ip = self._id_path(path), self._reset_intent_path(path)
         stamp = time.time_ns()
-        archived: dict[str, str] = {}
-        for src in (path, self._id_path(path)):
-            try:
-                with open(src, "rb") as f:
-                    old = f.read()
-            except FileNotFoundError:
-                continue
-            dst = f"{src}.reset-{stamp}"
-            self._write_file_durably(dst, old)
-            archived[src] = dst
         now = time.time()
-        jid = uuid.uuid4().hex
-        hdr = self._header_record(jid)
-        rst = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
-               "reason": reason, "ts": now, "fence_error": "",
-               "forced_fresh": True, "archived": archived.get(path, ""),
-               "archived_journal_id": self._journal_id, "prev": hdr["rec_hash"]}
-        rst["rec_hash"] = self._rec_hash(rst)
-        lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8")
-                 for r in (hdr, rst)]
-        data = b"".join(lines)
-        # Anchor first (as at creation): a crash between the two leaves the
-        # old journal under a new anchor -> id mismatch -> fenced, not replayed.
-        self._write_anchor(path, jid)
-        self._replace_durably(path, data)
-        for sfx in self.LEGACY_MARKER_SUFFIXES:
-            lp = path + sfx
-            if os.path.lexists(lp):
-                os.replace(lp, f"{lp}.cleared-{stamp}")
-                self._fsync_dir(lp)
+        was = self._journal_fence
+        old_jid = self._journal_id
+        # (1) fail closed in memory FIRST (F-reset-error-live-pending)
         discarded = list(self._journal_pending)
         for e in discarded:
             self._mark_unapplied(e, f"discarded by reset_journal ({actor}: {reason})")
         self._journal_pending = []
-        fence = self._journal_fence
+        self._reset_discard = True
+        self._set_fence("reset_in_progress", f"reset_journal by {actor} "
+                        f"({reason}) in progress; every pre-reset journaled "
+                        "rebind is discarded")
+        archived: dict[str, str] = {}
+        step = "create reset-intent marker"
+        try:
+            # (2) durable intent (F-reset-interruption-replays-restored-pair)
+            if not os.path.lexists(ip):
+                self._write_file_durably(ip, (json.dumps(
+                    {"v": JOURNAL_VERSION, "op": "reset_intent", "actor": actor,
+                     "reason": reason, "ts": now, "old_journal_id": old_jid},
+                    sort_keys=True) + "\n").encode("utf-8"))
+            # (3) old journal aside (rename), old anchor copied
+            step = "move old journal aside"
+            if os.path.lexists(path):
+                dst = f"{path}.reset-{stamp}"
+                os.replace(path, dst)
+                self._fsync_dir(dst)
+                archived[path] = dst
+            step = "archive old anchor"
+            try:
+                with open(idp, "rb") as f:
+                    old_anchor: bytes | None = f.read()
+            except FileNotFoundError:
+                old_anchor = None
+            if old_anchor is not None:
+                dst = f"{idp}.reset-{stamp}"
+                self._write_file_durably(dst, old_anchor)
+                archived[idp] = dst
+            # (4) new anchor first, then new journal
+            jid = uuid.uuid4().hex
+            hdr = self._header_record(jid)
+            rst = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
+                   "reason": reason, "ts": now, "fence_error": "",
+                   "forced_fresh": True, "archived": archived.get(path, ""),
+                   "archived_journal_id": old_jid, "prev": hdr["rec_hash"]}
+            rst["rec_hash"] = self._rec_hash(rst)
+            lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8")
+                     for r in (hdr, rst)]
+            data = b"".join(lines)
+            step = "write new anchor"
+            self._write_anchor(path, jid)
+            step = "write new journal"
+            self._replace_durably(path, data)
+            # (5) old fence files aside, then the commit point
+            step = "move old fence files aside"
+            for sfx in self.LEGACY_MARKER_SUFFIXES:
+                lp = path + sfx
+                if os.path.lexists(lp):
+                    os.replace(lp, f"{lp}.cleared-{stamp}")
+                    self._fsync_dir(lp)
+            step = "remove reset-intent marker"
+            os.unlink(ip)
+            self._fsync_dir(ip)
+        except BaseException as exc:
+            durable = os.path.lexists(ip)
+            self._set_fence(
+                "reset_failed", f"reset_journal by {actor} ({reason}) FAILED at "
+                f"step '{step}': {exc!r}. Every pre-reset journaled rebind stays "
+                "discarded (not replayed, not re-journaled by clearance). " + (
+                    "The reset-intent marker is durable: every start fences "
+                    "until reset_journal() is retried successfully or "
+                    "clear_journal_fence() is called." if durable else
+                    "The new rebind-free journal and anchor are complete and "
+                    "the marker was unlinked (its removal may not be durable; "
+                    "if it survives, the next start fences): a restart is safe."
+                    if step == "remove reset-intent marker" else
+                    "NO durable reset intent was recorded and the old journal "
+                    "is unchanged on disk, so a restart WOULD replay it: keep "
+                    "the service stopped and retry reset_journal() before any "
+                    "replay."), failed_step=step, intent_durable=durable)
+            self.journal_resets.append(
+                {"actor": actor, "reason": reason, "ts": now, "status": "failed",
+                 "failed_step": step, "error": repr(exc), "archived": archived,
+                 "intent_durable": durable, "rebinds_discarded": len(discarded)})
+            del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
+            raise
         self._set_journal_state(data, rst["rec_hash"], lines[-1], 2, jid)
         self._journal_corrupt = []
         self._journal_fence = None
-        info = {"actor": actor, "reason": reason, "ts": now, "archived": archived,
-                "journal_id": jid, "rebinds_discarded": len(discarded),
-                "was_fenced": None if fence is None else fence.get("kind")}
+        self._reset_discard = False
+        info = {"actor": actor, "reason": reason, "ts": now, "status": "completed",
+                "archived": archived, "journal_id": jid,
+                "rebinds_discarded": len(discarded),
+                "was_fenced": None if was is None else was.get("kind")}
         self.journal_resets.append(info)
         del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
         logger.warning("Rebind journal RESET by %s (%s): fresh journal %s, old "
@@ -1024,7 +1124,7 @@ class HiveReducer:
     def _replay_journal(self) -> None:
         """F-journal-order (Astra 7638): apply an entry exactly at the event
         position where it originally happened, never earlier or later."""
-        if not self._journal_pending:
+        if not self._journal_pending or self._reset_discard:   # Astra 7718
             return
         keep = []
         for e in self._journal_pending:
