@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741/7750)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -176,7 +176,14 @@ accident.
   `reset_journal()` move such an entry aside intact (`.cleared-<ns>` /
   `.reset-<ns>`) before writing a regular file. At runtime the journal is
   opened with `O_NOFOLLOW` and must still be a regular file, otherwise it
-  fences `changed` (Astra 7741). Limits: if the
+  fences `changed` (Astra 7741). Every open of a journal-namespace file
+  (journal, `.id` anchor, reset-intent marker) is `O_NONBLOCK | O_NOFOLLOW`,
+  `fstat`'d on the descriptor and refused unless it is a regular file before
+  any read or write; blocking mode is restored only after that check, so a
+  FIFO swapped in (at startup, between `lstat` and `open`, during
+  `verify_journal()` or before an append) can never hang the service. A
+  FIFO, directory or symlink swapped in for the journal at runtime fences
+  `changed` and marks the journal unhealthy (Astra 7750). Limits: if the
   process dies or the error hits before that confirmation, the old journal
   and `.id` are unchanged on disk, but something may already have changed: a
   marker, possibly empty or partial, can exist without being durable and may
@@ -289,5 +296,5 @@ accident.
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
   `tests/test_astra7718.py`, `tests/test_astra7727.py`,
-  `tests/test_astra7734.py`, `tests/test_astra7741.py`.
+  `tests/test_astra7734.py`, `tests/test_astra7741.py`, `tests/test_astra7750.py`.
 

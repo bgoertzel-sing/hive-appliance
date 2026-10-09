@@ -114,6 +114,25 @@ class _NotRegularFile(ValueError):
                          f"({_stat.filemode(mode)})")
 
 
+def _open_regular_fd(path: str, flags: int, what: str
+                     ) -> "tuple[int, os.stat_result]":
+    """Astra 7750: open a journal-namespace file without ever blocking on it.
+    Opened with O_NONBLOCK | O_NOFOLLOW (a FIFO with no peer cannot hang the
+    open, a symlink fails ELOOP), then fstat'd on the descriptor: anything that
+    is not a regular file raises _NotRegularFile BEFORE any read or write.
+    Blocking mode is restored only after that check.  Returns (fd, fstat)."""
+    fd = os.open(path, flags | os.O_NONBLOCK | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        st = os.fstat(fd)
+        if not _stat.S_ISREG(st.st_mode):
+            raise _NotRegularFile(path, what, st.st_mode)
+        os.set_blocking(fd, True)
+    except BaseException:
+        os.close(fd)
+        raise
+    return fd, st
+
+
 class HiveReducer:
     """Processes HiveEvents and maintains HiveState.
 
@@ -404,7 +423,8 @@ class HiveReducer:
 
     @staticmethod
     def _fsync_dir(path: str) -> None:
-        dfd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
+        dfd = os.open(os.path.dirname(os.path.abspath(path)),
+                      os.O_RDONLY | os.O_NONBLOCK | getattr(os, "O_DIRECTORY", 0))
         try:
             os.fsync(dfd)
         finally:
@@ -491,9 +511,12 @@ class HiveReducer:
                 f"({_stat.filemode(st.st_mode)}); its durability cannot be "
                 "confirmed. With the service stopped, remove it and retry "
                 "reset_journal() before any event"), path)
-        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:                                    # Astra 7750: non-blocking
+            fd, fst = _open_regular_fd(path, os.O_RDONLY, "reset-intent marker")
+        except _NotRegularFile as exc:
+            raise OSError(errno.ESTALE, f"reset-intent marker changed while it "
+                          f"was being confirmed ({exc})", path) from exc
         try:
-            fst = os.fstat(fd)
             if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
                     or fst.st_dev != st.st_dev):
                 raise OSError(errno.ESTALE, "reset-intent marker changed while "
@@ -550,13 +573,15 @@ class HiveReducer:
             return None
         if not _stat.S_ISREG(st.st_mode):
             raise _NotRegularFile(path, what, st.st_mode)
-        try:
-            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:                                    # Astra 7750: non-blocking
+            fd, fst = _open_regular_fd(path, os.O_RDONLY, what)
         except FileNotFoundError as exc:
             raise OSError(errno.ESTALE, f"{what} vanished between lstat and "
                           f"open ({exc})", path) from exc
+        except _NotRegularFile as exc:
+            raise OSError(errno.ESTALE, f"{what} changed while it was being "
+                          f"opened ({exc})", path) from exc
         try:
-            fst = os.fstat(fd)
             if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
                     or fst.st_dev != st.st_dev):
                 raise OSError(errno.ESTALE, f"{what} changed while it was being "
@@ -919,10 +944,10 @@ class HiveReducer:
             return True
         if self._journal_fence is not None:
             return False
-        try:
-            fd = os.open(self._journal_path,
-                         os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-        except OSError as exc:
+        try:                                    # Astra 7750: non-blocking
+            fd, _ = _open_regular_fd(self._journal_path, os.O_RDONLY,
+                                     "rebind journal")
+        except (OSError, _NotRegularFile) as exc:
             self._set_fence("changed", f"journal cannot be opened ({exc})")
             return False
         try:
@@ -943,14 +968,21 @@ class HiveReducer:
         rec["prev"] = self._journal_tip
         rec["rec_hash"] = self._rec_hash(rec)
         data = (json.dumps(rec, sort_keys=True) + "\n").encode("utf-8")
-        try:
-            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND
-                         | getattr(os, "O_NOFOLLOW", 0))
+        try:                                    # Astra 7750: non-blocking
+            fd, _ = _open_regular_fd(self._journal_path, os.O_RDWR | os.O_APPEND,
+                                     "rebind journal")
         except FileNotFoundError as exc:
             raise _JournalChanged(f"journal file is missing ({exc})") from exc
+        except _NotRegularFile as exc:          # fifo, socket, ...
+            raise _JournalChanged(str(exc)) from exc
         except OSError as exc:
-            if exc.errno == errno.ELOOP:            # Astra 7741: now a symlink
-                raise _JournalChanged(f"journal entry is a symlink ({exc})") from exc
+            # Astra 7741/7750: symlink (ELOOP), directory (EISDIR), fifo with
+            # no reader (ENXIO) or a non-directory parent: the entry was
+            # replaced -> "changed" fence, never a silent healthy refusal
+            if exc.errno in (errno.ELOOP, errno.EISDIR, errno.ENXIO,
+                             errno.ENOTDIR):
+                raise _JournalChanged(f"journal entry was replaced by a "
+                                      f"non-regular file ({exc})") from exc
             raise
         try:
             size, sha = self._verify_on_disk(fd)

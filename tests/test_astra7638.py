@@ -193,7 +193,11 @@ def test_short_or_failed_write_is_clean_refusal(tmp_path):
     h = run(BASE + [PLAN("p", "i", 1)], journal=str(tmp_path / "j.jsonl"))
     h._journal_path = str(tmp_path)                   # a directory
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    assert h.journal_status()["healthy"] is True
+    assert h._plan_owner.get("a1:p") is None          # clean refusal
+    # Astra 7750 Low: a directory in place of the journal is a replaced entry
+    # -> "changed" fence and unhealthy (previously reported healthy)
+    st = h.journal_status()
+    assert st["healthy"] is False and st["fence"]["kind"] == "changed"
 
 
 # ------------------------------------------------ 4 F-journal-tail
