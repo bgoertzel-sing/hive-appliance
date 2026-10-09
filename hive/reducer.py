@@ -7,10 +7,12 @@ rollup, resource aggregation, and drift detection.
 from __future__ import annotations
 
 import copy
+import errno
 import hashlib
 import json
 import logging
 import os
+import stat as _stat
 import time
 import uuid
 from types import SimpleNamespace
@@ -441,18 +443,52 @@ class HiveReducer:
                 pass
             raise
 
+    @staticmethod
+    def _lexists_strict(path: str) -> bool:
+        """Astra 7734: presence check that never turns a metadata error into
+        "absent".  Only ENOENT means absent; any other lstat error (EIO,
+        EACCES, ENOTDIR, ...) is raised.  os.path.lexists()/isfile() must not
+        be used for journal, anchor, marker or fence-file decisions."""
+        try:
+            os.lstat(path)
+        except FileNotFoundError:
+            return False
+        return True
+
+    def _presence(self, path: str) -> "tuple[bool | None, str]":
+        """(True/False, "") or (None, error) when presence is unknown."""
+        try:
+            return self._lexists_strict(path), ""
+        except OSError as exc:
+            return None, repr(exc)
+
     def _sync_existing_durably(self, path: str) -> None:
-        """Astra 7727: make an ALREADY-PRESENT file durable before relying on
-        it: a regular file is opened (no symlink following) and fsync'd, then
-        its directory is fsync'd.  Other entry types (symlink, directory) only
-        need their directory entry, so only the directory is fsync'd.  Raises
-        OSError if any step fails (e.g. an unreadable mode-000 file)."""
-        if os.path.isfile(path) and not os.path.islink(path):
-            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-            try:
-                os.fsync(fd)
-            finally:
-                os.close(fd)
+        """Astra 7727/7734: make an ALREADY-PRESENT reset-intent marker
+        durable before relying on it.  Classification uses os.lstat(), whose
+        errors (EIO, EACCES, ...) propagate -- an unreadable type is never
+        treated as "not a file".  Only a regular file is accepted: it is opened
+        without following symlinks, re-checked to be the same regular file,
+        fsync'd, and then its directory is fsync'd.  Any other entry type
+        (symlink, directory, fifo, ...) is rejected conservatively: OSError is
+        raised, so its durability is never reported as confirmed.  Raises
+        OSError if any step fails."""
+        st = os.lstat(path)
+        if not _stat.S_ISREG(st.st_mode):
+            raise OSError(errno.EINVAL, (
+                f"reset-intent marker is not a regular file "
+                f"({_stat.filemode(st.st_mode)}); its durability cannot be "
+                "confirmed. With the service stopped, remove it and retry "
+                "reset_journal() before any event"), path)
+        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            fst = os.fstat(fd)
+            if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
+                    or fst.st_dev != st.st_dev):
+                raise OSError(errno.ESTALE, "reset-intent marker changed while "
+                              "it was being confirmed", path)
+            os.fsync(fd)
+        finally:
+            os.close(fd)
         self._fsync_dir(path)
 
     def _legacy_fence_path(self, path: str | None = None) -> str:
@@ -557,7 +593,7 @@ class HiveReducer:
         old fence marker files (<journal>.fence, <journal>.fence.tmp) and a
         journal holding any v1-v4 record (incl. cancelled/abort records)."""
         found = [path + sfx for sfx in self.LEGACY_MARKER_SUFFIXES
-                 if os.path.lexists(path + sfx)]
+                 if self._lexists_strict(path + sfx)]
         first = None
         for n, raw in enumerate(data.split(b"\n"), 1):
             if not raw.strip():
@@ -602,7 +638,12 @@ class HiveReducer:
         matching anchor ALWAYS fences, whatever it contains."""
         idp = self._id_path(path)
         try:
-            if os.path.lexists(self._reset_intent_path(path)):
+            try:
+                ipresent = self._lexists_strict(self._reset_intent_path(path))
+                ierr = ""
+            except OSError as exc:            # Astra 7734: unknown != absent
+                ipresent, ierr = True, repr(exc)
+            if ipresent:
                 self._reset_discard = True       # Astra 7718
                 self._set_fence(
                     "reset_incomplete", f"reset-intent marker "
@@ -610,9 +651,14 @@ class HiveReducer:
                     "was interrupted or failed; nothing is created, adopted or "
                     "replayed. Retry reset_journal(actor=..., reason=...) before "
                     "any event (or call clear_journal_fence(), which re-journals "
-                    "no rebind)", found_at_startup=True)
+                    "no rebind)" + (
+                        f". Its presence could not be inspected ({ierr}) and "
+                        "is treated as present" if ierr else ""),
+                    found_at_startup=True, **({"intent_present": None,
+                                               "presence_error": ierr}
+                                              if ierr else {}))
                 return []
-            exists = os.path.lexists(path)
+            exists = self._lexists_strict(path)
             data = b""
             if exists:
                 with open(path, "rb") as f:
@@ -880,8 +926,9 @@ class HiveReducer:
             "corrupt_records": self._journal_corrupt,
             "fence_clearances": self.journal_fence_clearances,
             "journal_resets": self.journal_resets,
-            "reset_in_progress": bool(self._journal_path) and os.path.lexists(
-                self._reset_intent_path(self._journal_path)),
+            # Astra 7734: None = unknown (presence could not be inspected)
+            "reset_in_progress": bool(self._journal_path) and self._presence(
+                self._reset_intent_path(self._journal_path))[0],
             "plans_refused_cap": self.plans_refused_cap})
 
     def journal_unapplied(self) -> list[dict[str, Any]]:
@@ -952,13 +999,13 @@ class HiveReducer:
         # leaves them in place, which fences again at the next start (safe).
         for sfx in self.LEGACY_MARKER_SUFFIXES:
             lp = path + sfx
-            if os.path.lexists(lp):
+            if self._lexists_strict(lp):
                 os.replace(lp, f"{lp}.cleared-{stamp}")
                 self._fsync_dir(lp)
         # Astra 7718: a reset-intent marker is removed only once the new
         # (rebind-free) pair is durable
         ip = self._reset_intent_path(path)
-        if os.path.lexists(ip):
+        if self._lexists_strict(ip):
             os.unlink(ip)
             self._fsync_dir(ip)
         if self._reset_discard:
@@ -1046,9 +1093,12 @@ class HiveReducer:
         # new marker inside _write_file_durably; for a pre-existing one by
         # re-syncing it).  Marker presence alone never counts as durable.
         established = False
+        # Astra 7734: what actually completed on disk, for an accurate report
+        done: list[str] = []
+        unlinked = new_pair = False
         try:
             # (2) durable intent (F-reset-interruption-replays-restored-pair)
-            if not os.path.lexists(ip):
+            if not self._lexists_strict(ip):
                 self._write_file_durably(ip, (json.dumps(
                     {"v": JOURNAL_VERSION, "op": "reset_intent", "actor": actor,
                      "reason": reason, "ts": now, "old_journal_id": old_jid},
@@ -1057,13 +1107,15 @@ class HiveReducer:
                 step = "confirm existing reset-intent marker"
                 self._sync_existing_durably(ip)
             established = True
+            done.append("reset-intent marker confirmed durable")
             # (3) old journal aside (rename), old anchor copied
             step = "move old journal aside"
-            if os.path.lexists(path):
+            if self._lexists_strict(path):
                 dst = f"{path}.reset-{stamp}"
                 os.replace(path, dst)
-                self._fsync_dir(dst)
                 archived[path] = dst
+                done.append(f"old journal renamed to {dst}")
+                self._fsync_dir(dst)
             step = "archive old anchor"
             try:
                 with open(idp, "rb") as f:
@@ -1074,6 +1126,7 @@ class HiveReducer:
                 dst = f"{idp}.reset-{stamp}"
                 self._write_file_durably(dst, old_anchor)
                 archived[idp] = dst
+                done.append(f"old anchor copied to {dst}")
             # (4) new anchor first, then new journal
             jid = uuid.uuid4().hex
             hdr = self._header_record(jid)
@@ -1087,50 +1140,75 @@ class HiveReducer:
             data = b"".join(lines)
             step = "write new anchor"
             self._write_anchor(path, jid)
+            done.append(f"new anchor {jid} written")
             step = "write new journal"
             self._replace_durably(path, data)
+            done.append("new rebind-free journal written")
+            new_pair = True
             # (5) old fence files aside, then the commit point
             step = "move old fence files aside"
             for sfx in self.LEGACY_MARKER_SUFFIXES:
                 lp = path + sfx
-                if os.path.lexists(lp):
+                if self._lexists_strict(lp):
                     os.replace(lp, f"{lp}.cleared-{stamp}")
                     self._fsync_dir(lp)
+                    done.append(f"old fence file {lp} moved aside")
             step = "remove reset-intent marker"
             os.unlink(ip)
+            unlinked = True
+            done.append("reset-intent marker unlinked")
             self._fsync_dir(ip)
         except BaseException as exc:
-            present = os.path.lexists(ip)
-            durable = established and present
-            if durable:
-                tail = ("The reset-intent marker is durable (file and directory "
-                        "fsync confirmed): every start fences until "
+            # Astra 7734: a failed presence check is "unknown", never "absent"
+            present, perr = self._presence(ip)
+            durable = established and not unlinked and present is True
+            pres_txt = {True: "a marker is visible", False: "no marker is "
+                        "visible", None: f"marker presence UNKNOWN (inspection "
+                        f"failed: {perr})"}[present]
+            did = ("Completed on disk before the failure: " + "; ".join(done)
+                   + ". ") if done else ""
+            if new_pair:
+                tail = (did + "The new rebind-free journal and anchor are "
+                        "complete; " + pres_txt + (
+                            " (its removal may not be durable)" if unlinked
+                            else " (the marker was NOT unlinked)" if present
+                            else " (whether the marker was removed is not "
+                            "known)" if present is None else "") + ". A "
+                        "surviving marker only fences the next start: a "
+                        "restart is safe.")
+            elif durable:
+                tail = (did + "The reset-intent marker is durable (file and "
+                        "directory fsync confirmed): every start fences until "
                         "reset_journal() is retried successfully or "
                         "clear_journal_fence() is called.")
-            elif established and step == "remove reset-intent marker":
-                tail = ("The new rebind-free journal and anchor are complete and "
-                        "the marker was unlinked (its removal may not be "
-                        "durable; if it survives, the next start fences): a "
-                        "restart is safe.")
-            else:
+            elif step in ("create reset-intent marker",
+                          "confirm existing reset-intent marker"):
                 tail = ("Durability of the reset-intent marker was NOT "
-                        "confirmed (" + (
-                            "a marker, possibly empty or partial, is visible "
-                            "now but may not survive a crash" if present else
-                            "no marker is present") + "). The old journal and "
-                        ".id are unchanged on disk (at most a marker was "
+                        "confirmed (" + {
+                            True: "a marker, possibly empty or partial, is "
+                            "visible now but may not survive a crash",
+                            False: "no marker is present",
+                            None: pres_txt}[present] + "). The old journal "
+                        "and .id are unchanged on disk (at most a marker was "
                         "written), so a restart MAY replay them: keep the "
                         "service stopped and retry reset_journal() before any "
                         "replay.")
+            else:
+                tail = (did + f"The step '{step}' may have partly happened. "
+                        "Durability of the reset-intent marker is NOT "
+                        "confirmed now (" + pres_txt + "). Keep the service "
+                        "stopped and retry reset_journal() before any replay.")
             self._set_fence(
                 "reset_failed", f"reset_journal by {actor} ({reason}) FAILED at "
                 f"step '{step}': {exc!r}. Every pre-reset journaled rebind stays "
                 "discarded (not replayed, not re-journaled by clearance). " + tail,
-                failed_step=step, intent_durable=durable, intent_present=present)
+                failed_step=step, intent_durable=durable, intent_present=present,
+                completed_steps=list(done), **({"presence_error": perr}
+                                               if perr else {}))
             self.journal_resets.append(
                 {"actor": actor, "reason": reason, "ts": now, "status": "failed",
                  "failed_step": step, "error": repr(exc), "archived": archived,
-                 "intent_present": present,
+                 "intent_present": present, "completed_steps": list(done),
                  "intent_durable": durable, "rebinds_discarded": len(discarded)})
             del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
             raise

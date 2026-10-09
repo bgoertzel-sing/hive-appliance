@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -150,7 +150,21 @@ accident.
   `journal_resets`) is `true` ONLY once the marker's file fsync AND
   directory fsync have both succeeded; a marker that already existed is first
   re-synced (regular file opened and fsync'd, then its directory). Marker
-  presence alone is never reported as durable (Astra 7727). Limits: if the
+  presence alone is never reported as durable (Astra 7727). A
+  pre-existing marker is classified with `os.lstat()`, whose errors
+  propagate: a stat failure (EIO, EACCES, ...) is never read as "not a
+  file", so the reset fails with `intent_durable: false`. Only a regular-file
+  marker can be confirmed; a symlink, directory or other entry type is
+  rejected (`intent_durable: false`; startup still fences on it -- with the
+  service stopped, remove it and retry). Startup, reset and clearance decide
+  presence of the journal, anchor, marker and old fence files with a strict
+  check where only ENOENT means "absent"; any other metadata error fences
+  (startup) or raises (reset/clear), never "absent". In a failed reset,
+  `intent_present` is `null` (with `presence_error`) when the marker could not
+  be inspected, and the message and `completed_steps` list only the steps
+  that actually completed (e.g. "old journal renamed to ..."); it never
+  claims the old pair is unchanged after the old journal was moved, nor that
+  the marker was unlinked unless the unlink succeeded (Astra 7734). Limits: if the
   process dies or the error hits before that confirmation, the old journal
   and `.id` are unchanged on disk, but something may already have changed: a
   marker, possibly empty or partial, can exist without being durable and may
@@ -262,5 +276,6 @@ accident.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
-  `tests/test_astra7718.py`, `tests/test_astra7727.py`.
+  `tests/test_astra7718.py`, `tests/test_astra7727.py`,
+  `tests/test_astra7734.py`.
 
