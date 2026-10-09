@@ -1,0 +1,208 @@
+{
+  "unsafe_predicate_calls": [],
+  "exception_handlers": [
+    {
+      "file": "hive/adapter.py",
+      "line": 167,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Agent %s action %s failed', agent_id, action.kind.value)\n    return HiveActionResult(action_id=action.id, success=False, output='Exception during action execution')"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 132,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error during event polling')\n    result['errors'].append('event_poll_failed')\n    events = []"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 161,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error during action planning')\n    result['errors'].append('planning_failed')\n    actions = []"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 143,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error reducing event %s', hevt.id)\n    result['errors'].append(f'reduce_failed:{hevt.id}')"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 187,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error polling health from agent %s', agent_id)\n    result.setdefault('errors', []).append(f'health_poll_failed:{agent_id}')"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 208,
+      "type": "Exception",
+      "body": "except Exception as exc:\n    logger.exception('Error executing action %s on %s', action.id, target)\n    agent_results[target] = {'success': False, 'error': str(exc)}"
+    },
+    {
+      "file": "hive/appliance.py",
+      "line": 260,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Unexpected error in hive tick')"
+    },
+    {
+      "file": "hive/dashboard.py",
+      "line": 107,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error generating text report')\n    return 'ERROR: Could not generate health report'"
+    },
+    {
+      "file": "hive/event_bus.py",
+      "line": 82,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error polling events from agent %s', agent_id)\n    return []"
+    },
+    {
+      "file": "hive/event_bus.py",
+      "line": 120,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Subscriber %s failed on event %s', sub, hevt.id)"
+    },
+    {
+      "file": "hive/planner.py",
+      "line": 69,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Custom planning rule %s failed', rule)"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 439,
+      "type": "OSError",
+      "body": "except OSError:\n    try:\n        os.unlink(path)\n    except OSError:\n        pass\n    raise"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 454,
+      "type": "FileNotFoundError",
+      "body": "except FileNotFoundError:\n    return False"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 462,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    return (None, repr(exc))"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 533,
+      "type": "FileNotFoundError",
+      "body": "except FileNotFoundError:\n    return None"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 550,
+      "type": "OSError",
+      "body": "except OSError:\n    try:\n        os.unlink(tmp)\n    except OSError:\n        pass\n    raise"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 673,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    self._set_fence('unwritable', f'rebind journal cannot be created or read ({exc}); no journaled rebind is replayed', found_at_startup=True)\n    return []"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 817,
+      "type": "(OSError, ValueError)",
+      "body": "except (OSError, ValueError) as exc:\n    raise _JournalChanged(f'identity anchor unreadable ({exc})') from exc"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 848,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    self._set_fence('changed', f'journal cannot be opened ({exc})')\n    return False"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 853,
+      "type": "(_JournalChanged, OSError)",
+      "body": "except (_JournalChanged, OSError) as exc:\n    self._set_fence('changed', f'verify_journal: {exc}')\n    return False"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 871,
+      "type": "FileNotFoundError",
+      "body": "except FileNotFoundError as exc:\n    raise _JournalChanged(f'journal file is missing ({exc})') from exc"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 962,
+      "type": "FileNotFoundError",
+      "body": "except FileNotFoundError:\n    old = None"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 1161,
+      "type": "BaseException",
+      "body": "except BaseException as exc:\n    (present, perr) = self._presence(ip)\n    durable = established and (not unlinked) and (present is True)\n    pres_txt = {True: 'a marker is visible', False: 'no marker is visible', None: f'marker presence UNKNOWN (inspection failed: {perr})'}[present]\n    did = 'Completed on disk before the failure: ' + '; '.join(done) + '. ' if done else ''\n    if new_pair:\n        tail = did + 'The new rebind-free journal and anchor are complete; ' + pres_txt + (' (its removal may not be durable)' if unlinked else ' (the marker was NOT unlinked)' if present else ' (whether the marker was removed is not known)' if present is None else '') + '. A surviving marker only fences the next start: a restart is safe.'\n    elif durable:\n        tail = did + 'The reset-intent marker is durable (file and directory fsync confirmed): every start fences until reset_journal() is retried successfully or clear_journal_fence() is called.'\n    elif step in ('create reset-intent marker', 'confirm existing reset-intent marker'):\n        tail = 'Durability of the reset-intent marker was NOT confirmed (' + {True: 'a marker, possibly empty or partial, is visible now but may not survive a crash', False: 'no marker is present', None: pres_txt}[present] + '). The old journal and .id are unchanged on disk (at most a marker was written), so a restart MAY replay them: keep the service stopped and retry reset_journal() before any replay.'\n    else:\n        tail = did + f\"The step '{step}' may have partly happened. Durability of the reset-intent marker is NOT confirmed now (\" + pres_txt + '). Keep the service stopped and retry reset_journal() before any replay.'\n    self._set_fence('reset_failed', f\"reset_journal by {actor} ({reason}) FAILED at step '{step}': {exc!r}. Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). \" + tail, failed_step=step, intent_durable=durable, intent_present=present, completed_steps=list(done), **{'presence_error': perr} if perr else {})\n    self.journal_resets.append({'actor': actor, 'reason': reason, 'ts': now, 'status': 'failed', 'failed_step': step, 'error': repr(exc), 'archived': archived, 'intent_present': present, 'completed_steps': list(done), 'intent_durable': durable, 'rebinds_discarded': len(discarded)})\n    del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]\n    raise"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 644,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    (ipresent, ierr) = (True, repr(exc))"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 881,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    try:\n        os.ftruncate(fd, size)\n        os.fsync(fd)\n    except OSError as exc2:\n        raise _JournalIndeterminate(f'{exc}; rollback failed: {exc2}') from exc2\n    raise"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 892,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    logger.warning('Rebind journal %s close error: %s', self._journal_path, exc)"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 1123,
+      "type": "FileNotFoundError",
+      "body": "except FileNotFoundError:\n    old_anchor = None"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 442,
+      "type": "OSError",
+      "body": "except OSError:\n    pass"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 553,
+      "type": "OSError",
+      "body": "except OSError:\n    pass"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 1420,
+      "type": "OSError",
+      "body": "except OSError as exc:\n    logger.error('Refused hive rebind of %s: %s record write failed and was rolled back durably (%s)%s', what, step, exc, '; the pending record has no commit and is never replayed' if step == 'commit' else '')\n    return False"
+    },
+    {
+      "file": "hive/reducer.py",
+      "line": 885,
+      "type": "OSError",
+      "body": "except OSError as exc2:\n    raise _JournalIndeterminate(f'{exc}; rollback failed: {exc2}') from exc2"
+    },
+    {
+      "file": "hive/shared_store.py",
+      "line": 100,
+      "type": "Exception",
+      "body": "except Exception:\n    logger.exception('Error querying agent %s store', agent_id)\n    return []"
+    }
+  ],
+  "notes": {
+    "cleanup": "reducer 439/442 and 550/553 swallow only cleanup unlink errors then re-raise original failure; no absent decision.",
+    "presence": "454 returns missing only on FileNotFoundError (native ENOENT); 462 preserves unknown/error.",
+    "startup": "644 treats intent metadata error present, sets discard; 673 blocks unwritable.",
+    "anchor_gap": "533 maps open ENOENT to absent without lstat: dangling .id entry is overwritten on cold startup. Witness focused7741.dangling_anchor.",
+    "clear_reset_reads": "962 and 1123 map open ENOENT to missing journal/anchor content; other errors propagate. These are explicit destructive recovery operations, unlike startup.",
+    "runtime": "817/848/853/871 fence or raise; 881/885 rollback errors propagate; 892 only logs close errors after successful fsync, does not infer absence.",
+    "other_modules": "Broad Exception guards log polling, planning, adapter/store and appliance errors; no filesystem existence decisions.",
+    "audit_gap": "reset failure audit 1208-1212 omits presence_error; fence includes it at 1203-1207.",
+    "portability": "getattr(O_NOFOLLOW,0) is safe for tested Linux flag; when unavailable, same-inode symlink replacement can be followed; concurrent hostile namespace mutation excluded."
+  }
+}
