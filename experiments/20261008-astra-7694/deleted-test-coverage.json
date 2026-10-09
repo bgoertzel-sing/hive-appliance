@@ -1,0 +1,75 @@
+{
+  "source": "d1239f9:tests/test_astra7669.py",
+  "tests": [
+    {
+      "deleted": "test_marker_unlink_then_dir_fsync_failure_never_replays",
+      "mapping": [
+        "test_astra7656.py::test_clean_refusal_leaves_no_fence",
+        "followup7694.v4_fault_matrix",
+        "followup7694.exact7678_archived_witnesses"
+      ],
+      "assessment": "Old writer unlink/abort step removed. Refused-restart invariant retained, not the obsolete syscall path."
+    },
+    {
+      "deleted": "test_abort_also_fails_marker_rewritten_restart_fenced",
+      "mapping": [
+        "test_astra7678.py::test_pending_write_and_rollback_fail_refused_and_never_replayed",
+        "test_astra7678.py::test_commit_write_and_rollback_fail_is_applied_not_refused",
+        "followup7694.v4_fault_matrix",
+        "followup7694.exact7678_archived_witnesses"
+      ],
+      "assessment": "Compensating abort/marker removed; both new uncertain outcomes covered."
+    },
+    {
+      "deleted": "test_marker_with_edited_op_id_fences_everything",
+      "mapping": [
+        "test_astra7656.py::test_legacy_fence_marker_fences_everything",
+        "followup7694.old_markers"
+      ],
+      "assessment": "Presence alone now fences all; edited ID and missing entry specifically retained independently."
+    },
+    {
+      "deleted": "test_valid_marker_not_naming_last_entry_fences_everything",
+      "mapping": [
+        "test_astra7656.py::test_legacy_fence_marker_fences_everything",
+        "followup7694.old_markers"
+      ],
+      "assessment": "Selective marker validation intentionally removed; nonlast marker presence blocks all. No hash-valid v2-specific assertion in current pytest; obsolete validation path."
+    },
+    {
+      "deleted": "test_intact_marker_still_fences_only_its_entry",
+      "mapping": [
+        "test_astra7656.py::test_legacy_fence_marker_fences_everything",
+        "followup7694.old_markers"
+      ],
+      "assessment": "Selective availability guarantee intentionally lost, superseded by documented whole-journal legacy fencing; not a lost fail-closed guarantee."
+    },
+    {
+      "deleted": "test_one_char_edit_of_abort_op_id_does_not_revive_entry",
+      "mapping": [
+        "test_astra7656.py::test_edited_journal_entry_not_replayed",
+        "followup7694.native_tails_order_edits",
+        "followup7694.exact7678_archived_witnesses"
+      ],
+      "assessment": "v3 abort unsupported/migration-fenced; v4 deciding-commit edit/tail covered. Old-format byte regression no longer an authored pytest case."
+    },
+    {
+      "deleted": "test_rehashed_abort_naming_no_rebind_does_not_revive_entry",
+      "mapping": [
+        "test_astra7678.py::test_rehashed_forged_commit_without_chain_fences",
+        "followup7694.duplicate_commit"
+      ],
+      "assessment": "Analogous chain and missing-pending validation covered independently; no v4 abort path."
+    },
+    {
+      "deleted": "test_garbage_line_after_rebind_blocks_it_but_not_later_ones",
+      "mapping": [
+        "test_astra7678.py::test_garbage_line_fences_everything_including_later_rebinds",
+        "followup7694.native_tails_order_edits"
+      ],
+      "assessment": "Whole-journal fencing is stronger safety, deliberately loses earlier selective later-record availability."
+    }
+  ],
+  "genuinely_lost": "Exact old-protocol pytest cases and selective-marker/later-record availability assertions removed; old paths no longer supported. No current v4 fail-closed invariant found wholly uncovered once independent evidence included. Added independent clearance matrix and crash/fault coverage are evidence, not permanent repository tests.",
+  "deletion_rationale": "No explicit deletion rationale found beyond v4 commit-record replacement in source/docs and new test module; do not invent author rationale."
+}

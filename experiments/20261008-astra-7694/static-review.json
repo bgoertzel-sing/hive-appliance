@@ -1,0 +1,42 @@
+{
+  "changed_files": [
+    "README.md",
+    "docs/POLICY_MULTI_PLAN_SUPERSESSION.md",
+    "hive/appliance.py",
+    "hive/reducer.py",
+    "tests/test_astra7582.py",
+    "tests/test_astra7638.py",
+    "tests/test_astra7656.py",
+    "tests/test_astra7669.py",
+    "tests/test_astra7678.py"
+  ],
+  "diff_sha256": "419b29caa3bf9a2a34af32cceefb26a191a86d60982efcd40d572782616e7b3d",
+  "documentation": {
+    "protocol": "Accurate pending-durable then commit; pending-only never replays.",
+    "chain": "Unkeyed SHA-256, not MAC; file-permission threat model explicit. Broad removed-record claim needs clean suffix/whole-file rollback qualification; empty genesis has no externally anchored identity/tip.",
+    "whole_journal": "Accurate at startup for unverifiable records; exact archived v3 witnesses migration-fenced and native v4 faults independently covered.",
+    "clearance": "Archive byte identity, reset audit, re-journaling and success restart agree. Seven pre-rename failures preserve old bytes. Post-rename directory fsync failure leaves live fence but disk may already be new; no unconditional old-bytes promise. fence_clearances is live-process history, not reconstructed at restart; journal_reset durably audits actor/reason/archive.",
+    "commit_uncertain": "Policy explicitly states replayed if commit survived, held if lost, fenced if torn. APPLIED is honest for memory, not durable success; stronger zero-byte-write witness returns True then holds on restart.",
+    "migration": "README/policy explicitly v1-v3 whole-journal fence, clear and reissue; authentic v1/v2/v3 tested.",
+    "health": "Appliance status includes rebind_journal_healthy; True denotes absence of known fence, not continuous verification. Runtime permission refusal can remain healthy. Missing startup file creates empty healthy journal.",
+    "runtime_change": "OPEN Low F-runtime-integrity-overclaim: size/last-record check misses same-size earlier-record edit, permitting new rebind live; restart detects edit and fences. Policy says exactly what this process last wrote, broader than checked bytes.",
+    "snapshot": "Explicitly unsupported suffix/snapshot restore; full ordered original stream needed, not a new blocker.",
+    "deleted_tests": "See deleted-test-coverage.json; eight deleted and eleven added -> 785 versus 782; same count retained in other edited test files."
+  },
+  "findings": {
+    "closed": [
+      "F-abort-tail",
+      "F-journal-refused-compound",
+      "F-abort-order-scope"
+    ],
+    "open_medium": [
+      "F-applied-without-durable-commit",
+      "F-journal-rollback-anchor"
+    ],
+    "open_low": [
+      "F-runtime-integrity-overclaim"
+    ]
+  },
+  "gate": "NOT APPROVED",
+  "scope": "Review/evidence only; no product/test changes"
+}

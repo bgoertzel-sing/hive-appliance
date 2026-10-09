@@ -1,0 +1,1861 @@
+diff --git a/README.md b/README.md
+index 033cc6e..d20d67a 100644
+--- a/README.md
++++ b/README.md
+@@ -92,13 +92,13 @@ export HIVE_REBIND_JOURNAL=$(pwd)/state/hive-rebinds.jsonl
+ ```
+ 
+ Without a journal, `HiveAppliance` refuses rebinds unless you pass
+-`volatile_rebinds=True`. After upgrading, older (v1/v2) journal entries are
+-reported as unapplied rather than replayed: re-issue any you still want. A
+-`<journal>.fence` file means a journal write did not finish cleanly (an
+-unverifiable marker fences every journaled rebind). Rebinds stay refused until
+-an operator inspects the journal and calls
+-`clear_journal_fence(actor=..., reason=...)`, which durably cancels the
+-uncertain entry before removing the marker. See
++`volatile_rebinds=True`. Each rebind is journaled as a pending record plus a
++commit record, and only committed rebinds replay. If any journal record cannot
++be verified (torn, edited, reordered, legacy v1-v3 format), the whole journal is
++fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds
++are refused until an operator inspects it and calls
++`clear_journal_fence(actor=..., reason=...)`, which archives the old journal
++and starts a new one; re-issue any rebind still wanted. See
+ `docs/POLICY_MULTI_PLAN_SUPERSESSION.md` ("Hive rebind journal").
+ 
+ ## Development
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index ba2fbc0..39e0669 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -70,7 +70,7 @@ accident.
+   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+ 
+-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656)
++## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678)
+ 
+ - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
+   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
+@@ -78,7 +78,7 @@ accident.
+   `volatile_rebinds=True` is passed. A bare `HiveReducer()` still allows
+   volatile rebinds.
+ - **Replay model.** A restart must replay the FULL hive event stream from the
+-  beginning. Each entry (format v3) records the event-stream position (`seq`)
++  beginning. Each rebind record (format v4) records the event-stream position (`seq`)
+   and a SHA-256 hash chain over the canonical CONTENT of every reduced event
+   (id, kind, ts, source, subject, payload, severity, schema version). An entry
+   is re-applied only at exactly that position and only if the replayed stream
+@@ -87,71 +87,66 @@ accident.
+   conflicting PLANs (7146 N6) do not advance the position. Snapshot or partial
+   (suffix) restore is NOT supported: entries stay pending or are reported as
+   unapplied.
+-- **Entry integrity.** Each rebind entry and each `abort_rebind` record
+-  carries `entry_hash` (SHA-256 of its other fields). A rebind line that fails
+-  its hash is reported unapplied ("entry content hash mismatch"). Any record
+-  that cannot be verified -- an unreadable or invalid line, an abort record
+-  that fails its hash/format check, or an abort record that names no earlier
+-  journaled rebind -- might have been the cancellation of an earlier rebind,
+-  so EVERY rebind before it is not replayed (fail-closed; reported unapplied
+-  and listed in `journal_status()["corrupt_records"]`). Rebinds after it are
+-  unaffected. These checks detect accidental and naive edits. They are NOT a
+-  keyed MAC: someone with write access who recomputes the hashes is not
+-  detected, so protect the journal and marker with file permissions.
+-- **Write protocol and fence.** Before each append, a fence marker
+-  `<journal>.fence` is written to a temp file, fsync'd, renamed into place and
+-  its directory fsync'd. The marker (format v2) embeds the entry and its own
+-  `marker_hash`. The entry is then appended and fsync'd; on success the
+-  marker is unlinked and the directory fsync'd. Outcomes:
+-  - Append write/fsync fails and the truncate-rollback is fsync'd: clean
+-    refusal, the marker is removed. If that removal fails the journal stays
+-    fenced in memory; nothing can replay because the entry is not in the
+-    journal.
+-  - Rollback fails: indeterminate. The marker is left in place (it was made
+-    durable before the append) and the journal is fenced in memory.
+-  - Entry committed but the marker unlink fails, OR the unlink succeeds and
+-    the directory fsync fails (so the removal may or may not survive a
+-    crash): the rebind is reported NOT applied, the journal is fenced in
+-    memory, and a durable `abort_rebind` record for the entry is appended
+-    (the journal file's own fsync), so a restart does not apply it whatever
+-    happened to the marker. If that abort record also cannot be made
+-    durable, the marker is re-written; `journal_status()["indeterminate"]`
+-    reports `abort_durable` and `marker_present`. Only if BOTH fail can the
+-    entry replay after a restart, and the status says so explicitly.
+-  - `marker_present`/`persisted` report presence in the directory listing at
+-    that moment, not a durability guarantee.
+-  While fenced (live, or a marker found at startup), new rebinds are refused.
+-  At startup a marker is trusted only if it parses, has format v2, its
+-  `marker_hash` matches, it embeds a hash-valid entry with the same `op_id`,
+-  and that entry is the LAST journaled rebind; then only that entry is held
+-  back. Any other marker (unreadable, edited, legacy format, or naming a
+-  different entry) fences EVERY journaled rebind. A leftover
+-  `<journal>.fence.tmp` (never renamed into place) means the append never
+-  started; it is deleted.
+-- **Clearing a fence.** Inspect the journal and the marker, then call
+-  `clear_journal_fence(actor=..., reason=...)`. It FIRST appends durable
+-  `abort_rebind` records -- for the marker's entry if the marker is trusted,
+-  and, if the marker is untrusted or does not name the last journaled
+-  rebind, also for the last journaled rebind -- and only then removes the
+-  marker, so losing the removal cannot bring the entry back. If an abort
+-  record or the directory fsync after the removal fails, it raises and the
+-  journal stays fenced in memory. The clearance is recorded in
+-  `journal_status()["fence_clearances"]`. Aborted entries are never replayed;
+-  re-issue the rebind afterwards if it is still wanted.
+-- **Torn tail.** An unterminated last line is copied to
+-  `<journal>.torn-<ns>`. The copy is fully written, fsync'd, read back and
+-  compared, and its directory entry fsync'd, BEFORE the journal is truncated.
+-  This happens at startup and before every append. If a step fails BEFORE the
+-  truncate, the journal bytes are untouched and the rebind is refused (or
+-  startup raises). If the truncate succeeds but the journal's following fsync
+-  fails, the journal may already be truncated (on disk the old length may or
+-  may not survive a crash); the fragment is preserved in the verified,
+-  durable aside file and the rebind is refused.
+-- **Legacy entries.** v1 (no position) and v2 (id-only stream hash, no
+-  entry hash) entries are NOT replayed after upgrading. They appear in
+-  `unapplied` with "legacy entry (format vN)". Migration: review them, then
+-  re-issue each rebind that is still wanted with `rebind_plan_owner()`. The new
+-  v3 entry replays normally, and the legacy diagnostic stays visible.
++- **Commit-record journal (Astra 7678).** Each rebind is written as a
++  `rebind_pending` record, then, once that is durable, a `rebind_commit`
++  record naming it (`op_id` plus the pending record's hash). Only rebinds
++  with a valid commit record are replayed; a pending record without one (the
++  rebind was refused, or the process stopped between the two writes) is
++  listed in `unapplied` with "no commit record" and never replays. There are
++  no cancel/abort records and no fence marker file.
++- **Record integrity and chain.** Every record carries `prev` (the
++  `rec_hash` of the record before it, `""` for the first) and its own
++  `rec_hash` (SHA-256 of all its other fields). A reordered, removed,
++  inserted or edited record therefore breaks the chain. These hashes detect
++  accidental and naive edits; they are NOT a keyed MAC (someone with write
++  access who recomputes every hash is not detected), so protect the journal
++  with file permissions.
++- **Fail closed on the whole journal.** At startup, if ANY record cannot be
++  verified -- an unreadable line, a hash mismatch, a broken chain, a legacy
++  or unknown format, a commit naming no earlier pending record or not
++  matching it, a duplicate, or an unterminated (torn) last line, including a
++  record missing only its final newline -- NO journaled rebind is replayed.
++  The journal is reported unhealthy (`journal_status()["healthy"]` False,
++  `fence` says why, `corrupt_records` gives the line) and every new rebind is
++  refused. The journal is never trimmed or repaired, so it fences again after
++  every restart until an operator clears it. A leftover legacy
++  `<journal>.fence` file also fences everything.
++- **Write failures.** Each record is appended and fsync'd; on failure the
++  partial write is truncated away and that truncation fsync'd.
++  - Pending write fails, rollback OK: clean refusal, journal stays healthy.
++  - Pending write fails AND rollback fails: refused and fenced (unhealthy).
++    The record may be on disk, possibly torn, but it has no commit, so it can
++    never replay; a torn tail fences the journal at the next start.
++  - Commit write fails, rollback OK: clean refusal; the pending record stays
++    on disk without a commit and never replays. Journal stays healthy.
++  - Commit write fails AND rollback fails: the commit may or may not be
++    durable, so a refusal could be contradicted by a restart. The rebind is
++    therefore APPLIED and reported as applied (`True`), and the journal is
++    fenced (`fence.kind == "commit_uncertain"`, `applied: True`). After a
++    restart it is either replayed (commit survived), held again (commit
++    lost) or the whole journal is fenced (commit torn) -- never a refused
++    rebind coming back.
++  - Before every write the journal must still be exactly what this process
++    last wrote (size and last record). Otherwise (changed, truncated,
++    removed or torn from outside) nothing is written and the journal is
++    fenced (`changed`).
++  - A journal that cannot be created or read at startup is fenced
++    (`unwritable`): the process reports unhealthy and refuses rebinds.
++- **Clearing a fence.** Inspect the journal, then call
++  `clear_journal_fence(actor=..., reason=...)`. It copies the old journal
++  byte-for-byte to `<journal>.fenced-<ns>` (fsync'd, directory fsync'd),
++  then atomically replaces the journal with a new one that starts with a
++  `journal_reset` record (actor, reason, archive path) and re-journals, as
++  pending + commit pairs, exactly the rebinds this process holds applied or
++  still awaiting their event position, so a restart matches the running
++  state. Rebinds in the old journal that were not applied are NOT carried
++  over: re-issue them if still wanted. Any failure raises and the journal
++  stays fenced. Clearances are listed in
++  `journal_status()["fence_clearances"]`.
++- **Upgrading (behaviour change).** v1-v3 journals are legacy format and
++  fence the whole journal at the first start after upgrading: nothing in them
++  is replayed. Review the journal, clear the fence, and re-issue each rebind
++  that is still wanted with `rebind_plan_owner()`.
+ - **Caps and observability.** `MAX_HIVE_JOURNAL_BYTES` (64 MiB, append
+   admission; rotate or compact offline when it is reached),
+   `MAX_HIVE_CANDIDATE_KEYS` (256; the hold itself is never dropped), and
+@@ -162,5 +157,5 @@ accident.
+   (up to `MAX_HIVE_UNAPPLIED_RECORDS`). Holds, open incidents and plan
+   provenance below these caps are deliberately never dropped.
+ - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
+-  `tests/test_astra7669.py`.
++  `tests/test_astra7678.py`.
+ 
+diff --git a/hive/appliance.py b/hive/appliance.py
+index ee756e4..8272ff3 100644
+--- a/hive/appliance.py
++++ b/hive/appliance.py
+@@ -280,6 +280,8 @@ class HiveAppliance:
+             "total_incidents": self._total_incidents,
+             "agents": list(self._adapters.keys()),
+             "dashboard": self.dashboard.summary(),
++            # Astra 7678: False while the rebind journal is fenced
++            "rebind_journal_healthy": self.reducer.journal_status()["healthy"],
+         }
+ 
+     @property
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 16284ef..706481b 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -40,13 +40,17 @@ MAX_HIVE_CANDIDATE_KEYS = 256      # Astra 7638 (Low): held plans with candidate
+ MAX_HIVE_JOURNAL_BYTES = 64 * 1024 * 1024   # Astra 7638 (Low): journal admission cap
+ MAX_HIVE_PLANS = 10000             # Astra 7656 (Low): overall tracked-plan admission cap
+ MAX_HIVE_UNAPPLIED_RECORDS = 10000  # Astra 7656 (Low): retained unapplied dispositions
+-JOURNAL_VERSION = 3                # Astra 7656: content-hashed stream + entry hash
+-FENCE_VERSION = 2                  # Astra 7669: self-hashed fence marker
++JOURNAL_VERSION = 4                # Astra 7678: chained pending/commit records
+ 
+ 
+ class _JournalIndeterminate(Exception):
+     """Astra 7638 F-journal-refused-fsync: a journal append failed AND its
+-    rollback failed, so whether the entry survives a restart is unknown."""
++    rollback failed, so whether the record survives a restart is unknown."""
++
++
++class _JournalChanged(Exception):
++    """Astra 7678: the journal file no longer ends where this process last
++    wrote it (changed, truncated or removed outside this process)."""
+ 
+ # H1: severity ordering used when merging polled health with reducer state
+ _HEALTH_RANK = {
+@@ -124,16 +128,19 @@ class HiveReducer:
+         self._event_seq = 0
+         self._stream_digest = ""
+         self._journal_unapplied: list[dict[str, Any]] = []
+-        self._journal_indeterminate: dict[str, Any] | None = None
+-        self._journal_set_aside: list[str] = []
+-        self._journal_invalid_lines = 0
+-        # Astra 7656: cumulative unapplied count, operator-aborted op_ids,
+-        # fence clearance audit, plans refused by the overall plan cap.
+-        self._journal_unapplied_total = 0
+-        self._journal_last_rebind_op = ""
+-        # Astra 7669: corrupt/unverifiable journal records (line, why)
++        self._journal_unapplied_total = 0   # Astra 7656: cumulative
++        # Astra 7678: commit-record journal.  _journal_fence != None means the
++        # journal is UNHEALTHY: every rebind is refused until an operator
++        # calls clear_journal_fence().  It is never written to disk: a damaged
++        # journal is never trimmed or repaired, so it re-fences on restart.
++        self._journal_fence: dict[str, Any] | None = None
+         self._journal_corrupt: list[dict[str, Any]] = []
+-        self._journal_aborted: set[str] = set()
++        self._journal_size = 0          # bytes this process expects on disk
++        self._journal_tip = ""          # rec_hash of the last record
++        self._journal_last = b""        # last record line as written
++        self._journal_records = 0
++        # committed rebinds this process holds APPLIED (live or replayed)
++        self._journal_applied: list[dict[str, Any]] = []
+         self.journal_fence_clearances: list[dict[str, Any]] = []
+         self.plans_refused_cap = 0
+         self._journal_pending: list[dict[str, Any]] = (
+@@ -339,15 +346,6 @@ class HiveReducer:
+         self._event_seq += 1
+         self._stream_digest = hashlib.sha256(blob.encode("utf-8")).hexdigest()
+ 
+-    @staticmethod
+-    def _entry_hash(e: dict[str, Any]) -> str:
+-        """Astra 7656: hash of a journal entry's own content (everything but
+-        entry_hash).  Detects edits/corruption; it is NOT a keyed MAC, so it
+-        does not stop someone who rewrites the line and recomputes it."""
+-        return hashlib.sha256(json.dumps(
+-            {k: v for k, v in e.items() if k != "entry_hash"},
+-            sort_keys=True, default=str).encode("utf-8")).hexdigest()
+-
+     @staticmethod
+     def _fsync_dir(path: str) -> None:
+         dfd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
+@@ -356,112 +354,22 @@ class HiveReducer:
+         finally:
+             os.close(dfd)
+ 
+-    def _set_aside_tail(self, fd: int, size: int) -> int:
+-        """F-journal-tail (Astra 7638): move an unterminated (torn) last line
+-        to <journal>.torn-<ns> and truncate the journal to its last complete
+-        line BEFORE any new write.  Astra 7656: the copy is written in full,
+-        fsync'd, read back and compared, and its directory entry fsync'd,
+-        before a single journal byte is removed.  Returns the new size.
+-        Raises OSError on failure (the journal is then left untouched)."""
+-        data = os.pread(fd, size, 0)
+-        if len(data) != size:
+-            raise OSError(f"short journal read ({len(data)}/{size} bytes) while "
+-                          "setting aside a torn tail; journal left untouched")
+-        keep = data.rfind(b"\n") + 1
+-        frag = data[keep:]
+-        aside = f"{self._journal_path}.torn-{time.time_ns()}"
+-        afd = os.open(aside, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+-        try:
+-            off = 0
+-            while off < len(frag):
+-                n = os.write(afd, frag[off:])
+-                if n <= 0:
+-                    raise OSError("set-aside write made no progress")
+-                off += n
+-            os.fsync(afd)
+-            if (os.fstat(afd).st_size != len(frag)
+-                    or os.pread(afd, len(frag), 0) != frag):
+-                raise OSError("set-aside copy is incomplete; journal left untouched")
+-        finally:
+-            os.close(afd)
+-        self._fsync_dir(aside)             # copy durable BEFORE truncating
+-        os.ftruncate(fd, keep)
+-        os.fsync(fd)
+-        self._journal_set_aside.append(aside)
+-        logger.error("Rebind journal %s ended with a torn line (%d bytes); set "
+-                     "aside to %s before further writes", self._journal_path,
+-                     size - keep, aside)
+-        return keep
+-
+-    # ── Astra 7656/7669: durable, self-hashed fence marker (<journal>.fence) ──
+-    def _fence_path(self, path: str | None = None) -> str:
+-        return f"{path or self._journal_path}.fence"
+-
++    # ── Astra 7678: commit-record rebind journal (format v4) ──
++    # Each rebind is journaled as a "rebind_pending" record followed, once
++    # durable, by a "rebind_commit" record naming it.  Every record carries
++    # "prev" (rec_hash of the record before it; "" for the first) and its own
++    # "rec_hash", so a reordered, removed, inserted or edited record breaks
++    # the chain.  Only rebinds with a valid commit are replayed.  Any record
++    # that cannot be verified fences the WHOLE journal.
+     @staticmethod
+-    def _hash_without(d: dict[str, Any], key: str) -> str:
++    def _rec_hash(r: dict[str, Any]) -> str:
++        """SHA-256 of a record's content (every field but rec_hash, including
++        the chain link "prev").  Detects accidental and naive edits; it is
++        NOT a keyed MAC."""
+         return hashlib.sha256(json.dumps(
+-            {k: v for k, v in d.items() if k != key},
++            {k: v for k, v in r.items() if k != "rec_hash"},
+             sort_keys=True, default=str).encode("utf-8")).hexdigest()
+ 
+-    def _marker_bytes(self, entry: dict[str, Any]) -> bytes:
+-        m = {"v": FENCE_VERSION, "op_id": entry["op_id"], "entry": entry}
+-        m["marker_hash"] = self._hash_without(m, "marker_hash")
+-        return json.dumps(m, sort_keys=True).encode("utf-8")
+-
+-    def _load_fence(self, path: str) -> None:
+-        """A fence marker left on disk means a rebind write did not finish
+-        cleanly.  Astra 7669 F-fence-content: the marker is trusted ONLY if it
+-        parses, has the current format, its own marker_hash matches and it
+-        embeds a hash-valid entry with the same op_id.  Its scope is narrowed
+-        to that single entry in _parse_journal only if that entry is the LAST
+-        journaled rebind; any other marker fences EVERY journaled rebind."""
+-        fp = self._fence_path(path)
+-        tmp = fp + ".tmp"
+-        if os.path.exists(tmp):
+-            # A marker that never got renamed into place: its journal write
+-            # never started (the marker is made durable first).
+-            try:
+-                os.unlink(tmp)
+-            except OSError:
+-                pass
+-        if not os.path.exists(fp):
+-            return
+-        op_id: str | None = None
+-        entry = None
+-        problem = ""
+-        try:
+-            with open(fp, "rb") as f:
+-                m = json.loads(f.read().decode("utf-8"))
+-        except (OSError, UnicodeDecodeError, ValueError) as exc:
+-            problem = f"UNREADABLE fence marker ({type(exc).__name__})"
+-        else:
+-            e = m.get("entry") if isinstance(m, dict) else None
+-            if not isinstance(m, dict):
+-                problem = "UNTRUSTED fence marker: not a JSON object"
+-            elif m.get("v") != FENCE_VERSION:
+-                problem = f"UNTRUSTED fence marker: format v{m.get('v')} (need v{FENCE_VERSION})"
+-            elif m.get("marker_hash") != self._hash_without(m, "marker_hash"):
+-                problem = "UNTRUSTED fence marker: marker hash mismatch"
+-            elif not (isinstance(m.get("op_id"), str) and m["op_id"]
+-                      and isinstance(e, dict) and e.get("op_id") == m["op_id"]
+-                      and e.get("entry_hash") == self._entry_hash(e)):
+-                problem = ("UNTRUSTED fence marker: does not embed a valid entry "
+-                           "with the same op_id")
+-            else:
+-                op_id, entry = m["op_id"], e
+-        self._journal_indeterminate = {
+-            "op_id": op_id, "entry": entry, "marker_valid": not problem,
+-            "marker_problem": problem, "scope": "all",
+-            "persisted": True, "marker_present": True, "abort_durable": None,
+-            "marker": fp, "found_at_startup": True,
+-            "error": (problem + ": no journaled rebind is replayed until an "
+-                      "operator clears it") if problem else
+-                     ("fence marker found at startup: a rebind journal write "
+-                      "did not finish cleanly before shutdown")}
+-        logger.critical("Rebind journal %s is FENCED (%s): %s; rebinds refused "
+-                        "until clear_journal_fence()", path, fp,
+-                        problem or f"entry {op_id} uncertain")
+-
+     @staticmethod
+     def _write_all(fd: int, data: bytes) -> None:
+         off = 0
+@@ -471,321 +379,223 @@ class HiveReducer:
+                 raise OSError("write made no progress")
+             off += n
+ 
+-    def _drop_fence(self, cause: BaseException) -> None:
+-        """Remove the fence marker after a clean REFUSAL (the entry is not in
+-        the journal).  If removal fails, raise _JournalIndeterminate so the
+-        journal stays fenced in memory; a marker that survives on disk fences
+-        it after restart too.  Either way nothing can replay: the entry was
+-        never written or its rollback was fsync'd."""
+-        try:
+-            os.unlink(self._fence_path())
+-            self._fsync_dir(self._fence_path())
+-        except FileNotFoundError:
+-            pass
+-        except OSError as exc2:
+-            raise _JournalIndeterminate(
+-                f"{cause}; fence marker removal failed or is not durable: {exc2}") from exc2
+-
+-    def _put_marker(self, entry: dict[str, Any]) -> None:
+-        """tmp write + fsync + rename + directory fsync.  On failure before
+-        the rename the tmp file is removed and nothing is in place; a failing
+-        directory fsync after the rename raises with the marker in place."""
+-        fp = self._fence_path()
+-        tmp = fp + ".tmp"
++    def _write_file_durably(self, path: str, data: bytes) -> None:
++        """New file, fully written, fsync'd, size-checked, directory fsync'd.
++        On failure the file is removed and OSError raised."""
++        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+         try:
+-            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+             try:
+-                self._write_all(fd, self._marker_bytes(entry))
++                self._write_all(fd, data)
+                 os.fsync(fd)
++                if os.fstat(fd).st_size != len(data):
++                    raise OSError(f"{path}: incomplete write")
+             finally:
+                 os.close(fd)
+-            os.replace(tmp, fp)
++            self._fsync_dir(path)
+         except OSError:
+             try:
+-                os.unlink(tmp)
++                os.unlink(path)
+             except OSError:
+                 pass
+             raise
+-        self._fsync_dir(fp)
+ 
+-    def _write_fence(self, entry: dict[str, Any]) -> None:
+-        """Make the fence marker durable BEFORE the journal append, so a crash
+-        or failed rollback leaves the uncertain entry fenced on restart."""
+-        fp = self._fence_path()
+-        try:
+-            self._put_marker(entry)
+-        except OSError as exc:
+-            if os.path.exists(fp):         # renamed, directory fsync failed
+-                self._drop_fence(exc)
+-            raise                          # nothing journaled: clean refusal
+-
+-    def _commit_unconfirmed(self, entry: dict[str, Any], what: str) -> "_JournalIndeterminate":
+-        """Astra 7669 F-fence-remove-dir-fsync: the entry IS durably in the
+-        journal but its fence marker removal failed or may not be durable, so
+-        the marker cannot be relied on to stop a restart from replaying a
+-        rebind we report as NOT applied.  Write a durable abort record for it
+-        (the journal file's own fsync does not depend on the directory).  If
+-        that fails too, re-write the marker.  The caller keeps the journal
+-        fenced in memory either way."""
+-        rec = {"v": JOURNAL_VERSION, "op": "abort_rebind", "op_id": entry["op_id"],
+-               "actor": "hive-reducer",
+-               "reason": "automatic: entry committed but fence marker removal "
+-                         "unconfirmed; cancelled so a restart cannot apply a "
+-                         "rebind reported as not applied",
+-               "ts": time.time(), "fence_error": what, "target_in_journal": True}
+-        rec["entry_hash"] = self._entry_hash(rec)
+-        abort_durable, marker_restored, notes = False, None, []
+-        try:
+-            self._journal_append(rec, guard=False)
+-            abort_durable = True
+-            self._journal_aborted.add(entry["op_id"])
+-        except (OSError, _JournalIndeterminate) as exc:
+-            notes.append(f"abort record failed: {exc}")
+-            try:
+-                self._put_marker(entry)
+-                marker_restored = True
+-            except OSError as exc2:
+-                marker_restored = False
+-                notes.append(f"fence marker re-write failed: {exc2}")
+-        if abort_durable:
+-            tail = "durable abort record written: it will not be replayed"
+-        elif marker_restored:
+-            tail = "fence marker re-written durably: it stays fenced after restart"
+-        else:
+-            tail = ("abort record AND marker re-write failed: the entry MAY "
+-                    "replay after a restart unless an operator intervenes")
+-        err = _JournalIndeterminate(
+-            f"entry committed but {what}; {tail}" + (f" ({'; '.join(notes)})" if notes else ""))
+-        err.abort_durable = abort_durable
+-        err.marker_restored = marker_restored
+-        return err
+-
+-    def _scan_rebind_ops(self) -> list[str]:
+-        """op_ids of owner_rebind lines currently in the journal file, in order."""
+-        ops: list[str] = []
+-        try:
+-            with open(self._journal_path, "rb") as f:
+-                data = f.read()
+-        except OSError:
+-            return ops
+-        for raw in data.split(b"\n"):
+-            try:
+-                e = json.loads(raw.decode("utf-8"))
+-            except (UnicodeDecodeError, ValueError):
+-                continue
+-            if (isinstance(e, dict) and e.get("op") == "owner_rebind"
+-                    and isinstance(e.get("op_id"), str) and e["op_id"]):
+-                ops.append(e["op_id"])
+-        return ops
++    def _legacy_fence_path(self, path: str | None = None) -> str:
++        return f"{path or self._journal_path}.fence"
++
++    def _set_fence(self, kind: str, error: str, **extra: Any) -> None:
++        self._journal_fence = {"kind": kind, "error": error,
++                               "found_at_startup": False, "ts": time.time(),
++                               **extra}
++        logger.critical("Rebind journal %s is FENCED (%s): %s -- journal "
++                        "unhealthy, rebinds refused until an operator inspects "
++                        "it and calls clear_journal_fence()",
++                        self._journal_path, kind, error)
+ 
+     def _open_journal(self, path: str) -> list[dict[str, Any]]:
+-        self._load_fence(path)             # Astra 7656: durable fence first
+-        created = not os.path.exists(path)
+-        fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
++        """Startup.  Read-only apart from creating a missing journal: a
++        damaged journal is never trimmed or repaired, so whatever fenced it
++        fences it again after every restart until clear_journal_fence()."""
+         try:
+-            size = os.fstat(fd).st_size
+-            if size and os.pread(fd, 1, size - 1) != b"\n":
+-                size = self._set_aside_tail(fd, size)
+-            data = os.pread(fd, size, 0) if size else b""
+-            if created:
+-                os.fsync(fd)
+-        finally:
+-            os.close(fd)
+-        if created:
+-            self._fsync_dir(path)          # the new file's directory entry
+-        return self._parse_journal(path, data)
+-
+-    def _abort_ok(self, e: dict[str, Any]) -> bool:
+-        return (e.get("entry_hash") == self._entry_hash(e)
+-                and isinstance(e.get("op_id"), str)
+-                and all(isinstance(e.get(k), str) and e.get(k).strip()
+-                        for k in ("actor", "reason"))
+-                and isinstance(e.get("target_in_journal", True), bool))
++            if not os.path.exists(path):
++                fd = os.open(path, os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
++                try:
++                    os.fsync(fd)
++                finally:
++                    os.close(fd)
++                self._fsync_dir(path)          # the new file's directory entry
++            with open(path, "rb") as f:
++                data = f.read()
++        except OSError as exc:
++            self._set_fence("unwritable", f"rebind journal cannot be created or "
++                            f"read ({exc}); no journaled rebind is replayed",
++                            found_at_startup=True)
++            return []
++        out = self._parse_journal(path, data)
++        lp = self._legacy_fence_path(path)
++        if self._journal_fence is None and os.path.exists(lp):
++            why = (f"legacy fence marker {lp} present (a pre-v4 journal write "
++                   "did not finish cleanly)")
++            for e in out:
++                self._mark_unapplied(e, f"journal fenced: {why}; not replayed")
++            self._set_fence("legacy_marker", why + "; no journaled rebind is "
++                            "replayed", found_at_startup=True)
++            return []
++        return out
++
++    def _check_record(self, r: Any, n: int, tip: str,
++                      pend: dict[str, dict[str, Any]], done: set[str]) -> str:
++        """'' if record r (line n) is verifiable at this point, else why not."""
++        if not isinstance(r, dict):
++            return "not a JSON object"
++        if r.get("v") != JOURNAL_VERSION:
++            return (f"legacy or unknown record format v{r.get('v')} "
++                    f"(op {r.get('op')!r})")
++        if r.get("rec_hash") != self._rec_hash(r):
++            return "record hash mismatch (edited or corrupted)"
++        if r.get("prev") != tip:
++            return ("hash chain broken (a record was reordered, removed or "
++                    "inserted)")
++        op, op_id = r.get("op"), r.get("op_id")
++        if op == "journal_reset":
++            if n == 1 and all(isinstance(r.get(k), str) and r[k].strip()
++                              for k in ("actor", "reason")):
++                return ""
++            return "journal_reset record that is not a valid first record"
++        if not (isinstance(op_id, str) and op_id):
++            return "record without op_id"
++        if op == "rebind_pending":
++            if op_id in pend:
++                return "duplicate rebind op_id"
++            seq = r.get("seq")
++            if not (all(isinstance(r.get(k), str) and r[k].strip()
++                        for k in ("agent_id", "plan_id", "incident_id",
++                                  "actor", "reason"))
++                    and isinstance(seq, int) and not isinstance(seq, bool)
++                    and seq >= 0 and isinstance(r.get("stream_digest"), str)):
++                return "rebind_pending record with missing or invalid fields"
++            return ""
++        if op == "rebind_commit":
++            p = pend.get(op_id)
++            if p is None:
++                return "commit record names no earlier pending rebind"
++            if op_id in done:
++                return "duplicate commit record"
++            if r.get("pending_hash") != p.get("rec_hash"):
++                return "commit record does not match its pending rebind"
++            return ""
++        return f"unknown record op {op!r}"
+ 
+     def _parse_journal(self, path: str, data: bytes) -> list[dict[str, Any]]:
+-        """Astra 7669: an untrustworthy record (unreadable/invalid line, an
+-        abort record whose hash fails or that names no earlier journaled
+-        rebind, a rebind whose hash fails) may have been the cancellation of
+-        ANY earlier rebind, so every rebind BEFORE it is not replayed
+-        (fail-closed); rebinds after it are unaffected."""
+-        recs: list[tuple[int, dict[str, Any]]] = []
+-        corrupt: list[tuple[int, str]] = []
+-        seen_ops: set[str] = set()
+-        for n, raw in enumerate(data.split(b"\n"), 1):
+-            if not raw.strip():
+-                continue
++        """Committed rebind entries in journal order, or [] with the WHOLE
++        journal fenced if any record cannot be verified: an unreadable line,
++        a hash mismatch, a broken chain (reorder/removal/insertion), a
++        legacy-format record, a commit naming no earlier pending rebind, or
++        an unterminated (torn) last line."""
++        pend: dict[str, dict[str, Any]] = {}
++        done: set[str] = set()
++        tip, last, problem = "", b"", None
++        lines = data.split(b"\n")
++        torn = bool(data) and not data.endswith(b"\n")
++        lines = lines[:-1]                      # after the final newline / torn
++        for n, raw in enumerate(lines, 1):
+             try:
+-                e = json.loads(raw.decode("utf-8"))
++                r = json.loads(raw.decode("utf-8"))
+             except (UnicodeDecodeError, ValueError):
+-                self._journal_invalid_lines += 1
+-                corrupt.append((n, "unreadable line"))
+-                logger.error("Rebind journal %s line %d unreadable", path, n)
+-                continue
+-            if isinstance(e, dict) and e.get("op") == "abort_rebind":
+-                if not self._abort_ok(e):
+-                    corrupt.append((n, "abort record fails its hash/format check"))
+-                    logger.critical("Rebind journal %s line %d: corrupt abort "
+-                                    "record; earlier rebinds not replayed", path, n)
+-                    continue
+-                if e.get("target_in_journal", True) and e["op_id"] not in seen_ops:
+-                    corrupt.append((n, "abort record names no earlier journaled rebind"))
+-                    logger.critical("Rebind journal %s line %d: abort record names "
+-                                    "no earlier rebind; earlier rebinds not "
+-                                    "replayed", path, n)
+-                    continue
+-                if e["op_id"]:
+-                    self._journal_aborted.add(e["op_id"])
+-                continue
+-            if not (isinstance(e, dict) and e.get("op") == "owner_rebind"
+-                    and all(isinstance(e.get(k), str) and e.get(k).strip()
+-                            for k in ("agent_id", "plan_id", "incident_id",
+-                                      "actor", "reason"))):
+-                self._journal_invalid_lines += 1
+-                corrupt.append((n, "invalid record"))
+-                logger.error("Rebind journal %s line %d invalid", path, n)
+-                continue
+-            if e.get("v") == JOURNAL_VERSION and e.get("entry_hash") != self._entry_hash(e):
+-                corrupt.append((n, "rebind entry fails its hash check"))
+-            recs.append((n, e))
+-            op = str(e.get("op_id") or "")
+-            seen_ops.add(op)
+-            self._journal_last_rebind_op = op
+-        self._journal_corrupt = [{"line": n, "why": w} for n, w in corrupt
+-                                 ][-MAX_HIVE_REBIND_RECORDS:]
+-        last_bad = max((n for n, _ in corrupt), default=0)
+-        fence = self._journal_indeterminate
+-        if fence is not None and fence.get("found_at_startup"):
+-            if (fence.get("marker_valid") and fence.get("op_id")
+-                    and fence["op_id"] == self._journal_last_rebind_op):
+-                fence["scope"] = "entry"
+-            elif fence.get("marker_valid"):
+-                fence["error"] = ("UNTRUSTED fence marker: it does not name the "
+-                                  "last journaled rebind; no journaled rebind is "
+-                                  "replayed until an operator clears it")
+-        out: list[dict[str, Any]] = []
+-        seen: set[str] = set()
+-        for n, e in recs:
+-            op_id = str(e.get("op_id") or "")
+-            if op_id and op_id in seen:
+-                continue                      # duplicate physical line
+-            seen.add(op_id)
+-            seq = e.get("seq")
+-            if not (e.get("v") == JOURNAL_VERSION and isinstance(seq, int)
+-                    and not isinstance(seq, bool) and seq >= 0
+-                    and isinstance(e.get("stream_digest"), str)):
+-                self._mark_unapplied(e, f"legacy entry (format v{e.get('v')}): no "
+-                                        "content-hashed event-stream position; "
+-                                        "not replayed (re-issue the rebind if "
+-                                        "still wanted)")
+-                continue
+-            if e.get("entry_hash") != self._entry_hash(e):
+-                self._mark_unapplied(e, "entry content hash mismatch: the journal "
+-                                        "line was edited or corrupted; not replayed")
+-                continue
+-            if op_id in self._journal_aborted:
+-                self._mark_unapplied(e, "aborted (clear_journal_fence or automatic "
+-                                        "cancellation)")
+-                continue
+-            if n < last_bad:
+-                self._mark_unapplied(e, f"a corrupt/unverifiable journal record "
+-                                        f"follows it (line {last_bad}) and may be "
+-                                        "its cancellation; not replayed -- inspect, "
++                problem = (n, "unreadable line")
++                break
++            why = self._check_record(r, n, tip, pend, done)
++            if why:
++                problem = (n, why)
++                break
++            if r["op"] == "rebind_pending":
++                pend[r["op_id"]] = r
++            elif r["op"] == "rebind_commit":
++                done.add(r["op_id"])
++            tip, last = r["rec_hash"], raw + b"\n"
++        if problem is None and torn:
++            problem = (len(lines) + 1, "unterminated (torn) last line")
++        if problem is not None:
++            n, why = problem
++            self._journal_corrupt = [{"line": n, "why": why}]
++            logger.critical("Rebind journal %s line %d: %s", path, n, why)
++            for e in pend.values():
++                self._mark_unapplied(e, f"journal fenced (line {n}: {why}); not "
++                                        "replayed -- inspect, clear_journal_fence(), "
+                                         "re-issue if still wanted")
+-                continue
+-            if fence is not None and (fence.get("scope") != "entry"
+-                                      or fence.get("op_id") == op_id):
+-                self._mark_unapplied(e, "journal fenced: this entry's write did not "
+-                                        "finish cleanly or the fence marker is "
+-                                        "untrusted; not replayed -- inspect, then "
+-                                        "clear_journal_fence()")
+-                continue
+-            out.append(e)
++            self._set_fence("corrupt", f"line {n}: {why}; no journaled rebind "
++                            "is replayed", found_at_startup=True, line=n)
++            return []
++        self._journal_size, self._journal_tip = len(data), tip
++        self._journal_last, self._journal_records = last, len(lines)
++        out = []
++        for op_id, e in pend.items():
++            if op_id in done:
++                out.append(e)
++            else:
++                self._mark_unapplied(e, "no commit record: the rebind was refused "
++                                        "or its write did not complete; not replayed")
+         return out
+ 
+-    def _journal_append(self, entry: dict[str, Any], *, guard: bool = True) -> None:
+-        """Write-ahead append.  Returns normally only if the entry is durably
+-        committed AND (guard) its fence marker is gone.  OSError = clean
+-        refusal (nothing durable, no fence left).  _JournalIndeterminate =
+-        outcome uncertain or fence marker stuck: the fence stays on disk so a
+-        restart refuses the entry too (Astra 7656)."""
+-        data = (json.dumps(entry, sort_keys=True) + "\n").encode("utf-8")
+-        if guard:
+-            self._write_fence(entry)
++    def _journal_write(self, rec: dict[str, Any]) -> None:
++        """Append one chained record.  Returns only once it is durable.
++        OSError: nothing of it is on disk (any partial write was rolled back
++        and the rollback fsync'd).  _JournalIndeterminate: the rollback failed,
++        so it may or may not survive (possibly torn).  _JournalChanged: the
++        file is not what this process last wrote; nothing was written."""
++        rec["prev"] = self._journal_tip
++        rec["rec_hash"] = self._rec_hash(rec)
++        data = (json.dumps(rec, sort_keys=True) + "\n").encode("utf-8")
+         try:
+-            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o600)
+-        except OSError as exc:
+-            if guard:
+-                self._drop_fence(exc)
+-            raise
+-        committed = False
++            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND)
++        except FileNotFoundError as exc:
++            raise _JournalChanged(f"journal file is missing ({exc})") from exc
+         try:
++            size = os.fstat(fd).st_size
++            last = self._journal_last
++            if size != self._journal_size or (
++                    last and os.pread(fd, len(last), size - len(last)) != last):
++                raise _JournalChanged(
++                    f"journal is {size} bytes, expected {self._journal_size} "
++                    "ending with the last record this process wrote: it was "
++                    "changed outside this process")
++            if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
++                raise OSError(f"rebind journal would exceed {MAX_HIVE_JOURNAL_BYTES} "
++                              "bytes; rotate/compact it (admission refused)")
+             try:
+-                size = os.fstat(fd).st_size
+-                if size and os.pread(fd, 1, size - 1) != b"\n":
+-                    size = self._set_aside_tail(fd, size)   # F-journal-tail
+-                if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
+-                    raise OSError(f"rebind journal would exceed {MAX_HIVE_JOURNAL_BYTES} "
+-                                  "bytes; rotate/compact it (admission refused)")
+-            except OSError as exc:          # nothing written yet
+-                if guard:
+-                    self._drop_fence(exc)
+-                raise
+-            try:
+-                n = os.write(fd, data)
+-                if n != len(data):
+-                    raise OSError(f"short journal write ({n}/{len(data)} bytes)")
++                self._write_all(fd, data)
+                 os.fsync(fd)
+-                committed = True
+             except OSError as exc:
+-                # F-journal-refused-fsync (Astra 7638): roll the entry back so
+-                # a refused rebind can never be applied after a restart.
+                 try:
+                     os.ftruncate(fd, size)
+                     os.fsync(fd)
+                 except OSError as exc2:
+                     raise _JournalIndeterminate(
+                         f"{exc}; rollback failed: {exc2}") from exc2
+-                if guard:
+-                    self._drop_fence(exc)
+                 raise
+         finally:
+             try:
+                 os.close(fd)
+             except OSError as exc:
+-                # Astra 7656: a close error after a durable commit does not
+-                # turn the commit into a refusal (and vice versa).
+-                logger.warning("Rebind journal %s close error after %s: %s",
+-                               self._journal_path,
+-                               "commit" if committed else "refusal", exc)
+-        if guard:
+-            # Astra 7669: after a durable commit, an unlink failure OR an
+-            # unlink whose directory fsync fails leaves the marker's on-disk
+-            # state unknown -> durable abort record + in-memory fence.
+-            fp = self._fence_path()
+-            try:
+-                os.unlink(fp)
+-            except FileNotFoundError:
+-                pass
+-            except OSError as exc:
+-                raise self._commit_unconfirmed(
+-                    entry, f"its fence marker could not be removed ({exc})") from exc
+-            try:
+-                self._fsync_dir(fp)
+-            except OSError as exc:
+-                raise self._commit_unconfirmed(
+-                    entry, "its fence marker was unlinked but the directory "
+-                           f"fsync failed, so the removal may not be durable ({exc})") from exc
++                logger.warning("Rebind journal %s close error: %s",
++                               self._journal_path, exc)
++        self._journal_size += len(data)
++        self._journal_tip = rec["rec_hash"]
++        self._journal_last = data
++        self._journal_records += 1
+ 
+     def journal_pending(self) -> list[dict[str, Any]]:
+         """Journaled rebinds whose event-stream position is not reached yet."""
+         return copy.deepcopy(self._journal_pending)
+ 
+     def journal_status(self) -> dict[str, Any]:
+-        """Astra 7638: operator view of rebind durability."""
++        """Astra 7638/7678: operator view of rebind durability.  healthy is
++        False while the journal is fenced (fence says why)."""
+         return copy.deepcopy({
+             "path": self._journal_path,
+             "durable": bool(self._journal_path),
+             "volatile_rebinds_allowed": self._volatile_rebinds,
++            "healthy": self._journal_fence is None,
++            "fence": self._journal_fence,
+             "event_seq": self._event_seq,
+             "pending": len(self._journal_pending),
+             "unapplied": self._journal_unapplied[-MAX_HIVE_REBIND_RECORDS:],
+@@ -794,14 +604,11 @@ class HiveReducer:
+             "unapplied_total": self._journal_unapplied_total,
+             "unapplied_omitted": self._journal_unapplied_total
+             - min(len(self._journal_unapplied), MAX_HIVE_REBIND_RECORDS),
+-            "indeterminate": self._journal_indeterminate,
+-            "fence_marker": self._fence_path() if self._journal_path else None,
+-            "aborted": sorted(self._journal_aborted),
+-            "fence_clearances": self.journal_fence_clearances,
++            "records": self._journal_records,
++            "bytes": self._journal_size,
+             "corrupt_records": self._journal_corrupt,
+-            "plans_refused_cap": self.plans_refused_cap,
+-            "set_aside": self._journal_set_aside,
+-            "invalid_lines": self._journal_invalid_lines})
++            "fence_clearances": self.journal_fence_clearances,
++            "plans_refused_cap": self.plans_refused_cap})
+ 
+     def journal_unapplied(self) -> list[dict[str, Any]]:
+         """Astra 7656: every retained unapplied disposition (up to
+@@ -810,69 +617,77 @@ class HiveReducer:
+         return copy.deepcopy(self._journal_unapplied)
+ 
+     def clear_journal_fence(self, actor: str, reason: str) -> bool:
+-        """Astra 7656: operator clearance of a fenced journal.  The uncertain
+-        entry is ABORTED: an abort record is journaled (fsync'd) so the entry
+-        is never replayed, then the fence marker is removed.  Re-issue the
+-        rebind afterwards if it is still wanted.  Returns False if there was
+-        no fence; raises OSError (fence kept) if the abort cannot be made
+-        durable."""
++        """Astra 7678: operator clearance of a fenced (unhealthy) journal.
++        The old journal is preserved byte-for-byte as <journal>.fenced-<ns>
++        (fsync'd), then atomically replaced by a new journal that starts with
++        a journal_reset record and re-journals (pending + commit) exactly the
++        rebinds this process holds applied or still awaiting their event
++        position, so the state after a restart equals the running state.
++        Rebinds in the old journal that this process did not apply are NOT
++        carried over: re-issue them if still wanted.  Returns False if not
++        fenced; raises OSError (journal stays fenced) on any failure."""
+         if not (isinstance(actor, str) and actor.strip()):
+             raise ValueError("clear_journal_fence requires a non-empty actor")
+         if not (isinstance(reason, str) and reason.strip()):
+             raise ValueError("clear_journal_fence requires a non-empty reason")
+-        fence = self._journal_indeterminate
++        fence = self._journal_fence
+         if fence is None or not self._journal_path:
+             return False
+-        # Astra 7669: abort the marker's entry only if the marker is trusted;
+-        # for an untrusted marker (or one not naming the last journaled
+-        # rebind) also abort the last journaled rebind -- the only entry
+-        # whose write can be the uncertain one.
+-        ops_in = self._scan_rebind_ops()
+-        last = ops_in[-1] if ops_in else ""
+-        targets: list[str] = []
+-        if fence.get("marker_valid", True) and fence.get("op_id"):
+-            targets.append(fence["op_id"])
+-        # A LIVE fence names exactly the entry this process was writing.  A
+-        # fence found at startup is narrowed to its entry only when the
+-        # marker is trusted AND names the last journaled rebind; otherwise
+-        # fail closed and also abort the last journaled rebind.
+-        narrow = (fence.get("marker_valid", True) and fence.get("op_id")
+-                  and (not fence.get("found_at_startup") or fence["op_id"] == last))
+-        if not narrow and last and last not in targets:
+-            targets.append(last)
+-        if not targets:
+-            targets.append("")
+-        recs = []
+-        for op_id in targets:
+-            rec = {"v": JOURNAL_VERSION, "op": "abort_rebind", "op_id": op_id,
+-                   "actor": actor, "reason": reason, "ts": time.time(),
+-                   "fence_error": str(fence.get("error")),
+-                   "target_in_journal": bool(op_id) and op_id in ops_in}
+-            rec["entry_hash"] = self._entry_hash(rec)
+-            try:
+-                self._journal_append(rec, guard=False)   # abort BEFORE unlink
+-            except _JournalIndeterminate as exc:
+-                raise OSError(f"abort record not durable: {exc}") from exc
+-            recs.append(rec)
++        path = self._journal_path
++        stamp = time.time_ns()
+         try:
+-            os.unlink(self._fence_path())
++            with open(path, "rb") as f:
++                old: bytes | None = f.read()
+         except FileNotFoundError:
+-            pass
+-        self._fsync_dir(self._fence_path())   # raises -> stays fenced in memory
+-        for op_id in targets:
+-            if op_id:
+-                self._journal_aborted.add(op_id)
+-                self._journal_pending = [e for e in self._journal_pending
+-                                         if e.get("op_id") != op_id]
+-        op_id = ",".join(t for t in targets if t)
+-        rec = recs[-1]
+-        self._journal_indeterminate = None
++            old = None
++        archive = f"{path}.fenced-{stamp}" if old is not None else ""
++        if old is not None:
++            self._write_file_durably(archive, old)
++        now = time.time()
++        reset = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
++                 "reason": reason, "ts": now, "fence_error": str(fence.get("error")),
++                 "archived": archive, "prev": ""}
++        reset["rec_hash"] = self._rec_hash(reset)
++        recs, tip = [reset], reset["rec_hash"]
++        for e in list(self._journal_applied) + list(self._journal_pending):
++            pr = {k: v for k, v in e.items() if k not in ("prev", "rec_hash")}
++            pr["prev"] = tip
++            pr["rec_hash"] = tip = self._rec_hash(pr)
++            cr = {"v": JOURNAL_VERSION, "op": "rebind_commit", "op_id": pr["op_id"],
++                  "pending_hash": pr["rec_hash"], "ts": now, "prev": tip}
++            cr["rec_hash"] = tip = self._rec_hash(cr)
++            recs += [pr, cr]
++        lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8") for r in recs]
++        data = b"".join(lines)
++        tmp = f"{path}.new-{stamp}"
++        self._write_file_durably(tmp, data)
++        try:
++            os.replace(tmp, path)
++        except OSError:
++            try:
++                os.unlink(tmp)
++            except OSError:
++                pass
++            raise
++        # A failing directory fsync raises: the journal on disk after a crash
++        # is then the old (fenced) one or the new one -- both safe.
++        self._fsync_dir(path)
++        lp = self._legacy_fence_path()
++        if os.path.exists(lp):
++            os.unlink(lp)
++            self._fsync_dir(lp)
++        self._journal_size, self._journal_tip = len(data), tip
++        self._journal_last, self._journal_records = lines[-1], len(recs)
++        self._journal_corrupt = []
++        self._journal_fence = None
+         self.journal_fence_clearances.append(
+-            {"op_id": op_id, "actor": actor, "reason": reason, "ts": rec["ts"],
+-             "fence_error": rec["fence_error"]})
++            {"actor": actor, "reason": reason, "ts": now, "archived": archive,
++             "fence_kind": fence.get("kind"), "fence_error": str(fence.get("error")),
++             "rebinds_rejournaled": (len(recs) - 1) // 2})
+         del self.journal_fence_clearances[:-MAX_HIVE_REBIND_RECORDS]
+-        logger.warning("Rebind journal fence cleared by %s (%s): entry %s aborted",
+-                       actor, reason, op_id or "<no journaled rebind>")
++        logger.warning("Rebind journal fence cleared by %s (%s): old journal "
++                       "archived to %s, %d applied rebind(s) re-journaled",
++                       actor, reason, archive or "<missing>", (len(recs) - 1) // 2)
+         return True
+ 
+     def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
+@@ -909,6 +724,7 @@ class HiveReducer:
+                     self._do_rebind(e["agent_id"], e["plan_id"], e["incident_id"],
+                                     inc, actor=e["actor"], reason=e["reason"],
+                                     replayed=True)
++                    self._journal_applied.append(e)
+         self._journal_pending = keep
+ 
+     def _held_receipts(self, agent_id: str, plan_id: str,
+@@ -978,14 +794,16 @@ class HiveReducer:
+                          "volatile_rebinds=True)", agent_id, plan_id, incident_id)
+             return False
+         if self._journal_path:
+-            if self._journal_indeterminate is not None:
++            if self._journal_fence is not None:
+                 logger.error("Refused hive rebind of %s:%s -> %s: rebind journal "
+-                             "is fenced after an indeterminate write (%s); "
+-                             "inspect it, then clear_journal_fence()",
++                             "is fenced (%s); inspect it, then clear_journal_fence()",
+                              agent_id, plan_id, incident_id,
+-                             self._journal_indeterminate.get("error"))
++                             self._journal_fence.get("error"))
+                 return False
+-            entry = {"v": JOURNAL_VERSION, "op": "owner_rebind", "op_id": uuid.uuid4().hex,
++            # Astra 7678: pending record, then commit record.  Only a rebind
++            # with a durable commit can replay after a restart.
++            entry = {"v": JOURNAL_VERSION, "op": "rebind_pending",
++                     "op_id": uuid.uuid4().hex,
+                      "agent_id": agent_id, "plan_id": plan_id,
+                      "incident_id": incident_id, "actor": actor,
+                      "reason": reason, "ts": time.time(),
+@@ -993,33 +811,49 @@ class HiveReducer:
+                      "stream_digest": self._stream_digest,
+                      "candidate": incident_id in self.owner_candidates.get(
+                          f"{agent_id}:{plan_id}", [])}
+-            entry["entry_hash"] = self._entry_hash(entry)   # Astra 7656
+-            try:
+-                self._journal_append(entry)   # write-ahead
+-            except _JournalIndeterminate as exc:
+-                present = os.path.exists(self._fence_path())
+-                self._journal_indeterminate = {
+-                    "op_id": entry["op_id"], "entry": entry, "error": str(exc),
+-                    "marker": self._fence_path(), "marker_valid": True,
+-                    "marker_problem": "", "scope": "entry",
+-                    # Astra 7669: presence in the directory listing, NOT a
+-                    # durability claim; abort_durable says whether a durable
+-                    # abort record covers the entry.
+-                    "persisted": present, "marker_present": present,
+-                    "abort_durable": getattr(exc, "abort_durable", None),
+-                    "found_at_startup": False}
+-                logger.critical("Hive rebind of %s:%s -> %s NOT applied, but its "
+-                                "journal entry may survive a restart (%s); journal "
+-                                "fenced in memory: further rebinds refused "
+-                                "until an operator inspects %s and calls "
+-                                "clear_journal_fence()", agent_id, plan_id, incident_id,
+-                                exc, self._journal_path)
+-                return False
+-            except OSError as exc:
+-                logger.error("Refused hive rebind of %s:%s -> %s: rebind "
+-                             "journal write failed (rolled back): %s", agent_id,
+-                             plan_id, incident_id, exc)
+-                return False
++            what = f"{agent_id}:{plan_id} -> {incident_id}"
++            for step in ("pending", "commit"):
++                rec = entry if step == "pending" else {
++                    "v": JOURNAL_VERSION, "op": "rebind_commit",
++                    "op_id": entry["op_id"], "pending_hash": entry["rec_hash"],
++                    "ts": time.time()}
++                try:
++                    self._journal_write(rec)
++                except _JournalChanged as exc:
++                    self._set_fence("changed", f"{exc}; rebind {what} refused "
++                                    "(nothing written)", op_id=entry["op_id"],
++                                    applied=False)
++                    return False
++                except _JournalIndeterminate as exc:
++                    if step == "pending":
++                        # No commit exists, so it can never replay: the refusal
++                        # is truthful.  The tail may be torn -> fenced.
++                        self._set_fence(
++                            "write_failure", f"pending record write failed and "
++                            f"its rollback failed ({exc}); rebind {what} refused "
++                            "(it has no commit record, so it never replays); the "
++                            "journal tail may be torn", op_id=entry["op_id"],
++                            applied=False)
++                        return False
++                    # The commit MAY be durable, so a restart may replay it.
++                    # Never report a refusal a restart could contradict: apply
++                    # it now and fence (restart: replayed, or the plan held).
++                    self._do_rebind(agent_id, plan_id, incident_id, inc,
++                                    actor=actor, reason=reason)
++                    self._journal_applied.append(entry)
++                    self._set_fence(
++                        "commit_uncertain", f"rebind {what} APPLIED but its commit "
++                        f"record may not be durable ({exc}): after a restart it "
++                        "is either replayed or the plan is held again",
++                        op_id=entry["op_id"], applied=True)
++                    return True
++                except OSError as exc:
++                    logger.error("Refused hive rebind of %s: %s record write "
++                                 "failed and was rolled back durably (%s)%s", what,
++                                 step, exc, "; the pending record has no commit "
++                                 "and is never replayed" if step == "commit" else "")
++                    return False
++            self._journal_applied.append(entry)
+         self._do_rebind(agent_id, plan_id, incident_id, inc, actor=actor,
+                         reason=reason)
+         return True
+diff --git a/tests/test_astra7582.py b/tests/test_astra7582.py
+index 585daf5..152acd9 100644
+--- a/tests/test_astra7582.py
++++ b/tests/test_astra7582.py
+@@ -99,7 +99,7 @@ def test_hive_rebind_journal_replayed_after_restart(tmp_path):
+     assert hive.rebind_plan_owner("a1", "p", "i", actor="alice", reason="ticket-1",
+                                   allow_non_candidate=True)
+     lines = [json.loads(x) for x in open(jp) if x.strip()]
+-    assert len(lines) == 1 and lines[0]["op"] == "owner_rebind"
++    assert [x["op"] for x in lines] == ["rebind_pending", "rebind_commit"]
+     # restart: fresh reducer, same journal, replayed event stream
+     _, h2 = run(FOREIGN, journal=jp)
+     assert h2._plan_owner.get("a1:p") == "i"
+@@ -110,7 +110,7 @@ def test_hive_rebind_journal_replayed_after_restart(tmp_path):
+     assert ho(h2) == ["i", "j"]       # foreign evidence still not credited to i
+     assert h2._plan_verified_steps.get("a1:p") == {1}
+     # replay never re-writes the journal
+-    assert len([x for x in open(jp) if x.strip()]) == 1
++    assert len([x for x in open(jp) if x.strip()]) == 2
+ 
+ 
+ def test_hive_rebind_fails_closed_when_journal_unwritable(tmp_path):
+diff --git a/tests/test_astra7638.py b/tests/test_astra7638.py
+index 750c06c..90a806d 100644
+--- a/tests/test_astra7638.py
++++ b/tests/test_astra7638.py
+@@ -132,7 +132,8 @@ def test_legacy_v1_entry_without_position_is_not_replayed(tmp_path):
+                               "reason": "t"}) + "\n")
+     h = run(BASE, journal=str(jp))
+     assert h._plan_owner.get("a1:p") is None
+-    assert "legacy" in h.journal_status()["unapplied"][0]["why"]
++    st = h.journal_status()                      # Astra 7678: fences the journal
++    assert st["healthy"] is False and "legacy" in st["fence"]["error"]
+ 
+ 
+ # ------------------------------------------------ 3 F-journal-refused-fsync
+@@ -180,7 +181,8 @@ def test_failed_rollback_is_indeterminate_and_fences(tmp_path, monkeypatch):
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     monkeypatch.undo()
+     st = h.journal_status()
+-    assert st["indeterminate"] and st["indeterminate"]["entry"]["incident_id"] == "i"
++    assert st["healthy"] is False and st["fence"]["kind"] == "write_failure"
++    assert st["fence"]["applied"] is False
+     assert h._plan_owner.get("a1:p") is None
+     # fenced: even a healthy journal refuses further rebinds until inspected
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+@@ -190,30 +192,34 @@ def test_short_or_failed_write_is_clean_refusal(tmp_path):
+     h = run(BASE + [PLAN("p", "i", 1)], journal=str(tmp_path / "j.jsonl"))
+     h._journal_path = str(tmp_path)                   # a directory
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    assert h.journal_status()["indeterminate"] is None
++    assert h.journal_status()["healthy"] is True
+ 
+ 
+ # ------------------------------------------------ 4 F-journal-tail
+ S_HELD = BASE + [PLAN("p", "i", 1)]
+ 
+ 
+-def test_torn_tail_at_startup_set_aside_before_new_write(tmp_path):
++def test_torn_tail_at_startup_fences_whole_journal(tmp_path):
++    # Astra 7678: a torn tail is never trimmed; it fences the whole journal
+     jp = tmp_path / "rebinds.jsonl"
+     jp.write_bytes(b'{"op": "owner_reb')
+     h = run(S_HELD, journal=str(jp))
+     st = h.journal_status()
+-    assert len(st["set_aside"]) == 1
+-    assert open(st["set_aside"][0], "rb").read() == b'{"op": "owner_reb'
+-    assert jp.read_bytes() == b""
++    assert st["healthy"] is False and "torn" in st["fence"]["error"]
++    assert jp.read_bytes() == b'{"op": "owner_reb'
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert h.clear_journal_fence(actor="op", reason="inspected")
++    arch = h.journal_status()["fence_clearances"][-1]["archived"]
++    assert open(arch, "rb").read() == b'{"op": "owner_reb'
+     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     h2 = run(S_HELD, journal=str(jp))                 # restart: rebind survives
+     assert h2._plan_owner.get("a1:p") == "i"
+     assert ho(h2) == ["i", "j"]                       # no receipts yet: nothing closed
+-    assert h2.journal_status()["set_aside"] == []     # journal is clean now
++    assert h2.journal_status()["healthy"] is True
+     assert h2.owner_rebinds and h2.owner_rebinds[-1]["replayed"] is True
+ 
+ 
+-def test_torn_tail_appearing_at_runtime_set_aside_on_append(tmp_path):
++def test_torn_tail_appearing_at_runtime_fences(tmp_path):
+     jp = tmp_path / "rebinds.jsonl"
+     s = [INCL("i", "p"), INCL("j", "p"), PLAN("p", "", 1),
+          INCL("k", "q"), PLAN("q", "", 1), PLAN("p", "i", 1), PLAN("q", "k", 1)]
+@@ -222,12 +228,12 @@ def test_torn_tail_appearing_at_runtime_set_aside_on_append(tmp_path):
+     good = jp.read_bytes()
+     with open(jp, "ab") as f:
+         f.write(b'{"torn":')
+-    assert h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
+-    assert jp.read_bytes().startswith(good) and jp.read_bytes().endswith(b"\n")
+-    assert len(h.journal_status()["set_aside"]) == 1
++    assert not h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
++    assert jp.read_bytes() == good + b'{"torn":'      # nothing written or trimmed
++    assert h.journal_status()["fence"]["kind"] == "changed"
+     h2 = run(s, journal=str(jp))
+-    assert h2._plan_owner.get("a1:p") == "i" and h2._plan_owner.get("a1:q") == "k"
+-    assert len(h2.owner_rebinds) == 2
++    assert h2.journal_status()["healthy"] is False
++    assert h2._plan_owner.get("a1:p") is None and h2.owner_rebinds == []
+ 
+ 
+ # ------------------------------------------------ 5 defaults and caps
+@@ -248,7 +254,7 @@ def test_appliance_uses_env_journal(monkeypatch, tmp_path):
+     a.reducer.register_agent("a1")
+     feed(a.reducer, S_HELD)
+     assert a.reducer.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    assert jp.read_text().count("\n") == 1
++    assert jp.read_text().count("\n") == 2            # pending + commit
+ 
+ 
+ def test_appliance_explicit_volatile_opt_out(monkeypatch):
+diff --git a/tests/test_astra7656.py b/tests/test_astra7656.py
+index c4100c8..f0f4933 100644
+--- a/tests/test_astra7656.py
++++ b/tests/test_astra7656.py
+@@ -39,33 +39,28 @@ def _fail_journal_fsync_and_rollback(monkeypatch, jp):
+ 
+ # ------------------------------------------------ 1 durable fence
+ def test_fence_survives_restart_and_blocks_replay(tmp_path, monkeypatch):
++    # Astra 7678: no marker file; the uncertain pending record has no commit
+     jp = str(tmp_path / "rebinds.jsonl")
+     h = run(S, journal=jp)
+     _fail_journal_fsync_and_rollback(monkeypatch, jp)
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     monkeypatch.undo()
+-    assert os.path.exists(jp + ".fence")
+-    assert h.journal_status()["indeterminate"]["persisted"] is True
++    assert not os.path.exists(jp + ".fence")
++    st = h.journal_status()
++    assert st["healthy"] is False and st["fence"]["applied"] is False
+     assert '"incident_id": "i"' in open(jp).read()     # the uncertain line survived
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     # restart: Astra's witness -- the refused rebind must NOT apply itself
+     h2 = run(S, journal=jp)
+     assert h2._plan_owner.get("a1:p") is None and h2.owner_rebinds == []
+     assert ho(h2) == ["i", "j"] and h2.quarantined_plans() == ["a1:p"]
+-    st = h2.journal_status()
+-    assert st["indeterminate"]["found_at_startup"] is True
+-    assert st["indeterminate"]["entry"]["incident_id"] == "i"
+-    assert "fenced" in st["unapplied"][0]["why"]
+-    assert not h2.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    # operator clears: the entry is ABORTED durably
++    assert "no commit" in h2.journal_status()["unapplied"][0]["why"]
+     with pytest.raises(ValueError):
+-        h2.clear_journal_fence(actor="", reason="x")
+-    assert h2.clear_journal_fence(actor="op", reason="inspected")
+-    assert not os.path.exists(jp + ".fence")
+-    assert h2._plan_owner.get("a1:p") is None
++        h.clear_journal_fence(actor="", reason="x")
++    assert h.clear_journal_fence(actor="op", reason="inspected")
++    assert h.journal_status()["healthy"] is True
+     h3 = run(S, journal=jp)
+-    assert h3.journal_status()["indeterminate"] is None
+-    assert h3._plan_owner.get("a1:p") is None
+-    assert "aborted" in h3.journal_status()["unapplied"][0]["why"]
++    assert h3._plan_owner.get("a1:p") is None and h3.journal_status()["healthy"]
+     # re-issued rebind works and replays
+     assert h3.rebind_plan_owner("a1", "p", "i", actor="op", reason="reissue")
+     h4 = run(S, journal=jp)
+@@ -74,30 +69,32 @@ def test_fence_survives_restart_and_blocks_replay(tmp_path, monkeypatch):
+     assert not h4.clear_journal_fence(actor="op", reason="nothing")
+ 
+ 
+-def test_crash_after_append_before_marker_removal_is_fenced(tmp_path):
++def test_crash_between_pending_and_commit_not_replayed(tmp_path):
+     jp = str(tmp_path / "rebinds.jsonl")
+     h = run(S, journal=jp)
+     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    line = json.loads(open(jp).read())
+-    # simulate a crash between the durable append and the marker unlink
+-    with open(jp + ".fence", "w") as f:
+-        json.dump({"v": 1, "op_id": line["op_id"], "entry": line}, f)
++    lines = open(jp).read().splitlines(keepends=True)
++    assert len(lines) == 2
++    open(jp, "w").write(lines[0])                      # crash before the commit
+     h2 = run(S, journal=jp)
+     assert h2._plan_owner.get("a1:p") is None
+-    assert not h2.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert h2.journal_status()["healthy"] is True      # a clean prefix
++    assert "no commit" in h2.journal_status()["unapplied"][0]["why"]
++    assert h2.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+ 
+ 
+-def test_unreadable_fence_marker_fences_everything(tmp_path):
++def test_legacy_fence_marker_fences_everything(tmp_path):
+     jp = str(tmp_path / "rebinds.jsonl")
+     h = run(S, journal=jp)
+     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     open(jp + ".fence", "wb").write(b"\x00garbage")
+     h2 = run(S, journal=jp)
+     assert h2._plan_owner.get("a1:p") is None
+-    assert "UNREADABLE" in h2.journal_status()["indeterminate"]["error"]
++    assert h2.journal_status()["fence"]["kind"] == "legacy_marker"
+     assert h2.clear_journal_fence(actor="op", reason="inspected")
+-    h3 = run(S, journal=jp)                            # last rebind aborted
+-    assert h3._plan_owner.get("a1:p") is None
++    assert not os.path.exists(jp + ".fence")
++    h3 = run(S, journal=jp)                            # nothing re-journaled
++    assert h3._plan_owner.get("a1:p") is None and h3.journal_status()["healthy"]
+ 
+ 
+ def test_stale_tmp_marker_is_ignored(tmp_path):
+@@ -107,7 +104,6 @@ def test_stale_tmp_marker_is_ignored(tmp_path):
+     open(jp + ".fence.tmp", "w").write("{}")           # never renamed into place
+     h2 = run(S, journal=jp)
+     assert h2._plan_owner.get("a1:p") == "i"
+-    assert not os.path.exists(jp + ".fence.tmp")
+ 
+ 
+ def test_clean_refusal_leaves_no_fence(tmp_path, monkeypatch):
+@@ -127,7 +123,7 @@ def test_clean_refusal_leaves_no_fence(tmp_path, monkeypatch):
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+     monkeypatch.undo()
+     assert not os.path.exists(jp + ".fence")
+-    assert h.journal_status()["indeterminate"] is None
++    assert h.journal_status()["healthy"] is True
+     assert os.path.getsize(jp) == 0                    # rolled back
+     assert len(n) == 2                                 # append fsync + rollback fsync
+     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+@@ -140,12 +136,16 @@ def test_edited_journal_entry_not_replayed(tmp_path):
+     jp = tmp_path / "rebinds.jsonl"
+     h = run(S, journal=str(jp))
+     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    e = json.loads(jp.read_text())
++    lines = jp.read_text().splitlines()
++    e = json.loads(lines[0])
+     e["incident_id"] = "j"                             # ids/position kept
+-    jp.write_text(json.dumps(e) + "\n")
++    lines[0] = json.dumps(e)
++    jp.write_text("\n".join(lines) + "\n")
+     h2 = run(S, journal=str(jp))
+     assert h2._plan_owner.get("a1:p") is None
+-    assert "hash mismatch" in h2.journal_status()["unapplied"][0]["why"]
++    st = h2.journal_status()
++    assert st["healthy"] is False
++    assert "hash mismatch" in st["corrupt_records"][0]["why"]
+ 
+ 
+ def test_edited_event_content_with_same_ids_not_replayed(tmp_path):
+@@ -162,37 +162,34 @@ def test_edited_event_content_with_same_ids_not_replayed(tmp_path):
+ 
+ 
+ # ------------------------------------------------ 3 set-aside verified
+-def test_short_set_aside_copy_leaves_journal_untouched(tmp_path, monkeypatch):
++def test_torn_journal_is_never_trimmed(tmp_path):
++    # Astra 7678 replaces the set-aside/truncate path: bytes are never removed
+     jp = tmp_path / "rebinds.jsonl"
+     h = run(S, journal=str(jp))
+     jp.write_bytes(b'{"torn":')
+-    real = os.write
+-
+-    def short(fd, data):
+-        if ".torn-" in os.readlink(f"/proc/self/fd/{fd}"):
+-            return 0
+-        return real(fd, data)
+-    monkeypatch.setattr(os, "write", short)
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    monkeypatch.undo()
+     assert jp.read_bytes() == b'{"torn":'              # no bytes lost
+-    assert not os.path.exists(str(jp) + ".fence")
+-    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    aside = h.journal_status()["set_aside"]
+-    assert len(aside) == 1 and open(aside[0], "rb").read() == b'{"torn":'
++    assert h.journal_status()["fence"]["kind"] == "changed"
++    h2 = run(S, journal=str(jp))
++    assert "torn" in h2.journal_status()["fence"]["error"]
++    assert jp.read_bytes() == b'{"torn":'
+ 
+ 
+ # ------------------------------------------------ 4 unapplied accounting
+ def test_unapplied_total_and_omitted_reported(tmp_path):
+     jp = tmp_path / "rebinds.jsonl"
++    tip = ""
+     with open(jp, "w") as f:
+-        for k in range(201):
+-            f.write(json.dumps({"v": 1, "op": "owner_rebind", "op_id": f"o{k}",
+-                                "agent_id": "a1", "plan_id": "p",
+-                                "incident_id": "i", "actor": "op",
+-                                "reason": "t"}) + "\n")
++        for k in range(201):                           # pending, never committed
++            r = {"v": hr.JOURNAL_VERSION, "op": "rebind_pending", "op_id": f"o{k}",
++                 "agent_id": "a1", "plan_id": "p", "incident_id": "i",
++                 "actor": "op", "reason": "t", "seq": 0, "stream_digest": "",
++                 "prev": tip}
++            r["rec_hash"] = tip = hr.HiveReducer._rec_hash(r)
++            f.write(json.dumps(r) + "\n")
+     h = run(BASE, journal=str(jp))
+     st = h.journal_status()
++    assert st["healthy"] is True
+     assert len(st["unapplied"]) == 200
+     assert st["unapplied_total"] == 201 and st["unapplied_omitted"] == 1
+     assert len(h.journal_unapplied()) == 201
+diff --git a/tests/test_astra7669.py b/tests/test_astra7669.py
+deleted file mode 100644
+index bc854ad..0000000
+--- a/tests/test_astra7669.py
++++ /dev/null
+@@ -1,186 +0,0 @@
+-"""Astra 7669 (docs/ASTRA_REVIEW_7669.md, 7008f0a):
+-1 Med F-fence-remove-dir-fsync: committed entry whose marker removal is not
+-      durable gets a durable abort record (or a re-written marker) and the
+-      journal stays fenced in memory; a restart never applies it.
+-2 Med F-fence-content: fence marker carries marker_hash and must embed a valid
+-      entry naming the LAST journaled rebind; otherwise every rebind is fenced.
+-3 Med F-abort-content: abort records are hash-checked and must name an earlier
+-      rebind; a corrupt abort blocks replay of every earlier rebind.
+-"""
+-import json
+-import os
+-
+-import hive.reducer as hr
+-from tests.test_astra7656 import S, _fail_journal_fsync_and_rollback
+-from tests.test_astra7638 import run
+-
+-
+-def _uncertain(tmp_path, monkeypatch):
+-    jp = str(tmp_path / "rebinds.jsonl")
+-    h = run(S, journal=jp)
+-    _fail_journal_fsync_and_rollback(monkeypatch, jp)
+-    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    monkeypatch.undo()
+-    assert os.path.exists(jp + ".fence")
+-    return jp, h
+-
+-
+-def _held(h):
+-    return h._plan_owner.get("a1:p") is None and h.owner_rebinds == []
+-
+-
+-# ------------------------------------------------ 1 unlink ok, dir fsync fails
+-def _fail_dir_fsync_after_fence_unlink(monkeypatch, jp, journal_too=False):
+-    st = {"s": ""}
+-    real_unlink, real_fsync = os.unlink, os.fsync
+-    real_dir = hr.HiveReducer._fsync_dir
+-
+-    def unlink(p, *a, **k):
+-        real_unlink(p, *a, **k)
+-        if str(p) == jp + ".fence" and not st["s"]:
+-            st["s"] = "unlinked"
+-
+-    def fsync_dir(p):
+-        if st["s"] == "unlinked":
+-            st["s"] = "after"
+-            raise OSError("EIO dir")
+-        return real_dir(p)
+-
+-    def fsync(fd):
+-        if (journal_too and st["s"] == "after"
+-                and os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp)):
+-            raise OSError("EIO journal")
+-        return real_fsync(fd)
+-
+-    def ftruncate(fd, n):
+-        raise OSError("EIO truncate")
+-    monkeypatch.setattr(os, "unlink", unlink)
+-    monkeypatch.setattr(hr.HiveReducer, "_fsync_dir", staticmethod(fsync_dir))
+-    if journal_too:
+-        monkeypatch.setattr(os, "fsync", fsync)
+-        monkeypatch.setattr(os, "ftruncate", ftruncate)
+-    return st
+-
+-
+-def test_marker_unlink_then_dir_fsync_failure_never_replays(tmp_path, monkeypatch):
+-    jp = str(tmp_path / "rebinds.jsonl")
+-    h = run(S, journal=jp)
+-    st = _fail_dir_fsync_after_fence_unlink(monkeypatch, jp)
+-    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    monkeypatch.undo()
+-    assert st["s"] == "after"
+-    ind = h.journal_status()["indeterminate"]
+-    assert ind is not None and ind["abort_durable"] is True
+-    assert _held(h)
+-    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")  # fenced live
+-    # Astra's witness: restart must NOT apply the refused rebind
+-    h2 = run(S, journal=jp)
+-    assert _held(h2) and h2.journal_status()["indeterminate"] is None
+-    assert "aborted" in h2.journal_status()["unapplied"][0]["why"]
+-    assert h2.journal_status()["corrupt_records"] == []
+-    # operator clears the live fence; reissue works and replays
+-    assert h.clear_journal_fence(actor="op", reason="inspected")
+-    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="reissue")
+-    h3 = run(S, journal=jp)
+-    assert h3._plan_owner.get("a1:p") == "i"
+-    assert h3.owner_rebinds[-1]["reason"] == "reissue"
+-
+-
+-def test_abort_also_fails_marker_rewritten_restart_fenced(tmp_path, monkeypatch):
+-    jp = str(tmp_path / "rebinds.jsonl")
+-    h = run(S, journal=jp)
+-    _fail_dir_fsync_after_fence_unlink(monkeypatch, jp, journal_too=True)
+-    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    monkeypatch.undo()
+-    ind = h.journal_status()["indeterminate"]
+-    assert ind["abort_durable"] is False and ind["marker_present"] is True
+-    assert os.path.exists(jp + ".fence")                 # marker re-written
+-    h2 = run(S, journal=jp)
+-    assert _held(h2)
+-    assert h2.journal_status()["indeterminate"]["found_at_startup"] is True
+-
+-
+-# ------------------------------------------------ 2 corrupt / mismatched fence marker
+-def test_marker_with_edited_op_id_fences_everything(tmp_path, monkeypatch):
+-    jp, _ = _uncertain(tmp_path, monkeypatch)
+-    m = json.loads(open(jp + ".fence").read())
+-    m["op_id"] = "someone-else"                          # hash NOT recomputed
+-    open(jp + ".fence", "w").write(json.dumps(m))
+-    h2 = run(S, journal=jp)
+-    assert _held(h2)
+-    ind = h2.journal_status()["indeterminate"]
+-    assert ind["marker_valid"] is False and "UNTRUSTED" in ind["error"]
+-    # marker holding only an unrelated op_id, no entry
+-    open(jp + ".fence", "w").write(json.dumps({"v": 2, "op_id": "x"}))
+-    assert _held(run(S, journal=jp))
+-
+-
+-def test_valid_marker_not_naming_last_entry_fences_everything(tmp_path, monkeypatch):
+-    jp, h = _uncertain(tmp_path, monkeypatch)
+-    fake = {"op": "owner_rebind", "op_id": "other", "agent_id": "a1",
+-            "plan_id": "p", "incident_id": "j", "actor": "op", "reason": "t"}
+-    fake["entry_hash"] = h._entry_hash(fake)
+-    open(jp + ".fence", "wb").write(h._marker_bytes(fake))   # self-consistent
+-    h2 = run(S, journal=jp)
+-    assert _held(h2)
+-    assert "last journaled rebind" in h2.journal_status()["indeterminate"]["error"]
+-    # clearing aborts the named op AND the last journaled rebind
+-    assert h2.clear_journal_fence(actor="op", reason="inspected")
+-    h3 = run(S, journal=jp)
+-    assert _held(h3) and h3.journal_status()["indeterminate"] is None
+-    assert h3.journal_status()["corrupt_records"] == []
+-
+-
+-def test_intact_marker_still_fences_only_its_entry(tmp_path, monkeypatch):
+-    jp, h = _uncertain(tmp_path, monkeypatch)
+-    h2 = run(S, journal=jp)
+-    ind = h2.journal_status()["indeterminate"]
+-    assert ind["marker_valid"] and ind["scope"] == "entry" and _held(h2)
+-
+-
+-# ------------------------------------------------ 3 corrupt abort record
+-def _cleared(tmp_path, monkeypatch):
+-    jp, h = _uncertain(tmp_path, monkeypatch)
+-    h2 = run(S, journal=jp)
+-    assert h2.clear_journal_fence(actor="op", reason="cancel")
+-    assert _held(run(S, journal=jp))
+-    return jp
+-
+-
+-def test_one_char_edit_of_abort_op_id_does_not_revive_entry(tmp_path, monkeypatch):
+-    jp = _cleared(tmp_path, monkeypatch)
+-    lines = open(jp).read().splitlines()
+-    ab = json.loads(lines[-1])
+-    assert ab["op"] == "abort_rebind"
+-    ab["op_id"] = ("0" if ab["op_id"][0] != "0" else "1") + ab["op_id"][1:]
+-    lines[-1] = json.dumps(ab, sort_keys=True)          # hash NOT recomputed
+-    open(jp, "w").write("\n".join(lines) + "\n")
+-    for _ in range(2):
+-        h = run(S, journal=jp)
+-        assert _held(h)
+-        assert h.journal_status()["corrupt_records"]
+-        assert h.journal_status()["unapplied_total"] >= 1
+-
+-
+-def test_rehashed_abort_naming_no_rebind_does_not_revive_entry(tmp_path, monkeypatch):
+-    jp = _cleared(tmp_path, monkeypatch)
+-    lines = open(jp).read().splitlines()
+-    ab = json.loads(lines[-1])
+-    ab["op_id"] = "nonexistent"
+-    ab["entry_hash"] = hr.HiveReducer._entry_hash(ab)    # self-consistent
+-    lines[-1] = json.dumps(ab, sort_keys=True)
+-    open(jp, "w").write("\n".join(lines) + "\n")
+-    h = run(S, journal=jp)
+-    assert _held(h)
+-    assert "names no earlier" in h.journal_status()["corrupt_records"][0]["why"]
+-
+-
+-def test_garbage_line_after_rebind_blocks_it_but_not_later_ones(tmp_path):
+-    jp = str(tmp_path / "rebinds.jsonl")
+-    h = run(S, journal=jp)
+-    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    with open(jp, "a") as f:
+-        f.write('{"op": "abort_rebind", "op_id": "zz"\n')   # unreadable line
+-    h2 = run(S, journal=jp)
+-    assert _held(h2)
+-    assert "may be its cancellation" in h2.journal_status()["unapplied"][0]["why"]
+diff --git a/tests/test_astra7678.py b/tests/test_astra7678.py
+new file mode 100644
+index 0000000..bd79dfc
+--- /dev/null
++++ b/tests/test_astra7678.py
+@@ -0,0 +1,224 @@
++"""Astra 7678 (docs/ASTRA_REVIEW_7678.md, d1239f9): commit-record journal.
++Each rebind is a hashed, chained "rebind_pending" record followed by a
++"rebind_commit" record; only committed rebinds replay.  Any unverifiable
++record fences the WHOLE journal (unhealthy, rebinds refused).
++1 Med torn final newline of the record that decides the outcome
++2 Med every durability step after the entry fails
++3 Med reordered records
++"""
++import json
++import os
++
++import hive.reducer as hr
++from tests.test_astra7160 import ho
++from tests.test_astra7638 import run
++from tests.test_astra7656 import S, _fail_journal_fsync_and_rollback
++
++
++def _held(h):
++    return h._plan_owner.get("a1:p") is None and h.owner_rebinds == []
++
++
++def _lines(jp):
++    return open(jp, "rb").read().splitlines(keepends=True)
++
++
++# ------------------------------------------------ 1 torn final newline
++def test_commit_record_missing_final_newline_fences_whole_journal(tmp_path):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    data = open(jp, "rb").read()
++    open(jp, "wb").write(data[:-1])                    # drop only the final "\n"
++    for _ in range(2):                                 # never trimmed: stays fenced
++        h2 = run(S, journal=jp)
++        st = h2.journal_status()
++        assert _held(h2) and st["healthy"] is False
++        assert "torn" in st["fence"]["error"]
++        assert not h2.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert open(jp, "rb").read() == data[:-1]
++
++
++def test_refused_rebind_with_torn_tail_never_revives(tmp_path, monkeypatch):
++    # a cleanly refused rebind (commit rolled back) followed by a torn line
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    real, n = os.fsync, []
++
++    def second_fails(fd):
++        if os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp):
++            n.append(fd)
++            if len(n) == 2:                            # the commit's fsync
++                raise OSError("EIO")
++        return real(fd)
++    monkeypatch.setattr(os, "fsync", second_fails)
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    monkeypatch.undo()
++    assert h.journal_status()["healthy"] is True and _held(h)
++    assert len(_lines(jp)) == 1                        # pending only, rolled back
++    h2 = run(S, journal=jp)
++    assert _held(h2) and "no commit" in h2.journal_status()["unapplied"][0]["why"]
++    with open(jp, "ab") as f:
++        f.write(_lines(jp)[0][:-1])                    # forged, torn copy
++    assert _held(run(S, journal=jp))
++
++
++# ------------------------------------------------ 2 all later steps fail
++def test_pending_write_and_rollback_fail_refused_and_never_replayed(tmp_path, monkeypatch):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    _fail_journal_fsync_and_rollback(monkeypatch, jp)
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    monkeypatch.undo()
++    st = h.journal_status()
++    assert st["healthy"] is False and st["fence"]["applied"] is False and _held(h)
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert _held(run(S, journal=jp))                   # no commit -> never replays
++    # even a torn copy of the pending line cannot revive it
++    d = open(jp, "rb").read()
++    open(jp, "wb").write(d[:-5])
++    assert _held(run(S, journal=jp))
++
++
++def test_commit_write_and_rollback_fail_is_applied_not_refused(tmp_path, monkeypatch):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    real, n = os.fsync, []
++
++    def commit_fails(fd):
++        if os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp):
++            n.append(fd)
++            if len(n) >= 2:
++                raise OSError("EIO")
++        return real(fd)
++
++    def boom(*a):
++        raise OSError("EIO")
++    monkeypatch.setattr(os, "fsync", commit_fails)
++    monkeypatch.setattr(os, "ftruncate", boom)
++    # never a refusal that a restart could contradict
++    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    monkeypatch.undo()
++    st = h.journal_status()
++    assert h._plan_owner.get("a1:p") == "i"
++    assert st["healthy"] is False and st["fence"]["kind"] == "commit_uncertain"
++    assert st["fence"]["applied"] is True
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="again")
++    data = open(jp, "rb").read()
++    # restart outcome A: the commit survived -> replayed (matches live state)
++    h2 = run(S, journal=jp)
++    assert h2._plan_owner.get("a1:p") == "i" and h2.journal_status()["healthy"]
++    # restart outcome B: the commit was lost -> plan held, never a phantom
++    open(jp, "wb").write(data.splitlines(keepends=True)[0])
++    assert _held(run(S, journal=jp))
++    # outcome C: the commit was torn -> whole journal fenced
++    open(jp, "wb").write(data[:-3])
++    h3 = run(S, journal=jp)
++    assert _held(h3) and h3.journal_status()["healthy"] is False
++    # operator clears the LIVE process: its applied rebind is re-journaled
++    open(jp, "wb").write(data)
++    assert h.clear_journal_fence(actor="op", reason="inspected")
++    h4 = run(S, journal=jp)
++    assert h4._plan_owner.get("a1:p") == "i" and h4.journal_status()["healthy"]
++
++
++def test_journal_changed_outside_process_fences_without_writing(tmp_path):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    os.unlink(jp)
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    st = h.journal_status()
++    assert st["healthy"] is False and st["fence"]["kind"] == "changed"
++    assert not os.path.exists(jp)
++
++
++def test_unwritable_journal_at_startup_is_unhealthy(tmp_path):
++    d = tmp_path / "ro"
++    d.mkdir()
++    os.chmod(d, 0o500)
++    try:
++        h = run(S, journal=str(d / "rebinds.jsonl"))
++        st = h.journal_status()
++        if os.geteuid() != 0:
++            assert st["healthy"] is False and st["fence"]["kind"] == "unwritable"
++            assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    finally:
++        os.chmod(d, 0o700)
++
++
++# ------------------------------------------------ 3 reordered records
++def test_commit_before_its_pending_fences_whole_journal(tmp_path):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    a, b = _lines(jp)
++    open(jp, "wb").write(b + a)
++    h2 = run(S, journal=jp)
++    st = h2.journal_status()
++    assert _held(h2) and st["healthy"] is False
++    assert st["corrupt_records"][0]["line"] == 1
++
++
++def test_reordered_rebinds_fence_whole_journal(tmp_path):
++    from tests.test_astra7519 import INCL
++    from tests.test_astra7160 import PLAN
++    jp = str(tmp_path / "rebinds.jsonl")
++    s = [INCL("i", "p"), INCL("j", "p"), PLAN("p", "", 1),
++         INCL("k", "q"), PLAN("q", "", 1), PLAN("p", "i", 1), PLAN("q", "k", 1)]
++    h = run(s, journal=jp)
++    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
++    L = _lines(jp)
++    assert len(L) == 4
++    for bad in (L[2:] + L[:2], [L[0], L[2], L[1], L[3]], L[:1] + L[2:]):
++        open(jp, "wb").write(b"".join(bad))
++        h2 = run(s, journal=jp)
++        assert h2.journal_status()["healthy"] is False
++        assert h2.owner_rebinds == []
++    open(jp, "wb").write(b"".join(L))                  # intact: both replay
++    h3 = run(s, journal=jp)
++    assert h3._plan_owner.get("a1:p") == "i" and h3._plan_owner.get("a1:q") == "k"
++
++
++def test_rehashed_forged_commit_without_chain_fences(tmp_path, monkeypatch):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    real, n = os.fsync, []
++
++    def second_fails(fd):
++        if os.readlink(f"/proc/self/fd/{fd}") == os.path.realpath(jp):
++            n.append(fd)
++            if len(n) == 2:
++                raise OSError("EIO")
++        return real(fd)
++    monkeypatch.setattr(os, "fsync", second_fails)
++    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    monkeypatch.undo()
++    p = json.loads(_lines(jp)[0])
++    c = {"v": hr.JOURNAL_VERSION, "op": "rebind_commit", "op_id": p["op_id"],
++         "pending_hash": p["rec_hash"], "ts": 0, "prev": "wrong"}
++    c["rec_hash"] = hr.HiveReducer._rec_hash(c)
++    with open(jp, "a") as f:
++        f.write(json.dumps(c) + "\n")
++    h2 = run(S, journal=jp)
++    assert _held(h2) and "chain" in h2.journal_status()["corrupt_records"][0]["why"]
++
++
++def test_garbage_line_fences_everything_including_later_rebinds(tmp_path):
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    with open(jp, "a") as f:
++        f.write('{"op": "rebind_commit"\n')
++    h2 = run(S, journal=jp)
++    assert _held(h2) and h2.journal_status()["healthy"] is False
++    assert ho(h2) == ["i", "j"]
++
++
++def test_appliance_status_reports_journal_health(tmp_path):
++    from hive.appliance import HiveAppliance
++    jp = tmp_path / "rebinds.jsonl"
++    jp.write_bytes(b'{"torn":')
++    assert HiveAppliance(rebind_journal=str(jp)).status()["rebind_journal_healthy"] is False
++    jp2 = tmp_path / "ok.jsonl"
++    assert HiveAppliance(rebind_journal=str(jp2)).status()["rebind_journal_healthy"] is True
