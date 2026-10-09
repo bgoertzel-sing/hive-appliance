@@ -1,0 +1,188 @@
+{
+  "intent_controls": {
+    "passed": false,
+    "error": "PermissionError(13, 'Permission denied')",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 132, in <module>\n    try:fn(r);r['passed']=True\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 28, in controls\n    before=disk(p);h=hnew(p);st=state(h)\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset7718.py\", line 14, in disk\n    def disk(p):return {q.name:q.read_bytes().hex() for q in p.parent.glob(p.name+'*') if q.is_file()}\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset7718.py\", line 14, in <dictcomp>\n    def disk(p):return {q.name:q.read_bytes().hex() for q in p.parent.glob(p.name+'*') if q.is_file()}\n  File \"/usr/lib/python3.10/pathlib.py\", line 1126, in read_bytes\n    with self.open(mode='rb') as f:\n  File \"/usr/lib/python3.10/pathlib.py\", line 1119, in open\n    return self._accessor.open(self, mode, buffering, encoding, errors,\nPermissionError: [Errno 13] Permission denied: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/intent-unreadable-healthy.jsonl.reset-intent'\n"
+  },
+  "reset_retries_and_live_errors": {
+    "passed": false,
+    "error": "TypeError(\"'NoneType' object is not callable\")",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 132, in <module>\n    try:fn(r);r['passed']=True\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 83, in retries\n    base=action_case('retry-base','reset');rows=[]\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 62, in action_case\n    if action=='reset':h.reset_journal('op','reset retry')\n  File \"/tmp/hive-astra-7727-source/hive/reducer.py\", line 1030, in reset_journal\n    self._write_file_durably(ip, (json.dumps(\n  File \"/tmp/hive-astra-7727-source/hive/reducer.py\", line 427, in _write_file_durably\n    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)\nTypeError: 'NoneType' object is not callable\n"
+  },
+  "intent_clearance_matrix": {
+    "passed": false,
+    "error": "TypeError(\"'NoneType' object is not callable\")",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 132, in <module>\n    try:fn(r);r['passed']=True\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 91, in clearance\n    base=action_case('clear-base','clear');rows=[]\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/intent7727.py\", line 63, in action_case\n    else:h.clear_journal_fence('op','clear interruption')\n  File \"/tmp/hive-astra-7727-source/hive/reducer.py\", line 905, in clear_journal_fence\n    self._write_file_durably(archive, old)\n  File \"/tmp/hive-astra-7727-source/hive/reducer.py\", line 427, in _write_file_durably\n    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)\nTypeError: 'NoneType' object is not callable\n"
+  },
+  "intent_durability_reporting": {
+    "witness": {
+      "owner": {},
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/intent-durability-open.jsonl",
+        "durable": true,
+        "journal_id": "43f617d0f2f04cd38db134f04039deb5",
+        "volatile_rebinds_allowed": true,
+        "healthy": false,
+        "fence": {
+          "kind": "reset_failed",
+          "error": "reset_journal by op (durability report witness) FAILED at step 'create reset-intent marker': OSError('return-boundary failure after intent create, before any fsync'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). The reset-intent marker is durable: every start fences until reset_journal() is retried successfully or clear_journal_fence() is called.",
+          "found_at_startup": false,
+          "ts": 1791518442.6346457,
+          "failed_step": "create reset-intent marker",
+          "intent_durable": true
+        },
+        "event_seq": 0,
+        "pending": 0,
+        "unapplied": [
+          {
+            "op_id": "95148038833749f3a6b23a5019fefc83",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "seq": 4,
+            "why": "discarded by reset_journal (op: durability report witness)"
+          }
+        ],
+        "unapplied_total": 1,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1026,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [
+          {
+            "actor": "op",
+            "reason": "durability report witness",
+            "ts": 1791518442.6345031,
+            "status": "failed",
+            "failed_step": "create reset-intent marker",
+            "error": "OSError('return-boundary failure after intent create, before any fsync')",
+            "archived": {},
+            "intent_durable": true,
+            "rebinds_discarded": 1
+          }
+        ],
+        "reset_in_progress": true,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 0,
+      "resets": [
+        {
+          "actor": "op",
+          "reason": "durability report witness",
+          "ts": 1791518442.6345031,
+          "status": "failed",
+          "failed_step": "create reset-intent marker",
+          "error": "OSError('return-boundary failure after intent create, before any fsync')",
+          "archived": {},
+          "intent_durable": true,
+          "rebinds_discarded": 1
+        }
+      ]
+    },
+    "fsync_calls": [],
+    "intent_bytes": 0,
+    "modeled_power_loss_restart": {
+      "owner": {
+        "a1:p": "i"
+      },
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/intent-durability-open.jsonl",
+        "durable": true,
+        "journal_id": "43f617d0f2f04cd38db134f04039deb5",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1026,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [],
+        "reset_in_progress": false,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 1,
+      "resets": []
+    },
+    "finding": "lexists is not durability; failure claims every start fences without a durability acknowledgement",
+    "simulation_scope": "Only unsynced marker entry removed; journal and identity bytes unchanged",
+    "fsync_failure_plus_cleanup_failure": {
+      "owner": {},
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/intent-durability-fsync.jsonl",
+        "durable": true,
+        "journal_id": "ed174c2af84440d4884cbc29e1eefee3",
+        "volatile_rebinds_allowed": true,
+        "healthy": false,
+        "fence": {
+          "kind": "reset_failed",
+          "error": "reset_journal by op (fsync and cleanup failure) FAILED at step 'create reset-intent marker': OSError('EIO intent fsync'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). The reset-intent marker is durable: every start fences until reset_journal() is retried successfully or clear_journal_fence() is called.",
+          "found_at_startup": false,
+          "ts": 1791518442.648711,
+          "failed_step": "create reset-intent marker",
+          "intent_durable": true
+        },
+        "event_seq": 0,
+        "pending": 0,
+        "unapplied": [
+          {
+            "op_id": "d55e16ebad1d4573bf100a4f2329d59c",
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "seq": 4,
+            "why": "discarded by reset_journal (op: fsync and cleanup failure)"
+          }
+        ],
+        "unapplied_total": 1,
+        "unapplied_omitted": 0,
+        "records": 3,
+        "bytes": 1024,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [
+          {
+            "actor": "op",
+            "reason": "fsync and cleanup failure",
+            "ts": 1791518442.6485596,
+            "status": "failed",
+            "failed_step": "create reset-intent marker",
+            "error": "OSError('EIO intent fsync')",
+            "archived": {},
+            "intent_durable": true,
+            "rebinds_discarded": 1
+          }
+        ],
+        "reset_in_progress": true,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 0,
+      "resets": [
+        {
+          "actor": "op",
+          "reason": "fsync and cleanup failure",
+          "ts": 1791518442.6485596,
+          "status": "failed",
+          "failed_step": "create reset-intent marker",
+          "error": "OSError('EIO intent fsync')",
+          "archived": {},
+          "intent_durable": true,
+          "rebinds_discarded": 1
+        }
+      ]
+    },
+    "passed": true
+  }
+}

@@ -1,0 +1,287 @@
+{
+  "healthy_restored": {
+    "owner": {},
+    "status": {
+      "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+      "durable": true,
+      "journal_id": "f6b14af0ee9249458e83ca9144eda17b",
+      "volatile_rebinds_allowed": true,
+      "healthy": true,
+      "fence": null,
+      "event_seq": 0,
+      "pending": 1,
+      "unapplied": [],
+      "unapplied_total": 0,
+      "unapplied_omitted": 0,
+      "records": 3,
+      "bytes": 1026,
+      "corrupt_records": [],
+      "fence_clearances": [],
+      "journal_resets": [],
+      "reset_in_progress": false,
+      "plans_refused_cap": 0
+    },
+    "pending": 1,
+    "applied": 0,
+    "resets": []
+  },
+  "info": {
+    "actor": "op",
+    "reason": "restore without discarded authorization",
+    "ts": 1791518441.7879517,
+    "status": "completed",
+    "archived": {
+      "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.reset-1791518441787951365",
+      "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id.reset-1791518441787951365"
+    },
+    "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+    "rebinds_discarded": 1,
+    "was_fenced": null
+  },
+  "archive_bytes_match": true,
+  "after_reset": {
+    "owner": {},
+    "status": {
+      "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+      "durable": true,
+      "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+      "volatile_rebinds_allowed": true,
+      "healthy": true,
+      "fence": null,
+      "event_seq": 4,
+      "pending": 0,
+      "unapplied": [
+        {
+          "op_id": "7ae380a01a634d829d15b7f8d90cd4d6",
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "seq": 4,
+          "why": "discarded by reset_journal (op: restore without discarded authorization)"
+        }
+      ],
+      "unapplied_total": 1,
+      "unapplied_omitted": 0,
+      "records": 2,
+      "bytes": 778,
+      "corrupt_records": [],
+      "fence_clearances": [],
+      "journal_resets": [
+        {
+          "actor": "op",
+          "reason": "restore without discarded authorization",
+          "ts": 1791518441.7879517,
+          "status": "completed",
+          "archived": {
+            "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.reset-1791518441787951365",
+            "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id.reset-1791518441787951365"
+          },
+          "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+          "rebinds_discarded": 1,
+          "was_fenced": null
+        }
+      ],
+      "reset_in_progress": false,
+      "plans_refused_cap": 0
+    },
+    "pending": 0,
+    "applied": 0,
+    "resets": [
+      {
+        "actor": "op",
+        "reason": "restore without discarded authorization",
+        "ts": 1791518441.7879517,
+        "status": "completed",
+        "archived": {
+          "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.reset-1791518441787951365",
+          "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id.reset-1791518441787951365"
+        },
+        "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+        "rebinds_discarded": 1,
+        "was_fenced": null
+      }
+    ]
+  },
+  "two_restarts_before_reissue": [
+    {
+      "owner": {},
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+        "durable": true,
+        "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 2,
+        "bytes": 778,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [],
+        "reset_in_progress": false,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 0,
+      "resets": []
+    },
+    {
+      "owner": {},
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+        "durable": true,
+        "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 2,
+        "bytes": 778,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [],
+        "reset_in_progress": false,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 0,
+      "resets": []
+    }
+  ],
+  "two_restarts_after_reissue": [
+    {
+      "owner": {
+        "a1:p": "i"
+      },
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+        "durable": true,
+        "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 4,
+        "bytes": 1603,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [],
+        "reset_in_progress": false,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 1,
+      "resets": []
+    },
+    {
+      "owner": {
+        "a1:p": "i"
+      },
+      "status": {
+        "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl",
+        "durable": true,
+        "journal_id": "3d4c46ee60ef4f9c9723f473ca01dd9f",
+        "volatile_rebinds_allowed": true,
+        "healthy": true,
+        "fence": null,
+        "event_seq": 4,
+        "pending": 0,
+        "unapplied": [],
+        "unapplied_total": 0,
+        "unapplied_omitted": 0,
+        "records": 4,
+        "bytes": 1603,
+        "corrupt_records": [],
+        "fence_clearances": [],
+        "journal_resets": [],
+        "reset_in_progress": false,
+        "plans_refused_cap": 0
+      },
+      "pending": 0,
+      "applied": 1,
+      "resets": []
+    }
+  ],
+  "logs": [
+    {
+      "level": "ERROR",
+      "message": "Journaled hive rebind a1:p -> i by operator-original NOT re-applied: discarded by reset_journal (op: restore without discarded authorization)"
+    },
+    {
+      "level": "CRITICAL",
+      "message": "Rebind journal /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl is FENCED (reset_in_progress): reset_journal by op (restore without discarded authorization) in progress; every pre-reset journaled rebind is discarded -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Rebind journal RESET by op (restore without discarded authorization): fresh journal 3d4c46ee60ef4f9c9723f473ca01dd9f, old files archived {'/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl': '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.reset-1791518441787951365', '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id': '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7727/reset-cases/exact-restore-final-timeline.jsonl.id.reset-1791518441787951365'}, 1 journaled rebind(s) discarded"
+    },
+    {
+      "level": "WARNING",
+      "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+    },
+    {
+      "level": "WARNING",
+      "message": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+    },
+    {
+      "level": "WARNING",
+      "message": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+    },
+    {
+      "level": "WARNING",
+      "message": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Operator hive rebind by operator-original (case-proof): a1:p owner set to incident i (candidate=True, held=0, foreign=[], closed=['i'])"
+    },
+    {
+      "level": "WARNING",
+      "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+    },
+    {
+      "level": "WARNING",
+      "message": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Operator hive rebind (journal replay) by operator-original (case-proof): a1:p owner set to incident i (candidate=True, held=0, foreign=[], closed=['i'])"
+    },
+    {
+      "level": "WARNING",
+      "message": "Agent a1 plan p is complete but has no proven owner; it closes nothing (linked open incidents ['i'] stay open). It is HELD in quarantined_plans() (ownerless_linked); repair with preview_rebind()/rebind_plan_owner(). A re-sent PLAN only records an owner candidate."
+    },
+    {
+      "level": "WARNING",
+      "message": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()"
+    },
+    {
+      "level": "WARNING",
+      "message": "Operator hive rebind (journal replay) by operator-original (case-proof): a1:p owner set to incident i (candidate=True, held=0, foreign=[], closed=['i'])"
+    }
+  ],
+  "passed": true,
+  "note": "Observations frozen before mutation. reset7718 successful_restore cases assert held before reissue, but its second reducer is subsequently rebound before serializing that earlier list; this supplemental timeline removes that display ambiguity."
+}

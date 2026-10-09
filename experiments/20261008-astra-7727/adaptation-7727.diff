@@ -1,0 +1,145 @@
+--- 7718/runner.py
++++ 7727/runner.py
+@@ -30,7 +30,7 @@
+     e = os.environ.copy()
+     e.update(PYTHONDONTWRITEBYTECODE='1', PIP_NO_INDEX='1', HF_HUB_OFFLINE='1',
+              TRANSFORMERS_OFFLINE='1', ANONYMIZED_TELEMETRY='False',
+-             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR=str(E / 'tmp'),
++             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR='/tmp/hive-astra-7727-runtime',
+              PYTHONPATH=str(E / 'guard'), HIVE_SRC=str(S))
+     return e
+ 
+--- 7718/reset7718.py
++++ 7727/reset7718.py
+@@ -85,17 +85,25 @@
+   except (Crash,OSError) as ex:caught=type(ex).__name__
+  if target is not None:assert triggered and caught
+  before_feed=state(h);disk_after=disk(p)
+- # Crash object intentionally not resumed; OSError is catchable and live object remains accessible.
+- live=None
+- if error==OSError and target is not None:
+-  hfeed(h,s);live=state(h)
+  rs=[hfeed(hnew(p),s) for _ in range(2)]
+  assert state(rs[0])['owner']==state(rs[1])['owner']
+  for z in rs:
+   if not z.journal_status()['healthy']:assert not z._plan_owner
++ recovery=None;live=None
++ if error==OSError and target is not None:
++  assert not before_feed['status']['healthy'] and before_feed['pending']==0
++  assert before_feed['resets'][-1]['status']=='failed'
++  assert h.verify_journal() is False
++  assert h.clear_journal_fence('op','verify then clear failed reset')
++  assert h.journal_fence_clearances[-1]['rebinds_rejournaled']==0
++  assert [r['op'] for r in records(p)]==['journal_header','journal_reset']
++  hfeed(h,s);held(h);live=state(h)
++  recovered=[hfeed(hnew(p),s) for _ in range(2)]
++  for z in recovered:held(z)
++  recovery=dict(rejournaled=0,restarts=[state(z) for z in recovered])
+  return dict(name=name,mode=mode,target=target,side=side,error=error.__name__,caught=caught,trace=trace,
+              before_feed=before_feed,live_after_error_feed=live,restarts=[state(z) for z in rs],
+-             pair_unchanged=pair(p)==old,disk_after=disk_after)
++             recovery=recovery,pair_unchanged_before_recovery=all(disk_after.get(Path(q).name)==v.hex() for q,v in old.items()),disk_after=disk_after)
+ 
+ def interruptions(row):
+  rows=[];bases=[]
+@@ -109,7 +117,12 @@
+             fenced_restart=sum(not r['restarts'][0]['status']['healthy'] for r in rows),
+             healthy_held_restart=sum(r['restarts'][0]['status']['healthy'] and not r['restarts'][0]['owner'] for r in rows),
+             live_replay_after_error=sum(bool(r['live_after_error_feed'] and r['live_after_error_feed']['owner']) for r in rows))
+- assert row['healthy_old_replay']>0 and row['live_replay_after_error']>0
++ assert row['live_replay_after_error']==0
++ # Old-pair replay is allowed ONLY before a durable intent is established.
++ old_replays=[r for r in rows if r['restarts'][0]['owner']]
++ assert all(r['target']<=3 and r['pair_unchanged_before_recovery'] for r in old_replays)
++ row['old_replay_only_pre_intent']=True
++ row['error_verify_clear_cases']=sum(r['error']=='OSError' for r in rows)
+ 
+ def live_witness(row):
+  # Fail after the new journal has itself been durably installed.
+@@ -125,14 +138,14 @@
+    except OSError:pass
+    else:raise AssertionError('expected failure')
+   clean_restart=hfeed(hnew(p),s);held(clean_restart)
+-  before=state(h);assert before['status']['healthy'] and before['pending']==1 and not before['resets']
++  before=state(h);assert not before['status']['healthy'] and before['pending']==0 and before['resets'][-1]['status']=='failed'
+   if action=='verify_then_clear':
+    assert h.verify_journal() is False
+    assert h.clear_journal_fence('op','recover failed reset')
+-  hfeed(h,s);assert h._plan_owner=={'a1:p':'i'}
++  hfeed(h,s);held(h)
+   after=state(h);rs=[hfeed(hnew(p),s) for _ in range(2)]
+   if action=='verify_then_clear':
+-   for z in rs:assert z._plan_owner=={'a1:p':'i'}
++   for z in rs:held(z)
+   else:
+    for z in rs:held(z)
+   rows.append(dict(action=action,new_disk_records=[r['op'] for r in records(p)],before=before,clean_restart=state(clean_restart),after=after,restarts=[state(z) for z in rs]))
+@@ -144,6 +157,6 @@
+  try:fn(r);r['passed']=True
+  except Exception as ex:r.update(passed=False,error=repr(ex),traceback=traceback.format_exc())
+  out[name]=r;print(name,r['passed'],r.get('error',''),flush=True)
+-(E/'reset7718.json').write_text(json.dumps(out,indent=2,default=str)+'\n')
++(E/'reset7727.json').write_text(json.dumps(out,indent=2,default=str)+'\n')
+ print(json.dumps({k:v for k,v in out.get('interruptions',{}).items() if k not in ['bases','cases']}))
+ sys.exit(not all(x['passed'] for x in out.values()))
+--- 7718/verify_evidence.py
++++ 7727/verify_evidence.py
+@@ -1,16 +1,32 @@
+-"""Read-only delivered evidence/report verification, with complete manifest coverage."""
+-import hashlib
++"""Read-only full evidence/report manifest and semantic ledger verification."""
++import hashlib,json
+ from pathlib import Path
+ E=Path(__file__).resolve().parent
+-report=E.parent.parent/'docs/ASTRA_REVIEW_7718.md'
++report=(E.parent.parent/'docs/ASTRA_REVIEW_7727.md').resolve()
+ seen=set()
+ for line in (E/'SHA256SUMS').read_text().splitlines():
+- expected,name=line.split('  ',1)
+- p=(E/name).resolve()
++ expected,name=line.split('  ',1);p=(E/name).resolve()
+  assert p.is_relative_to(E) or p==report,name
+  assert p not in seen,name
+  assert hashlib.sha256(p.read_bytes()).hexdigest()==expected,name
+  seen.add(p)
+ actual={p.resolve() for p in E.rglob('*') if p.is_file() and p.name!='SHA256SUMS'}|{report}
+ assert seen==actual,dict(unmanifested=list(actual-seen),missing=list(seen-actual))
+-print('verified',len(seen),'artifact/report hashes; complete manifest coverage')
++load=lambda n:json.loads((E/n).read_text())
++assert load('model-verification.json')['runtime_model']=='openai/gpt-6-astra'
++assert load('source-verification.json')['pin']=='7ce5cd5c2c3289ee1ce9f50c2683854e038df0d0'
++assert load('source-verification.json')['files']==157
++expected_nonzero={'semantic-7133-exit.json','intent7727-exit.json'}
++exits=list(E.glob('*-exit.json'));assert len(exits)==24
++for p in exits:
++ d=load(p.name);assert d['exit_code']==(1 if p.name in expected_nonzero else 0),p.name
++ assert not d['timed_out'];stem=p.name.removesuffix('-exit.json')
++ for suffix in ['-started.json','.stdout','.stderr']:assert (E/(stem+suffix)).is_file(),stem+suffix
++assert '817 passed in 51.57s' in (E/'pytest.stdout').read_text()
++for name in ['reset7727.json','intent-final7727.json','extra-io7727.json']:
++ assert all(r['passed'] for r in load(name).values()),name
++r=load('reset7727.json')['interruptions'];assert r['injections']==208 and r['error_verify_clear_cases']==104 and r['live_replay_after_error']==0
++assert len(load('policy-schedules.json'))==1440
++assert load('review7694.json')['retained_hold_144_schedules']['schedules']==144
++assert '## Verdict: NOT APPROVED' in report.read_text()
++print('verified',len(seen),'artifact/report hashes; complete manifest coverage; 24 execution ledgers; suite and review invariants')
+--- 7718/run_journals.py
++++ 7727/run_journals.py
+@@ -1,4 +1,4 @@
+ import sys
+ from runner import E,run
+-for n in ['review7694','followup7694','focused7701','startup7701','clearance7701','marker7701']:
+- run(n,[sys.executable,str(E/(n+'.py'))])
++for n in ['review7694', 'followup7694', 'focused7701', 'startup7708', 'startup_recovery_final7708', 'clearance7701', 'marker7701', 'recovery7708']:
++ run(n,[sys.executable,str(E/(n+".py"))])
+--- 7718/run_primary.py
++++ 7727/run_primary.py
+@@ -1,6 +1,6 @@
+ import os,sys
+ from runner import E,S,run
+-os.environ["PIP_FIND_LINKS"]=str(E/"build-prerequisites")
+-run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+str(E/"pytest-tmp")],S)
++os.environ["PIP_FIND_LINKS"]="/tmp/hive-astra-7718/20261008-astra-7718/build-prerequisites"
++run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+"/tmp/hive-astra-7727-pytest"],S)
+ for n in ["review7195","review7173","boundary_and_disk","mechanism_probes","probes","older-regressions","independent","new_cases","semantic_7133"]:
+  run(n.replace("_","-"),[sys.executable,str(E/(n+".py"))],E)

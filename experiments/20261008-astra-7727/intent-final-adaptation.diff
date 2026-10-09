@@ -1,0 +1,47 @@
+--- intent7727.py
++++ intent_final7727.py
+@@ -7,6 +7,17 @@
+ ns={'__file__':str(E/'reset7718.py'),'__name__':'defs'}
+ src=(E/'reset7718.py').read_text();exec(compile(src[:src.index('\nout={}\n')],str(E/'reset7718.py'),'exec'),ns)
+ for k in ['restored','hnew','hfeed','held','state','records','pair','disk','hr','Crash','fpath','anchor']:globals()[k]=ns[k]
++
++ns['T']=E/'intent-final-cases';ns['T'].mkdir(exist_ok=True)
++def inspect_disk(p):
++ result={}
++ for q in p.parent.glob(p.name+'*'):
++  if q.is_symlink():result[q.name]={'symlink':str(q.readlink())}
++  elif q.is_dir():result[q.name]={'directory':True}
++  else:
++   try:result[q.name]=q.read_bytes().hex()
++   except PermissionError:result[q.name]={'unreadable':True,'size':q.stat().st_size,'mode':q.stat().st_mode}
++ return result
+ 
+ def controls(row):
+  rows=[]
+@@ -25,9 +36,9 @@
+    elif marker=='dangling_symlink':ip.symlink_to(ip.name+'.absent')
+    else:ip.write_bytes({'empty':b'','partial':b'{"v":','damaged':b'\xff\x00','unreadable':b'opaque'}[marker])
+    if marker=='unreadable':ip.chmod(0)
+-   before=disk(p);h=hnew(p);st=state(h)
++   before=inspect_disk(p);h=hnew(p);st=state(h)
+    assert not st['status']['healthy'] and st['status']['fence']['kind']=='reset_incomplete'
+-   assert st['pending']==0 and before==disk(p)
++   assert st['pending']==0 and before==inspect_disk(p)
+    hfeed(h,s);held(h)
+    failed=None
+    try:assert h.clear_journal_fence('op','finish interrupted reset')
+@@ -56,6 +67,7 @@
+    r=real[kind](*args,**kw)
+    if n==target and side=='after':triggered=True;raise error(name)
+    return r
++  return call
+  with ExitStack() as stack:
+   for k in real:stack.enter_context(patch.object(os,k,wrap(k)))
+   try:
+@@ -132,5 +144,5 @@
+  try:fn(r);r['passed']=True
+  except Exception as ex:r.update(passed=False,error=repr(ex),traceback=traceback.format_exc())
+  out[name]=r;print(name,r['passed'],r.get('error',''),flush=True)
+-(E/'intent7727.json').write_text(json.dumps(out,indent=2,default=str)+'\n')
++(E/'intent-final7727.json').write_text(json.dumps(out,indent=2,default=str)+'\n')
+ sys.exit(not all(r['passed'] for r in out.values()))
