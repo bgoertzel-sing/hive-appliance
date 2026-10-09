@@ -92,13 +92,13 @@ export HIVE_REBIND_JOURNAL=$(pwd)/state/hive-rebinds.jsonl
 ```
 
 Without a journal, `HiveAppliance` refuses rebinds unless you pass
-`volatile_rebinds=True`. After upgrading, older (v1/v2) journal entries are
-reported as unapplied rather than replayed: re-issue any you still want. A
-`<journal>.fence` file means a journal write did not finish cleanly (an
-unverifiable marker fences every journaled rebind). Rebinds stay refused until
-an operator inspects the journal and calls
-`clear_journal_fence(actor=..., reason=...)`, which durably cancels the
-uncertain entry before removing the marker. See
+`volatile_rebinds=True`. Each rebind is journaled as a pending record plus a
+commit record, and only committed rebinds replay. If any journal record cannot
+be verified (torn, edited, reordered, legacy v1-v3 format), the whole journal is
+fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds
+are refused until an operator inspects it and calls
+`clear_journal_fence(actor=..., reason=...)`, which archives the old journal
+and starts a new one; re-issue any rebind still wanted. See
 `docs/POLICY_MULTI_PLAN_SUPERSESSION.md` ("Hive rebind journal").
 
 ## Development

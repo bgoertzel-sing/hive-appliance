@@ -280,6 +280,8 @@ class HiveAppliance:
             "total_incidents": self._total_incidents,
             "agents": list(self._adapters.keys()),
             "dashboard": self.dashboard.summary(),
+            # Astra 7678: False while the rebind journal is fenced
+            "rebind_journal_healthy": self.reducer.journal_status()["healthy"],
         }
 
     @property

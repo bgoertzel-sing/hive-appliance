@@ -132,7 +132,8 @@ def test_legacy_v1_entry_without_position_is_not_replayed(tmp_path):
                               "reason": "t"}) + "\n")
     h = run(BASE, journal=str(jp))
     assert h._plan_owner.get("a1:p") is None
-    assert "legacy" in h.journal_status()["unapplied"][0]["why"]
+    st = h.journal_status()                      # Astra 7678: fences the journal
+    assert st["healthy"] is False and "legacy" in st["fence"]["error"]
 
 
 # ------------------------------------------------ 3 F-journal-refused-fsync
@@ -180,7 +181,8 @@ def test_failed_rollback_is_indeterminate_and_fences(tmp_path, monkeypatch):
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     monkeypatch.undo()
     st = h.journal_status()
-    assert st["indeterminate"] and st["indeterminate"]["entry"]["incident_id"] == "i"
+    assert st["healthy"] is False and st["fence"]["kind"] == "write_failure"
+    assert st["fence"]["applied"] is False
     assert h._plan_owner.get("a1:p") is None
     # fenced: even a healthy journal refuses further rebinds until inspected
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
@@ -190,30 +192,34 @@ def test_short_or_failed_write_is_clean_refusal(tmp_path):
     h = run(BASE + [PLAN("p", "i", 1)], journal=str(tmp_path / "j.jsonl"))
     h._journal_path = str(tmp_path)                   # a directory
     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    assert h.journal_status()["indeterminate"] is None
+    assert h.journal_status()["healthy"] is True
 
 
 # ------------------------------------------------ 4 F-journal-tail
 S_HELD = BASE + [PLAN("p", "i", 1)]
 
 
-def test_torn_tail_at_startup_set_aside_before_new_write(tmp_path):
+def test_torn_tail_at_startup_fences_whole_journal(tmp_path):
+    # Astra 7678: a torn tail is never trimmed; it fences the whole journal
     jp = tmp_path / "rebinds.jsonl"
     jp.write_bytes(b'{"op": "owner_reb')
     h = run(S_HELD, journal=str(jp))
     st = h.journal_status()
-    assert len(st["set_aside"]) == 1
-    assert open(st["set_aside"][0], "rb").read() == b'{"op": "owner_reb'
-    assert jp.read_bytes() == b""
+    assert st["healthy"] is False and "torn" in st["fence"]["error"]
+    assert jp.read_bytes() == b'{"op": "owner_reb'
+    assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+    assert h.clear_journal_fence(actor="op", reason="inspected")
+    arch = h.journal_status()["fence_clearances"][-1]["archived"]
+    assert open(arch, "rb").read() == b'{"op": "owner_reb'
     assert h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
     h2 = run(S_HELD, journal=str(jp))                 # restart: rebind survives
     assert h2._plan_owner.get("a1:p") == "i"
     assert ho(h2) == ["i", "j"]                       # no receipts yet: nothing closed
-    assert h2.journal_status()["set_aside"] == []     # journal is clean now
+    assert h2.journal_status()["healthy"] is True
     assert h2.owner_rebinds and h2.owner_rebinds[-1]["replayed"] is True
 
 
-def test_torn_tail_appearing_at_runtime_set_aside_on_append(tmp_path):
+def test_torn_tail_appearing_at_runtime_fences(tmp_path):
     jp = tmp_path / "rebinds.jsonl"
     s = [INCL("i", "p"), INCL("j", "p"), PLAN("p", "", 1),
          INCL("k", "q"), PLAN("q", "", 1), PLAN("p", "i", 1), PLAN("q", "k", 1)]
@@ -222,12 +228,12 @@ def test_torn_tail_appearing_at_runtime_set_aside_on_append(tmp_path):
     good = jp.read_bytes()
     with open(jp, "ab") as f:
         f.write(b'{"torn":')
-    assert h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
-    assert jp.read_bytes().startswith(good) and jp.read_bytes().endswith(b"\n")
-    assert len(h.journal_status()["set_aside"]) == 1
+    assert not h.rebind_plan_owner("a1", "q", "k", actor="op", reason="t")
+    assert jp.read_bytes() == good + b'{"torn":'      # nothing written or trimmed
+    assert h.journal_status()["fence"]["kind"] == "changed"
     h2 = run(s, journal=str(jp))
-    assert h2._plan_owner.get("a1:p") == "i" and h2._plan_owner.get("a1:q") == "k"
-    assert len(h2.owner_rebinds) == 2
+    assert h2.journal_status()["healthy"] is False
+    assert h2._plan_owner.get("a1:p") is None and h2.owner_rebinds == []
 
 
 # ------------------------------------------------ 5 defaults and caps
@@ -248,7 +254,7 @@ def test_appliance_uses_env_journal(monkeypatch, tmp_path):
     a.reducer.register_agent("a1")
     feed(a.reducer, S_HELD)
     assert a.reducer.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
-    assert jp.read_text().count("\n") == 1
+    assert jp.read_text().count("\n") == 2            # pending + commit
 
 
 def test_appliance_explicit_volatile_opt_out(monkeypatch):

@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -78,7 +78,7 @@ accident.
   `volatile_rebinds=True` is passed. A bare `HiveReducer()` still allows
   volatile rebinds.
 - **Replay model.** A restart must replay the FULL hive event stream from the
-  beginning. Each entry (format v3) records the event-stream position (`seq`)
+  beginning. Each rebind record (format v4) records the event-stream position (`seq`)
   and a SHA-256 hash chain over the canonical CONTENT of every reduced event
   (id, kind, ts, source, subject, payload, severity, schema version). An entry
   is re-applied only at exactly that position and only if the replayed stream
@@ -87,71 +87,66 @@ accident.
   conflicting PLANs (7146 N6) do not advance the position. Snapshot or partial
   (suffix) restore is NOT supported: entries stay pending or are reported as
   unapplied.
-- **Entry integrity.** Each rebind entry and each `abort_rebind` record
-  carries `entry_hash` (SHA-256 of its other fields). A rebind line that fails
-  its hash is reported unapplied ("entry content hash mismatch"). Any record
-  that cannot be verified -- an unreadable or invalid line, an abort record
-  that fails its hash/format check, or an abort record that names no earlier
-  journaled rebind -- might have been the cancellation of an earlier rebind,
-  so EVERY rebind before it is not replayed (fail-closed; reported unapplied
-  and listed in `journal_status()["corrupt_records"]`). Rebinds after it are
-  unaffected. These checks detect accidental and naive edits. They are NOT a
-  keyed MAC: someone with write access who recomputes the hashes is not
-  detected, so protect the journal and marker with file permissions.
-- **Write protocol and fence.** Before each append, a fence marker
-  `<journal>.fence` is written to a temp file, fsync'd, renamed into place and
-  its directory fsync'd. The marker (format v2) embeds the entry and its own
-  `marker_hash`. The entry is then appended and fsync'd; on success the
-  marker is unlinked and the directory fsync'd. Outcomes:
-  - Append write/fsync fails and the truncate-rollback is fsync'd: clean
-    refusal, the marker is removed. If that removal fails the journal stays
-    fenced in memory; nothing can replay because the entry is not in the
-    journal.
-  - Rollback fails: indeterminate. The marker is left in place (it was made
-    durable before the append) and the journal is fenced in memory.
-  - Entry committed but the marker unlink fails, OR the unlink succeeds and
-    the directory fsync fails (so the removal may or may not survive a
-    crash): the rebind is reported NOT applied, the journal is fenced in
-    memory, and a durable `abort_rebind` record for the entry is appended
-    (the journal file's own fsync), so a restart does not apply it whatever
-    happened to the marker. If that abort record also cannot be made
-    durable, the marker is re-written; `journal_status()["indeterminate"]`
-    reports `abort_durable` and `marker_present`. Only if BOTH fail can the
-    entry replay after a restart, and the status says so explicitly.
-  - `marker_present`/`persisted` report presence in the directory listing at
-    that moment, not a durability guarantee.
-  While fenced (live, or a marker found at startup), new rebinds are refused.
-  At startup a marker is trusted only if it parses, has format v2, its
-  `marker_hash` matches, it embeds a hash-valid entry with the same `op_id`,
-  and that entry is the LAST journaled rebind; then only that entry is held
-  back. Any other marker (unreadable, edited, legacy format, or naming a
-  different entry) fences EVERY journaled rebind. A leftover
-  `<journal>.fence.tmp` (never renamed into place) means the append never
-  started; it is deleted.
-- **Clearing a fence.** Inspect the journal and the marker, then call
-  `clear_journal_fence(actor=..., reason=...)`. It FIRST appends durable
-  `abort_rebind` records -- for the marker's entry if the marker is trusted,
-  and, if the marker is untrusted or does not name the last journaled
-  rebind, also for the last journaled rebind -- and only then removes the
-  marker, so losing the removal cannot bring the entry back. If an abort
-  record or the directory fsync after the removal fails, it raises and the
-  journal stays fenced in memory. The clearance is recorded in
-  `journal_status()["fence_clearances"]`. Aborted entries are never replayed;
-  re-issue the rebind afterwards if it is still wanted.
-- **Torn tail.** An unterminated last line is copied to
-  `<journal>.torn-<ns>`. The copy is fully written, fsync'd, read back and
-  compared, and its directory entry fsync'd, BEFORE the journal is truncated.
-  This happens at startup and before every append. If a step fails BEFORE the
-  truncate, the journal bytes are untouched and the rebind is refused (or
-  startup raises). If the truncate succeeds but the journal's following fsync
-  fails, the journal may already be truncated (on disk the old length may or
-  may not survive a crash); the fragment is preserved in the verified,
-  durable aside file and the rebind is refused.
-- **Legacy entries.** v1 (no position) and v2 (id-only stream hash, no
-  entry hash) entries are NOT replayed after upgrading. They appear in
-  `unapplied` with "legacy entry (format vN)". Migration: review them, then
-  re-issue each rebind that is still wanted with `rebind_plan_owner()`. The new
-  v3 entry replays normally, and the legacy diagnostic stays visible.
+- **Commit-record journal (Astra 7678).** Each rebind is written as a
+  `rebind_pending` record, then, once that is durable, a `rebind_commit`
+  record naming it (`op_id` plus the pending record's hash). Only rebinds
+  with a valid commit record are replayed; a pending record without one (the
+  rebind was refused, or the process stopped between the two writes) is
+  listed in `unapplied` with "no commit record" and never replays. There are
+  no cancel/abort records and no fence marker file.
+- **Record integrity and chain.** Every record carries `prev` (the
+  `rec_hash` of the record before it, `""` for the first) and its own
+  `rec_hash` (SHA-256 of all its other fields). A reordered, removed,
+  inserted or edited record therefore breaks the chain. These hashes detect
+  accidental and naive edits; they are NOT a keyed MAC (someone with write
+  access who recomputes every hash is not detected), so protect the journal
+  with file permissions.
+- **Fail closed on the whole journal.** At startup, if ANY record cannot be
+  verified -- an unreadable line, a hash mismatch, a broken chain, a legacy
+  or unknown format, a commit naming no earlier pending record or not
+  matching it, a duplicate, or an unterminated (torn) last line, including a
+  record missing only its final newline -- NO journaled rebind is replayed.
+  The journal is reported unhealthy (`journal_status()["healthy"]` False,
+  `fence` says why, `corrupt_records` gives the line) and every new rebind is
+  refused. The journal is never trimmed or repaired, so it fences again after
+  every restart until an operator clears it. A leftover legacy
+  `<journal>.fence` file also fences everything.
+- **Write failures.** Each record is appended and fsync'd; on failure the
+  partial write is truncated away and that truncation fsync'd.
+  - Pending write fails, rollback OK: clean refusal, journal stays healthy.
+  - Pending write fails AND rollback fails: refused and fenced (unhealthy).
+    The record may be on disk, possibly torn, but it has no commit, so it can
+    never replay; a torn tail fences the journal at the next start.
+  - Commit write fails, rollback OK: clean refusal; the pending record stays
+    on disk without a commit and never replays. Journal stays healthy.
+  - Commit write fails AND rollback fails: the commit may or may not be
+    durable, so a refusal could be contradicted by a restart. The rebind is
+    therefore APPLIED and reported as applied (`True`), and the journal is
+    fenced (`fence.kind == "commit_uncertain"`, `applied: True`). After a
+    restart it is either replayed (commit survived), held again (commit
+    lost) or the whole journal is fenced (commit torn) -- never a refused
+    rebind coming back.
+  - Before every write the journal must still be exactly what this process
+    last wrote (size and last record). Otherwise (changed, truncated,
+    removed or torn from outside) nothing is written and the journal is
+    fenced (`changed`).
+  - A journal that cannot be created or read at startup is fenced
+    (`unwritable`): the process reports unhealthy and refuses rebinds.
+- **Clearing a fence.** Inspect the journal, then call
+  `clear_journal_fence(actor=..., reason=...)`. It copies the old journal
+  byte-for-byte to `<journal>.fenced-<ns>` (fsync'd, directory fsync'd),
+  then atomically replaces the journal with a new one that starts with a
+  `journal_reset` record (actor, reason, archive path) and re-journals, as
+  pending + commit pairs, exactly the rebinds this process holds applied or
+  still awaiting their event position, so a restart matches the running
+  state. Rebinds in the old journal that were not applied are NOT carried
+  over: re-issue them if still wanted. Any failure raises and the journal
+  stays fenced. Clearances are listed in
+  `journal_status()["fence_clearances"]`.
+- **Upgrading (behaviour change).** v1-v3 journals are legacy format and
+  fence the whole journal at the first start after upgrading: nothing in them
+  is replayed. Review the journal, clear the fence, and re-issue each rebind
+  that is still wanted with `rebind_plan_owner()`.
 - **Caps and observability.** `MAX_HIVE_JOURNAL_BYTES` (64 MiB, append
   admission; rotate or compact offline when it is reached),
   `MAX_HIVE_CANDIDATE_KEYS` (256; the hold itself is never dropped), and
@@ -162,5 +157,5 @@ accident.
   (up to `MAX_HIVE_UNAPPLIED_RECORDS`). Holds, open incidents and plan
   provenance below these caps are deliberately never dropped.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
-  `tests/test_astra7669.py`.
+  `tests/test_astra7678.py`.
 
