@@ -1,0 +1,22 @@
+--- 7708/scan_staged.py
++++ 7718/scan_staged.py
+@@ -3,7 +3,7 @@
+ from pathlib import Path
+ R=Path('/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance');E=Path(__file__).resolve().parent
+ files=subprocess.check_output(['git','diff','--cached','--name-only','-z'],cwd=R).decode().split('\0');files=[f for f in files if f]
+-assert files and all(f=='docs/ASTRA_REVIEW_7708.md' or f.startswith('experiments/20261008-astra-7708/') for f in files)
++assert files and all(f=='docs/ASTRA_REVIEW_7718.md' or f.startswith('experiments/20261008-astra-7718/') for f in files)
+ patterns={'github_token':rb'(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{50,})','private_key':rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----','aws_access_id':rb'AKIA[0-9A-Z]{16}','openai_style':rb'sk-(?:proj-)?[A-Za-z0-9_-]{40,}','telegram_bot_token':rb'(?<![0-9])[0-9]{8,12}:[A-Za-z0-9_-]{35}(?![A-Za-z0-9_-])'}
+ hits=[];largest=0
+ for f in files:
+--- 7708/followup7694.py
++++ 7718/followup7694.py
+@@ -279,7 +279,7 @@
+  # Authentic 7678 v3 bytes, 7656 v2 bytes, and original v1 record.
+  sources=[(1,dict(v=1,op='owner_rebind',agent_id='a1',plan_id='p',incident_id='i',actor='legacy-op',reason='legacy-proof')),(2,S/'experiments/20261008-astra-7656/journal-cases/target_success_then_failure.jsonl'),(3,S/'experiments/20261008-astra-7678/journal-7678/normal-order.jsonl')]
+  for version,src in sources:
+-  p=T/('legacy-'+str(version)+'.jsonl');p.write_bytes((json.dumps(src)+'\n').encode() if isinstance(src,dict) else src.read_bytes());before=p.read_bytes();s=history();h=hfeed(hnew(p),s);held(h);assert not h.journal_status()['healthy'] and 'legacy or unknown' in h.journal_status()['fence']['error'] and not hb(h)
++  p=T/('legacy-'+str(version)+'.jsonl');p.write_bytes((json.dumps(src)+'\n').encode() if isinstance(src,dict) else src.read_bytes());before=p.read_bytes();s=history();h=hfeed(hnew(p),s);held(h);assert not h.journal_status()['healthy'] and h.journal_status()['fence']['kind']=='legacy' and 'MIGRATION' in h.journal_status()['fence']['error'] and not hb(h)
+   st=v(h);assert h.clear_journal_fence('reviewer','legacy reviewed');assert Path(h.journal_status()['fence_clearances'][-1]['archived']).read_bytes()==before;held(hfeed(hnew(p),s));assert hb(h);n=hfeed(hnew(p),s);assert n._plan_owner=={'a1:p':'i'};rows.append(dict(version=version,before=st,after=v(n)))
+  # Retain the exact four appliance default/env precedence checks from 7656.
+  src=inspect.getsource(q['q']['default_and_legacy']);src=src[:src.index(" legacy={'v':1")]+" row.update(appliance=cases,direct_reducer_default_volatile=HiveReducer()._volatile_rebinds)\n"

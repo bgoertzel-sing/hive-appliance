@@ -1,0 +1,310 @@
+diff --git a/README.md b/README.md
+index fc00d32..c54f55c 100644
+--- a/README.md
++++ b/README.md
+@@ -97,8 +97,11 @@ commit record, and only committed rebinds replay. Each journal starts with a
+ header carrying a random id, also stored in `<journal>.id`; a mismatch (an old
+ journal swapped back, or a journal without its `.id`) fences it; any pre-v5
+ artifact (old `.fence` files, v1-v4 records) fences before anything is created.
+-Rolling back the journal AND its `.id` together is NOT detected: never restore
+-backups of either file on its own (see the policy doc). `rebind_plan_owner()` returns a `RebindResult`
++Rolling back the journal AND its `.id` together, or cutting whole records off
++the journal's end, is NOT detected at restart (a cut can only drop rebinds).
++Never restore backups of either file on its own; after an unavoidable joint
++restore call `reset_journal(actor, reason)` before replay and re-issue only the
++rebinds still wanted (see the policy doc). `rebind_plan_owner()` returns a `RebindResult`
+ (`applied` / `refused` / `uncertain`; only `applied` is truthy). If any journal record cannot
+ be verified (torn, edited, reordered, legacy v1-v4 format), the whole journal is
+ fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index 83e4c63..b092bf0 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -70,7 +70,7 @@ accident.
+   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+ 
+-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701)
++## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708)
+ 
+ - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
+   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
+@@ -116,13 +116,34 @@ accident.
+   can come back. Only the identity anchor ties the journal to "now"; nothing
+   records which pair is the latest. Therefore: never restore backups of the
+   journal or its `.id` file at all while the hive is in service, and never
+-  restore either one on its own. If a restore is unavoidable, restore both
+-  together and then, before serving, call `clear_journal_fence()` (or start a
+-  fresh journal) and re-issue only the rebinds still wanted.
++  restore either one on its own. `clear_journal_fence()` does NOT help here:
++  a restored pair is healthy, so it returns False and changes nothing
++  (Astra 7708). If a restore is unavoidable: stop service; restore both
++  together; construct the reducer and, BEFORE any event is reduced (before
++  event replay / serving), call `reset_journal(actor=..., reason=...)`. It
++  works whether or not the journal is fenced, keeps the old journal and
++  anchor byte-for-byte as `<file>.reset-<ns>` for inspection, writes a new
++  anchor (new random id) and then a new journal holding no rebinds, and
++  discards every journaled rebind. Then replay the full original event
++  stream and re-issue, with `rebind_plan_owner()`, only the reviewed rebinds
++  still wanted. `reset_journal()` raises `RuntimeError` (changing nothing)
++  once any event has been reduced, because rebinds already applied in memory
++  cannot be discarded; forcing a fence after replay is not a substitute,
++  since clearance keeps applied rebinds. A crash part-way through a reset
++  leaves the old journal under a new anchor, which fences at the next start.
+ - **Record integrity and chain.** Every record carries `prev` (the
+   `rec_hash` of the record before it, `""` for the header) and its own
+-  `rec_hash` (SHA-256 of all its other fields). A reordered, removed,
+-  inserted or edited record therefore breaks the chain. These hashes detect
++  `rec_hash` (SHA-256 of all its other fields). A reordered, inserted or
++  edited record, a record removed from the MIDDLE, or a torn last line
++  therefore breaks the chain or fails verification.
++  **Cutting complete records off the END is NOT detected at restart (Astra
++  7708):** a journal truncated back to an earlier record boundary that keeps
++  its header (same `journal_id`, so the anchor still matches) is a valid,
++  self-consistent prefix and is accepted as healthy. This can only DROP
++  rebinds (a lost commit, or a pending record left without its commit, is
++  not replayed, so the plan is held again; no refused or discarded rebind
++  can come back this way). Only a running process notices it (whole-file
++  check before its next write or at `verify_journal()`). These hashes detect
+   accidental and naive edits; they are NOT a keyed MAC (someone with write
+   access who recomputes every hash is not detected), so protect the journal
+   with file permissions.
+@@ -173,8 +194,11 @@ accident.
+     the journal must be byte-for-byte what this process last wrote or
+     verified: its size and a SHA-256 of the WHOLE file, re-read (Astra 7694).
+     `verify_journal()` runs the same check on demand. Between writes nothing
+-    is watched continuously; an edit is caught at the next write,
+-    `verify_journal()` call or restart. Otherwise (changed, truncated,
++    is watched continuously; an edit is caught at the next write or
++    `verify_journal()` call by the running process. At restart only what
++    the file itself proves is checked (chain, hashes, header vs anchor):
++    an edit or torn line is caught, a clean cut at a record boundary is not
++    (see above). Otherwise (changed, truncated,
+     removed or torn from outside) nothing is written and the journal is
+     fenced (`changed`).
+   - A journal that cannot be created or read at startup is fenced
+@@ -207,5 +231,5 @@ accident.
+   provenance below these caps are deliberately never dropped.
+ - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
+   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
+-  `tests/test_astra7701.py`.
++  `tests/test_astra7701.py`, `tests/test_astra7708.py`.
+ 
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 9b290fe..985c251 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -180,6 +180,7 @@ class HiveReducer:
+         # committed rebinds this process holds APPLIED (live or replayed)
+         self._journal_applied: list[dict[str, Any]] = []
+         self.journal_fence_clearances: list[dict[str, Any]] = []
++        self.journal_resets: list[dict[str, Any]] = []   # Astra 7708
+         self.plans_refused_cap = 0
+         self._journal_pending: list[dict[str, Any]] = (
+             self._open_journal(rebind_journal) if rebind_journal else [])
+@@ -851,6 +852,7 @@ class HiveReducer:
+             "bytes": self._journal_size,
+             "corrupt_records": self._journal_corrupt,
+             "fence_clearances": self.journal_fence_clearances,
++            "journal_resets": self.journal_resets,
+             "plans_refused_cap": self.plans_refused_cap})
+ 
+     def journal_unapplied(self) -> list[dict[str, Any]]:
+@@ -931,6 +933,84 @@ class HiveReducer:
+                        actor, reason, archive or "<missing>", (len(recs) - 2) // 2)
+         return True
+ 
++    def reset_journal(self, actor: str, reason: str) -> dict[str, Any]:
++        """Astra 7708 F-joint-rollback-doc-scope: operator command that forces
++        a FRESH journal and identity, discarding every journaled rebind.
++
++        For recovery after the journal and its <journal>.id may have been
++        rolled back together (a self-consistent older pair, which startup
++        cannot detect and clear_journal_fence() leaves alone because it is
++        healthy).  Must be called on a freshly constructed reducer BEFORE any
++        event is reduced (before event replay / serving); otherwise raises
++        RuntimeError and changes nothing.  Works whether or not the journal is
++        fenced.  The old journal and anchor are kept byte-for-byte as
++        <file>.reset-<ns> (fsync'd); then a new anchor (new random id) and a
++        new journal (header + journal_reset record, no rebinds) are written.
++        No journaled rebind is carried over: re-issue, after replay, only the
++        rebinds still wanted.  Raises OSError on a write failure (a crash or
++        failure part-way leaves an id mismatch, which fences at the next
++        start; nothing old is replayed)."""
++        if not (isinstance(actor, str) and actor.strip()):
++            raise ValueError("reset_journal requires a non-empty actor")
++        if not (isinstance(reason, str) and reason.strip()):
++            raise ValueError("reset_journal requires a non-empty reason")
++        if not self._journal_path:
++            raise ValueError("reset_journal: no rebind journal is configured")
++        if self._event_seq != 0 or self._journal_applied:
++            raise RuntimeError(
++                "reset_journal must be called on a freshly constructed reducer "
++                "before any event is reduced (before event replay/serving): "
++                "rebinds already applied in memory cannot be discarded")
++        path = self._journal_path
++        stamp = time.time_ns()
++        archived: dict[str, str] = {}
++        for src in (path, self._id_path(path)):
++            try:
++                with open(src, "rb") as f:
++                    old = f.read()
++            except FileNotFoundError:
++                continue
++            dst = f"{src}.reset-{stamp}"
++            self._write_file_durably(dst, old)
++            archived[src] = dst
++        now = time.time()
++        jid = uuid.uuid4().hex
++        hdr = self._header_record(jid)
++        rst = {"v": JOURNAL_VERSION, "op": "journal_reset", "actor": actor,
++               "reason": reason, "ts": now, "fence_error": "",
++               "forced_fresh": True, "archived": archived.get(path, ""),
++               "archived_journal_id": self._journal_id, "prev": hdr["rec_hash"]}
++        rst["rec_hash"] = self._rec_hash(rst)
++        lines = [(json.dumps(r, sort_keys=True) + "\n").encode("utf-8")
++                 for r in (hdr, rst)]
++        data = b"".join(lines)
++        # Anchor first (as at creation): a crash between the two leaves the
++        # old journal under a new anchor -> id mismatch -> fenced, not replayed.
++        self._write_anchor(path, jid)
++        self._replace_durably(path, data)
++        for sfx in self.LEGACY_MARKER_SUFFIXES:
++            lp = path + sfx
++            if os.path.lexists(lp):
++                os.replace(lp, f"{lp}.cleared-{stamp}")
++                self._fsync_dir(lp)
++        discarded = list(self._journal_pending)
++        for e in discarded:
++            self._mark_unapplied(e, f"discarded by reset_journal ({actor}: {reason})")
++        self._journal_pending = []
++        fence = self._journal_fence
++        self._set_journal_state(data, rst["rec_hash"], lines[-1], 2, jid)
++        self._journal_corrupt = []
++        self._journal_fence = None
++        info = {"actor": actor, "reason": reason, "ts": now, "archived": archived,
++                "journal_id": jid, "rebinds_discarded": len(discarded),
++                "was_fenced": None if fence is None else fence.get("kind")}
++        self.journal_resets.append(info)
++        del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
++        logger.warning("Rebind journal RESET by %s (%s): fresh journal %s, old "
++                       "files archived %s, %d journaled rebind(s) discarded",
++                       actor, reason, jid, archived, len(discarded))
++        return copy.deepcopy(info)
++
+     def _mark_unapplied(self, e: dict[str, Any], why: str) -> None:
+         self._journal_unapplied_total += 1
+         self._journal_unapplied.append({
+diff --git a/tests/test_astra7708.py b/tests/test_astra7708.py
+new file mode 100644
+index 0000000..44b6161
+--- /dev/null
++++ b/tests/test_astra7708.py
+@@ -0,0 +1,107 @@
++"""Astra 7708 (docs/ASTRA_REVIEW_7708.md, 3ba9d6a) on 8945bdc.
++F-joint-rollback-doc-scope: reset_journal(actor, reason) forces a fresh
++journal + identity before replay, so a restored (healthy, self-consistent)
++older pair cannot bring a discarded rebind back.
++"""
++import os
++
++import pytest
++
++import hive.reducer as hr
++from tests.test_astra7638 import feed, run
++from tests.test_astra7656 import S
++
++
++class Crash(BaseException):
++    pass
++
++
++def _held(h):
++    return h._plan_owner.get("a1:p") is None
++
++
++def _restored_pair(tmp_path):
++    """Astra recovery7708.restore_guidance: commit p, save journal+.id,
++    corrupt tail, restart fenced, clear to discard p, restore both files."""
++    jp = str(tmp_path / "rebinds.jsonl")
++    h = run(S, journal=jp)
++    r = h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert r and r.status == "applied"
++    saved = {f: open(f, "rb").read() for f in (jp, jp + ".id")}
++    with open(jp, "ab") as f:
++        f.write(b"garbage\n")
++    h2 = run(S, journal=jp)
++    assert h2.journal_status()["healthy"] is False and _held(h2)
++    assert h2.clear_journal_fence(actor="op", reason="discard p")
++    assert _held(run(S, journal=jp))                     # p discarded
++    for f, b in saved.items():                           # joint rollback
++        open(f, "wb").write(b)
++    return jp
++
++
++def test_clear_is_noop_on_restored_pair_but_reset_discards(tmp_path):
++    jp = _restored_pair(tmp_path)
++    h = hr.HiveReducer(rebind_journal=jp)                # before replay/serving
++    h.register_agent("a1")
++    assert h.journal_status()["healthy"] is True         # undetectable
++    assert h.clear_journal_fence(actor="op", reason="x") is False  # Astra: no-op
++    old_jid = h._journal_id
++    info = h.reset_journal(actor="op", reason="restored from backup")
++    assert info["rebinds_discarded"] == 1 and info["journal_id"] != old_jid
++    for src, dst in info["archived"].items():            # kept for inspection
++        assert os.path.exists(dst)
++    feed(h, S)
++    assert _held(h)                                      # p does not come back
++    assert h.journal_status()["healthy"] is True
++    for _ in range(2):                                   # nor after restarts
++        h2 = run(S, journal=jp)
++        assert _held(h2) and h2.journal_status()["healthy"] is True
++    r = h2.rebind_plan_owner("a1", "p", "i", actor="op", reason="re-issued")
++    assert r and r.status == "applied"                   # wanted ones re-issued
++    assert run(S, journal=jp)._plan_owner.get("a1:p") == "i"
++
++
++def test_without_reset_restored_pair_revives_p(tmp_path):
++    # documents the limitation reset_journal exists for
++    jp = _restored_pair(tmp_path)
++    assert run(S, journal=jp)._plan_owner.get("a1:p") == "i"
++
++
++def test_reset_refused_after_events_changes_nothing(tmp_path):
++    jp = _restored_pair(tmp_path)
++    before = {f: open(f, "rb").read() for f in (jp, jp + ".id")}
++    h = run(S, journal=jp)
++    with pytest.raises(RuntimeError):
++        h.reset_journal(actor="op", reason="too late")
++    assert {f: open(f, "rb").read() for f in (jp, jp + ".id")} == before
++    with pytest.raises(ValueError):
++        hr.HiveReducer(rebind_journal=jp).reset_journal(actor=" ", reason="r")
++
++
++def test_reset_works_on_fenced_journal(tmp_path):
++    jp = str(tmp_path / "rebinds.jsonl")
++    run(S, journal=jp)
++    open(jp + ".fence", "w").write("{}")                 # legacy marker
++    h = hr.HiveReducer(rebind_journal=jp)
++    assert h.journal_status()["fence"]["kind"] == "legacy"
++    info = h.reset_journal(actor="op", reason="fresh start")
++    assert info["was_fenced"] == "legacy" and not os.path.exists(jp + ".fence")
++    assert run(S, journal=jp).journal_status()["healthy"] is True
++
++
++def test_crash_between_new_anchor_and_new_journal_fences(tmp_path, monkeypatch):
++    jp = _restored_pair(tmp_path)
++    real = hr.HiveReducer._replace_durably
++
++    def crash(self, path, data):
++        if path == jp:
++            raise Crash()
++        return real(self, path, data)
++    h = hr.HiveReducer(rebind_journal=jp)
++    monkeypatch.setattr(hr.HiveReducer, "_replace_durably", crash)
++    with pytest.raises(Crash):
++        h.reset_journal(actor="op", reason="r")
++    monkeypatch.undo()
++    for _ in range(2):
++        h2 = run(S, journal=jp)                          # old journal, new anchor
++        assert h2.journal_status()["fence"]["kind"] == "identity" and _held(h2)

@@ -1,0 +1,6 @@
+Rebind journal /tmp/hive-astra-7718/20261008-astra-7718/reset-cases/exact-restore-timeline.jsonl line 4: unterminated (torn) last line
+Rebind journal /tmp/hive-astra-7718/20261008-astra-7718/reset-cases/exact-restore-timeline.jsonl is FENCED (corrupt): line 4: unterminated (torn) last line; no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Traceback (most recent call last):
+  File "/tmp/hive-astra-7718/20261008-astra-7718/exact_restore7718.py", line 25, in <module>
+    assert any('Rebind journal RESET by op' in x['message'] for x in logs)
+AssertionError

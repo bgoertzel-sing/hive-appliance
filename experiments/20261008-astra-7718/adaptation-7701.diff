@@ -1,0 +1,181 @@
+--- 7694/review7694.py
++++ 7701/review7694.py
+@@ -22,7 +22,7 @@
+  jp,s,h=fresh('exact-content',s);assert hb(h) and hop(h)==['i','j']
+  changed=copy.deepcopy(s);changed[4].payload['verified']=True;n=hfeed(hnew(jp),changed)
+  assert h._stream_digest!=n._stream_digest and hop(n)==['i','j'] and not n._plan_owner and n.journal_status()['unapplied_total']==1
+- lines=[json.loads(x) for x in jp.read_text().splitlines()];entry=lines[0];entry['incident_id']='j';jp.write_text(''.join(json.dumps(x)+'\n' for x in lines));m=hfeed(hnew(jp),s)
++ lines=[json.loads(x) for x in jp.read_text().splitlines()];entry=lines[1];entry['incident_id']='j';jp.write_text(''.join(json.dumps(x)+'\n' for x in lines));m=hfeed(hnew(jp),s)
+  assert not m._plan_owner and 'hash mismatch' in m.journal_status()['corrupt_records'][0]['why']
+  row.update(verdict='CLOSED Medium exact7656 witness',original_events=events(s),changed_events=events(changed),changed_replay=v(n),edited_entry_replay=v(m))
+ 
+--- 7694/followup7694.py
++++ 7701/followup7694.py
+@@ -1,4 +1,4 @@
+-"""Sole independent v4 protocol review. Assertions include defects, not safety passes.
++"""Sole independent v5 protocol review. Assertions include defects, not safety passes.
+ Historical original byte fixtures + retained event/fault witnesses; no source changes.
+ """
+ import builtins,copy,hashlib,inspect,json,os,sys,traceback,difflib
+@@ -44,8 +44,8 @@
+ def tails_and_order(row):
+  rows=[]
+  for mode in ['lost_final_newline','truncated_commit_json','malformed_complete_commit','blank_commit_line','commit_before_pending','second_pair_first','interleave','remove_middle','duplicate_pair','edited_pending_id','edited_commit_id','edited_target','bad_utf8','array','unknown_op']:
+-  p,s,h=fresh('native-'+mode,two());assert hb(h) and bindq(h);original=p.read_bytes();L=original.splitlines(keepends=True)
+-  if mode=='lost_final_newline':bad=original[:-1]
++  p,s,h=fresh('native-'+mode,two());assert hb(h) and bindq(h);original=p.read_bytes();L=original.splitlines(keepends=True);H,L=L[0],L[1:]
++  if mode=='lost_final_newline':bad=b''.join(L)[:-1]
+   elif mode=='truncated_commit_json':bad=b''.join(L[:-1])+L[-1][:20]
+   elif mode=='malformed_complete_commit':bad=b''.join(L[:-1])+L[-1][:20]+b'\n'
+   elif mode=='blank_commit_line':bad=b''.join(L[:-1])+b' '*len(L[-1].rstrip(b'\n'))+b'\n'
+@@ -53,11 +53,11 @@
+   elif mode=='second_pair_first':bad=b''.join(L[2:]+L[:2])
+   elif mode=='interleave':bad=b''.join([L[0],L[2],L[1],L[3]])
+   elif mode=='remove_middle':bad=b''.join([L[0],L[2],L[3]])
+-  elif mode=='duplicate_pair':bad=original+original
++  elif mode=='duplicate_pair':bad=b''.join(L+L)
+   elif mode in ['edited_pending_id','edited_commit_id','edited_target']:
+-   rs=records(p);r=rs[1 if mode=='edited_commit_id' else 0];key='incident_id' if mode=='edited_target' else 'op_id';value=r[key];r[key]=('0' if value[0]!='0' else '1')+value[1:];put(p,rs);bad=p.read_bytes()
+-  else:bad=original+{'bad_utf8':b'\xff\n','array':b'[]\n','unknown_op':b'{"v":4,"op":"wrong"}\n'}[mode]
+-  p.write_bytes(bad);rs=restarts(p,s)
++   rs=records(p);r=rs[2 if mode=='edited_commit_id' else 1];key='incident_id' if mode=='edited_target' else 'op_id';value=r[key];r[key]=('0' if value[0]!='0' else '1')+value[1:];put(p,rs);bad=p.read_bytes()[len(H):]
++  else:bad=b''.join(L)+{'bad_utf8':b'\xff\n','array':b'[]\n','unknown_op':b'{"v":4,"op":"wrong"}\n'}[mode]
++  p.write_bytes(H+bad);bad=H+bad;rs=restarts(p,s)
+   for n in rs:assert not n._plan_owner and not n.journal_status()['healthy'] and n.journal_status()['corrupt_records'] and not hb(n)
+   assert p.read_bytes()==bad
+   rows.append(dict(mode=mode,original_sha256=hashlib.sha256(original).hexdigest(),damaged_sha256=hashlib.sha256(bad).hexdigest(),restarts=[v(n) for n in rs]))
+@@ -70,7 +70,7 @@
+    if count==2:raise OSError('commit fsync')
+   return real(fd)
+  with patch.object(os,'fsync',sync):assert not hb(h)
+- held(h);assert len(records(p))==1;held(hfeed(hnew(p),s));p.write_bytes(p.read_bytes()[:-1])
++ held(h);assert len(records(p))==2;held(hfeed(hnew(p),s));p.write_bytes(p.read_bytes()[:-1])
+  for n in restarts(p,s):held(n);assert not n.journal_status()['healthy']
+  row.update(cases=rows,refused_pending_tail='held twice; no bytes trimmed',verdict='CLOSED F-abort-tail/F-abort-order-scope at native v4 boundaries; whole-file rollback separately tested')
+ 
+@@ -124,16 +124,16 @@
+     ok=hb(h)
+    assert triggered,(phase,mode)
+    uncertain=phase=='commit' and mode in ['truncate_before','truncate_after','rollback_fsync','all_after_write_fail']
+-   assert ok==(uncertain or mode in ['positive_short','close_after']),(phase,mode,ok)
+-   if not ok:
++   assert bool(ok)==(mode in ['positive_short','close_after']) and (ok.status=='uncertain')==uncertain,(phase,mode,ok)
++   if ok.status=='refused':
+     held(h)
+     changed=[k for k in before if before[k]!=vars(h)[k]]
+-    assert all(k.startswith('_journal') for k in changed),changed
++    assert all(k.startswith('_journal') or k in ['last_rebind_result','_rebind_op_id'] for k in changed),changed
+    rs=restarts(p,s)
+    for n in rs:
+-    if ok and mode not in ['truncate_after','rollback_fsync']:assert n._plan_owner=={'a1:p':'i'} and hop(n)==[]
++    if ok.applied and mode not in ['truncate_after','rollback_fsync']:assert n._plan_owner=={'a1:p':'i'} and hop(n)==[]
+     else:held(n)
+-   rows.append(dict(phase=phase,mode=mode,returned=ok,live=v(h),restart=[v(n) for n in rs],trace=trace,divergence=bool(h._plan_owner)!=bool(rs[0]._plan_owner)))
++   rows.append(dict(phase=phase,mode=mode,returned=ok.as_dict(),live=v(h),restart=[v(n) for n in rs],trace=trace,divergence=bool(h._plan_owner)!=bool(rs[0]._plan_owner)))
+  row.update(cases=rows,verdict='No False-return replay in 24 v4 fault cases; commit rollback uncertainty returns True with possible lost authorization; close-after and positive short writes safe')
+ 
+ def commit_absent(row):
+@@ -147,11 +147,11 @@
+   return real_write(fd,data)
+  def trunc(fd,n):raise OSError('rollback unavailable')
+  with patch.object(os,'write',write),patch.object(os,'ftruncate',trunc):ok=hb(h)
+- assert ok and h._plan_owner=={'a1:p':'i'} and hop(h)==[] and len(records(p))==1
++ assert not ok and ok.status=='uncertain' and ok.applied and ok.durable is None and h._plan_owner=={'a1:p':'i'} and hop(h)==[] and len(records(p))==2
+  assert h.journal_status()['fence']['kind']=='commit_uncertain' and h.journal_status()['fence']['applied']
+  rs=restarts(p,s)
+  for n in rs:held(n);assert n.journal_status()['healthy']
+- row.update(returned=ok,live=v(h),trace=trace,restarts=[v(n) for n in rs],journal=p.read_text(),verdict='OPEN Medium F-applied-without-durable-commit: True means in-memory applied but cannot mean durable success; structured UNCERTAIN required for current production gate')
++ row.update(returned=ok.as_dict(),live=v(h),trace=trace,restarts=[v(n) for n in rs],journal=p.read_text(),verdict='CLOSED Medium F-applied-without-durable-commit: explicit falsy UNCERTAIN; live applied and two restarts held')
+ 
+ def crash_boundaries(row):
+  rows=[]
+@@ -189,13 +189,13 @@
+  row.update(cases=rows,actual_order='pending write -> pending fsync -> commit write -> commit fsync -> apply; not pending->apply->commit',scope='Abrupt BaseException + normal fresh-reducer restart; after-write bytes may survive without fsync, not proof of physical durability')
+ 
+ def duplicates(row):
+- p,s,h=fresh('duplicate-template');assert hb(h);P0,C0=records(p);rows=[]
++ p,s,h=fresh('duplicate-template');assert hb(h);H0,P0,C0=records(p);rows=[]
+  for mode in ['exact_duplicate_commit','second_commit_same_pending','unknown_pending','wrong_pending_hash']:
+-  rs=copy.deepcopy([P0,C0]);r=copy.deepcopy(C0)
++  rs=copy.deepcopy([H0,P0,C0]);r=copy.deepcopy(C0)
+   if mode!='exact_duplicate_commit':
+    r['prev']=C0['rec_hash'];r['ts']=0
+    if mode=='unknown_pending':r['op_id']='missing'
+-   if mode=='wrong_pending_hash':r['pending_hash']='wrong';rs=[P0];r['prev']=P0['rec_hash']
++   if mode=='wrong_pending_hash':r['pending_hash']='wrong';rs=[H0,P0];r['prev']=P0['rec_hash']
+    r['rec_hash']=HiveReducer._rec_hash(r)
+   dest=T/(mode+'.jsonl');put(dest,rs+[r]);ns=restarts(dest,s)
+   for n in ns:held(n);assert not n.journal_status()['healthy']
+@@ -253,7 +253,7 @@
+    if mode=='runtime_prefix_edit_same_size':assert ok and h.journal_status()['healthy']
+    else:assert not ok
+    if mode=='runtime_open_denied':assert h.journal_status()['healthy']
+-   n=hfeed(hnew(p),s);rows.append(dict(mode=mode,returned=ok,live=v(h),restart=v(n)));continue
++   n=hfeed(hnew(p),s);rows.append(dict(mode=mode,returned=ok.as_dict(),live=v(h),restart=v(n)));continue
+   if mode=='read_denied':p.write_bytes(b'')
+   def opened(path,*a,**kw):
+    if str(path)==str(p) and mode=='read_denied':raise PermissionError('read denied')
+@@ -289,14 +289,14 @@
+ def old_markers(row):
+  rows=[]
+  for mode in ['invalid_utf8','invalid_json','json_array','empty_object','edited_op_id','missing_entry','valid_nonlast','legacy_v1']:
+-  p,s,h=fresh('marker-'+mode,two());assert hb(h) and bindq(h);fp=Path(str(p)+'.fence');r=records(p)[0]
++  p,s,h=fresh('marker-'+mode,two());assert hb(h) and bindq(h);fp=Path(str(p)+'.fence');r=records(p)[1]
+   vals={'invalid_utf8':b'\xff','invalid_json':b'{oops','json_array':b'[]','empty_object':b'{}','edited_op_id':json.dumps(dict(v=2,op_id='changed-id',entry=r,marker_hash='bad')).encode(),'missing_entry':b'{"v":2,"op_id":"changed-id"}','valid_nonlast':json.dumps(dict(v=2,op_id=r['op_id'],entry=r)).encode(),'legacy_v1':json.dumps(dict(v=1,op_id=r['op_id'],entry=r)).encode()};fp.write_bytes(vals[mode]);n=hfeed(hnew(p),s);assert not n._plan_owner and n.journal_status()['fence']['kind']=='legacy_marker';assert not hb(n);assert n.clear_journal_fence('reviewer','inspect old marker');assert not fp.exists()
+   for x in restarts(p,s):assert not x._plan_owner and x.journal_status()['healthy']
+   rows.append(dict(mode=mode,cleared=v(n)))
+  row.update(cases=rows,interpretation='Presence alone fences all, so old marker hash/trust narrowing no longer applicable')
+ 
+ out={}
+-functions=[('exact7678_archived_witnesses',historical_exact),('native_tails_order_edits',tails_and_order),('v4_fault_matrix',fault_matrix),('applied_no_commit',commit_absent),('crash_boundaries',crash_boundaries),('duplicate_commit',duplicates),('archive_splice',splice),('clean_prefixes',clean_prefixes),('startup_external_health',startup_external),('legacy_default',legacy_default),('old_markers',old_markers)]
++functions=[('exact7678_archived_witnesses',historical_exact),('native_tails_order_edits',tails_and_order),('v5_fault_matrix',fault_matrix),('applied_no_commit',commit_absent),('crash_boundaries',crash_boundaries),('duplicate_commit',duplicates),('legacy_default',legacy_default),('old_markers',old_markers)]
+ # Extra clearance/caps groups are installed below by the generation script.
+ for name,fn in functions:
+  r={}
+--- 7694/review7582.py
++++ 7701/review7582.py
+@@ -27,13 +27,16 @@
+ def opens(l,h):return [sorted(i.id for i in l.open_incidents()),sorted(i['incident_id'] for i in h._open_agent_incidents('a1'))]
+ def view(l,h):return dict(open=opens(l,h),holds=[l.quarantine_reasons(),h.quarantine_reasons()],owners=[dict(l._plan_owner),dict(h._plan_owner)],candidates=[copy.deepcopy(l.migration_diagnostics.get('owner_candidates',{})),copy.deepcopy(h.owner_candidates)],audits=[copy.deepcopy(l.migration_diagnostics.get('owner_rebinds',[])),copy.deepcopy(h.owner_rebinds)])
+ def preview(l,h,i='i',override=False):
+- b=copy.deepcopy((vars(l),vars(h)));pv=l.preview_rebind('p',i,allow_non_candidate=override);hv=h.preview_rebind('a1','p',i,allow_non_candidate=override)
+- assert (vars(l),vars(h))==b
+- saved=copy.deepcopy((pv,hv));pv['candidates'].append('mutated');hv['held_receipts'].append({'id':'mutated'});assert (vars(l),vars(h))==b
++ b=copy.deepcopy((vars(l),business(h)));pv=l.preview_rebind('p',i,allow_non_candidate=override);hv=h.preview_rebind('a1','p',i,allow_non_candidate=override)
++ assert (vars(l),business(h))==b
++ saved=copy.deepcopy((pv,hv));pv['candidates'].append('mutated');hv['held_receipts'].append({'id':'mutated'});assert (vars(l),business(h))==b
+  return saved
+ 
++def business(h):
++ return {k:v for k,v in vars(h).items() if k not in ['last_rebind_result','_rebind_op_id']}
++
+ def rebind(l,h,i='i',override=False):
+- return [l.rebind_plan_owner('p',i,actor='Astra-7582',reason='fixture authority',allow_non_candidate=override),h.rebind_plan_owner('a1','p',i,actor='Astra-7582',reason='fixture authority',allow_non_candidate=override)]
++ return [l.rebind_plan_owner('p',i,actor='Astra-7582',reason='fixture authority',allow_non_candidate=override),bool(h.rebind_plan_owner('a1','p',i,actor='Astra-7582',reason='fixture authority',allow_non_candidate=override))]
+ def witness(row):
+  hist=[I('i','p'),I('j','p'),P(),R(),P(i='i')];l,h=new();trace=[]
+  for e in hist:feed(l,h,e);l=rt(l);h=replay(hist[:len(trace)+1]);trace.append(view(l,h))
+@@ -76,7 +79,7 @@
+  pv,hv=preview(l,h,'j');assert [r['id'] for r in pv['held_receipts']]==[r['id'] for r in hv['held_receipts']]==['x'];assert pv['would_close']==hv['would_close']==['j']
+  checks=[]
+  for target,allow in [('missing',True),('closed',True),('other',True),('i',False)]:
+-  b=copy.deepcopy((vars(l),vars(h)));p=preview(l,h,target,allow);assert not p[0]['allowed'] and not p[1]['allowed'];assert rebind(l,h,target,allow)==[False,False];assert (vars(l),vars(h))==b;checks.append(p)
++  b=copy.deepcopy((vars(l),business(h)));p=preview(l,h,target,allow);assert not p[0]['allowed'] and not p[1]['allowed'];assert rebind(l,h,target,allow)==[False,False];assert (vars(l),business(h))==b;checks.append(p)
+  for actor,reason in [('', 'r'),(' ','r'),('op',''),('op',None)]:
+   for fn,args in [(l.rebind_plan_owner,('p','j')),(h.rebind_plan_owner,('a1','p','j'))]:
+    try:fn(*args,actor=actor,reason=reason)
+--- 7694/review7656.py
++++ 7701/review7656.py
+@@ -182,10 +182,10 @@
+    kw={'volatile_rebinds':True} if mode=='volatile' else {}
+    if mode=='explicit_over_env':kw['rebind_journal']=str(T/'explicit-wins.jsonl')
+    app=HiveAppliance(**kw);app.register_agent(StubAgentAdapter('a1',events=s));assert app.tick()['errors']==[];h=app.reducer;before=v(h)
+-   ok=bind(h);assert ok==(mode!='default')
++   ok=bind(h);assert bool(ok)==(mode!='default')
+    assert hop(h)==(['i'] if mode=='default' else [])
+    if mode=='explicit_over_env':assert h._journal_path==kw['rebind_journal']
+-   cases.append(dict(mode=mode,return_value=ok,before=before,after=v(h)))
++   cases.append(dict(mode=mode,return_value=ok.as_dict(),before=before,after=v(h)))
+  legacy={'v':1,'op':'owner_rebind','agent_id':'a1','plan_id':'p','incident_id':'i','actor':'legacy-op','reason':'legacy-proof'}
+  jp=T/'legacy-v1.jsonl';jp.write_text(json.dumps(legacy)+'\n');h=hfeed(hnew(jp),s);assert not h._plan_owner and h.quarantined_plans()==['a1:p'] and len(h.journal_status()['unapplied'])==1
+  before=v(h);assert bind(h);n=hfeed(hnew(jp),s);assert n._plan_owner=={'a1:p':'i'} and len(n.journal_status()['unapplied'])==1

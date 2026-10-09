@@ -1,0 +1,1168 @@
+[
+  {
+    "name": "e6afe16_owner_missing_incident",
+    "passed": true,
+    "source_ref": "e6afe16",
+    "events_before": [
+      {
+        "id": "evt_f8ebed9f9c224b6b",
+        "kind": "plan",
+        "ts": 1791516746.7897553,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_37a20a933fae4e59",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_9c0987cc65654864",
+        "kind": "plan",
+        "ts": 1791516746.789777,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "other",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e057d974809b42a5",
+        "kind": "receipt",
+        "ts": 1791516746.789786,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_a98b02f32e2646fd",
+        "kind": "receipt",
+        "ts": 1791516746.7897935,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {},
+      "seen_receipt_ids": [],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "restored": {
+      "open": [
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": ""
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": ""
+      },
+      "discarded": 0,
+      "pending": 2
+    },
+    "expected_open": [
+      "other"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  },
+  {
+    "name": "e6afe16_ambiguous_incident_order",
+    "passed": true,
+    "source_ref": "e6afe16",
+    "events_before": [
+      {
+        "id": "evt_77613af3897649f6",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_0468e512ae0c463e",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_b535a5e81a2e47e2",
+        "kind": "plan",
+        "ts": 1791516746.789817,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_78755748a0ae4c49",
+        "kind": "plan",
+        "ts": 1791516746.7898247,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "other",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_1ee1db4d6a134c2b",
+        "kind": "receipt",
+        "ts": 1791516746.7898319,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_fa7653f527244f35",
+        "kind": "receipt",
+        "ts": 1791516746.7898388,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": {},
+      "seen_receipt_ids": [],
+      "incidents_total": 2,
+      "incidents_open": 2
+    },
+    "restored": {
+      "open": [
+        "i",
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": "p",
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "i",
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": "p",
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 2
+    },
+    "expected_open": [
+      "i",
+      "other"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  },
+  {
+    "name": "e6afe16_resolved_link_control",
+    "passed": true,
+    "source_ref": "e6afe16",
+    "events_before": [
+      {
+        "id": "evt_a7d8d577f1e74422",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_eab1588551034047",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_213ca6eba1be40ce",
+        "kind": "plan",
+        "ts": 1791516746.7046068,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_baf33128a56f46e0",
+        "kind": "plan",
+        "ts": 1791516746.7046146,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e31c4582fc884ead",
+        "kind": "receipt",
+        "ts": 1791516746.7046223,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "q",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_7a12c4a554454f4e",
+        "kind": "receipt",
+        "ts": 1791516746.70463,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_4e22e27c063d4d1b",
+        "kind": "receipt",
+        "ts": 1791516746.7046373,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "bad1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "q",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2,
+        "q": 1
+      },
+      "plan_receipts": {
+        "p": [],
+        "q": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": [],
+        "q": []
+      },
+      "pending_receipts": {},
+      "seen_receipt_ids": [
+        "q0"
+      ],
+      "incidents_total": 2,
+      "incidents_open": 1
+    },
+    "restored": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [],
+        "q": [
+          0
+        ]
+      },
+      "failed": {
+        "p": [],
+        "q": []
+      },
+      "owner": {
+        "p": "i",
+        "q": "other"
+      },
+      "links": {
+        "i": "p",
+        "other": "q"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          0
+        ],
+        "q": [
+          0
+        ]
+      },
+      "failed": {
+        "p": [],
+        "q": []
+      },
+      "owner": {
+        "p": "i",
+        "q": "other"
+      },
+      "links": {
+        "i": "p",
+        "other": "q"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "expected_open": [
+      "i"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  },
+  {
+    "name": "5de0d53_owner_missing_incident",
+    "passed": true,
+    "source_ref": "5de0d53",
+    "events_before": [
+      {
+        "id": "evt_0be3517e14524cc2",
+        "kind": "plan",
+        "ts": 1791516746.7929308,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_5fb1c3096b744a6a",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_53862db7570a448d",
+        "kind": "plan",
+        "ts": 1791516746.7929482,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "other",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_bf4d16e0e4384c93",
+        "kind": "receipt",
+        "ts": 1791516746.792956,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_6a23e78197574e53",
+        "kind": "receipt",
+        "ts": 1791516746.7929635,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "incidents_total": 1,
+      "incidents_open": 1
+    },
+    "restored": {
+      "open": [
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": ""
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": ""
+      },
+      "discarded": 0,
+      "pending": 2
+    },
+    "expected_open": [
+      "other"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  },
+  {
+    "name": "5de0d53_ambiguous_incident_order",
+    "passed": true,
+    "source_ref": "5de0d53",
+    "events_before": [
+      {
+        "id": "evt_036665ce17284004",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_d205072fd3e64ca0",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_9f8eb23f7e474c01",
+        "kind": "plan",
+        "ts": 1791516746.7929857,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_f63aefbebf9f4146",
+        "kind": "plan",
+        "ts": 1791516746.7929933,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "other",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_41ac385797f24456",
+        "kind": "receipt",
+        "ts": 1791516746.7930002,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_2a0d16a8cef44e28",
+        "kind": "receipt",
+        "ts": 1791516746.7930071,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "x1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2
+      },
+      "plan_receipts": {
+        "p": []
+      },
+      "plan_failed_steps": {
+        "p": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [],
+      "incidents_total": 2,
+      "incidents_open": 2
+    },
+    "restored": {
+      "open": [
+        "i",
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": "p",
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "i",
+        "other"
+      ],
+      "verified": {
+        "p": []
+      },
+      "failed": {
+        "p": []
+      },
+      "owner": {},
+      "links": {
+        "other": "p",
+        "i": "p"
+      },
+      "discarded": 0,
+      "pending": 2
+    },
+    "expected_open": [
+      "i",
+      "other"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  },
+  {
+    "name": "5de0d53_resolved_link_control",
+    "passed": true,
+    "source_ref": "5de0d53",
+    "events_before": [
+      {
+        "id": "evt_a7d8d577f1e74422",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "i",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_eab1588551034047",
+        "kind": "incident",
+        "ts": 1700000000.0,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "other",
+          "ts": 1700000000.0,
+          "component": "svc",
+          "symptom": "down",
+          "severity": "critical",
+          "plan_id": "",
+          "resolved": false
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_213ca6eba1be40ce",
+        "kind": "plan",
+        "ts": 1791516746.7046068,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p",
+          "incident_id": "i",
+          "steps": [
+            {},
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_baf33128a56f46e0",
+        "kind": "plan",
+        "ts": 1791516746.7046146,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q",
+          "incident_id": "other",
+          "steps": [
+            {}
+          ]
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_e31c4582fc884ead",
+        "kind": "receipt",
+        "ts": 1791516746.7046223,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "q0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "q",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "events_after": [
+      {
+        "id": "evt_7a12c4a554454f4e",
+        "kind": "receipt",
+        "ts": 1791516746.70463,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "p0",
+          "step_index": 0,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": ""
+        },
+        "severity": "info",
+        "schema_version": "1"
+      },
+      {
+        "id": "evt_4e22e27c063d4d1b",
+        "kind": "receipt",
+        "ts": 1791516746.7046373,
+        "source": "",
+        "subject": "",
+        "payload": {
+          "id": "bad1",
+          "step_index": 1,
+          "verified": true,
+          "plan_id": "p",
+          "incident_id": "other"
+        },
+        "severity": "info",
+        "schema_version": "1"
+      }
+    ],
+    "snapshot": {
+      "state": {},
+      "incidents": [
+        {
+          "id": "i",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": false,
+          "plan_id": "p",
+          "schema_version": "1"
+        },
+        {
+          "id": "other",
+          "ts": 1700000000.0,
+          "severity": "critical",
+          "component": "svc",
+          "symptom": "down",
+          "evidence": [],
+          "resolved": true,
+          "plan_id": "q",
+          "schema_version": "1"
+        }
+      ],
+      "plan_step_counts": {
+        "p": 2,
+        "q": 1
+      },
+      "plan_receipts": {
+        "p": [],
+        "q": [
+          0
+        ]
+      },
+      "plan_failed_steps": {
+        "p": [],
+        "q": []
+      },
+      "pending_receipts": [],
+      "seen_receipt_ids": [
+        "q0"
+      ],
+      "incidents_total": 2,
+      "incidents_open": 1
+    },
+    "restored": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [],
+        "q": [
+          0
+        ]
+      },
+      "failed": {
+        "p": [],
+        "q": []
+      },
+      "owner": {
+        "p": "i",
+        "q": "other"
+      },
+      "links": {
+        "i": "p",
+        "other": "q"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "final": {
+      "open": [
+        "i"
+      ],
+      "verified": {
+        "p": [
+          0
+        ],
+        "q": [
+          0
+        ]
+      },
+      "failed": {
+        "p": [],
+        "q": []
+      },
+      "owner": {
+        "p": "i",
+        "q": "other"
+      },
+      "links": {
+        "i": "p",
+        "other": "q"
+      },
+      "discarded": 0,
+      "pending": 0
+    },
+    "expected_open": [
+      "i"
+    ],
+    "oracle": "Do not invent a different authoritative owner when the old format lost first-PLAN ownership."
+  }
+]
