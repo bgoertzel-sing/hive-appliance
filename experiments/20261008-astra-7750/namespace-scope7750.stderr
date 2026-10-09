@@ -1,0 +1,7 @@
+Rebind journal /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-cases/clear/journal line 2: unterminated (torn) last line
+Rebind journal /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-cases/clear/journal is FENCED (corrupt): line 2: unterminated (torn) last line; no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Rebind journal /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-cases/parent-retarget/live/journal is FENCED (changed): journal is 201 bytes, expected 683, or its content differs from what this process wrote: it was changed outside this process; rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()
+Traceback (most recent call last):
+  File "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750.py", line 37, in <module>
+    assert result and hit and h.journal_status()['healthy'] and (b/'journal').read_bytes()==before and (a/'journal').read_bytes()!=before
+AssertionError

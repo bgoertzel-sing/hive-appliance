@@ -1,0 +1,408 @@
+{
+  "presence_error_cases": [
+    {
+      "stage": "archive old anchor",
+      "failed": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl",
+          "durable": true,
+          "journal_id": "2a02cff4ea334d06b0b2043f5946ba1d",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_failed",
+            "error": "reset_journal by op (metadata failure) FAILED at step 'archive old anchor': OSError(5, 'anchor read fails'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). Completed on disk before the failure: reset-intent marker confirmed durable; old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869. The step 'archive old anchor' may have partly happened. Durability of the reset-intent marker is NOT confirmed now (marker presence UNKNOWN (inspection failed: OSError(5, 'marker lstat unavailable'))). Keep the service stopped and retry reset_journal() before any replay.",
+            "found_at_startup": false,
+            "ts": 1791523349.1124332,
+            "failed_step": "archive old anchor",
+            "intent_durable": false,
+            "intent_present": null,
+            "completed_steps": [
+              "reset-intent marker confirmed durable",
+              "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869"
+            ],
+            "presence_error": "OSError(5, 'marker lstat unavailable')"
+          },
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "fa48c4d2bf0a43fe81bd0508bbccf96b",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "discarded by reset_journal (op: metadata failure)"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 3,
+          "bytes": 1024,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [
+            {
+              "actor": "op",
+              "reason": "metadata failure",
+              "ts": 1791523349.111076,
+              "status": "failed",
+              "failed_step": "archive old anchor",
+              "error": "OSError(5, 'anchor read fails')",
+              "archived": {
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869"
+              },
+              "intent_present": null,
+              "completed_steps": [
+                "reset-intent marker confirmed durable",
+                "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869"
+              ],
+              "intent_durable": false,
+              "rebinds_discarded": 1,
+              "presence_error": "OSError(5, 'marker lstat unavailable')"
+            }
+          ],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": [
+          {
+            "actor": "op",
+            "reason": "metadata failure",
+            "ts": 1791523349.111076,
+            "status": "failed",
+            "failed_step": "archive old anchor",
+            "error": "OSError(5, 'anchor read fails')",
+            "archived": {
+              "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869"
+            },
+            "intent_present": null,
+            "completed_steps": [
+              "reset-intent marker confirmed durable",
+              "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-1791523349111075869"
+            ],
+            "intent_durable": false,
+            "rebinds_discarded": 1,
+            "presence_error": "OSError(5, 'marker lstat unavailable')"
+          }
+        ]
+      },
+      "actual_intent_present": true,
+      "old_pair_unchanged": false,
+      "restart": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl",
+          "durable": true,
+          "journal_id": "",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_incomplete",
+            "error": "reset-intent marker /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/archive-old-anchor.jsonl.reset-intent present: a reset_journal() was interrupted or failed; nothing is created, adopted or replayed. Retry reset_journal(actor=..., reason=...) before any event (or call clear_journal_fence(), which re-journals no rebind)",
+            "found_at_startup": true,
+            "ts": 1791523349.1127646
+          },
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 0,
+          "bytes": 0,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": []
+      },
+      "false_old_pair_claim": false,
+      "false_unlinked_claim": false
+    },
+    {
+      "stage": "remove reset-intent marker",
+      "failed": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl",
+          "durable": true,
+          "journal_id": "aa72a8dab3ab42e5984ab7ecaa3ce6ef",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_failed",
+            "error": "reset_journal by op (metadata failure) FAILED at step 'remove reset-intent marker': PermissionError(13, 'intent unlink fails'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). Completed on disk before the failure: reset-intent marker confirmed durable; old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477; old anchor copied to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477; new anchor ac59dfc89f6d4dc3852522529c543cb0 written; new rebind-free journal written. The new rebind-free journal and anchor are complete; marker presence UNKNOWN (inspection failed: OSError(5, 'marker lstat unavailable')) (whether the marker was removed is not known). A surviving marker only fences the next start: a restart is safe.",
+            "found_at_startup": false,
+            "ts": 1791523349.1286945,
+            "failed_step": "remove reset-intent marker",
+            "intent_durable": false,
+            "intent_present": null,
+            "completed_steps": [
+              "reset-intent marker confirmed durable",
+              "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477",
+              "old anchor copied to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477",
+              "new anchor ac59dfc89f6d4dc3852522529c543cb0 written",
+              "new rebind-free journal written"
+            ],
+            "presence_error": "OSError(5, 'marker lstat unavailable')"
+          },
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "6bcb1288fec540568e5e587ab12c6af8",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "discarded by reset_journal (op: metadata failure)"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 3,
+          "bytes": 1025,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [
+            {
+              "actor": "op",
+              "reason": "metadata failure",
+              "ts": 1791523349.1245327,
+              "status": "failed",
+              "failed_step": "remove reset-intent marker",
+              "error": "PermissionError(13, 'intent unlink fails')",
+              "archived": {
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477",
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477"
+              },
+              "intent_present": null,
+              "completed_steps": [
+                "reset-intent marker confirmed durable",
+                "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477",
+                "old anchor copied to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477",
+                "new anchor ac59dfc89f6d4dc3852522529c543cb0 written",
+                "new rebind-free journal written"
+              ],
+              "intent_durable": false,
+              "rebinds_discarded": 1,
+              "presence_error": "OSError(5, 'marker lstat unavailable')"
+            }
+          ],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": [
+          {
+            "actor": "op",
+            "reason": "metadata failure",
+            "ts": 1791523349.1245327,
+            "status": "failed",
+            "failed_step": "remove reset-intent marker",
+            "error": "PermissionError(13, 'intent unlink fails')",
+            "archived": {
+              "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477",
+              "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477"
+            },
+            "intent_present": null,
+            "completed_steps": [
+              "reset-intent marker confirmed durable",
+              "old journal renamed to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-1791523349124532477",
+              "old anchor copied to /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.id.reset-1791523349124532477",
+              "new anchor ac59dfc89f6d4dc3852522529c543cb0 written",
+              "new rebind-free journal written"
+            ],
+            "intent_durable": false,
+            "rebinds_discarded": 1,
+            "presence_error": "OSError(5, 'marker lstat unavailable')"
+          }
+        ]
+      },
+      "actual_intent_present": true,
+      "old_pair_unchanged": false,
+      "restart": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl",
+          "durable": true,
+          "journal_id": "",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_incomplete",
+            "error": "reset-intent marker /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/remove-reset-intent-marker.jsonl.reset-intent present: a reset_journal() was interrupted or failed; nothing is created, adopted or replayed. Retry reset_journal(actor=..., reason=...) before any event (or call clear_journal_fence(), which re-journals no rebind)",
+            "found_at_startup": true,
+            "ts": 1791523349.1290843
+          },
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 0,
+          "bytes": 0,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": []
+      },
+      "false_old_pair_claim": false,
+      "false_unlinked_claim": false
+    }
+  ],
+  "nonregular_markers": [
+    {
+      "form": "directory",
+      "fsync_acknowledgements": [],
+      "failed": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/nonregular-directory.jsonl",
+          "durable": true,
+          "journal_id": "",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_failed",
+            "error": "reset_journal by op (namespace marker) FAILED at step 'confirm existing reset-intent marker': OSError(22, 'reset-intent marker is not a regular file (drwxr-xr-x); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). Durability of the reset-intent marker was NOT confirmed (a marker, possibly empty or partial, is visible now but may not survive a crash). The old journal and .id are unchanged on disk (at most a marker was written), so a restart MAY replay them: keep the service stopped and retry reset_journal() before any replay.",
+            "found_at_startup": false,
+            "ts": 1791523349.1397297,
+            "failed_step": "confirm existing reset-intent marker",
+            "intent_durable": false,
+            "intent_present": true,
+            "completed_steps": []
+          },
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 0,
+          "bytes": 0,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [
+            {
+              "actor": "op",
+              "reason": "namespace marker",
+              "ts": 1791523349.139665,
+              "status": "failed",
+              "failed_step": "confirm existing reset-intent marker",
+              "error": "OSError(22, 'reset-intent marker is not a regular file (drwxr-xr-x); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event')",
+              "archived": {},
+              "intent_present": true,
+              "completed_steps": [],
+              "intent_durable": false,
+              "rebinds_discarded": 0
+            }
+          ],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": [
+          {
+            "actor": "op",
+            "reason": "namespace marker",
+            "ts": 1791523349.139665,
+            "status": "failed",
+            "failed_step": "confirm existing reset-intent marker",
+            "error": "OSError(22, 'reset-intent marker is not a regular file (drwxr-xr-x); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event')",
+            "archived": {},
+            "intent_present": true,
+            "completed_steps": [],
+            "intent_durable": false,
+            "rebinds_discarded": 0
+          }
+        ]
+      }
+    },
+    {
+      "form": "dangling_symlink",
+      "fsync_acknowledgements": [],
+      "failed": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/metadata7734-cases/nonregular-dangling_symlink.jsonl",
+          "durable": true,
+          "journal_id": "",
+          "volatile_rebinds_allowed": true,
+          "healthy": false,
+          "fence": {
+            "kind": "reset_failed",
+            "error": "reset_journal by op (namespace marker) FAILED at step 'confirm existing reset-intent marker': OSError(22, 'reset-intent marker is not a regular file (lrwxrwxrwx); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). Durability of the reset-intent marker was NOT confirmed (a marker, possibly empty or partial, is visible now but may not survive a crash). The old journal and .id are unchanged on disk (at most a marker was written), so a restart MAY replay them: keep the service stopped and retry reset_journal() before any replay.",
+            "found_at_startup": false,
+            "ts": 1791523349.1532245,
+            "failed_step": "confirm existing reset-intent marker",
+            "intent_durable": false,
+            "intent_present": true,
+            "completed_steps": []
+          },
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 0,
+          "bytes": 0,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [
+            {
+              "actor": "op",
+              "reason": "namespace marker",
+              "ts": 1791523349.153159,
+              "status": "failed",
+              "failed_step": "confirm existing reset-intent marker",
+              "error": "OSError(22, 'reset-intent marker is not a regular file (lrwxrwxrwx); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event')",
+              "archived": {},
+              "intent_present": true,
+              "completed_steps": [],
+              "intent_durable": false,
+              "rebinds_discarded": 0
+            }
+          ],
+          "reset_in_progress": true,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": [
+          {
+            "actor": "op",
+            "reason": "namespace marker",
+            "ts": 1791523349.153159,
+            "status": "failed",
+            "failed_step": "confirm existing reset-intent marker",
+            "error": "OSError(22, 'reset-intent marker is not a regular file (lrwxrwxrwx); its durability cannot be confirmed. With the service stopped, remove it and retry reset_journal() before any event')",
+            "archived": {},
+            "intent_present": true,
+            "completed_steps": [],
+            "intent_durable": false,
+            "rebinds_discarded": 0
+          }
+        ]
+      }
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,591 @@
+diff --git a/README.md b/README.md
+index dc951b32..3a27fb30 100644
+--- a/README.md
++++ b/README.md
+@@ -107,7 +107,9 @@ start until it completes, and a failed reset keeps its rebinds discarded.
+ A failed reset reports `intent_durable: true` only after the marker's file and
+ directory fsync succeeded; otherwise keep the service stopped and retry.
+ Presence and type checks use `lstat` with errors propagated (only ENOENT is
+-"absent"); only a regular-file marker can be confirmed durable. `rebind_plan_owner()` returns a `RebindResult`
++"absent"); only a regular-file marker can be confirmed durable.
++The journal and its `.id` anchor must be regular files too: a symlink (even a
++dangling one) or directory fences at startup and is never overwritten. `rebind_plan_owner()` returns a `RebindResult`
+ (`applied` / `refused` / `uncertain`; only `applied` is truthy). If any journal record cannot
+ be verified (torn, edited, reordered, legacy v1-v4 format), the whole journal is
+ fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds
+diff --git a/docs/ASTRA_REVIEW_7741.md b/docs/ASTRA_REVIEW_7741.md
+new file mode 100644
+index 00000000..4b841738
+--- /dev/null
++++ b/docs/ASTRA_REVIEW_7741.md
+@@ -0,0 +1,84 @@
++# Astra review 7741 — rebind-journal reset durability and recovery
++
++## Verdict: NOT APPROVED
++
++Reviewed **`2c7e337202cbfa19569b344992326a1603d867cd`**, specifically **`git diff 48c10cc..2c7e337`**. Two `git fetch origin` checks confirmed `HEAD = origin/main = 2c7e337`; no extra code required review. Sole independent reviewer: **`openai/gpt-6-astra`**, provider **openai**, verified using this session's runtime metadata and assistant-history provider/model fields. No delegation, substitute model, dependency download, paid compute, commit or push.
++
++**The 7734 file-durability defect is fixed.** Every retained reset/replay matrix passes, including the expanded **388-case** current intent matrix; **840 tests pass**, full suite exactly once. The remaining gate issue is a newly witnessed, pre-existing **Medium startup artifact-preservation gap**: `_read_anchor()` still equates an `open()` ENOENT with absence of the anchor directory entry. With a missing journal and dangling `.id` symlink, ordinary construction silently replaces the existing anchor entry and declares a fresh journal healthy, contrary to the stated “neither exists / damaged storage fences” contract. This is **not** evidence of authorization resurrection. The 7734 diagnostic finding also has a **Low residual**: the failure fence has `presence_error`, but its corresponding `journal_resets` audit entry does not.
++
++Evidence: [index](../experiments/20261008-astra-7741/README.md), [ledger](../experiments/20261008-astra-7741/RUN.md), [retained reset matrix](../experiments/20261008-astra-7741/reset7727.json), [intent matrix](../experiments/20261008-astra-7741/intent7734.json), [independent strict-check/race/metadata witnesses](../experiments/20261008-astra-7741/focused7741.json). Exactly pinned source was exported to `/tmp/hive-astra-7741-source`; historical evidence is a read-only-use `experiments` link. Production files, tests and `scratch/` were not modified.
++
++## Findings
++
++| Finding | Status / severity | Evidence and scope |
++|---|---|---|
++| F-reset-interruption-replays-restored-pair (7718) | **CLOSED — Medium, established-intent scope** | 208 interruptions: 188 fenced restarts, 12 healthy new-pair/held restarts, eight unchanged-old-pair restarts before confirmation. No discarded replay after confirmed intent. |
++| F-reset-error-live-pending (7718) | **CLOSED — Medium** | 104 caught-error recoveries leave pending empty and live fenced; clearance carries zero rebinds. Retained 96 retry/live-error cases pass. |
++| F-reset-intent-durability-status (7727/7734) | **CLOSED — Medium** | Error-propagating lstat, regular-file check, O_NOFOLLOW, fstat same-device/inode/type check, file fsync then directory fsync. Original witnesses, classification EIO/EACCES, fstat failures and Linux swap probes pass. |
++| F-reset-error-metadata-status (7734) | **OPEN — Low; original two incorrect-presence/text witnesses CLOSED** | Both original cases now report null and correct progress; six additional after-return boundaries never claim an unchanged moved pair or an unacknowledged unlink. Fence has `presence_error`, audit lacks it (`reducer.py:1208`). Complete the audit schema, or explicitly document its narrower fields. |
++| F-startup-dangling-anchor-overwrite (newly found; pre-existing code) | **OPEN — Medium** | `_read_anchor()` at `reducer.py:527`–`:534` follows symlinks and converts missing referent to absent anchor; `:669`–`:671` creates a fresh pair. Real dangling `.id` entry is overwritten with no fence or operator action. `focused7741.json → dangling_anchor`. No restored authorization is demonstrated. |
++| Intent startup / damaged markers / recovery | **CLOSED — Medium, tested requirements** | 42 marker/pair controls and non-root mode-000 repair/retry pass. Symlink/directory reset intents are rejected before old-pair mutation; ordinary startup blocks on either. |
++| Clearance after interrupted reset | **CLOSED — Medium** | 72 intent-bearing clearance interruptions; marker removal follows durable rebind-free pair. |
++| F-joint-rollback-doc-scope / F-clean-suffix-doc-overclaim (7708) | **CLOSED — Low** | Exact byte-preserving restore, held replay and durable explicit reissue pass; policy accurately distinguishes joint rollback and record-boundary suffix truncation. |
++| Identity, legacy startup, rebind-result ambiguity, single-file rollback, runtime integrity | **CLOSED — retained Medium/Low scopes** | Retained 7701/7708 groups, 48 first-use / 80 clearance injections, 24 explicit startup recoveries and eight active-marker controls pass. Newly discovered dangling-anchor case is separately OPEN above. |
++| Abort-tail / refused compound / order / stream-content / default journal / foreign isolation / unregister / hold-preview | **CLOSED — retained High/Medium/Low scopes** | 16 primary / eight focused journal groups; 1,440 supersession and 144 hold/rebind schedules rerun. |
++| Snapshot / partial replay | **CLOSED — Low documentation scope; unsupported capability** | Policy `:87` requires full original ordered replay; no snapshot/partial-replay approval inferred. |
++| O_NOFOLLOW availability | **CLOSED — Low, Linux deployment scope only** | Host flag is enforced. Forced flag-unavailable control can follow a swapped same-inode symlink; cross-platform/no-flag and hostile concurrent namespace writers are not approved by this review. |
++| Full suite | **CLOSED — independent verification** | **840 passed in 50.37 s**, runner wall **50.9045 s**, exit 0, exactly once. Author's claimed count reproduced on exactly 2c7e337; author's own run provenance not independently verified. |
++
++## 1. Reset order and retained guarantees
++
++At `hive/reducer.py:1095`, `done`, `unlinked` and `new_pair` track acknowledged progress independently of namespace visibility. `established` becomes True only after the intent helper returns (`:1109`). Existing regular markers now receive lstat, open, fstat, file fsync/close and directory fsync/close. A type/readability failure cannot reach confirmation. Journal rename precedes its directory fsync, and the completed-steps list records the acknowledged rename before that fsync. Later partial failures no longer infer an unchanged old pair merely from failed marker inspection.
++
++The retained mutation traces remain 24 / 28 operations and yield **208** interruption cases, **104** caught-error recoveries, **42** leftover/damaged-marker combinations and **72** clearance interruption cases. Another **96** reset retry/live-feed cases pass. Extra I/O coverage remains **48** close/fstat/directory-open injections plus **four** anchor read/open injections. Six successful reset states, seven refusal guards, late replacement and exact joint restore pass. Archives preserve both original files byte-for-byte, replay remains held through two starts, and explicit reissue persists through two more.
++
++The adapted 7734 intent matrix now has fresh/existing traces of **48 / 47 calls**. The added existing-marker fstat boundary accounts for four extra before/after Crash/OSError cases: **380 syscall cases + eight helper-return cases = 388**, versus 384 previously. It checks both fence and audit, acknowledged file-and-directory fsync for any positive durability claim, untouched old pair before confirmation, held live replay, and zero-carry clearance for caught OSError. Four compound fsync/cleanup-denial configurations pass. The only ordinary-matrix expectation adjustment is accepting the new accurate “new pair complete” message where the old text asserted fsync confirmation.
++
++Injected Crash is a caught BaseException boundary model, not an actual process kill or power cut. After-return injections are deliberately conservative: a real syscall may have completed, while the caller has not acknowledged it. `completed_steps` may omit that operation; it must not invent a completed one. No universal filesystem/firmware persistence claim is inferred.
++
++## 2. F-reset-intent-durability-status — CLOSED Medium
++
++The original 7727 zero-fsync and fsync-plus-cleanup-denial witnesses still report not durable and preserve the old pair. The original 7734 classification probes no longer reproduce a positive durability claim without file fsync. The new independent matrix injects EIO/EACCES into `stat` and `lstat`, on the first marker check, confirmation check and every marker call: **12 variants**. `stat` is no longer called; its six controls complete both fsyncs before an injected first-mutation stop. Every lstat fault stops before file synchronization and old-pair mutation. Persistent lstat failure yields `intent_present: null`, a fence `presence_error`, and `reset_in_progress: null`.
++
++Seven additional helper probes exercise regular-file replacement, symlink replacement, directory replacement, fstat EIO, fstat nonregular mode, fstat changed device, and forced O_NOFOLLOW unavailability. On this Linux host, regular replacement fails inode comparison; the symlink swap is refused by O_NOFOLLOW; directory/type/device/fstat faults refuse confirmation. All six enforced controls have no fsync acknowledgment, report not durable and preserve the old pair. The seventh portability control deliberately sets the flag to zero: a symlink to the original inode is then followed and accepted. This is not a Linux regression; do not generalize this review to platforms lacking the flag or to hostile concurrent writers.
++
++Pre-existing directory and dangling-symlink reset-intent controls now fail at classification without file/directory-only “durable” claims. Mode 000 under uid 1001 remains unchanged and undeleted after failed confirmation; fixing permissions then retrying succeeds with held replay. These outcomes match policy `:154`–`:175`.
++
++## 3. Presence reporting, strict checks and remaining gaps
++
++**7734 original metadata cases corrected.** Failure reading the old anchor after journal rename plus marker-lstat EIO reports unknown presence and the acknowledged rename, not an unchanged pair. Failed final unlink plus marker-lstat EIO reports a complete new pair and unknown removal, not a successful unlink. Both continue to fence live and on ordinary restart. Six additional failures immediately after intent write, journal rename, old-anchor copy, new-anchor write, new-journal replacement and final unlink check null presence, accurate progress and consistent fence/audit completed-step arrays.
++
++**Residual Low:** `presence_error` is attached to the failure fence at `hive/reducer.py:1207`, but omitted from the appended failed audit dictionary at `:1208`–`:1212`. All six added cases reproduce this. The audit's `error` contains only the primary exception, so the secondary namespace-inspection error is unavailable to audit-only consumers. The requested “null + presence_error” diagnostic is therefore only partly implemented. Add that field to the audit too, or explicitly narrow policy `:163`–`:167` and the public schema. This is not a replay failure.
++
++**Whole-hive audit.** AST inspection finds zero calls to `os.path.lexists/isfile/islink/exists`, `Path.exists/is_file/is_dir`, or `os.access`; the literal names remaining in reducer `:450` are documentation. `FileNotFoundError` at the strict lstat helper means native ENOENT; EIO, EACCES and ENOTDIR propagate. Cleanup-only broad OSError handlers remove temporary files best-effort and re-raise the original error. Runtime verification errors fence/raise, and append-close logging occurs after fsync, not as an absence decision. Other modules' broad exception handlers log polling/planning/adapter failures and do not decide journal namespace presence.
++
++The independent strict-check matrix records **45 combinations**: startup/reset/clear × intent/journal/anchor/two legacy fence paths × EIO/EACCES/ENOTDIR. **42 apply and pass**; clearance's three anchor-read cases are correctly not applicable because clearance replaces the old anchor without reading it. `.id` is checked by open/read, not lstat; clear similarly reads journal content directly. Startup intent errors are treated present, drop pending decisions, fence `reset_incomplete` and expose null `reset_in_progress`; other startup faults fence `unwritable`. Applicable reset/clear faults raise and stay fenced; live replay remains held.
++
++**New Medium: dangling anchor is not absence of its directory entry.** `_read_anchor()` still uses `open(self._id_path(path), "rb")` and catches FileNotFoundError (`:531`–`:534`) without checking the entry itself. An anchor symlink with a missing referent produces ENOENT even though the `.id` entry exists. With the journal missing, `_open_journal()` concludes neither exists (`:669`) and creates a journal (`:670`), replacing the symlink through `_write_anchor()` rather than fencing. `focused7741.json → dangling_anchor` creates this real fixture and records healthy=True, a newly created journal and anchor_replaced=True. No monkeypatched OS failure is needed.
++
++This is a **pre-existing** hole exposed by this round's broadened strict-presence audit, not introduced by the new lstat helper. It violates the startup's documented read-only behavior for damaged artifacts and “new only when neither exists” rule (policy `:105`–`:111`; reducer `:630`–`:638`), and the new universal strict-entry claim (policy `:160`; README `:109`). The effect is silent loss of an existing recovery/identity entry and healthy admission of ambiguous storage, **not** replay of a discarded authorization. Require explicit error-propagating namespace inspection when anchor open reports ENOENT: only a genuinely absent anchor entry is first-use; an existing dangling/nonreadable entry must fence and remain untouched. Rerun regular/missing/dangling anchor controls and first-use/clearance matrices. The Medium artifact-preservation violation is the production-gate blocker; the Low audit-field omission alone would not establish a storage replay defect.
++
++## 4. Retained integrity checks and accepted limitations
++
++All **16 primary / eight focused journal groups** pass. **1,440 supersession schedules / 15,840 event-prefix checks** and **144 hold/rebind schedules / 1,152 checks** pass. Applicable 7638–7734 content/order, refusal, pending/commit failures, identity adoption, legacy startup, unreadable-file, artifact and valid-prefix controls are rerun via their retained composite harnesses. Historical `recovery7708.restore_guidance` retains its obsolete clearance-only witness; successful reset corrects that recovery path.
++
++These architectural limits are accurately documented and are not gate blockers:
++
++- Unkeyed hashes are not a MAC; a writer can recompute them (policy `:190`–`:193`).
++- Joint journal/`.id` rollback without successful pre-replay reset can revive discarded decisions (policy `:112`–`:132`; README `:100`–`:104`).
++- Clean complete-record suffix truncation with matching identity is accepted at restart and can drop rebinds; live whole-file verification may detect it (policy `:183`–`:190`; README `:100`–`:101`).
++- Snapshot, partial and synthetic replay are unsupported; recover using the full original ordered stream (policy `:87`–`:89`, `:127`–`:128`).
++- If intent cannot be confirmed durable, the old pair is intact before confirmation; a visible partial marker may still be lost. Keep service stopped and retry before replay (policy `:168`–`:175`; README `:107`–`:108`).
++- Symlink/directory reset markers require stopped-service operator cleanup and retry; unreadable regular markers require permission repair, not deletion (policy `:157`–`:159`, `:174`–`:175`).
++
++Both files genuinely absent remains indistinguishable from first use. Protect storage permissions, keep one writer, retain the original ordered event stream, and perform recovery before serving/replay. Synchronous verification is linear in journal size; performance qualification, hardware power-cut behavior and no-O_NOFOLLOW platforms remain outside scope. These accepted limits do not excuse the observed existing-anchor-entry overwrite. Approval is withheld until the Medium startup gap is corrected and independently witnessed closed; complete the Low audit field in the same repair.
++
++## 5. Suite, execution accounting and publication integrity
++
++Full suite executed **exactly once**: **840 passed in 50.37 s**, exit 0, runner wall **50.9045 s**. Sixteen additional tests relative to 7734 account for the increase from 824. All **161 tracked non-experiment files** match pinned Git blobs, initial export and repository source. Prior manifests verified **315 / 351 / 355 / 829 / 1,189 / 2,221 / 3,913 / 5,821** artifact hashes for 7669/7678/7694/7701/7708/7718/7727/7734.
++
++All execution output is retained without overwriting logs. The sole nonzero substantive run is `semantic-7133`, repeating three already-documented obsolete automatic-closure expectations; its 3,072 current-format, 3,072 prior-format, 384 legacy and lifecycle controls pass. Previously corrected `probes-final`, `older-regressions-final` and `independent-final` scripts pass directly. The suite was not rerun. `audit7741-final` corrects only the first audit's mistaken line-reference note; both originals are retained. Preliminary shell status inspection while the suite was still starting found no exit file yet and made no changes.
++
++Each substantive run has exclusive started/exit JSON and stdout/stderr. Commands, environment allowlist, local-wheel hashes, copied-script provenance/adaptation diffs, source patch and changed-file snapshots are retained. Python sockets are guarded and builds use existing local wheels; this is not an OS network sandbox. Setup exports source without running tests. Copied legacy dependency scripts not directly executed are distinguished by the execution ledger, not assumed to have standalone results.
++
++The report/evidence secret scan found **zero credential-pattern matches**; its exact scope and limitations are retained. No environment dump or credential value was captured. Only this report and `experiments/20261008-astra-7741/` were written in the repository. `SHA256SUMS` covers every delivered regular evidence file and this report, excluding itself; read-only `verify_evidence.py` checks complete coverage, hashes, execution ledgers, suite count, regression matrices and findings. No production/test/scratch edit, staging, commit or push was performed. Parent publication remains separate.
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index d79dd68f..6890fbae 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -70,7 +70,7 @@ accident.
+   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+ 
+-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734)
++## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741)
+ 
+ - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
+   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
+@@ -164,7 +164,19 @@ accident.
+   be inspected, and the message and `completed_steps` list only the steps
+   that actually completed (e.g. "old journal renamed to ..."); it never
+   claims the old pair is unchanged after the old journal was moved, nor that
+-  the marker was unlinked unless the unlink succeeded (Astra 7734). Limits: if the
++  the marker was unlinked unless the unlink succeeded (Astra 7734). The
++  failed-reset `journal_resets` entry carries the same `presence_error` as
++  the fence. The journal and its `.id` anchor are read strictly as well:
++  only an `lstat` ENOENT on the entry itself means "absent" (a dangling
++  symlink is NOT absent), and both must be regular files. A symlink
++  (dangling or valid), directory or other entry type fences at startup
++  (`identity`, listed in `artifacts`), is never followed and never
++  overwritten; nothing is created, adopted or replayed. Other metadata or
++  read errors fence `unwritable`. `clear_journal_fence()` and
++  `reset_journal()` move such an entry aside intact (`.cleared-<ns>` /
++  `.reset-<ns>`) before writing a regular file. At runtime the journal is
++  opened with `O_NOFOLLOW` and must still be a regular file, otherwise it
++  fences `changed` (Astra 7741). Limits: if the
+   process dies or the error hits before that confirmation, the old journal
+   and `.id` are unchanged on disk, but something may already have changed: a
+   marker, possibly empty or partial, can exist without being durable and may
+@@ -277,5 +289,5 @@ accident.
+   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
+   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
+   `tests/test_astra7718.py`, `tests/test_astra7727.py`,
+-  `tests/test_astra7734.py`.
++  `tests/test_astra7734.py`, `tests/test_astra7741.py`.
+ 
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 3c8e4c3e..8130bc86 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -102,6 +102,18 @@ def _valid_step_index(idx: Any, count: int) -> bool:
+     return isinstance(idx, int) and not isinstance(idx, bool) and 0 <= idx < count
+ 
+ 
++class _NotRegularFile(ValueError):
++    """Astra 7741: a journal/anchor directory entry exists but is not a
++    regular file (symlink -- dangling or not --, directory, fifo, ...).  It is
++    never read through, never treated as absent and never overwritten at
++    startup: the journal fences and the entry is left untouched."""
++
++    def __init__(self, path: str, what: str, mode: int) -> None:
++        self.path, self.what = path, what
++        super().__init__(f"{what} {path} exists but is not a regular file "
++                         f"({_stat.filemode(mode)})")
++
++
+ class HiveReducer:
+     """Processes HiveEvents and maintains HiveState.
+ 
+@@ -524,14 +536,50 @@ class HiveReducer:
+         h["rec_hash"] = HiveReducer._rec_hash(h)
+         return h
+ 
+-    def _read_anchor(self, path: str) -> str | None:
+-        """journal_id named by the identity anchor; None if it does not exist;
+-        ValueError if it exists but is unreadable or malformed."""
++    @staticmethod
++    def _read_regular(path: str, what: str) -> "bytes | None":
++        """Astra 7741: strict read of a journal-namespace file.  None ONLY if
++        os.lstat() reports ENOENT for the entry itself.  An existing entry that
++        is not a regular file (incl. a dangling or valid symlink, a directory)
++        raises _NotRegularFile; it is never followed.  Every other error
++        (EIO, EACCES, ENOTDIR, the entry vanishing or changing between lstat
++        and open) raises OSError -- never "absent"."""
+         try:
+-            with open(self._id_path(path), "rb") as f:
+-                raw = f.read()
++            st = os.lstat(path)
+         except FileNotFoundError:
+             return None
++        if not _stat.S_ISREG(st.st_mode):
++            raise _NotRegularFile(path, what, st.st_mode)
++        try:
++            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
++        except FileNotFoundError as exc:
++            raise OSError(errno.ESTALE, f"{what} vanished between lstat and "
++                          f"open ({exc})", path) from exc
++        try:
++            fst = os.fstat(fd)
++            if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
++                    or fst.st_dev != st.st_dev):
++                raise OSError(errno.ESTALE, f"{what} changed while it was being "
++                              "opened", path)
++            chunks = []
++            while True:
++                b = os.read(fd, 1 << 20)
++                if not b:
++                    break
++                chunks.append(b)
++            return b"".join(chunks)
++        finally:
++            os.close(fd)
++
++    def _read_anchor(self, path: str) -> str | None:
++        """journal_id named by the identity anchor; None ONLY if the .id entry
++        itself does not exist (lstat ENOENT; Astra 7741 -- a dangling symlink
++        is NOT absent).  _NotRegularFile (a ValueError) if the entry is a
++        symlink/directory/other; ValueError if unreadable or malformed;
++        OSError on any other metadata/read error."""
++        raw = self._read_regular(self._id_path(path), "identity anchor")
++        if raw is None:
++            return None
+         try:
+             a = json.loads(raw.decode("utf-8"))
+         except (UnicodeDecodeError, ValueError) as exc:
+@@ -541,6 +589,21 @@ class HiveReducer:
+             raise ValueError("identity anchor malformed or legacy format")
+         return a["journal_id"]
+ 
++    def _move_aside_if_not_regular(self, path: str, dst: str) -> bool:
++        """Astra 7741: an existing non-regular entry (symlink, directory, ...)
++        is renamed aside intact (kept as evidence, never followed or deleted)
++        before an explicit operator command writes a regular file there.
++        True if moved.  lstat errors other than ENOENT propagate."""
++        try:
++            st = os.lstat(path)
++        except FileNotFoundError:
++            return False
++        if _stat.S_ISREG(st.st_mode):
++            return False
++        os.replace(path, dst)
++        self._fsync_dir(dst)
++        return True
++
+     def _replace_durably(self, path: str, data: bytes) -> None:
+         """Write a temp file durably, rename it over path, fsync the dir."""
+         tmp = f"{path}.new-{time.time_ns()}"
+@@ -635,7 +698,10 @@ class HiveReducer:
+         Order (Astra 7701): (1) any pre-v5 artifact fences before anything is
+         created or adopted; (2) a journal is created only when neither the
+         journal nor its anchor exists (anchor first); (3) a journal without a
+-        matching anchor ALWAYS fences, whatever it contains."""
++        matching anchor ALWAYS fences, whatever it contains.  Astra 7741: every
++        presence decision is strict (lstat; only ENOENT is absent) and the
++        journal and anchor must be regular files -- a symlink (dangling or
++        not) or directory fences and is never overwritten."""
+         idp = self._id_path(path)
+         try:
+             try:
+@@ -658,11 +724,11 @@ class HiveReducer:
+                                                "presence_error": ierr}
+                                               if ierr else {}))
+                 return []
+-            exists = self._lexists_strict(path)
+-            data = b""
+-            if exists:
+-                with open(path, "rb") as f:
+-                    data = f.read()
++            # Astra 7741: strict -- only an lstat ENOENT is "no journal"; a
++            # symlink/directory journal entry fences (_NotRegularFile)
++            raw = self._read_regular(path, "rebind journal")
++            exists = raw is not None
++            data = raw if raw is not None else b""
+             legacy, first = self._legacy_artifacts(path, data)
+             if legacy:
+                 return self._fence_legacy(legacy, first)
+@@ -675,6 +741,14 @@ class HiveReducer:
+                             f"read ({exc}); no journaled rebind is replayed",
+                             found_at_startup=True)
+             return []
++        except _NotRegularFile as exc:          # Astra 7741
++            self._set_fence("identity", f"{exc}: it is not followed, not "
++                            "treated as absent and left untouched; nothing is "
++                            "created, adopted or replayed. Inspect it, then "
++                            "call clear_journal_fence() or reset_journal() "
++                            "(both move it aside intact)",
++                            found_at_startup=True, artifacts=[exc.path])
++            return []
+         except ValueError as exc:
+             self._set_fence("identity", f"{idp}: {exc}; no journaled rebind is "
+                             "replayed", found_at_startup=True)
+@@ -812,6 +886,8 @@ class HiveReducer:
+         this process last wrote or verified (size AND SHA-256 of the whole
+         file, re-read).  Returns (size, sha256 object of the verified bytes);
+         raises _JournalChanged."""
++        if not _stat.S_ISREG(os.fstat(fd).st_mode):      # Astra 7741
++            raise _JournalChanged("journal is not a regular file")
+         try:
+             anchor = self._read_anchor(self._journal_path)
+         except (OSError, ValueError) as exc:
+@@ -844,7 +920,8 @@ class HiveReducer:
+         if self._journal_fence is not None:
+             return False
+         try:
+-            fd = os.open(self._journal_path, os.O_RDONLY)
++            fd = os.open(self._journal_path,
++                         os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+         except OSError as exc:
+             self._set_fence("changed", f"journal cannot be opened ({exc})")
+             return False
+@@ -867,9 +944,14 @@ class HiveReducer:
+         rec["rec_hash"] = self._rec_hash(rec)
+         data = (json.dumps(rec, sort_keys=True) + "\n").encode("utf-8")
+         try:
+-            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND)
++            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND
++                         | getattr(os, "O_NOFOLLOW", 0))
+         except FileNotFoundError as exc:
+             raise _JournalChanged(f"journal file is missing ({exc})") from exc
++        except OSError as exc:
++            if exc.errno == errno.ELOOP:            # Astra 7741: now a symlink
++                raise _JournalChanged(f"journal entry is a symlink ({exc})") from exc
++            raise
+         try:
+             size, sha = self._verify_on_disk(fd)
+             if size + len(data) > MAX_HIVE_JOURNAL_BYTES:
+@@ -956,14 +1038,18 @@ class HiveReducer:
+             return False
+         path = self._journal_path
+         stamp = time.time_ns()
++        # Astra 7741: strict read; a non-regular journal entry is moved aside
++        # intact as the archive instead of being read through or replaced
++        archive = f"{path}.fenced-{stamp}"
+         try:
+-            with open(path, "rb") as f:
+-                old: bytes | None = f.read()
+-        except FileNotFoundError:
+-            old = None
+-        archive = f"{path}.fenced-{stamp}" if old is not None else ""
++            old: bytes | None = self._read_regular(path, "rebind journal")
++            moved = False
++        except _NotRegularFile:
++            old, moved = None, self._move_aside_if_not_regular(path, archive)
+         if old is not None:
+             self._write_file_durably(archive, old)
++        elif not moved:
++            archive = ""
+         now = time.time()
+         jid = uuid.uuid4().hex                 # Astra 7694: new identity
+         hdr = self._header_record(jid)
+@@ -993,6 +1079,8 @@ class HiveReducer:
+         # journal rename and the anchor rename leaves a journal/anchor id
+         # mismatch, which fences again at the next start (safe).
+         self._replace_durably(path, data)
++        self._move_aside_if_not_regular(self._id_path(path),
++                                        f"{self._id_path(path)}.cleared-{stamp}")
+         self._write_anchor(path, jid)
+         # Astra 7701: old fence files are moved aside (kept as evidence) only
+         # after the new journal and anchor are durable; a crash before this
+@@ -1118,10 +1206,15 @@ class HiveReducer:
+                 self._fsync_dir(dst)
+             step = "archive old anchor"
+             try:
+-                with open(idp, "rb") as f:
+-                    old_anchor: bytes | None = f.read()
+-            except FileNotFoundError:
++                old_anchor: bytes | None = self._read_regular(
++                    idp, "identity anchor")        # Astra 7741: strict
++            except _NotRegularFile:
+                 old_anchor = None
++                dst = f"{idp}.reset-{stamp}"
++                if self._move_aside_if_not_regular(idp, dst):
++                    archived[idp] = dst
++                    done.append(f"old anchor entry (not a regular file) moved "
++                                f"to {dst}")
+             if old_anchor is not None:
+                 dst = f"{idp}.reset-{stamp}"
+                 self._write_file_durably(dst, old_anchor)
+@@ -1209,7 +1302,8 @@ class HiveReducer:
+                 {"actor": actor, "reason": reason, "ts": now, "status": "failed",
+                  "failed_step": step, "error": repr(exc), "archived": archived,
+                  "intent_present": present, "completed_steps": list(done),
+-                 "intent_durable": durable, "rebinds_discarded": len(discarded)})
++                 "intent_durable": durable, "rebinds_discarded": len(discarded),
++                 **({"presence_error": perr} if perr else {})})
+             del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
+             raise
+         self._set_journal_state(data, rst["rec_hash"], lines[-1], 2, jid)
+diff --git a/tests/test_astra7734.py b/tests/test_astra7734.py
+index b0feb82e..5ad8f35e 100644
+--- a/tests/test_astra7734.py
++++ b/tests/test_astra7734.py
+@@ -8,7 +8,6 @@
+       is built from the steps that actually completed (completed_steps).
+ Audit: reset/clear/startup use a strict presence check (only ENOENT = absent).
+ """
+-import builtins
+ import errno
+ import os
+ 
+@@ -121,15 +120,15 @@ def test_handler_lstat_eio_after_journal_moved_reports_unknown(tmp_path, monkeyp
+     # Astra metadata7734 case 1
+     jp, h = _pair(tmp_path, "m1")
+     ip, idp = jp + ".reset-intent", jp + ".id"
+-    real_open = builtins.open
++    real_open = os.open
+     broke = [False]
+ 
+-    def opn(p, *a, **k):
++    def opn(p, *a, **k):        # anchor read uses os.open since Astra 7741
+         if os.fspath(p) == idp and not broke[0]:
+             broke[0] = True
+             raise OSError(errno.EIO, "injected anchor read")
+         return real_open(p, *a, **k)
+-    monkeypatch.setattr(builtins, "open", opn)
++    monkeypatch.setattr(os, "open", opn)
+     real_lstat = os.lstat
+ 
+     def lst(p, *a, **k):
+diff --git a/tests/test_astra7741.py b/tests/test_astra7741.py
+new file mode 100644
+index 00000000..e1999453
+--- /dev/null
++++ b/tests/test_astra7741.py
+@@ -0,0 +1,166 @@
++"""Astra 7741 (docs/ASTRA_REVIEW_7741.md, fb8bdb2) on 2c7e337.
++1 Med F-dangling-anchor-overwrite: the identity anchor (<journal>.id) and the
++      journal are read strictly -- only an lstat ENOENT on the entry itself is
++      "absent".  A symlink (dangling or valid) or directory fences at startup,
++      is never followed and never overwritten; clear/reset move it aside intact.
++2 Low: journal_resets failure entries carry presence_error like the fence.
++"""
++import errno
++import os
++
++import pytest
++
++import hive.reducer as hr
++from tests.test_astra7638 import run
++from tests.test_astra7718 import _pair
++
++
++def _fence(h):
++    return h.journal_status()["fence"]
++
++
++def _snap(p):
++    st = os.lstat(p)
++    return (st.st_mode, st.st_ino, os.readlink(p) if os.path.islink(p) else None)
++
++
++def _make(kind, p, tmp_path):
++    if kind == "dangling":
++        os.symlink(str(tmp_path / "nowhere.id"), p)
++    elif kind == "valid":
++        tgt = tmp_path / "real.id"
++        tgt.write_text('{"journal_id": "x", "v": 5}\n')
++        os.symlink(str(tgt), p)
++    else:
++        os.mkdir(p)
++
++
++def _start(jp):
++    h = hr.HiveReducer(rebind_journal=jp)
++    h.register_agent("a1")
++    return h
++
++
++KINDS = ["dangling", "valid", "directory"]
++
++
++@pytest.mark.parametrize("journal", ["missing", "present"])
++@pytest.mark.parametrize("kind", KINDS)
++def test_non_regular_anchor_fences_never_overwritten(tmp_path, kind, journal):
++    if journal == "present":
++        jp, _ = _pair(tmp_path, kind)
++        os.unlink(jp + ".id")
++        before_j = open(jp, "rb").read()
++    else:
++        d = tmp_path / kind
++        d.mkdir()
++        jp = str(d / "rebinds.jsonl")
++    idp = jp + ".id"
++    _make(kind, idp, tmp_path)
++    snap = _snap(idp)
++    for _ in range(2):                                  # every restart
++        h = _start(jp)
++        f = _fence(h)
++        assert f["kind"] == "identity" and h.journal_status()["healthy"] is False
++        assert "not a regular file" in f["error"] and f["artifacts"] == [idp]
++        assert h._journal_pending == [] and h._journal_applied == []
++        assert _snap(idp) == snap                       # untouched
++        if journal == "missing":
++            assert not os.path.lexists(jp)              # nothing created
++        else:
++            assert open(jp, "rb").read() == before_j
++    if kind == "valid":
++        assert open(tmp_path / "real.id").read() == '{"journal_id": "x", "v": 5}\n'
++    # explicit operator commands move the entry aside intact, then succeed
++    h = _start(jp)
++    if journal == "present":
++        assert h.reset_journal(actor="op", reason="fix anchor")["status"] == "completed"
++        aside = [p for p in os.listdir(os.path.dirname(jp)) if p.startswith("rebinds.jsonl.id.reset-")]
++    else:
++        assert h.clear_journal_fence(actor="op", reason="fix anchor") is True
++        aside = [p for p in os.listdir(os.path.dirname(jp)) if p.startswith("rebinds.jsonl.id.cleared-")]
++    assert len(aside) == 1
++    assert _snap(os.path.join(os.path.dirname(jp), aside[0]))[0] == snap[0]
++    assert os.path.isfile(idp) and not os.path.islink(idp)
++    h2 = _start(jp)
++    assert h2.journal_status()["healthy"] is True
++
++
++@pytest.mark.parametrize("kind", KINDS)
++def test_non_regular_journal_entry_fences(tmp_path, kind):
++    jp, _ = _pair(tmp_path, "j" + kind)
++    os.unlink(jp)
++    _make(kind, jp, tmp_path)
++    snap = _snap(jp)
++    h = _start(jp)
++    assert _fence(h)["kind"] == "identity" and "rebind journal" in _fence(h)["error"]
++    assert _snap(jp) == snap and h._journal_pending == []
++    assert h.clear_journal_fence(actor="op", reason="fix") is True
++    assert os.path.isfile(jp) and not os.path.islink(jp)
++    archived = h.journal_fence_clearances[-1]["archived"]
++    assert archived and _snap(archived)[0] == snap[0]
++    assert _start(jp).journal_status()["healthy"] is True
++
++
++def test_regular_and_missing_anchor_controls(tmp_path):
++    d = tmp_path / "fresh"
++    d.mkdir()
++    jp = str(d / "rebinds.jsonl")
++    h = _start(jp)                                      # genuine first use
++    assert h.journal_status()["healthy"] is True and os.path.isfile(jp + ".id")
++    assert _start(jp).journal_status()["healthy"] is True   # regular pair adopted
++
++
++@pytest.mark.parametrize("err", [errno.EIO, errno.EACCES, errno.ENOTDIR])
++def test_anchor_lstat_error_fences_unwritable(tmp_path, monkeypatch, err):
++    d = tmp_path / str(err)
++    d.mkdir()
++    jp = str(d / "rebinds.jsonl")
++    real = os.lstat
++
++    def f(p, *a, **k):
++        if os.fspath(p) == jp + ".id":
++            raise OSError(err, "injected", p)
++        return real(p, *a, **k)
++    monkeypatch.setattr(os, "lstat", f)
++    h = _start(jp)
++    monkeypatch.undo()
++    assert _fence(h)["kind"] == "unwritable"
++    assert not os.path.lexists(jp) and not os.path.lexists(jp + ".id")
++
++
++def test_runtime_journal_swapped_for_symlink_fences(tmp_path):
++    jp, _ = _pair(tmp_path, "rt")
++    h = _start(jp)
++    assert h.journal_status()["healthy"] is True
++    real = jp + ".real"
++    os.replace(jp, real)
++    os.symlink(real, jp)
++    assert h.verify_journal() is False and _fence(h)["kind"] == "changed"
++
++
++def test_failed_reset_audit_carries_presence_error(tmp_path, monkeypatch):
++    jp, h = _pair(tmp_path, "low")
++    ip = jp + ".reset-intent"
++    real_unlink, real_lstat = os.unlink, os.lstat
++    broke = [False]
++
++    def unl(p, *a, **k):
++        if os.fspath(p) == ip:
++            broke[0] = True
++            raise PermissionError(errno.EACCES, "injected unlink")
++        return real_unlink(p, *a, **k)
++
++    def lst(p, *a, **k):
++        if broke[0] and os.fspath(p) == ip:
++            raise OSError(errno.EIO, "injected handler lstat", p)
++        return real_lstat(p, *a, **k)
++    monkeypatch.setattr(os, "unlink", unl)
++    monkeypatch.setattr(os, "lstat", lst)
++    with pytest.raises(OSError):
++        h.reset_journal(actor="op", reason="restore")
++    monkeypatch.undo()
++    f, a = _fence(h), h.journal_status()["journal_resets"][-1]
++    assert f["intent_present"] is None and a["intent_present"] is None
++    assert a["presence_error"] == f["presence_error"]
++    assert "injected handler lstat" in a["presence_error"]

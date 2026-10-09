@@ -1,0 +1,460 @@
+--- experiments/20261008-astra-7741/extra_io7727.py
++++ experiments/20261008-astra-7750/extra_io7727.py
+@@ -21,24 +21,22 @@
+  rows=[]
+  for stage in ['open','read']:
+   for side in ['before','after']:
+-   p,s,h=ns['restored']('anchor-read-'+stage+'-'+side);oldopen=builtins.open
+-   class ReadWrapper:
+-    def __init__(self,f):self.f=f
+-    def __enter__(self):return self
+-    def __exit__(self,*a):self.f.close()
+-    def read(self,*a,**kw):
+-     if side=='before':raise OSError('anchor read before')
+-     self.f.read(*a,**kw);raise OSError('anchor read after')
++   p,s,h=ns['restored']('anchor-read-'+stage+'-'+side);oldopen=os.open;oldread=os.read;hit=[]
+    def opening(path,*a,**kw):
+-    if str(path)!=str(ns['anchor'](p)):return oldopen(path,*a,**kw)
+-    if stage=='open' and side=='before':raise OSError('anchor open before')
+-    f=oldopen(path,*a,**kw)
+-    if stage=='open':f.close();raise OSError('anchor open after')
+-    return ReadWrapper(f)
+-   with patch.object(builtins,'open',opening):
++    if str(path)!=str(ns['anchor'](p)) or stage!='open':return oldopen(path,*a,**kw)
++    hit.append('open')
++    if side=='before':raise OSError('anchor open before')
++    fd=oldopen(path,*a,**kw);os.close(fd);raise OSError('anchor open after')
++   def reading(fd,*a,**kw):
++    if ns['fpath'](fd)!=str(ns['anchor'](p)) or stage!='read':return oldread(fd,*a,**kw)
++    hit.append('read')
++    if side=='before':raise OSError('anchor read before')
++    oldread(fd,*a,**kw);raise OSError('anchor read after')
++   with patch.object(os,'open',opening),patch.object(os,'read',reading):
+     try:h.reset_journal('op','anchor read fail')
+     except OSError:pass
+     else:raise AssertionError('error not raised')
++   assert hit
+    st=ns['state'](h);assert not st['status']['healthy'] and st['pending']==0
+    assert not h.verify_journal();assert h.clear_journal_fence('op','recover anchor read failure')
+    assert h.journal_fence_clearances[-1]['rebinds_rejournaled']==0
+--- experiments/20261008-astra-7741/finalize_provenance.py
++++ experiments/20261008-astra-7750/finalize_provenance.py
+@@ -1,11 +1,15 @@
+ """Record all inherited harnesses and final adaptations, plus exact output inventory."""
+ from pathlib import Path
+ import hashlib,json,difflib
+-E=Path(__file__).resolve().parent;R=E.parent.parent;P=E.parent/'20261008-astra-7734';rows=[];diff=[]
++E=Path(__file__).resolve().parent;R=E.parent.parent;P=E.parent/'20261008-astra-7741';rows=[];diff=[]
+ for p in sorted(list(P.glob('*.py'))+list((P/'guard').glob('*.py'))):
+  if p.name.startswith('setup'):continue
+  rel=p.relative_to(P);q=E/rel;old=p.read_text();new=q.read_text()
+  rows.append(dict(source=str(p.relative_to(R)),destination=str(rel),source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),adapted_sha256=hashlib.sha256(q.read_bytes()).hexdigest()))
+  diff+=list(difflib.unified_diff(old.splitlines(True),new.splitlines(True),fromfile=str(p.relative_to(R)),tofile=str(q.relative_to(R))))
+-(E/'copy-provenance.json').write_text(json.dumps(rows,indent=2)+'\n');(E/'adaptation-7741.diff').write_text(''.join(diff))
++for src,dst in [('experiments/20261008-astra-7741/recovery7708.py','recovery-final7750.py'),('experiments/20261008-astra-7741/audit7741-final.py','audit7750.py'),('experiments/20261008-astra-7750/audit7750.py','audit7750-final.py'),('experiments/20261008-astra-7750/namespace-scope7750.py','namespace-scope7750-final.py')]:
++ p=R/src;q=E/dst
++ rows.append(dict(source=src,destination=dst,source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),adapted_sha256=hashlib.sha256(q.read_bytes()).hexdigest()))
++ diff+=list(difflib.unified_diff(p.read_text().splitlines(True),q.read_text().splitlines(True),fromfile=src,tofile=str(q.relative_to(R))))
++(E/'copy-provenance.json').write_text(json.dumps(rows,indent=2)+'\n');(E/'adaptation-7750.diff').write_text(''.join(diff))
+ print('inherited Python harnesses',len(rows))
+--- experiments/20261008-astra-7741/focused7741.py
++++ experiments/20261008-astra-7750/focused7741.py
+@@ -74,7 +74,7 @@
+  for operation in ['startup','reset','clear']:
+   for target in ['intent','journal','anchor','fence','fence_tmp']:
+    for eno in [errno.EIO,errno.EACCES,errno.ENOTDIR]:
+-    name='check-'+operation+'-'+target+'-'+str(eno);p,s,h=restored(name);ip=str(p)+'.reset-intent';paths=dict(intent=ip,journal=str(p),anchor=str(anchor(p)),fence=str(p)+'.fence',fence_tmp=str(p)+'.fence.tmp');bad=paths[target];ls=os.lstat;op=builtins.open;calls=[]
++    name='check-'+operation+'-'+target+'-'+str(eno);p,s,h=restored(name);ip=str(p)+'.reset-intent';paths=dict(intent=ip,journal=str(p),anchor=str(anchor(p)),fence=str(p)+'.fence',fence_tmp=str(p)+'.fence.tmp');bad=paths[target];ls=os.lstat;op=os.open;calls=[]
+     if operation=='clear':Path(ip).write_bytes(b'intent');h=hnew(p)
+     def lstat(path,*a,**kw):
+      if str(path)==bad:calls.append('lstat');raise OSError(eno,'strict presence fault')
+@@ -84,7 +84,7 @@
+      if str(path)==bad and (target=='anchor' or (operation=='clear' and target=='journal')):
+       calls.append('open');raise OSError(eno,'strict read fault')
+      return op(path,*a,**kw)
+-    with patch.object(os,'lstat',lstat),patch.object(builtins,'open',opening):
++    with patch.object(os,'lstat',lstat),patch.object(os,'open',opening):
+      raised=False
+      try:
+       if operation=='startup':h=hnew(p)
+@@ -93,7 +93,7 @@
+      except OSError:raised=True
+      st=state(h)
+     # Clearance never reads old anchor, replacing it only after durable journal replacement.
+-    applicable=not(operation=='clear' and target=='anchor')
++    applicable=True # clear now lstat-checks the anchor before replacement
+     if applicable:
+      assert calls and not st['status']['healthy']
+      assert raised==(operation!='startup')
+@@ -142,6 +142,7 @@
+    st=state(h)
+   f=st['status']['fence'];assert active and f['intent_present'] is None and f['presence_error'] and not f['intent_durable']
+   assert f['completed_steps']==st['resets'][-1]['completed_steps']
++  assert f['presence_error']==st['resets'][-1]['presence_error']
+   if pair(p)!=old:assert 'old journal and .id are unchanged' not in f['error']
+   assert 'marker was unlinked' not in f['error']
+   rows.append(dict(mode=mode,state=st,actual_intent_present=os.path.lexists(ip),old_pair_unchanged=pair(p)==old,audit_has_presence_error='presence_error' in st['resets'][-1]))
+@@ -150,7 +151,7 @@
+ def dangling_anchor(row):
+  p=ns['T']/'dangling-anchor.jsonl';a=anchor(p);a.symlink_to(a.name+'.missing');h=hnew(p)
+  row.update(anchor_initially_dangling=True,anchor_replaced=not a.is_symlink(),journal_created=p.exists(),state=state(h),passed=True)
+- assert row['anchor_replaced'] and row['journal_created'] and h.journal_status()['healthy']
++ assert not row['anchor_replaced'] and not row['journal_created'] and h.journal_status()['fence']['kind']=='identity'
+ 
+ out={}
+ for name,fn in [('classification',classification),('races',races),('strict_checks',checks),('metadata_boundaries',metadata),('dangling_anchor',dangling_anchor)]:
+--- experiments/20261008-astra-7741/followup7694.py
++++ experiments/20261008-astra-7750/followup7694.py
+@@ -259,7 +259,7 @@
+    if str(path)==str(p) and mode=='read_denied':raise PermissionError('read denied')
+    return real_open(path,*a,**kw)
+   def osopened(path,*a,**kw):
+-   if str(path)==str(p) and mode=='create_denied':raise PermissionError('create denied')
++   if str(path)==str(p) and mode in ['create_denied','read_denied']:raise PermissionError(mode)
+    return real_osopen(path,*a,**kw)
+   def sync(fd):
+    path=fpath(fd);trace.append(path)
+--- experiments/20261008-astra-7741/independent-final.py
++++ experiments/20261008-astra-7750/independent-final.py
+@@ -37,7 +37,7 @@
+ class Exec:
+  def __init__(self,fail=False):self.fail=fail;self.calls=[]
+  def execute_step(self,step,plan,index):self.calls.append(index);return Receipt(plan_id=plan.id,step_index=index,exit_code=1 if self.fail and index==1 else 0)
+-with tempfile.TemporaryDirectory(dir='/tmp/hive-astra-7741-runtime') as td:
++with tempfile.TemporaryDirectory(dir='/tmp/hive-astra-7750-runtime') as td:
+  t=pathlib.Path(td)
+  for fail in (False,True):
+   app=Appliance(str(t/f'repair-{fail}.db'));app.set_planner(SimplePlanner());x=Exec(fail);app.set_executor(x);app.set_verifier(ExitCodeVerifier());h=HiveAppliance(health_poll_interval=0);h.register_agent(LocalAgentAdapter('a',app));i=IncidentReport(component=str(t/'missing'),symptom='file_missing',severity=Severity.CRITICAL);assert not i.plan_id;app.record_incident(i);h.tick();rs=app.repair(i);h.tick();h.tick();state=h.reducer.state.agents['a'];out={'verified':[r.verified for r in rs],'calls':x.calls,'local_open':len(app.open_incidents()),'hive_open':state.open_incidents,'health':state.health.value,'outcome':app.repair_outcomes[i.id]};assert x.calls==[0,1];assert out['local_open']==out['hive_open']==int(fail);assert out['health']==('failed' if fail else 'healthy');O[f'public_repair_failure_{fail}']=out;app.close()
+--- experiments/20261008-astra-7741/metadata7734.py
++++ experiments/20261008-astra-7750/metadata7734.py
+@@ -8,7 +8,7 @@
+ ns['T']=E/'metadata7734-cases';ns['T'].mkdir(exist_ok=True)
+ rows=[]
+ for stage in ['archive old anchor','remove reset-intent marker']:
+- p,s,h=ns['restored'](stage.replace(' ','-'));ip=str(p)+'.reset-intent';old=ns['pair'](p);in_failure=False;ls=os.lstat;op=builtins.open;un=os.unlink
++ p,s,h=ns['restored'](stage.replace(' ','-'));ip=str(p)+'.reset-intent';old=ns['pair'](p);in_failure=False;ls=os.lstat;op=os.open;un=os.unlink
+  def stat(path,*a,**kw):
+   if in_failure and str(path)==ip:raise OSError(errno.EIO,'marker lstat unavailable')
+   return ls(path,*a,**kw)
+@@ -22,7 +22,7 @@
+   if stage=='remove reset-intent marker' and str(path)==ip:
+    in_failure=True;raise OSError(errno.EACCES,'intent unlink fails')
+   return un(path,*a,**kw)
+- with patch.object(os,'lstat',stat),patch.object(builtins,'open',opening),patch.object(os,'unlink',unlink):
++ with patch.object(os,'lstat',stat),patch.object(os,'open',opening),patch.object(os,'unlink',unlink):
+   try:h.reset_journal('op','metadata failure')
+   except OSError:pass
+  st=ns['state'](h);f=st['status']['fence'];assert os.path.lexists(ip) and f['intent_present'] is None and f['presence_error']
+--- experiments/20261008-astra-7741/older-regressions-final.py
++++ experiments/20261008-astra-7750/older-regressions-final.py
+@@ -21,7 +21,7 @@
+ RESULTS=[]
+ def case(name,fn):
+     try:
+-        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7741-runtime') as tmp:
++        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7750-runtime') as tmp:
+             detail=fn(pathlib.Path(tmp))
+         RESULTS.append({'name':name,'probe':'PASS','detail':detail})
+     except BaseException as ex:
+--- experiments/20261008-astra-7741/probes-final.py
++++ experiments/20261008-astra-7750/probes-final.py
+@@ -21,7 +21,7 @@
+ RESULTS=[]
+ def case(name,fn):
+     try:
+-        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7741-runtime') as tmp:
++        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7750-runtime') as tmp:
+             detail=fn(pathlib.Path(tmp))
+         RESULTS.append({'name':name,'probe':'PASS','detail':detail})
+     except BaseException as ex:
+--- experiments/20261008-astra-7741/run_primary.py
++++ experiments/20261008-astra-7750/run_primary.py
+@@ -1,6 +1,6 @@
+ import os,sys
+ from runner import E,S,run
+ os.environ["PIP_FIND_LINKS"]="/tmp/hive-astra-7718/20261008-astra-7718/build-prerequisites"
+-run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+"/tmp/hive-astra-7741-pytest"],S)
++run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+"/tmp/hive-astra-7750-pytest"],S)
+ for n in ["review7195","review7173","boundary_and_disk","mechanism_probes","probes-final","older-regressions-final","independent-final","new_cases","semantic_7133"]:
+  run(n.replace("_","-"),[sys.executable,str(E/(n+".py"))],E)
+--- experiments/20261008-astra-7741/runner.py
++++ experiments/20261008-astra-7750/runner.py
+@@ -30,7 +30,7 @@
+     e = os.environ.copy()
+     e.update(PYTHONDONTWRITEBYTECODE='1', PIP_NO_INDEX='1', HF_HUB_OFFLINE='1',
+              TRANSFORMERS_OFFLINE='1', ANONYMIZED_TELEMETRY='False',
+-             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR='/tmp/hive-astra-7741-runtime',
++             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR='/tmp/hive-astra-7750-runtime',
+              PYTHONPATH=str(E / 'guard'), HIVE_SRC=str(S))
+     return e
+ 
+--- experiments/20261008-astra-7741/secret_scan.py
++++ experiments/20261008-astra-7750/secret_scan.py
+@@ -1,7 +1,7 @@
+ """Content scan of report and regular evidence files, without printing matched values."""
+ import re,json
+ from pathlib import Path
+-E=Path(__file__).resolve().parent;report=E.parent.parent/'docs/ASTRA_REVIEW_7741.md'
++E=Path(__file__).resolve().parent;report=E.parent.parent/'docs/ASTRA_REVIEW_7750.md'
+ patterns={
+  'private-key':rb'-----BEGIN [A-Z ]*PRIVATE'+rb' KEY-----',
+  'provider-secret':rb'\bsk-'+rb'(?:proj-|ant-)?[A-Za-z0-9_-]{24,}',
+--- experiments/20261008-astra-7741/verify_evidence.py
++++ experiments/20261008-astra-7750/verify_evidence.py
+@@ -1,43 +1,53 @@
+-"""Read-only complete artifact/report manifest and semantic ledger verification."""
+-import hashlib,json
++"""Read-only complete manifest, symlink inventory, semantic and execution verification."""
++import hashlib,json,os
+ from pathlib import Path
+-E=Path(__file__).resolve().parent;report=(E.parent.parent/'docs/ASTRA_REVIEW_7741.md').resolve();seen=set()
++E=Path(__file__).resolve().parent;R=E.parent.parent;report=R/'docs/ASTRA_REVIEW_7750.md';seen=set()
++def digest(p):
++ return hashlib.sha256(os.fsencode(os.readlink(p)) if p.is_symlink() else p.read_bytes()).hexdigest()
+ for line in (E/'SHA256SUMS').read_text().splitlines():
+- expected,name=line.split('  ',1);p=(E/name).resolve()
++ expected,name=line.split('  ',1);p=Path(os.path.abspath(E/name))
+  assert p.is_relative_to(E) or p==report,name
+  assert p not in seen,name
+- assert hashlib.sha256(p.read_bytes()).hexdigest()==expected,name
++ assert digest(p)==expected,name
+  seen.add(p)
+-actual={p.resolve() for p in E.rglob('*') if p.is_file() and not p.is_symlink() and p.name!='SHA256SUMS'}|{report}
+-assert seen==actual,dict(unmanifested=list(actual-seen),missing=list(seen-actual))
++actual={p.absolute() for p in E.rglob('*') if (p.is_symlink() or p.is_file()) and p.name!='SHA256SUMS'}|{report}
++assert seen==actual,dict(unmanifested=[str(x) for x in actual-seen],missing=[str(x) for x in seen-actual])
+ load=lambda n:json.loads((E/n).read_text())
+ m=load('model-verification.json');assert m['runtime_model']=='openai/gpt-6-astra' and m['provider']=='openai' and m['model_match']
+-s=load('source-verification.json');assert s['pin']=='2c7e337202cbfa19569b344992326a1603d867cd' and s['files']==161 and s['all_match_pinned_git_blobs']
+-exits=list(E.glob('*-exit.json'));assert len(exits)==30,len(exits)
++s=load('source-verification.json');assert s['pin']=='6b750ca53a695d70ba4fd44dd2961389f1690df9' and s['files']==163 and s['all_match_pinned_git_blobs']
++s=load('source-verification-precommit.json');assert s['pin']==s['head']==s['origin_main'] and not s['extra_code'] and s['repository_source_unchanged']
++exits=list(E.glob('*-exit.json'));assert len(exits)==36,len(exits)
++nonzero={'semantic-7133','recovery7708','namespace-scope7750'}
+ for p in exits:
+- d=load(p.name);assert d['exit_code']==(1 if p.name=='semantic-7133-exit.json' else 0),p.name
+- assert not d['timed_out'];stem=p.name.removesuffix('-exit.json')
++ d=load(p.name);stem=p.name.removesuffix('-exit.json');assert d['exit_code']==(1 if stem in nonzero else 0),(stem,d['exit_code'])
++ assert not d['timed_out']
+  for suffix in ['-started.json','.stdout','.stderr']:assert (E/(stem+suffix)).is_file(),stem+suffix
+-assert len(list(E.glob('pytest-started.json')))==1
+-assert '840 passed in 50.37s' in (E/'pytest.stdout').read_text()
+-for name in ['reset7727.json','intent-final7727.json','extra-io7727.json','intent7734.json','review7694.json','followup7694.json','focused7701.json','focused7741.json']:
++ assert load(stem+'-started.json')['command']==d['command']
++assert len(list(E.glob('pytest-started.json')))==1 and '855 passed in 49.93s' in (E/'pytest.stdout').read_text()
++for name in ['reset7727.json','intent-final7727.json','extra-io7727.json','intent7734.json','review7694.json','followup7694.json','focused7701.json','focused7741.json','focused7750.json','recovery-final7750.json']:
+  assert all(r['passed'] for r in load(name).values()),name
+ r=load('reset7727.json')['interruptions'];assert r['injections']==208 and r['error_verify_clear_cases']==104 and r['live_replay_after_error']==0
+-r=load('intent-final7727.json');assert r['intent_controls']['count']==42 and r['intent_clearance_matrix']['count']==72
+-r=load('intent7734.json');assert r['intent_matrix']['count']==388 and r['compound_failures']['count']==4 and not r['classification_errors']['defect_reproduced']
+-assert not any(x['file_fsync_missing_but_durable'] for x in r['classification_errors']['cases'])
++r=load('intent-final7727.json');assert r['intent_controls']['count']==42 and r['intent_clearance_matrix']['count']==72 and r['reset_retries_and_live_errors']['count']==96
++r=load('extra-io7727.json');assert r['extra_boundaries']['additional_injections']==52 and len(r['anchor_reads']['cases'])==4
++r=load('intent7734.json');assert r['intent_matrix']['count']==412 and r['compound_failures']['count']==4 and not r['classification_errors']['defect_reproduced']
+ assert r['mode000']['not_deleted'] and r['mode000']['uid']!=0
+-r=load('metadata7734.json');assert len(r['presence_error_cases'])==2 and all(not x['false_old_pair_claim'] and not x['false_unlinked_claim'] for x in r['presence_error_cases'])
+-r=load('focused7741.json');assert r['classification']['count']==12 and r['races']['count']==7 and r['strict_checks']['count']==45 and r['metadata_boundaries']['count']==6
+-assert sum(x['applicable'] for x in r['strict_checks']['cases'])==42
+-assert all(not x['audit_has_presence_error'] for x in r['metadata_boundaries']['cases'])
+-assert r['dangling_anchor']['anchor_replaced'] and r['dangling_anchor']['journal_created'] and r['dangling_anchor']['state']['status']['healthy']
+-assert not load('audit7741-final.json')['unsafe_predicate_calls']
++r=load('focused7741.json');assert r['classification']['count']==12 and r['races']['count']==7 and r['strict_checks']['count']==45 and all(x['applicable'] for x in r['strict_checks']['cases'])
++assert r['metadata_boundaries']['count']==6 and all(x['audit_has_presence_error'] for x in r['metadata_boundaries']['cases'])
++assert not r['dangling_anchor']['anchor_replaced'] and not r['dangling_anchor']['journal_created'] and r['dangling_anchor']['state']['status']['fence']['kind']=='identity'
++r=load('focused7750.json');assert r['nonregular_variants']['count']==32 and r['reader_errors']['count']==40 and r['reader_swaps']['count']==8 and r['runtime']['count']==15
++assert r['runtime']['directory_append_defect_reproduced'] and sum(x['missing_changed_fence'] for x in r['runtime']['cases'])==1
++assert r['fifo_blocking']['count']==3 and all(x['blocked_without_fifo_writer'] and x['returned_after_writer_open'] for x in r['fifo_blocking']['cases'])
++assert r['directory_symlinks']['count']==5 and r['archive_trace']['archive_read_count']==0
++r=load('namespace-scope7750-final.json');assert r['passed'] and r['count']==3
++r=load('audit7750-final.json');assert not r['builtin_open_calls'] and not r['unsafe_predicate_calls'] and '_replay_journal' in r['reachable_methods']
++assert r['test_adaptation']['same_function_AST_after_builtin_to_os_normalization']
+ assert len(load('policy-schedules.json'))==1440 and load('review7694.json')['retained_hold_144_schedules']['schedules']==144
+-assert len(load('prior-evidence-verification.json'))==8 and all(r['all_match'] for r in load('prior-evidence-verification.json'))
++p=load('prior-evidence-verification.json');assert len(p)==9 and all(x['all_match'] for x in p) and p[-1]['round']=='7741' and p[-1]['artifacts']==6131
+ assert load('secret-scan.json')['matches']==[] and load('secret-scan.json')['passed']
+ assert '## Verdict: NOT APPROVED' in report.read_text()
+ for row in load('copy-provenance.json'):
+- assert hashlib.sha256((E/row['destination']).read_bytes()).hexdigest()==row['adapted_sha256'],row['destination']
+- assert hashlib.sha256((E.parent.parent/row['source']).read_bytes()).hexdigest()==row['source_sha256'],row['source']
+-print('verified',len(seen),'artifact/report hashes; complete manifest coverage; 30 execution ledgers; suite, retained matrices, closed durability witnesses and reproduced residual findings')
++ assert digest(E/row['destination'])==row['adapted_sha256'],row['destination']
++ assert digest(R/row['source'])==row['source_sha256'],row['source']
++f=load('special-fixtures.json');assert len(f['serialized_special_entries'])==14 and len(f['retained_symlinks'])==39
++assert {x['path']:x['target'] for x in f['retained_symlinks']}=={str(p.relative_to(E)):os.readlink(p) for p in E.rglob('*') if p.is_symlink()}
++print('verified',len(seen),'artifact/report hashes including symlink payloads; complete coverage; 36 execution ledgers; 855 tests; retained schedules/reset matrices; both 7741 closures; two reproduced OPEN runtime findings')
+--- experiments/20261008-astra-7741/verify_sources7734.py
++++ experiments/20261008-astra-7750/verify_sources7734.py
+@@ -9,7 +9,7 @@
+  blob=subprocess.check_output(['git','show',pin+':'+f],cwd=R);assert hashlib.sha256(blob).hexdigest()==h==sha(S/f)==sha(R/f),f
+ result=dict(pin=pin,files=len(b['hashes']),source=str(S),all_match_initial_hashes=True,all_match_pinned_git_blobs=True,repository_source_unchanged=True,source_is_export_not_git_worktree=True,git_status=git('status','--short'),origin_main=git('rev-parse','origin/main'))
+ (E/'source-verification.json').write_text(json.dumps(result,indent=2)+'\n')
+-for round in ['7669','7678','7694','7701','7708','7718','7727','7734']:
++for round in ['7669','7678','7694','7701','7708','7718','7727','7734','7741']:
+  p=R/('experiments/20261008-astra-'+round);count=0
+  for line in (p/'SHA256SUMS').read_text().splitlines():
+   expected,name=line.split('  ',1);assert sha(p/name)==expected,(round,name);count+=1
+--- experiments/20261008-astra-7741/recovery7708.py
++++ experiments/20261008-astra-7750/recovery-final7750.py
+@@ -5,7 +5,7 @@
+ E=Path(__file__).resolve().parent
+ ns={'__file__':str(E/'focused7701.py'),'__name__':'defs'};src=(E/'focused7701.py').read_text();exec(compile(src[:src.index('\nout={}\n')],str(E/'focused7701.py'),'exec'),ns)
+ for k in ['fresh','hnew','hfeed','history','hb','snapshot','anchor','held','records']:globals()[k]=ns[k]
+-T=ns['T']
++T=ns['T']=E/'recovery-final7750-cases';T.mkdir(exist_ok=True)
+ def guide(row):
+  p,s,h=fresh('guide7708');assert hb(h);old=p.read_bytes();oldid=anchor(p).read_bytes()
+  p.write_bytes(old+b'{torn');n=hfeed(hnew(p),s);held(n);assert n.clear_journal_fence('operator','discard former authorization');held(hfeed(hnew(p),s))
+@@ -28,14 +28,14 @@
+  row['cases']=rows
+ 
+ def unreadable(row):
+- rows=[];real=builtins.open
++ rows=[];real=os.open
+  for target in ['journal','anchor']:
+   for err in [errno.EACCES,errno.EIO]:
+    p,s,h=fresh('unreadable7708-'+target+str(err));assert hb(h);q=p if target=='journal' else anchor(p);old=p.read_bytes();aid=anchor(p).read_bytes()
+    def denied(file,*a,**kw):
+     if str(file)==str(q):raise OSError(err,os.strerror(err))
+     return real(file,*a,**kw)
+-   with patch.object(builtins,'open',denied):
++   with patch.object(os,'open',denied):
+     rs=[hfeed(hnew(p),s) for _ in range(2)]
+     for z in rs:assert not z.journal_status()['healthy'] and not z._plan_owner and not hb(z)
+     try:rs[0].clear_journal_fence('operator','unreadable inspection')
+@@ -67,4 +67,4 @@
+  try:fn(r);r['passed']=True
+  except Exception as ex:r.update(passed=False,error=repr(ex),traceback=traceback.format_exc())
+  out[name]=r;print(name,r['passed'],r.get('error',''),flush=True)
+-(E/'recovery7708.json').write_text(json.dumps(out,indent=2,default=str)+'\n');sys.exit(not all(x['passed'] for x in out.values()))
++(E/'recovery-final7750.json').write_text(json.dumps(out,indent=2,default=str)+'\n');sys.exit(not all(x['passed'] for x in out.values()))
+--- experiments/20261008-astra-7741/audit7741-final.py
++++ experiments/20261008-astra-7750/audit7750.py
+@@ -1,26 +1,46 @@
+-"""Read-only source audit: AST avoids counting comments/docstrings as calls."""
+-import ast,json,re
++"""AST/read-path audit, original-test comparison and explicit scope evidence."""
++import ast,json,subprocess,os,re,hashlib
+ from pathlib import Path
+ from runner import E,S
+-rows=[];suppressed=[]
+-for p in sorted((S/'hive').glob('*.py')):
+- t=ast.parse(p.read_text())
+- for n in ast.walk(t):
+-  if isinstance(n,ast.Call):
+-   name=ast.unparse(n.func)
+-   if re.search(r'(lexists|isfile|islink|exists|is_file|is_dir|access)$',name):rows.append(dict(file=str(p.relative_to(S)),line=n.lineno,call=name))
+-  if isinstance(n,ast.ExceptHandler):
+-   typ=ast.unparse(n.type) if n.type else 'bare'
+-   if any(x in typ for x in ['OSError','FileNotFoundError','Exception']):suppressed.append(dict(file=str(p.relative_to(S)),line=n.lineno,type=typ,body=ast.unparse(n)))
+-assert not rows
+-result=dict(unsafe_predicate_calls=rows,exception_handlers=suppressed,notes={
+- 'cleanup':'reducer 439/442 and 550/553 swallow only cleanup unlink errors then re-raise original failure; no absent decision.',
+- 'presence':'454 returns missing only on FileNotFoundError (native ENOENT); 462 preserves unknown/error.',
+- 'startup':'644 treats intent metadata error present, sets discard; 673 blocks unwritable.',
+- 'anchor_gap':'533 maps open ENOENT to absent without lstat: dangling .id entry is overwritten on cold startup. Witness focused7741.dangling_anchor.',
+- 'clear_reset_reads':'962 and 1123 map open ENOENT to missing journal/anchor content; other errors propagate. These are explicit destructive recovery operations, unlike startup.',
+- 'runtime':'817/848/853/871 fence or raise; 881/885 rollback errors propagate; 892 only logs close errors after successful fsync, does not infer absence.',
+- 'other_modules':'Broad Exception guards log polling, planning, adapter/store and appliance errors; no filesystem existence decisions.',
+- 'audit_gap':'reset failure audit 1208-1212 omits presence_error; fence includes it at 1203-1207.',
+- 'portability':'getattr(O_NOFOLLOW,0) is safe for tested Linux flag; when unavailable, same-inode symlink replacement can be followed; concurrent hostile namespace mutation excluded.'})
+-(E/'audit7741-final.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
++R=E.parent.parent;source=(S/'hive/reducer.py').read_text();t=ast.parse(source);cls=next(n for n in t.body if isinstance(n,ast.ClassDef) and n.name=='HiveReducer');methods={n.name:n for n in cls.body if isinstance(n,ast.FunctionDef)}
++opens=[];builtins=[];reads=[];unsafe=[]
++for name,n in methods.items():
++ for c in ast.walk(n):
++  if not isinstance(c,ast.Call):continue
++  f=ast.unparse(c.func)
++  if f in ['open','builtins.open']:builtins.append(dict(method=name,line=c.lineno,call=ast.unparse(c)))
++  if f=='os.open':opens.append(dict(method=name,line=c.lineno,call=ast.unparse(c)))
++  if f in ['os.read','os.pread']:reads.append(dict(method=name,line=c.lineno,call=ast.unparse(c)))
++  if re.search(r'(lexists|isfile|islink|exists|is_file|is_dir|access)$',f):unsafe.append(dict(method=name,line=c.lineno,call=f))
++assert not builtins and not unsafe
++calls={name:sorted({c.func.attr for c in ast.walk(n) if isinstance(c,ast.Call) and isinstance(c.func,ast.Attribute) and isinstance(c.func.value,ast.Name) and c.func.value.id=='self' and c.func.attr in methods}) for name,n in methods.items()}
++def reachable(start):
++ seen=set();stack=[start]
++ while stack:
++  n=stack.pop()
++  if n in seen:continue
++  seen.add(n);stack+=calls.get(n,[])
++ return sorted(seen)
++roots={n:reachable(n) for n in ['_open_journal','_replay_journal_rebinds','verify_journal','_journal_write','clear_journal_fence','reset_journal'] if n in methods}
++archive_exprs=[]
++for n in ast.walk(t):
++ if isinstance(n,ast.JoinedStr) and any(x in ast.unparse(n) for x in ['.fenced-','.reset-','.cleared-']):archive_exprs.append(dict(line=n.lineno,expression=ast.unparse(n)))
++old=subprocess.check_output(['git','show','2c7e337:tests/test_astra7734.py'],cwd=R).decode();new=(S/'tests/test_astra7734.py').read_text();test='test_handler_lstat_eio_after_journal_moved_reports_unknown'
++get=lambda s:next(n for n in ast.parse(s).body if isinstance(n,ast.FunctionDef) and n.name==test)
++a=get(old);b=get(new)
++class Normalize(ast.NodeTransformer):
++ def visit_Name(self,n):
++  if n.id=='builtins':n.id='os'
++  return n
++assert ast.dump(Normalize().visit(a),include_attributes=False)==ast.dump(b,include_attributes=False)
++(E/'source/test_astra7734-before.py').write_text(old)
++result=dict(builtin_open_calls=builtins,unsafe_predicate_calls=unsafe,os_open_calls=opens,fd_read_calls=reads,reachable_methods=roots,self_call_graph=calls,archive_expressions=archive_exprs,test_adaptation=dict(name=test,original_commit='2c7e337202cbfa19569b344992326a1603d867cd',same_function_AST_after_builtin_to_os_normalization=True,semantic_injection='First anchor read open fails EIO after old journal renamed. Subsequent marker-lstat EIO reports unknown presence and acknowledged rename, not unchanged pair. Same path guard, one-shot trigger, lstat hook and assertions; current test PASSED in full suite.'),notes={
++ 'strict_reads':'Only os.read call is _read_regular after lstat/O_NOFOLLOW/fstat identity+type validation. Only os.pread call is _verify_on_disk after descriptor regular check and anchor validation. No builtin open remains.',
++ 'archives':'Startup reads only exact configured journal and its exact .id. Legacy fence and reset-intent checks are lstat-only. No glob/listdir/archive discovery or record archived-field dereference. _open_journal treats journal_reset as an audit record; archive path strings are not opened. All constructed archive outputs flow to _write_file_durably O_WRONLY|O_CREAT|O_EXCL or os.replace. Behavior trace in focused7750 confirms no archived-file read with deliberately valid old rebinds in archive files.',
++ 'nonregular':'Steady entries fence identity and stay untouched. Clear moves nonregular journal to .fenced-, anchor to .cleared-; reset moves either to .reset-. Policy lists .cleared/.reset shorthand but journal clearance actually uses .fenced as documented separately at policy:264.',
++ 'races':'lstat->open same-device/inode/type comparison prevents tested regular, symlink and directory swaps, except FIFO open may block BEFORE fstat. O_NOFOLLOW=0 accepts a same-inode symlink. Final-component checks are not namespace locks.',
++ 'parent':'All paths are string-based. _fsync_dir opens dirname(abspath(path)) without O_DIRECTORY/O_NOFOLLOW or stored parent dirfd. Intermediate symlinks are followed by lstat/open/replace/unlink; stable symlink parents work. A changed ancestor can redirect operation/fsync. No hostile namespace-writer or concurrently retargeted directory guarantee.',
++ 'remaining_check_trust':'After absent lstat, _create_journal uses replace, not an atomic expected-absence check; a newly introduced entry can be replaced. _move_aside_if_not_regular lstat and rename are separate, and clear/reset later replace names without inode preconditions. Runtime verifies opened descriptor bytes and current anchor but does not bind its descriptor inode to the current journal pathname after opening; a namespace swap can detach it. These are outside the single-writer protected-stable-directory scope, not evidence of safe adversarial concurrency.',
++ 'runtime_findings':'_journal_write only maps ENOENT/ELOOP at open to _JournalChanged; EISDIR flows to generic OSError and refusal leaves healthy=True. verify opens FIFO O_RDONLY and blocks; startup reader can also block on a regular->FIFO swap. See independent runtime/fifo witnesses.',
++ 'limits_docs':'Unkeyed hashes policy 204-208; joint rollback 112-131; record-boundary tail 198-206; snapshot/partial replay 87-89; undurable intent 180-191; nonregular entries 169-177. Linux/no-O_NOFOLLOW scope explicitly in existing docs/ASTRA_REVIEW_7741.md sections 2, 4 and findings, not repeated in primary README/policy. This report makes ancestor scope explicit; no claim of universal symlink protection.'})
++(E/'audit7750.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
+--- experiments/20261008-astra-7750/audit7750.py
++++ experiments/20261008-astra-7750/audit7750-final.py
+@@ -21,7 +21,7 @@
+   if n in seen:continue
+   seen.add(n);stack+=calls.get(n,[])
+  return sorted(seen)
+-roots={n:reachable(n) for n in ['_open_journal','_replay_journal_rebinds','verify_journal','_journal_write','clear_journal_fence','reset_journal'] if n in methods}
++roots={n:reachable(n) for n in ['_open_journal','_replay_journal','verify_journal','_journal_write','clear_journal_fence','reset_journal'] if n in methods}
+ archive_exprs=[]
+ for n in ast.walk(t):
+  if isinstance(n,ast.JoinedStr) and any(x in ast.unparse(n) for x in ['.fenced-','.reset-','.cleared-']):archive_exprs.append(dict(line=n.lineno,expression=ast.unparse(n)))
+@@ -33,7 +33,7 @@
+   if n.id=='builtins':n.id='os'
+   return n
+ assert ast.dump(Normalize().visit(a),include_attributes=False)==ast.dump(b,include_attributes=False)
+-(E/'source/test_astra7734-before.py').write_text(old)
++assert (E/'source/test_astra7734-before.py').read_text()==old
+ result=dict(builtin_open_calls=builtins,unsafe_predicate_calls=unsafe,os_open_calls=opens,fd_read_calls=reads,reachable_methods=roots,self_call_graph=calls,archive_expressions=archive_exprs,test_adaptation=dict(name=test,original_commit='2c7e337202cbfa19569b344992326a1603d867cd',same_function_AST_after_builtin_to_os_normalization=True,semantic_injection='First anchor read open fails EIO after old journal renamed. Subsequent marker-lstat EIO reports unknown presence and acknowledged rename, not unchanged pair. Same path guard, one-shot trigger, lstat hook and assertions; current test PASSED in full suite.'),notes={
+  'strict_reads':'Only os.read call is _read_regular after lstat/O_NOFOLLOW/fstat identity+type validation. Only os.pread call is _verify_on_disk after descriptor regular check and anchor validation. No builtin open remains.',
+  'archives':'Startup reads only exact configured journal and its exact .id. Legacy fence and reset-intent checks are lstat-only. No glob/listdir/archive discovery or record archived-field dereference. _open_journal treats journal_reset as an audit record; archive path strings are not opened. All constructed archive outputs flow to _write_file_durably O_WRONLY|O_CREAT|O_EXCL or os.replace. Behavior trace in focused7750 confirms no archived-file read with deliberately valid old rebinds in archive files.',
+@@ -43,4 +43,4 @@
+  'remaining_check_trust':'After absent lstat, _create_journal uses replace, not an atomic expected-absence check; a newly introduced entry can be replaced. _move_aside_if_not_regular lstat and rename are separate, and clear/reset later replace names without inode preconditions. Runtime verifies opened descriptor bytes and current anchor but does not bind its descriptor inode to the current journal pathname after opening; a namespace swap can detach it. These are outside the single-writer protected-stable-directory scope, not evidence of safe adversarial concurrency.',
+  'runtime_findings':'_journal_write only maps ENOENT/ELOOP at open to _JournalChanged; EISDIR flows to generic OSError and refusal leaves healthy=True. verify opens FIFO O_RDONLY and blocks; startup reader can also block on a regular->FIFO swap. See independent runtime/fifo witnesses.',
+  'limits_docs':'Unkeyed hashes policy 204-208; joint rollback 112-131; record-boundary tail 198-206; snapshot/partial replay 87-89; undurable intent 180-191; nonregular entries 169-177. Linux/no-O_NOFOLLOW scope explicitly in existing docs/ASTRA_REVIEW_7741.md sections 2, 4 and findings, not repeated in primary README/policy. This report makes ancestor scope explicit; no claim of universal symlink protection.'})
+-(E/'audit7750.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
++(E/'audit7750-final.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
+--- experiments/20261008-astra-7750/namespace-scope7750.py
++++ experiments/20261008-astra-7750/namespace-scope7750-final.py
+@@ -5,7 +5,7 @@
+ E=Path(__file__).resolve().parent
+ ns={'__file__':str(E/'reset7718.py'),'__name__':'defs'};src=(E/'reset7718.py').read_text();exec(compile(src[:src.index('\nout={}\n')],str(E/'reset7718.py'),'exec'),ns)
+ for k in ['hnew','hfeed','history','hb','hr','state','anchor']:globals()[k]=ns[k]
+-T=E/'namespace-scope7750-cases';T.mkdir();rows=[]
++T=E/'namespace-scope7750-final-cases';T.mkdir();rows=[]
+ # A new entry after absence checks is not covered by the initial strict read.
+ d=T/'first-use';d.mkdir();p=d/'journal';create=hr.HiveReducer._create_journal
+ 
+@@ -30,12 +30,15 @@
+ before=(b/'journal').read_bytes();op=os.open;hit=[]
+ def opening(path,flags,*args,**kw):
+  fd=op(path,flags,*args,**kw)
+- if str(path)==str(p) and flags&os.O_RDWR and not hit:
+-  hit.append(True);link.unlink();link.symlink_to(b,target_is_directory=True)
++ if str(path)==str(p) and flags&os.O_RDWR:
++  hit.append(True)
++  if len(hit)==2:
++   (b/'journal').write_bytes((a/'journal').read_bytes())
++   link.unlink();link.symlink_to(b,target_is_directory=True)
+  return fd
+ with patch.object(os,'open',opening):result=hb(h)
+-assert result and hit and h.journal_status()['healthy'] and (b/'journal').read_bytes()==before and (a/'journal').read_bytes()!=before
++assert result and hit and h.journal_status()['healthy'] and (b/'journal').read_bytes()!=before and (a/'journal').read_bytes()!=(b/'journal').read_bytes()
+ z=hfeed(hnew(p),history());assert not z._plan_owner
+-rows.append(dict(case='parent-retarget-after-journal-open',result=result.as_dict(),live=state(h),restart=state(z),current_path_unchanged=True,old_directory_received_append=True))
++rows.append(dict(case='parent-retarget-after-journal-open',result=result.as_dict(),live=state(h),restart=state(z),current_path_has_pending_but_no_commit=True,old_directory_received_commit=True))
+ result=dict(passed=True,cases=rows,count=len(rows),classification='Not an additional in-scope durability defect: requires a writer mutating the namespace during the operation. Demonstrates why stable protected ancestors, one writer and stopped-service recovery are mandatory; O_NOFOLLOW is not a namespace-locking mechanism.')
+-(E/'namespace-scope7750.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
++(E/'namespace-scope7750-final.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))

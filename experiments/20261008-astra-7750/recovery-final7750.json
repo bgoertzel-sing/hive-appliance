@@ -1,0 +1,4129 @@
+{
+  "restore_guidance": {
+    "before_feed": {
+      "view": {
+        "open": [],
+        "hold": {},
+        "owner": {},
+        "audit": [],
+        "pending": [
+          {
+            "actor": "operator-original",
+            "agent_id": "a1",
+            "candidate": true,
+            "incident_id": "i",
+            "op": "rebind_pending",
+            "op_id": "a398740d846d4103aafd35068371890c",
+            "plan_id": "p",
+            "prev": "f5aaf814d615d05d8ccfa3145298d47139058ff3f42a8d646ee8028c1e84a1e8",
+            "reason": "case-proof",
+            "rec_hash": "c5bb29164f20845170e25387e7025e80e99c89f37b6f3482966eaa0bd9d333f5",
+            "seq": 4,
+            "stream_digest": "e64695d66e5062746270d8ac6de994ccde2a370b5b9cfa6a67c40d5ce42ad6d5",
+            "ts": 1791523342.9950228,
+            "v": 5
+          },
+          {
+            "actor": "operator-original",
+            "agent_id": "a1",
+            "candidate": true,
+            "incident_id": "i",
+            "op": "rebind_pending",
+            "op_id": "a125ed03bb684bdc8fa745a3b843321e",
+            "plan_id": "p",
+            "prev": "dd89b5eea49c951190683cc6547b1f8acf8016ea46fa3dd96d752e7697c2dddb",
+            "reason": "case-proof",
+            "rec_hash": "163a95878ad22ae27c23abbd2b1e1a4001c675542b5339c977182e0331e49f4b",
+            "seq": 4,
+            "stream_digest": "716f92f7175e83148bad185e6bd4a9c5d8815813cb9a2962ae40f26819ce799f",
+            "ts": 1791523435.6812568,
+            "v": 5
+          }
+        ],
+        "verified": {},
+        "failed": {},
+        "journal_status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/guide7708.jsonl",
+          "durable": true,
+          "journal_id": "b948c75f9a2143d4bab67686c3ea4cf1",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 0,
+          "pending": 2,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 5,
+          "bytes": 1851,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "event_seq": 0,
+        "digest": ""
+      },
+      "last_result": null,
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "clear_result": false,
+    "after": {
+      "view": {
+        "open": [],
+        "hold": {},
+        "owner": {
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/guide7708.jsonl",
+          "durable": true,
+          "journal_id": "b948c75f9a2143d4bab67686c3ea4cf1",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "a398740d846d4103aafd35068371890c",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "replayed event stream differs from the one the rebind was made on"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 5,
+          "bytes": 1851,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "event_seq": 4,
+        "digest": "716f92f7175e83148bad185e6bd4a9c5d8815813cb9a2962ae40f26819ce799f"
+      },
+      "last_result": null,
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "second_restart": {
+      "view": {
+        "open": [],
+        "hold": {},
+        "owner": {
+          "a1:p": "i"
+        },
+        "audit": [
+          {
+            "agent_id": "a1",
+            "plan_id": "p",
+            "incident_id": "i",
+            "actor": "operator-original",
+            "reason": "case-proof",
+            "candidate": true,
+            "hold_reason": "ownerless_linked",
+            "pending_before": 0,
+            "held_receipt_ids": [],
+            "foreign_steps_discarded": [],
+            "replayed": true,
+            "closed": [
+              "i"
+            ]
+          }
+        ],
+        "pending": [],
+        "verified": {
+          "a1:p": [
+            0
+          ]
+        },
+        "failed": {
+          "a1:p": []
+        },
+        "journal_status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/guide7708.jsonl",
+          "durable": true,
+          "journal_id": "b948c75f9a2143d4bab67686c3ea4cf1",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "a398740d846d4103aafd35068371890c",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "replayed event stream differs from the one the rebind was made on"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 5,
+          "bytes": 1851,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "event_seq": 4,
+        "digest": "716f92f7175e83148bad185e6bd4a9c5d8815813cb9a2962ae40f26819ce799f"
+      },
+      "last_result": null,
+      "audit": [
+        {
+          "agent_id": "a1",
+          "plan_id": "p",
+          "incident_id": "i",
+          "actor": "operator-original",
+          "reason": "case-proof",
+          "candidate": true,
+          "hold_reason": "ownerless_linked",
+          "pending_before": 0,
+          "held_receipt_ids": [],
+          "foreign_steps_discarded": [],
+          "replayed": true,
+          "closed": [
+            "i"
+          ]
+        }
+      ]
+    },
+    "verdict": "OPEN: restore warning accurate, but proposed clear_journal_fence call is a no-op on healthy restored pair and discarded authorization returns",
+    "passed": true
+  },
+  "leftover_artifacts": {
+    "cases": [
+      {
+        "suffix": ".tmp",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_tmp-first_use.jsonl",
+                "durable": true,
+                "journal_id": "7e683e3ab7654565877c68d2cd252114",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a0d45abb8e8245f1e8cb076df08e878afdf5c16ec0a32b1abadc3d5368204ddc"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_tmp-first_use.jsonl",
+                "durable": true,
+                "journal_id": "7e683e3ab7654565877c68d2cd252114",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a0d45abb8e8245f1e8cb076df08e878afdf5c16ec0a32b1abadc3d5368204ddc"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".tmp",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_tmp-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "310d9f82145944fc98da0d6f4ff029c4",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "1f6e5b7991a2c13d5f40ef83f37c67638a2f5bd30b76fd8d0d71c57ce3be9581"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_tmp-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "310d9f82145944fc98da0d6f4ff029c4",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "1f6e5b7991a2c13d5f40ef83f37c67638a2f5bd30b76fd8d0d71c57ce3be9581"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "suffix": ".id.tmp",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_tmp-first_use.jsonl",
+                "durable": true,
+                "journal_id": "17325a007dde4bb09c63b0201087d03b",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "35546c4c01e58c6ee84b142226e9ab6a15284ab7fd388f461c8d2fe5a48c0784"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_tmp-first_use.jsonl",
+                "durable": true,
+                "journal_id": "17325a007dde4bb09c63b0201087d03b",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "35546c4c01e58c6ee84b142226e9ab6a15284ab7fd388f461c8d2fe5a48c0784"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".id.tmp",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_tmp-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "778aaede0467462d9a9b5ce24c443166",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f02aa8c29ac88a6eb738564561a90fcb08feeb844182279211fc4d0eb7cd856f"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_tmp-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "778aaede0467462d9a9b5ce24c443166",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f02aa8c29ac88a6eb738564561a90fcb08feeb844182279211fc4d0eb7cd856f"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "suffix": ".new-interrupted",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_new-interrupted-first_use.jsonl",
+                "durable": true,
+                "journal_id": "3280990f8b8d4c76a8df1875ad4551f5",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "ac81a2cce99c34c886df430ac6184c276e658575c028b95ab2be80caa0489cc2"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_new-interrupted-first_use.jsonl",
+                "durable": true,
+                "journal_id": "3280990f8b8d4c76a8df1875ad4551f5",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "ac81a2cce99c34c886df430ac6184c276e658575c028b95ab2be80caa0489cc2"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".new-interrupted",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_new-interrupted-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "9a5aea0c9eb84587b4ac5f1f70bf0c53",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a5f52d89ebe541f55c4df21b0f52fb66969a6140427352cf5439965e439fb2ec"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_new-interrupted-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "9a5aea0c9eb84587b4ac5f1f70bf0c53",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1024,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a5f52d89ebe541f55c4df21b0f52fb66969a6140427352cf5439965e439fb2ec"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "suffix": ".id.new-interrupted",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_new-interrupted-first_use.jsonl",
+                "durable": true,
+                "journal_id": "15e4860cc05047b09690389fb1715142",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "78286f5f79b9c6df7413be4e75fe770cbdb96b5c7297af67c58aa5190d8e1edb"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_new-interrupted-first_use.jsonl",
+                "durable": true,
+                "journal_id": "15e4860cc05047b09690389fb1715142",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 201,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "78286f5f79b9c6df7413be4e75fe770cbdb96b5c7297af67c58aa5190d8e1edb"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".id.new-interrupted",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_new-interrupted-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "34639546bdef4f449b7d9f7481c1d0ea",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f95593e96ee1851104d0cbdac9ec777dc445d437a602bff63d3843d782c7ebd0"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_id_new-interrupted-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "34639546bdef4f449b7d9f7481c1d0ea",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f95593e96ee1851104d0cbdac9ec777dc445d437a602bff63d3843d782c7ebd0"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "suffix": ".fence.cleared-old",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_cleared-old-first_use.jsonl",
+                "durable": true,
+                "journal_id": "c03c54a777fb403bac64421e06bf515d",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "e907e9f0558ca9c7aa1249a8d0cfca87f8afbd6258e35f0b95e4b6ee60492772"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_cleared-old-first_use.jsonl",
+                "durable": true,
+                "journal_id": "c03c54a777fb403bac64421e06bf515d",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "e907e9f0558ca9c7aa1249a8d0cfca87f8afbd6258e35f0b95e4b6ee60492772"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".fence.cleared-old",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_cleared-old-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "d1c665eb24b448a9b9854f01e9055686",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f5f237b8f1740276ca8b9cbd8cae20683534f5f82eeb7d3e3c26c728de5a0b13"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_cleared-old-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "d1c665eb24b448a9b9854f01e9055686",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1025,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f5f237b8f1740276ca8b9cbd8cae20683534f5f82eeb7d3e3c26c728de5a0b13"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "suffix": ".fence.tmp.cleared-old",
+        "state": "first_use",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_tmp_cleared-old-first_use.jsonl",
+                "durable": true,
+                "journal_id": "2785380131e5439fa5af62bc8ba44914",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "029e9314a4f0c3b87b0a5613bb2303abaca8b7e1ca3ab34495be5b9515cbdf66"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_tmp_cleared-old-first_use.jsonl",
+                "durable": true,
+                "journal_id": "2785380131e5439fa5af62bc8ba44914",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 1,
+                "bytes": 200,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "029e9314a4f0c3b87b0a5613bb2303abaca8b7e1ca3ab34495be5b9515cbdf66"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "suffix": ".fence.tmp.cleared-old",
+        "state": "valid_committed",
+        "restarts": [
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_tmp_cleared-old-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "5216355652a14a86b279aa4afabec46c",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "33d2724f0b4a7892d58808ca5fff2728fff488b40a48dd2f2f1c95d8b0b9f0ed"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          },
+          {
+            "view": {
+              "open": [],
+              "hold": {},
+              "owner": {
+                "a1:p": "i"
+              },
+              "audit": [
+                {
+                  "agent_id": "a1",
+                  "plan_id": "p",
+                  "incident_id": "i",
+                  "actor": "operator-original",
+                  "reason": "case-proof",
+                  "candidate": true,
+                  "hold_reason": "ownerless_linked",
+                  "pending_before": 0,
+                  "held_receipt_ids": [],
+                  "foreign_steps_discarded": [],
+                  "replayed": true,
+                  "closed": [
+                    "i"
+                  ]
+                }
+              ],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/artifact7708-_fence_tmp_cleared-old-valid_committed.jsonl",
+                "durable": true,
+                "journal_id": "5216355652a14a86b279aa4afabec46c",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 3,
+                "bytes": 1026,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "33d2724f0b4a7892d58808ca5fff2728fff488b40a48dd2f2f1c95d8b0b9f0ed"
+            },
+            "last_result": null,
+            "audit": [
+              {
+                "agent_id": "a1",
+                "plan_id": "p",
+                "incident_id": "i",
+                "actor": "operator-original",
+                "reason": "case-proof",
+                "candidate": true,
+                "hold_reason": "ownerless_linked",
+                "pending_before": 0,
+                "held_receipt_ids": [],
+                "foreign_steps_discarded": [],
+                "replayed": true,
+                "closed": [
+                  "i"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "passed": true
+  },
+  "unreadable": {
+    "cases": [
+      {
+        "target": "journal",
+        "errno": 13,
+        "clear": "raised",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-journal13.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7530434
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c8ddb22402b656dfda52be2b55b4999c2623f53665d944aa1fa79316fdb54f60"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-journal13.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7534845
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c8ddb22402b656dfda52be2b55b4999c2623f53665d944aa1fa79316fdb54f60"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "target": "journal",
+        "errno": 5,
+        "clear": "raised",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-journal5.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 5] Input/output error); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.757968
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "103d233c3803fb5749b895de4297543e4b0de5c9e1e181eb7f27d1a4e8306d6e"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-journal5.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 5] Input/output error); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7583747
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "103d233c3803fb5749b895de4297543e4b0de5c9e1e181eb7f27d1a4e8306d6e"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "target": "journal",
+        "actual_chmod_000": true,
+        "euid": 1001,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-journal.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-journal.jsonl'); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7627459
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f4857acc5350f4bb53fe3c62941c81b5d80b68dc34372a23cba8d7341b6cd151"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-journal.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-journal.jsonl'); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7631292
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f4857acc5350f4bb53fe3c62941c81b5d80b68dc34372a23cba8d7341b6cd151"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      },
+      {
+        "target": "anchor",
+        "errno": 13,
+        "clear": "succeeded",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor13.jsonl",
+                "durable": true,
+                "journal_id": "54ee0a1c217f45c18d20ae613eb8d4f7",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 2,
+                "bytes": 821,
+                "corrupt_records": [],
+                "fence_clearances": [
+                  {
+                    "actor": "operator",
+                    "reason": "unreadable inspection",
+                    "ts": 1791523435.7692885,
+                    "archived": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor13.jsonl.fenced-1791523435768655027",
+                    "fence_kind": "unwritable",
+                    "fence_error": "rebind journal cannot be created or read ([Errno 13] Permission denied); no journaled rebind is replayed",
+                    "journal_id": "54ee0a1c217f45c18d20ae613eb8d4f7",
+                    "rebinds_rejournaled": 0
+                  }
+                ],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "8b33bc52b2f0f00b6d61ec6705d03518dc5c1969d554d6d7360852e64b961ce2"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor13.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.768231
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "8b33bc52b2f0f00b6d61ec6705d03518dc5c1969d554d6d7360852e64b961ce2"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "target": "anchor",
+        "errno": 5,
+        "clear": "succeeded",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor5.jsonl",
+                "durable": true,
+                "journal_id": "00a54399f54641858a486aa4e55f78d6",
+                "volatile_rebinds_allowed": true,
+                "healthy": true,
+                "fence": null,
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 2,
+                "bytes": 820,
+                "corrupt_records": [],
+                "fence_clearances": [
+                  {
+                    "actor": "operator",
+                    "reason": "unreadable inspection",
+                    "ts": 1791523435.7771156,
+                    "archived": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor5.jsonl.fenced-1791523435776509821",
+                    "fence_kind": "unwritable",
+                    "fence_error": "rebind journal cannot be created or read ([Errno 5] Input/output error); no journaled rebind is replayed",
+                    "journal_id": "00a54399f54641858a486aa4e55f78d6",
+                    "rebinds_rejournaled": 0
+                  }
+                ],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "9ea6739bee7089f8942f47cf0528a2329e271ca4ef05b3e9992b4d74253e797d"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/unreadable7708-anchor5.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 5] Input/output error); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.776084
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "9ea6739bee7089f8942f47cf0528a2329e271ca4ef05b3e9992b4d74253e797d"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "target": "anchor",
+        "actual_chmod_000": true,
+        "euid": 1001,
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-anchor.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-anchor.jsonl.id'); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.783629
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c6ed284cb2acf055d51a0be2f462a57ed1011e8c93bf796a5e161d1d24689773"
+            },
+            "last_result": null,
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-anchor.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "unwritable",
+                  "error": "rebind journal cannot be created or read ([Errno 13] Permission denied: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/chmod7708-anchor.jsonl.id'); no journaled rebind is replayed",
+                  "found_at_startup": true,
+                  "ts": 1791523435.784069
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "c6ed284cb2acf055d51a0be2f462a57ed1011e8c93bf796a5e161d1d24689773"
+            },
+            "last_result": null,
+            "audit": []
+          }
+        ]
+      }
+    ],
+    "passed": true
+  },
+  "legacy_versions": {
+    "cases": [
+      {
+        "version": 1,
+        "op": "owner_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7847335,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "7a2d9c57329147d5a7abe60ba3676f02a89cfc31650d696d6be899c723fc6e2f"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7851963,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-owner_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "8f72646b073708d6947986aabfde8de82d50408a22f83ba4068a2ed476daba2b"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 1,
+        "op": "abort_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7859068,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b81d13ca99f0d109f5aa9afbd8b42478601daf1fe60bd8c029e12754f16b632c"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7863398,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-abort_rebind.jsonl (pre-v5 journal: line 1 is format v1, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "4221b3f07c1f6706239c97741a3ceed063657d5515373ca2110fc7c50636f747"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 1,
+        "op": "rebind_pending",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl (pre-v5 journal: line 1 is format v1, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7870197,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl (pre-v5 journal: line 1 is format v1, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f7a05d51926b6f3a284015336cff681cd584e1dc7043f322fd13d258d8122f9f"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl (pre-v5 journal: line 1 is format v1, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7874682,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-1-rebind_pending.jsonl (pre-v5 journal: line 1 is format v1, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v1 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "7b9013f2f078bb094d283dca687bce72b6b3fe92bd86142d3ed9d28da478a2a2"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 2,
+        "op": "owner_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.788161,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "40ab0cc6c772c2d86a5d537e35883550f470a78f67e538ead6bbd8cf61e6c5cf"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7885637,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-owner_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f0054d0c90013721f92ce2736698e59e844ef28b72cf9b120eee225d07a7c914"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 2,
+        "op": "abort_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7892156,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "a3f23f39520b88182dd92c12a9d4a1392591188000e038c97c1732ae477c7b8a"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.789614,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-abort_rebind.jsonl (pre-v5 journal: line 1 is format v2, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "460829f39bdfcd16da1f9320c970790fdb98205e73b166368497fcc95163e8b8"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 2,
+        "op": "rebind_pending",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl (pre-v5 journal: line 1 is format v2, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7903168,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl (pre-v5 journal: line 1 is format v2, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "b9945ebc5fe1acfcee6085f0de124e5a782d3f2ae3f065dded48322bcdf4ca92"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl (pre-v5 journal: line 1 is format v2, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7907045,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-2-rebind_pending.jsonl (pre-v5 journal: line 1 is format v2, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v2 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "9169507c9df19bb01de0b2101befdf99cbcf75e5f71b9ed32d5d690858c6816a"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 3,
+        "op": "owner_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7913685,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "f8a2db11e5b6837b85b6acea2f8f8b495ff0f947d13f25a91bd7c3885c8628e3"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7917788,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-owner_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "2bffce203b174b3f245d55f22ccec38e13e8552d3dbc01620a5415fb71fc183d"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 3,
+        "op": "abort_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7924333,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "70bf3aea4a410a3521329c30ff1cac7cac7436620c4dfe844aebded8f44a7cfc"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7928236,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-abort_rebind.jsonl (pre-v5 journal: line 1 is format v3, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "9c55631ea78971c52413fc9800987435297549e0ac6dc99d1ae6d7e69068871b"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 3,
+        "op": "rebind_pending",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl (pre-v5 journal: line 1 is format v3, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7934818,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl (pre-v5 journal: line 1 is format v3, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "ffee25b8617ab6075d5902f32159e44fcb34041db9865df2f2b0eac45de1437b"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl (pre-v5 journal: line 1 is format v3, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7938998,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-3-rebind_pending.jsonl (pre-v5 journal: line 1 is format v3, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v3 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "6f2920012c34e817b6f378a2aa14d92026bd16247837b754d72f22eef9971e46"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 4,
+        "op": "owner_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7945623,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "beb6870815a952f0b12d3a82b75ad9f7df4566f9292ccf2e3fe6c541763f64cc"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'owner_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7949562,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-owner_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'owner_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'owner_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "07aa92672b03a0c079af6281ceeec96ceff84a3735b40aa1006ddd08e14c2477"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 4,
+        "op": "abort_rebind",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7956803,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "3030f2d8fb49a9f7dc0797e19d8deee5fc896b12d36516ab920ba925b455b5db"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'abort_rebind'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7960954,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-abort_rebind.jsonl (pre-v5 journal: line 1 is format v4, op 'abort_rebind')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'abort_rebind')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "2e350979e50ab2184620589a092907d0a4cf7d887b02ef432c5a6692157bb6f2"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      },
+      {
+        "version": 4,
+        "op": "rebind_pending",
+        "restarts": [
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.7967696,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "4fa63b7ff1554f3b1df7222b1487375a1ff066bda53f35b06997ad085a087c47"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          },
+          {
+            "view": {
+              "open": [
+                "i"
+              ],
+              "hold": {
+                "a1:p": "ownerless_linked"
+              },
+              "owner": {},
+              "audit": [],
+              "pending": [],
+              "verified": {
+                "a1:p": [
+                  0
+                ]
+              },
+              "failed": {
+                "a1:p": []
+              },
+              "journal_status": {
+                "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl",
+                "durable": true,
+                "journal_id": "",
+                "volatile_rebinds_allowed": true,
+                "healthy": false,
+                "fence": {
+                  "kind": "legacy",
+                  "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending'). MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                  "found_at_startup": true,
+                  "ts": 1791523435.797168,
+                  "artifacts": [
+                    "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/recovery-final7750-cases/legacy7708-4-rebind_pending.jsonl (pre-v5 journal: line 1 is format v4, op 'rebind_pending')"
+                  ]
+                },
+                "event_seq": 4,
+                "pending": 0,
+                "unapplied": [],
+                "unapplied_total": 0,
+                "unapplied_omitted": 0,
+                "records": 0,
+                "bytes": 0,
+                "corrupt_records": [
+                  {
+                    "line": 1,
+                    "why": "legacy journal format v4 (op 'rebind_pending')"
+                  }
+                ],
+                "fence_clearances": [],
+                "journal_resets": [],
+                "reset_in_progress": false,
+                "plans_refused_cap": 0
+              },
+              "event_seq": 4,
+              "digest": "6930dc0b71505392419170092e3e9943b091158598eade602e0e7c3a03f1e63e"
+            },
+            "last_result": {
+              "status": "refused",
+              "applied": false,
+              "durable": false,
+              "op_id": "",
+              "detail": "refused; see log and journal_status()"
+            },
+            "audit": []
+          }
+        ]
+      }
+    ],
+    "passed": true
+  }
+}

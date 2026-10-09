@@ -1,0 +1,432 @@
+{
+  "builtin_open_calls": [],
+  "unsafe_predicate_calls": [],
+  "os_open_calls": [
+    {
+      "method": "_fsync_dir",
+      "line": 407,
+      "call": "os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)"
+    },
+    {
+      "method": "_write_file_durably",
+      "line": 441,
+      "call": "os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 384)"
+    },
+    {
+      "method": "_sync_existing_durably",
+      "line": 494,
+      "call": "os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))"
+    },
+    {
+      "method": "_read_regular",
+      "line": 554,
+      "call": "os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))"
+    },
+    {
+      "method": "verify_journal",
+      "line": 923,
+      "call": "os.open(self._journal_path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))"
+    },
+    {
+      "method": "_journal_write",
+      "line": 947,
+      "call": "os.open(self._journal_path, os.O_RDWR | os.O_APPEND | getattr(os, 'O_NOFOLLOW', 0))"
+    }
+  ],
+  "fd_read_calls": [
+    {
+      "method": "_read_regular",
+      "line": 566,
+      "call": "os.read(fd, 1 << 20)"
+    },
+    {
+      "method": "_verify_on_disk",
+      "line": 901,
+      "call": "os.pread(fd, min(1 << 20, size - off), off)"
+    }
+  ],
+  "reachable_methods": {
+    "_open_journal": [
+      "_check_record",
+      "_create_journal",
+      "_fence_identity",
+      "_fence_legacy",
+      "_fsync_dir",
+      "_header_record",
+      "_id_path",
+      "_legacy_artifacts",
+      "_lexists_strict",
+      "_mark_unapplied",
+      "_open_journal",
+      "_parse_journal",
+      "_read_anchor",
+      "_read_regular",
+      "_rec_hash",
+      "_replace_durably",
+      "_reset_intent_path",
+      "_set_fence",
+      "_set_journal_state",
+      "_write_all",
+      "_write_anchor",
+      "_write_file_durably"
+    ],
+    "_replay_journal": [
+      "_apply_rebind",
+      "_discard_foreign_steps",
+      "_do_rebind",
+      "_drain_pending",
+      "_handle_receipt",
+      "_held_latched",
+      "_held_latched_key",
+      "_held_receipts",
+      "_mark_unapplied",
+      "_maybe_resolve_plan",
+      "_open_agent_incidents",
+      "_ownerless_linked",
+      "_pending_blocks",
+      "_rebind_check",
+      "_recompute_agent_health",
+      "_replay_journal",
+      "_unique_owned_plan",
+      "quarantine_reasons"
+    ],
+    "verify_journal": [
+      "_id_path",
+      "_read_anchor",
+      "_read_regular",
+      "_set_fence",
+      "_verify_on_disk",
+      "verify_journal"
+    ],
+    "_journal_write": [
+      "_id_path",
+      "_journal_write",
+      "_read_anchor",
+      "_read_regular",
+      "_rec_hash",
+      "_verify_on_disk",
+      "_write_all"
+    ],
+    "clear_journal_fence": [
+      "_fsync_dir",
+      "_header_record",
+      "_id_path",
+      "_lexists_strict",
+      "_move_aside_if_not_regular",
+      "_read_regular",
+      "_rec_hash",
+      "_replace_durably",
+      "_reset_intent_path",
+      "_set_journal_state",
+      "_write_all",
+      "_write_anchor",
+      "_write_file_durably",
+      "clear_journal_fence"
+    ],
+    "reset_journal": [
+      "_fsync_dir",
+      "_header_record",
+      "_id_path",
+      "_lexists_strict",
+      "_mark_unapplied",
+      "_move_aside_if_not_regular",
+      "_presence",
+      "_read_regular",
+      "_rec_hash",
+      "_replace_durably",
+      "_reset_intent_path",
+      "_set_fence",
+      "_set_journal_state",
+      "_sync_existing_durably",
+      "_write_all",
+      "_write_anchor",
+      "_write_file_durably",
+      "reset_journal"
+    ]
+  },
+  "self_call_graph": {
+    "__init__": [
+      "_open_journal",
+      "_replay_journal"
+    ],
+    "state": [],
+    "reduce": [
+      "_advance_stream",
+      "_handle_incident",
+      "_handle_observation",
+      "_handle_plan",
+      "_handle_receipt",
+      "_latch_holds",
+      "_reject_conflicting_plan",
+      "_replay_journal"
+    ],
+    "update_agent_health": [
+      "_open_agent_incidents"
+    ],
+    "quarantine_reasons": [
+      "_held_latched_key"
+    ],
+    "quarantined_plans": [
+      "quarantine_reasons"
+    ],
+    "_ownerless_linked": [
+      "_open_agent_incidents"
+    ],
+    "_held_latched_key": [],
+    "_held_latched": [
+      "_held_latched_key"
+    ],
+    "_latch_holds": [],
+    "_rebind_check": [
+      "_held_latched",
+      "_ownerless_linked"
+    ],
+    "_apply_rebind": [
+      "_discard_foreign_steps",
+      "_drain_pending"
+    ],
+    "_discard_foreign_steps": [],
+    "_advance_stream": [],
+    "_fsync_dir": [],
+    "_rec_hash": [],
+    "_write_all": [],
+    "_write_file_durably": [
+      "_fsync_dir",
+      "_write_all"
+    ],
+    "_lexists_strict": [],
+    "_presence": [
+      "_lexists_strict"
+    ],
+    "_sync_existing_durably": [
+      "_fsync_dir"
+    ],
+    "_legacy_fence_path": [],
+    "_set_fence": [],
+    "_id_path": [],
+    "_header_record": [],
+    "_read_regular": [],
+    "_read_anchor": [
+      "_id_path",
+      "_read_regular"
+    ],
+    "_move_aside_if_not_regular": [
+      "_fsync_dir"
+    ],
+    "_replace_durably": [
+      "_fsync_dir",
+      "_write_file_durably"
+    ],
+    "_write_anchor": [
+      "_id_path",
+      "_replace_durably"
+    ],
+    "_set_journal_state": [],
+    "_create_journal": [
+      "_header_record",
+      "_replace_durably",
+      "_set_journal_state",
+      "_write_anchor"
+    ],
+    "_fence_identity": [
+      "_mark_unapplied",
+      "_set_fence"
+    ],
+    "_legacy_artifacts": [
+      "_lexists_strict"
+    ],
+    "_fence_legacy": [
+      "_set_fence"
+    ],
+    "_open_journal": [
+      "_create_journal",
+      "_fence_identity",
+      "_fence_legacy",
+      "_id_path",
+      "_legacy_artifacts",
+      "_lexists_strict",
+      "_parse_journal",
+      "_read_anchor",
+      "_read_regular",
+      "_reset_intent_path",
+      "_set_fence"
+    ],
+    "_check_record": [
+      "_rec_hash"
+    ],
+    "_parse_journal": [
+      "_check_record",
+      "_mark_unapplied",
+      "_set_fence",
+      "_set_journal_state"
+    ],
+    "_verify_on_disk": [
+      "_read_anchor"
+    ],
+    "verify_journal": [
+      "_set_fence",
+      "_verify_on_disk"
+    ],
+    "_journal_write": [
+      "_rec_hash",
+      "_verify_on_disk",
+      "_write_all"
+    ],
+    "journal_pending": [],
+    "journal_status": [
+      "_presence",
+      "_reset_intent_path"
+    ],
+    "journal_unapplied": [],
+    "clear_journal_fence": [
+      "_fsync_dir",
+      "_header_record",
+      "_id_path",
+      "_lexists_strict",
+      "_move_aside_if_not_regular",
+      "_read_regular",
+      "_rec_hash",
+      "_replace_durably",
+      "_reset_intent_path",
+      "_set_journal_state",
+      "_write_anchor",
+      "_write_file_durably"
+    ],
+    "_reset_intent_path": [],
+    "reset_journal": [
+      "_fsync_dir",
+      "_header_record",
+      "_id_path",
+      "_lexists_strict",
+      "_mark_unapplied",
+      "_move_aside_if_not_regular",
+      "_presence",
+      "_read_regular",
+      "_rec_hash",
+      "_replace_durably",
+      "_reset_intent_path",
+      "_set_fence",
+      "_set_journal_state",
+      "_sync_existing_durably",
+      "_write_anchor",
+      "_write_file_durably"
+    ],
+    "_mark_unapplied": [],
+    "_replay_journal": [
+      "_do_rebind",
+      "_mark_unapplied",
+      "_rebind_check"
+    ],
+    "_held_receipts": [],
+    "preview_rebind": [
+      "_held_receipts",
+      "_rebind_check",
+      "quarantine_reasons"
+    ],
+    "rebind_plan_owner": [
+      "_rebind_plan_owner"
+    ],
+    "_rebind_plan_owner": [
+      "_do_rebind",
+      "_journal_write",
+      "_rebind_check",
+      "_set_fence"
+    ],
+    "_do_rebind": [
+      "_apply_rebind",
+      "_held_receipts",
+      "_open_agent_incidents",
+      "quarantine_reasons"
+    ],
+    "_open_agent_incidents": [],
+    "_recompute_agent_health": [
+      "_open_agent_incidents"
+    ],
+    "register_agent": [],
+    "unregister_agent": [],
+    "update_resources": [],
+    "_handle_incident": [
+      "_correlate_incidents",
+      "_drain_pending",
+      "_maybe_resolve_plan",
+      "_recompute_agent_health",
+      "_unique_owned_plan"
+    ],
+    "_correlate_incidents": [],
+    "_handle_observation": [],
+    "_handle_plan": [
+      "_drain_pending",
+      "_held_latched",
+      "_ownerless_linked",
+      "_reject_conflicting_plan"
+    ],
+    "_handle_receipt": [
+      "_maybe_resolve_plan",
+      "_unique_owned_plan"
+    ],
+    "_maybe_resolve_plan": [
+      "_open_agent_incidents",
+      "_pending_blocks",
+      "_recompute_agent_health"
+    ],
+    "_reject_conflicting_plan": [],
+    "_unique_owned_plan": [],
+    "_drain_pending": [
+      "_handle_receipt",
+      "_maybe_resolve_plan"
+    ],
+    "_pending_blocks": [],
+    "resolve_hive_incident": [],
+    "detect_drift": []
+  },
+  "archive_expressions": [
+    {
+      "line": 1043,
+      "expression": "f'{path}.fenced-{stamp}'"
+    },
+    {
+      "line": 1117,
+      "expression": "f'{path}.reset-intent'"
+    },
+    {
+      "line": 1083,
+      "expression": "f'{self._id_path(path)}.cleared-{stamp}'"
+    },
+    {
+      "line": 1202,
+      "expression": "f'{path}.reset-{stamp}'"
+    },
+    {
+      "line": 1219,
+      "expression": "f'{idp}.reset-{stamp}'"
+    },
+    {
+      "line": 1091,
+      "expression": "f'{lp}.cleared-{stamp}'"
+    },
+    {
+      "line": 1213,
+      "expression": "f'{idp}.reset-{stamp}'"
+    },
+    {
+      "line": 1246,
+      "expression": "f'{lp}.cleared-{stamp}'"
+    }
+  ],
+  "test_adaptation": {
+    "name": "test_handler_lstat_eio_after_journal_moved_reports_unknown",
+    "original_commit": "2c7e337202cbfa19569b344992326a1603d867cd",
+    "same_function_AST_after_builtin_to_os_normalization": true,
+    "semantic_injection": "First anchor read open fails EIO after old journal renamed. Subsequent marker-lstat EIO reports unknown presence and acknowledged rename, not unchanged pair. Same path guard, one-shot trigger, lstat hook and assertions; current test PASSED in full suite."
+  },
+  "notes": {
+    "strict_reads": "Only os.read call is _read_regular after lstat/O_NOFOLLOW/fstat identity+type validation. Only os.pread call is _verify_on_disk after descriptor regular check and anchor validation. No builtin open remains.",
+    "archives": "Startup reads only exact configured journal and its exact .id. Legacy fence and reset-intent checks are lstat-only. No glob/listdir/archive discovery or record archived-field dereference. _open_journal treats journal_reset as an audit record; archive path strings are not opened. All constructed archive outputs flow to _write_file_durably O_WRONLY|O_CREAT|O_EXCL or os.replace. Behavior trace in focused7750 confirms no archived-file read with deliberately valid old rebinds in archive files.",
+    "nonregular": "Steady entries fence identity and stay untouched. Clear moves nonregular journal to .fenced-, anchor to .cleared-; reset moves either to .reset-. Policy lists .cleared/.reset shorthand but journal clearance actually uses .fenced as documented separately at policy:264.",
+    "races": "lstat->open same-device/inode/type comparison prevents tested regular, symlink and directory swaps, except FIFO open may block BEFORE fstat. O_NOFOLLOW=0 accepts a same-inode symlink. Final-component checks are not namespace locks.",
+    "parent": "All paths are string-based. _fsync_dir opens dirname(abspath(path)) without O_DIRECTORY/O_NOFOLLOW or stored parent dirfd. Intermediate symlinks are followed by lstat/open/replace/unlink; stable symlink parents work. A changed ancestor can redirect operation/fsync. No hostile namespace-writer or concurrently retargeted directory guarantee.",
+    "remaining_check_trust": "After absent lstat, _create_journal uses replace, not an atomic expected-absence check; a newly introduced entry can be replaced. _move_aside_if_not_regular lstat and rename are separate, and clear/reset later replace names without inode preconditions. Runtime verifies opened descriptor bytes and current anchor but does not bind its descriptor inode to the current journal pathname after opening; a namespace swap can detach it. These are outside the single-writer protected-stable-directory scope, not evidence of safe adversarial concurrency.",
+    "runtime_findings": "_journal_write only maps ENOENT/ELOOP at open to _JournalChanged; EISDIR flows to generic OSError and refusal leaves healthy=True. verify opens FIFO O_RDONLY and blocks; startup reader can also block on a regular->FIFO swap. See independent runtime/fifo witnesses.",
+    "limits_docs": "Unkeyed hashes policy 204-208; joint rollback 112-131; record-boundary tail 198-206; snapshot/partial replay 87-89; undurable intent 180-191; nonregular entries 169-177. Linux/no-O_NOFOLLOW scope explicitly in existing docs/ASTRA_REVIEW_7741.md sections 2, 4 and findings, not repeated in primary README/policy. This report makes ancestor scope explicit; no claim of universal symlink protection."
+  }
+}

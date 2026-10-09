@@ -1,0 +1,155 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "case": "post-absence-entry-insertion",
+      "new_symlink_overwritten": true,
+      "state": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-final-cases/first-use/journal",
+          "durable": true,
+          "journal_id": "5c50aed0e8634b13b2e7082a5b81e823",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 1,
+          "bytes": 201,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": []
+      }
+    },
+    {
+      "case": "clear-anchor-post-lstat-symlink",
+      "new_symlink_overwritten_without_archive": true,
+      "state": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-final-cases/clear/journal",
+          "durable": true,
+          "journal_id": "3be0e37d204d4415885618a5dd8eb509",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 0,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 2,
+          "bytes": 769,
+          "corrupt_records": [],
+          "fence_clearances": [
+            {
+              "actor": "op",
+              "reason": "namespace race",
+              "ts": 1791523568.7459886,
+              "archived": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-final-cases/clear/journal.fenced-1791523568744712987",
+              "fence_kind": "corrupt",
+              "fence_error": "line 2: unterminated (torn) last line; no journaled rebind is replayed",
+              "journal_id": "3be0e37d204d4415885618a5dd8eb509",
+              "rebinds_rejournaled": 0
+            }
+          ],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": []
+      }
+    },
+    {
+      "case": "parent-retarget-after-journal-open",
+      "result": {
+        "status": "applied",
+        "applied": true,
+        "durable": true,
+        "op_id": "13bed42b39194595b10e1a5b202782e8",
+        "detail": "pending and commit records fsync'd"
+      },
+      "live": {
+        "owner": {
+          "a1:p": "i"
+        },
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-final-cases/parent-retarget/live/journal",
+          "durable": true,
+          "journal_id": "df867c1c19a348dca39c0ae4c6a8aa0e",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [],
+          "unapplied_total": 0,
+          "unapplied_omitted": 0,
+          "records": 3,
+          "bytes": 1025,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 1,
+        "resets": []
+      },
+      "restart": {
+        "owner": {},
+        "status": {
+          "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/namespace-scope7750-final-cases/parent-retarget/live/journal",
+          "durable": true,
+          "journal_id": "df867c1c19a348dca39c0ae4c6a8aa0e",
+          "volatile_rebinds_allowed": true,
+          "healthy": true,
+          "fence": null,
+          "event_seq": 4,
+          "pending": 0,
+          "unapplied": [
+            {
+              "op_id": "13bed42b39194595b10e1a5b202782e8",
+              "agent_id": "a1",
+              "plan_id": "p",
+              "incident_id": "i",
+              "actor": "operator-original",
+              "reason": "case-proof",
+              "seq": 4,
+              "why": "no commit record: the rebind was refused or its write did not complete; not replayed"
+            }
+          ],
+          "unapplied_total": 1,
+          "unapplied_omitted": 0,
+          "records": 2,
+          "bytes": 682,
+          "corrupt_records": [],
+          "fence_clearances": [],
+          "journal_resets": [],
+          "reset_in_progress": false,
+          "plans_refused_cap": 0
+        },
+        "pending": 0,
+        "applied": 0,
+        "resets": []
+      },
+      "current_path_has_pending_but_no_commit": true,
+      "old_directory_received_commit": true
+    }
+  ],
+  "count": 3,
+  "classification": "Not an additional in-scope durability defect: requires a writer mutating the namespace during the operation. Demonstrates why stable protected ancestors, one writer and stopped-service recovery are mandatory; O_NOFOLLOW is not a namespace-locking mechanism."
+}

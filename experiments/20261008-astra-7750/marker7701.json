@@ -1,0 +1,1861 @@
+{
+  "cases": [
+    {
+      "suffix": ".fence",
+      "mode": "no_journal_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6746523,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "12b5ab2266eddb834d3b010f95a3aef9551181a811da16fbc2215ada0aa04ffa"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6746523,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "12b5ab2266eddb834d3b010f95a3aef9551181a811da16fbc2215ada0aa04ffa"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6760418,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "fc0905d3012efc2551274c4b6bff90e7d0f0b888798c96f6fd86f81c237e89e1"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6767826,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "15af260057c0c8963e48b64c1e2136aeda7c13009a6ea54a7c12e5a2f5be48f8"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence.tmp",
+      "mode": "no_journal_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.680635,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "83e05d38356bd735ebf4d99d65ab9dc2856d81960bebccd97deb31a64e746847"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.680635,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "83e05d38356bd735ebf4d99d65ab9dc2856d81960bebccd97deb31a64e746847"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6815677,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "ffd69285d293be61a0f5402d9db174fa944bea4544b0d6b4cd01d723859c9986"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.682317,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-no_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "5b086425747ef3cd35d5a0ade62a322968244045736da3d453196a4be941bb5e"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence",
+      "mode": "empty_journal_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6861482,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "0f9f7725e9f387ec089e751b46d3b0353051b3076b2fc514bc82f232162c0679"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6861482,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "0f9f7725e9f387ec089e751b46d3b0353051b3076b2fc514bc82f232162c0679"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6870909,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "78cab1d1fbed8bb89a319c2a976828f6bc227bcf4d5e4a799f5f264ae327b560"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6878202,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "3e4cb27e02624f0a4a84faf75cdc733c8886ce77debaa7509c6d6ec3174d0cb3"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence.tmp",
+      "mode": "empty_journal_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6916819,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "f167ee5d0f5b8369e4bf676b91ab0cc7f3fc413b4d16bd49dad4127a7e41c753"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.6916819,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "f167ee5d0f5b8369e4bf676b91ab0cc7f3fc413b4d16bd49dad4127a7e41c753"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6926515,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "32dd820282fb184832e79ade0a03428e44cb6f31720ca2e0e137143417d0f663"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.6934001,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-empty_journal_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "6fb5e2d8e42431de618a798c74e4a0eaed38c7c1dc3aba3defeb61146db8f94a"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence",
+      "mode": "header_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.701271,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "83608db4199130d9c1aa8448e4262d9e69acba7584d2f3ecf3e4cb0f8efd42cb"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.701271,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "83608db4199130d9c1aa8448e4262d9e69acba7584d2f3ecf3e4cb0f8efd42cb"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7023404,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "239db30bd6953be923c7107d0c2b8498053a16936128ed6d599366b80705b461"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7031133,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "c69d3a454475c6b4ef607d25fdf9bdcdf0338c998a8c4be39e2477fc0e6da634"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence.tmp",
+      "mode": "header_no_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7113662,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "5f21a96ee668859fdb8230b1ec8c52088fb78960c34582ef92b296f665a1879b"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7113662,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "5f21a96ee668859fdb8230b1ec8c52088fb78960c34582ef92b296f665a1879b"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7123327,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "9f9b5a6725a4e2f3de2c858a3fb27661fb5b845b9d324aea874e25a5a31d476f"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.713053,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_no_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "52c1abdb26d0e10926ff2513435ab4edda073e959a6369144330632969963e4e"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence",
+      "mode": "header_with_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7248871,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "f1f660a177287e77909eaaa4ff4276ac9f22542c1caf50e1ece940cf6c193893"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7248871,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "f1f660a177287e77909eaaa4ff4276ac9f22542c1caf50e1ece940cf6c193893"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.72596,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "ae29bbd96677776fcddca5990d9aca36e0bf8933c537082dea64a1969849a909"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7270763,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.jsonl.fence"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "4552cf327dde268030ced6b544d043c2baffc7ecbee761245091f71efe5c2977"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    },
+    {
+      "suffix": ".fence.tmp",
+      "mode": "header_with_anchor",
+      "bypass": false,
+      "before": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7398262,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "9c00fcaa77e9b398084bfe45f29ab92bad0d3e191d4e4151446ea3a72f25d790"
+        },
+        "last_result": null,
+        "audit": []
+      },
+      "result": {
+        "status": "refused",
+        "applied": false,
+        "durable": false,
+        "op_id": "",
+        "detail": "refused; see log and journal_status()"
+      },
+      "live": {
+        "view": {
+          "open": [
+            "i"
+          ],
+          "hold": {
+            "a1:p": "ownerless_linked"
+          },
+          "owner": {},
+          "audit": [],
+          "pending": [],
+          "verified": {
+            "a1:p": [
+              0
+            ]
+          },
+          "failed": {
+            "a1:p": []
+          },
+          "journal_status": {
+            "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl",
+            "durable": true,
+            "journal_id": "",
+            "volatile_rebinds_allowed": true,
+            "healthy": false,
+            "fence": {
+              "kind": "legacy",
+              "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+              "found_at_startup": true,
+              "ts": 1791523342.7398262,
+              "artifacts": [
+                "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp"
+              ]
+            },
+            "event_seq": 4,
+            "pending": 0,
+            "unapplied": [],
+            "unapplied_total": 0,
+            "unapplied_omitted": 0,
+            "records": 0,
+            "bytes": 0,
+            "corrupt_records": [],
+            "fence_clearances": [],
+            "journal_resets": [],
+            "reset_in_progress": false,
+            "plans_refused_cap": 0
+          },
+          "event_seq": 4,
+          "digest": "9c00fcaa77e9b398084bfe45f29ab92bad0d3e191d4e4151446ea3a72f25d790"
+        },
+        "last_result": {
+          "status": "refused",
+          "applied": false,
+          "durable": false,
+          "op_id": "",
+          "detail": "refused; see log and journal_status()"
+        },
+        "audit": []
+      },
+      "restarts": [
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7408772,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "b301fc9c1474ef41a658d7dc1c44432a1a09b65733b6d25adb17c1dbf36ebeb5"
+          },
+          "last_result": null,
+          "audit": []
+        },
+        {
+          "view": {
+            "open": [
+              "i"
+            ],
+            "hold": {
+              "a1:p": "ownerless_linked"
+            },
+            "owner": {},
+            "audit": [],
+            "pending": [],
+            "verified": {
+              "a1:p": [
+                0
+              ]
+            },
+            "failed": {
+              "a1:p": []
+            },
+            "journal_status": {
+              "path": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl",
+              "durable": true,
+              "journal_id": "",
+              "volatile_rebinds_allowed": true,
+              "healthy": false,
+              "fence": {
+                "kind": "legacy",
+                "error": "pre-v5 rebind journal artifact(s) present: /home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp. MIGRATION: nothing in them is replayed and new rebinds are refused. Inspect them, then call clear_journal_fence(actor=..., reason=...) -- it archives the old journal byte-for-byte, moves old fence files aside and starts a new v5 journal -- and re-issue each rebind still wanted with rebind_plan_owner()",
+                "found_at_startup": true,
+                "ts": 1791523342.7418873,
+                "artifacts": [
+                  "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7750/journal-followup7694/marker7708-header_with_anchor.fence.tmp.jsonl.fence.tmp"
+                ]
+              },
+              "event_seq": 4,
+              "pending": 0,
+              "unapplied": [],
+              "unapplied_total": 0,
+              "unapplied_omitted": 0,
+              "records": 0,
+              "bytes": 0,
+              "corrupt_records": [],
+              "fence_clearances": [],
+              "journal_resets": [],
+              "reset_in_progress": false,
+              "plans_refused_cap": 0
+            },
+            "event_seq": 4,
+            "digest": "8225745d287538308f408f16a8e82f5ba7004c7012093fb57b5727e2c0d8d185"
+          },
+          "last_result": null,
+          "audit": []
+        }
+      ]
+    }
+  ],
+  "verdict": "CLOSED: eight variants fence before any creation; unchanged bytes over two restarts."
+}
