@@ -103,7 +103,9 @@ Never restore backups of either file on its own; after an unavoidable joint
 restore call `reset_journal(actor, reason)` before replay and re-issue only the
 rebinds still wanted (see the policy doc).
 A reset is fail-closed: a durable `<journal>.reset-intent` marker fences every
-start until it completes, and a failed reset keeps its rebinds discarded. `rebind_plan_owner()` returns a `RebindResult`
+start until it completes, and a failed reset keeps its rebinds discarded.
+A failed reset reports `intent_durable: true` only after the marker's file and
+directory fsync succeeded; otherwise keep the service stopped and retry. `rebind_plan_owner()` returns a `RebindResult`
 (`applied` / `refused` / `uncertain`; only `applied` is truthy). If any journal record cannot
 be verified (torn, edited, reordered, legacy v1-v4 format), the whole journal is
 fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds

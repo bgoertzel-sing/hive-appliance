@@ -441,6 +441,20 @@ class HiveReducer:
                 pass
             raise
 
+    def _sync_existing_durably(self, path: str) -> None:
+        """Astra 7727: make an ALREADY-PRESENT file durable before relying on
+        it: a regular file is opened (no symlink following) and fsync'd, then
+        its directory is fsync'd.  Other entry types (symlink, directory) only
+        need their directory entry, so only the directory is fsync'd.  Raises
+        OSError if any step fails (e.g. an unreadable mode-000 file)."""
+        if os.path.isfile(path) and not os.path.islink(path):
+            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            try:
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+        self._fsync_dir(path)
+
     def _legacy_fence_path(self, path: str | None = None) -> str:
         return f"{path or self._journal_path}.fence"
 
@@ -989,6 +1003,9 @@ class HiveReducer:
           4. new anchor, then new journal (header + journal_reset record);
           5. old fence files moved aside; the marker is removed (dir fsync'd)
              -- only this makes the reset complete and the journal healthy.
+        intent_durable is reported True only after the marker's file fsync
+        AND directory fsync succeeded (a pre-existing marker is re-synced
+        first); presence alone is never reported as durable (Astra 7727).
         Any error or crash leaves the journal fenced: live as "reset_failed"
         (pending stays discarded; replay and clearance carry nothing), on
         disk via the marker.  Retry reset_journal() (or clear_journal_fence())
@@ -1024,6 +1041,11 @@ class HiveReducer:
                         "rebind is discarded")
         archived: dict[str, str] = {}
         step = "create reset-intent marker"
+        # Astra 7727 F-reset-intent-durability-status: True ONLY after the
+        # marker file fsync AND its directory fsync have both succeeded (for a
+        # new marker inside _write_file_durably; for a pre-existing one by
+        # re-syncing it).  Marker presence alone never counts as durable.
+        established = False
         try:
             # (2) durable intent (F-reset-interruption-replays-restored-pair)
             if not os.path.lexists(ip):
@@ -1031,6 +1053,10 @@ class HiveReducer:
                     {"v": JOURNAL_VERSION, "op": "reset_intent", "actor": actor,
                      "reason": reason, "ts": now, "old_journal_id": old_jid},
                     sort_keys=True) + "\n").encode("utf-8"))
+            else:
+                step = "confirm existing reset-intent marker"
+                self._sync_existing_durably(ip)
+            established = True
             # (3) old journal aside (rename), old anchor copied
             step = "move old journal aside"
             if os.path.lexists(path):
@@ -1074,25 +1100,37 @@ class HiveReducer:
             os.unlink(ip)
             self._fsync_dir(ip)
         except BaseException as exc:
-            durable = os.path.lexists(ip)
+            present = os.path.lexists(ip)
+            durable = established and present
+            if durable:
+                tail = ("The reset-intent marker is durable (file and directory "
+                        "fsync confirmed): every start fences until "
+                        "reset_journal() is retried successfully or "
+                        "clear_journal_fence() is called.")
+            elif established and step == "remove reset-intent marker":
+                tail = ("The new rebind-free journal and anchor are complete and "
+                        "the marker was unlinked (its removal may not be "
+                        "durable; if it survives, the next start fences): a "
+                        "restart is safe.")
+            else:
+                tail = ("Durability of the reset-intent marker was NOT "
+                        "confirmed (" + (
+                            "a marker, possibly empty or partial, is visible "
+                            "now but may not survive a crash" if present else
+                            "no marker is present") + "). The old journal and "
+                        ".id are unchanged on disk (at most a marker was "
+                        "written), so a restart MAY replay them: keep the "
+                        "service stopped and retry reset_journal() before any "
+                        "replay.")
             self._set_fence(
                 "reset_failed", f"reset_journal by {actor} ({reason}) FAILED at "
                 f"step '{step}': {exc!r}. Every pre-reset journaled rebind stays "
-                "discarded (not replayed, not re-journaled by clearance). " + (
-                    "The reset-intent marker is durable: every start fences "
-                    "until reset_journal() is retried successfully or "
-                    "clear_journal_fence() is called." if durable else
-                    "The new rebind-free journal and anchor are complete and "
-                    "the marker was unlinked (its removal may not be durable; "
-                    "if it survives, the next start fences): a restart is safe."
-                    if step == "remove reset-intent marker" else
-                    "NO durable reset intent was recorded and the old journal "
-                    "is unchanged on disk, so a restart WOULD replay it: keep "
-                    "the service stopped and retry reset_journal() before any "
-                    "replay."), failed_step=step, intent_durable=durable)
+                "discarded (not replayed, not re-journaled by clearance). " + tail,
+                failed_step=step, intent_durable=durable, intent_present=present)
             self.journal_resets.append(
                 {"actor": actor, "reason": reason, "ts": now, "status": "failed",
                  "failed_step": step, "error": repr(exc), "archived": archived,
+                 "intent_present": present,
                  "intent_durable": durable, "rebinds_discarded": len(discarded)})
             del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
             raise

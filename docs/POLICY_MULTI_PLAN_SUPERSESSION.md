@@ -70,7 +70,7 @@ accident.
   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
   including health, after every event).
 
-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718)
+## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727)
 
 - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
@@ -146,10 +146,19 @@ accident.
   `status: "failed"`. To finish, retry `reset_journal()` (before any event) or
   call `clear_journal_fence()`: after a failed or interrupted reset clearance
   re-journals NO rebind and removes the marker only once the new pair is
-  durable. Limits: if the process dies (or the error hits) before the marker
-  itself is durable, nothing has changed on disk and the old pair is intact --
-  the error is raised with `intent_durable: false`; keep the service stopped
-  and retry `reset_journal()` before any replay. If only the final marker
+  durable. `intent_durable` (in the `reset_failed` fence and in
+  `journal_resets`) is `true` ONLY once the marker's file fsync AND
+  directory fsync have both succeeded; a marker that already existed is first
+  re-synced (regular file opened and fsync'd, then its directory). Marker
+  presence alone is never reported as durable (Astra 7727). Limits: if the
+  process dies or the error hits before that confirmation, the old journal
+  and `.id` are unchanged on disk, but something may already have changed: a
+  marker, possibly empty or partial, can exist without being durable and may
+  not survive a crash. The error is then raised with `intent_durable: false`
+  (`intent_present` says whether a marker is visible); keep the service
+  stopped and retry `reset_journal()` before any replay. A pre-existing marker
+  that cannot be opened and fsync'd (e.g. mode 000) makes the reset fail the
+  same way; fix the marker's permissions, do not delete it, and retry. If only the final marker
   removal fails, the new pair is complete; a surviving marker just fences
   the next start.
 - **Record integrity and chain.** Every record carries `prev` (the
@@ -253,5 +262,5 @@ accident.
 - Tests: `tests/test_astra7638.py`, `tests/test_astra7656.py`,
   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
-  `tests/test_astra7718.py`.
+  `tests/test_astra7718.py`, `tests/test_astra7727.py`.
 
