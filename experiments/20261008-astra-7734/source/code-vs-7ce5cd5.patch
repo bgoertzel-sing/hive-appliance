@@ -1,0 +1,281 @@
+diff --git a/hive/reducer.py b/hive/reducer.py
+index c648dc2..3abef97 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -441,6 +441,20 @@ class HiveReducer:
+                 pass
+             raise
+ 
++    def _sync_existing_durably(self, path: str) -> None:
++        """Astra 7727: make an ALREADY-PRESENT file durable before relying on
++        it: a regular file is opened (no symlink following) and fsync'd, then
++        its directory is fsync'd.  Other entry types (symlink, directory) only
++        need their directory entry, so only the directory is fsync'd.  Raises
++        OSError if any step fails (e.g. an unreadable mode-000 file)."""
++        if os.path.isfile(path) and not os.path.islink(path):
++            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
++            try:
++                os.fsync(fd)
++            finally:
++                os.close(fd)
++        self._fsync_dir(path)
++
+     def _legacy_fence_path(self, path: str | None = None) -> str:
+         return f"{path or self._journal_path}.fence"
+ 
+@@ -989,6 +1003,9 @@ class HiveReducer:
+           4. new anchor, then new journal (header + journal_reset record);
+           5. old fence files moved aside; the marker is removed (dir fsync'd)
+              -- only this makes the reset complete and the journal healthy.
++        intent_durable is reported True only after the marker's file fsync
++        AND directory fsync succeeded (a pre-existing marker is re-synced
++        first); presence alone is never reported as durable (Astra 7727).
+         Any error or crash leaves the journal fenced: live as "reset_failed"
+         (pending stays discarded; replay and clearance carry nothing), on
+         disk via the marker.  Retry reset_journal() (or clear_journal_fence())
+@@ -1024,6 +1041,11 @@ class HiveReducer:
+                         "rebind is discarded")
+         archived: dict[str, str] = {}
+         step = "create reset-intent marker"
++        # Astra 7727 F-reset-intent-durability-status: True ONLY after the
++        # marker file fsync AND its directory fsync have both succeeded (for a
++        # new marker inside _write_file_durably; for a pre-existing one by
++        # re-syncing it).  Marker presence alone never counts as durable.
++        established = False
+         try:
+             # (2) durable intent (F-reset-interruption-replays-restored-pair)
+             if not os.path.lexists(ip):
+@@ -1031,6 +1053,10 @@ class HiveReducer:
+                     {"v": JOURNAL_VERSION, "op": "reset_intent", "actor": actor,
+                      "reason": reason, "ts": now, "old_journal_id": old_jid},
+                     sort_keys=True) + "\n").encode("utf-8"))
++            else:
++                step = "confirm existing reset-intent marker"
++                self._sync_existing_durably(ip)
++            established = True
+             # (3) old journal aside (rename), old anchor copied
+             step = "move old journal aside"
+             if os.path.lexists(path):
+@@ -1074,25 +1100,37 @@ class HiveReducer:
+             os.unlink(ip)
+             self._fsync_dir(ip)
+         except BaseException as exc:
+-            durable = os.path.lexists(ip)
++            present = os.path.lexists(ip)
++            durable = established and present
++            if durable:
++                tail = ("The reset-intent marker is durable (file and directory "
++                        "fsync confirmed): every start fences until "
++                        "reset_journal() is retried successfully or "
++                        "clear_journal_fence() is called.")
++            elif established and step == "remove reset-intent marker":
++                tail = ("The new rebind-free journal and anchor are complete and "
++                        "the marker was unlinked (its removal may not be "
++                        "durable; if it survives, the next start fences): a "
++                        "restart is safe.")
++            else:
++                tail = ("Durability of the reset-intent marker was NOT "
++                        "confirmed (" + (
++                            "a marker, possibly empty or partial, is visible "
++                            "now but may not survive a crash" if present else
++                            "no marker is present") + "). The old journal and "
++                        ".id are unchanged on disk (at most a marker was "
++                        "written), so a restart MAY replay them: keep the "
++                        "service stopped and retry reset_journal() before any "
++                        "replay.")
+             self._set_fence(
+                 "reset_failed", f"reset_journal by {actor} ({reason}) FAILED at "
+                 f"step '{step}': {exc!r}. Every pre-reset journaled rebind stays "
+-                "discarded (not replayed, not re-journaled by clearance). " + (
+-                    "The reset-intent marker is durable: every start fences "
+-                    "until reset_journal() is retried successfully or "
+-                    "clear_journal_fence() is called." if durable else
+-                    "The new rebind-free journal and anchor are complete and "
+-                    "the marker was unlinked (its removal may not be durable; "
+-                    "if it survives, the next start fences): a restart is safe."
+-                    if step == "remove reset-intent marker" else
+-                    "NO durable reset intent was recorded and the old journal "
+-                    "is unchanged on disk, so a restart WOULD replay it: keep "
+-                    "the service stopped and retry reset_journal() before any "
+-                    "replay."), failed_step=step, intent_durable=durable)
++                "discarded (not replayed, not re-journaled by clearance). " + tail,
++                failed_step=step, intent_durable=durable, intent_present=present)
+             self.journal_resets.append(
+                 {"actor": actor, "reason": reason, "ts": now, "status": "failed",
+                  "failed_step": step, "error": repr(exc), "archived": archived,
++                 "intent_present": present,
+                  "intent_durable": durable, "rebinds_discarded": len(discarded)})
+             del self.journal_resets[:-MAX_HIVE_REBIND_RECORDS]
+             raise
+diff --git a/tests/test_astra7727.py b/tests/test_astra7727.py
+new file mode 100644
+index 0000000..a3a19cc
+--- /dev/null
++++ b/tests/test_astra7727.py
+@@ -0,0 +1,166 @@
++"""Astra 7727 (docs/ASTRA_REVIEW_7727.md, 1a33645) on 7ce5cd5.
++F-reset-intent-durability-status (Medium): a failed reset_journal() reports
++intent_durable True ONLY after the reset-intent marker's file fsync AND its
++directory fsync have succeeded (a pre-existing marker is re-synced first).
++Marker presence alone is never reported as durable.
++"""
++import errno
++import os
++
++import pytest
++
++import hive.reducer as hr
++from tests.test_astra7638 import run
++from tests.test_astra7718 import _held, _pair
++
++
++def _fence(h):
++    return h.journal_status()["fence"]
++
++
++def _last(h):
++    return h.journal_status()["journal_resets"][-1]
++
++
++def _not_durable(h, jp, old, present):
++    f = _fence(h)
++    assert f["kind"] == "reset_failed"
++    assert f["intent_durable"] is False and _last(h)["intent_durable"] is False
++    assert f["intent_present"] is present and _last(h)["intent_present"] is present
++    assert "NOT confirmed" in f["error"] and "keep the" in f["error"]
++    assert "every start fences" not in f["error"]
++    assert h.journal_pending() == [] and _held(h)     # live discard kept
++    assert {p: open(p, "rb").read() for p in old} == old   # old pair intact
++
++
++def _old(jp):
++    return {p: open(p, "rb").read() for p in (jp, jp + ".id")}
++
++
++def _fail_fsync_number(monkeypatch, n, exc=None):
++    real = os.fsync
++    calls = [0]
++
++    def f(fd):
++        i = calls[0]
++        calls[0] += 1
++        if i == n:
++            raise exc or OSError(errno.EIO, f"injected fsync #{i}")
++        return real(fd)
++    monkeypatch.setattr(os, "fsync", f)
++    return calls
++
++
++@pytest.mark.parametrize("which", [0, 1], ids=["file_fsync", "dir_fsync"])
++def test_each_marker_fsync_failure_reports_not_durable(tmp_path, monkeypatch, which):
++    jp, h = _pair(tmp_path, which)
++    old = _old(jp)
++    _fail_fsync_number(monkeypatch, which)   # #0 marker file, #1 its directory
++    with pytest.raises(OSError):
++        h.reset_journal(actor="op", reason="restore")
++    monkeypatch.undo()
++    assert _fence(h)["failed_step"] == "create reset-intent marker"
++    _not_durable(h, jp, old, present=os.path.lexists(jp + ".reset-intent"))
++
++
++def test_fsync_eio_and_cleanup_unlink_eacces_not_durable(tmp_path, monkeypatch):
++    # Astra witness 2: marker stays visible, nothing was confirmed durable
++    jp, h = _pair(tmp_path, "w2")
++    old = _old(jp)
++    _fail_fsync_number(monkeypatch, 0)
++    real_unlink = os.unlink
++
++    def unlink(p, *a, **k):
++        if p == jp + ".reset-intent":
++            raise PermissionError(errno.EACCES, "injected")
++        return real_unlink(p, *a, **k)
++    monkeypatch.setattr(os, "unlink", unlink)
++    with pytest.raises(OSError):
++        h.reset_journal(actor="op", reason="restore")
++    monkeypatch.undo()
++    assert os.path.lexists(jp + ".reset-intent")
++    _not_durable(h, jp, old, present=True)
++    # a visible marker still blocks ordinary restarts ...
++    assert _fence(run([], journal=jp))["kind"] == "reset_incomplete"
++
++
++def test_error_right_after_marker_open_zero_fsyncs(tmp_path, monkeypatch):
++    # Astra witness 1: empty marker created, zero fsync calls, then failure
++    jp, h = _pair(tmp_path, "w1")
++    old = _old(jp)
++    ip = jp + ".reset-intent"
++    real_open = os.open
++    calls = _fail_fsync_number(monkeypatch, -1)
++
++    def opn(p, *a, **k):
++        fd = real_open(p, *a, **k)
++        if p == ip:
++            os.close(fd)
++            raise OSError(errno.EIO, "injected after successful O_CREAT")
++        return fd
++    monkeypatch.setattr(os, "open", opn)
++    with pytest.raises(OSError):
++        h.reset_journal(actor="op", reason="restore")
++    monkeypatch.undo()
++    assert calls[0] == 0 and os.path.getsize(ip) == 0
++    _not_durable(h, jp, old, present=True)
++    # modeled loss of the unsynced marker: the old pair would replay p --
++    # exactly why intent_durable must be False here
++    os.unlink(ip)
++    assert run([], journal=jp)._journal_pending
++
++
++def test_preexisting_marker_is_resynced_before_durable(tmp_path, monkeypatch):
++    for which in (0, 1):
++        jp, h = _pair(tmp_path, f"pre{which}")
++        ip = jp + ".reset-intent"
++        open(ip, "wb").close()                       # leftover, unsynced
++        h = hr.HiveReducer(rebind_journal=jp)
++        h.register_agent("a1")
++        assert _fence(h)["kind"] == "reset_incomplete"
++        old = _old(jp)
++        _fail_fsync_number(monkeypatch, which)
++        with pytest.raises(OSError):
++            h.reset_journal(actor="op", reason="restore")
++        monkeypatch.undo()
++        assert _fence(h)["failed_step"] == "confirm existing reset-intent marker"
++        _not_durable(h, jp, old, present=True)
++        assert h.reset_journal(actor="op", reason="retry")["status"] == "completed"
++        assert not os.path.lexists(ip) and _held(run([], journal=jp))
++
++
++@pytest.mark.skipif(os.geteuid() == 0, reason="root ignores mode 000")
++def test_unreadable_preexisting_marker_not_durable(tmp_path):
++    jp, _h = _pair(tmp_path, "m000")
++    ip = jp + ".reset-intent"
++    open(ip, "wb").close()
++    os.chmod(ip, 0)
++    try:
++        h = hr.HiveReducer(rebind_journal=jp)
++        h.register_agent("a1")
++        with pytest.raises(OSError):
++            h.reset_journal(actor="op", reason="restore")
++        assert _fence(h)["intent_durable"] is False
++        assert os.path.lexists(ip)                   # not deleted
++    finally:
++        os.chmod(ip, 0o600)
++
++
++def test_failure_after_confirmed_intent_reports_durable(tmp_path, monkeypatch):
++    jp, h = _pair(tmp_path, "after")
++    real = os.replace
++
++    def rep(a, b, *x, **k):
++        if a == jp:                                  # move old journal aside
++            raise OSError(errno.EIO, "injected")
++        return real(a, b, *x, **k)
++    monkeypatch.setattr(os, "replace", rep)
++    with pytest.raises(OSError):
++        h.reset_journal(actor="op", reason="restore")
++    monkeypatch.undo()
++    f = _fence(h)
++    assert f["intent_durable"] is True and f["intent_present"] is True
++    assert "fsync confirmed" in f["error"]
++    for _ in range(2):
++        h2 = run([], journal=jp)
++        assert _fence(h2)["kind"] == "reset_incomplete" and _held(h2)

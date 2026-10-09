@@ -1,0 +1,14 @@
+[
+  {
+    "name": "P2_rooted_all_mutators",
+    "probe": "HARNESS_OR_ASSERTION_FAILURE",
+    "error": "FileNotFoundError(2, 'No such file or directory')",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7734/older-regressions.py\", line 24, in case\n    with tempfile.TemporaryDirectory(prefix=name+'-',dir=E/'tmp') as tmp:\n  File \"/usr/lib/python3.10/tempfile.py\", line 974, in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n  File \"/usr/lib/python3.10/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7734/tmp/P2_rooted_all_mutators-33kd5y1i'\n"
+  },
+  {
+    "name": "H2_prior_residual",
+    "probe": "HARNESS_OR_ASSERTION_FAILURE",
+    "error": "FileNotFoundError(2, 'No such file or directory')",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7734/older-regressions.py\", line 24, in case\n    with tempfile.TemporaryDirectory(prefix=name+'-',dir=E/'tmp') as tmp:\n  File \"/usr/lib/python3.10/tempfile.py\", line 974, in __init__\n    self.name = mkdtemp(suffix, prefix, dir)\n  File \"/usr/lib/python3.10/tempfile.py\", line 523, in mkdtemp\n    _os.mkdir(file, 0o700)\nFileNotFoundError: [Errno 2] No such file or directory: '/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance/experiments/20261008-astra-7734/tmp/H2_prior_residual-cuaii5mv'\n"
+  }
+]

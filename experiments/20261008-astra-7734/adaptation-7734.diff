@@ -1,0 +1,50 @@
+--- experiments/20261008-astra-7727/runner.py
++++ experiments/20261008-astra-7734/runner.py
+@@ -30,12 +30,11 @@
+     e = os.environ.copy()
+     e.update(PYTHONDONTWRITEBYTECODE='1', PIP_NO_INDEX='1', HF_HUB_OFFLINE='1',
+              TRANSFORMERS_OFFLINE='1', ANONYMIZED_TELEMETRY='False',
+-             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR='/tmp/hive-astra-7727-runtime',
++             PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', TMPDIR='/tmp/hive-astra-7734-runtime',
+              PYTHONPATH=str(E / 'guard'), HIVE_SRC=str(S))
+     return e
+ 
+ def run(name, command, cwd=None, timeout=600):
+-    (E / 'tmp').mkdir(exist_ok=True)
+     start = time.time()
+     save(name + '-started.json', dict(command=command, cwd=str(cwd or E), started=start))
+     timed_out = False
+--- experiments/20261008-astra-7727/intent_final7727.py
++++ experiments/20261008-astra-7734/intent_final7727.py
+@@ -120,10 +120,10 @@
+   try:h.reset_journal('op','durability report witness')
+   except OSError:pass
+  assert fd is not None;os.close(fd)
+- failed=state(h);assert failed['resets'][-1]['intent_durable'] is True and fsyncs==[] and pair(p)==old
++ failed=state(h);assert failed['resets'][-1]['intent_durable'] is False and fsyncs==[] and pair(p)==old
+  # Model the legal power-loss result of an unsynced directory entry disappearing.
+  Path(ip).unlink();z=hfeed(hnew(p),s);assert z._plan_owner=={'a1:p':'i'}
+- row.update(witness=failed,fsync_calls=fsyncs,intent_bytes=0,modeled_power_loss_restart=state(z),finding='lexists is not durability; failure claims every start fences without a durability acknowledgement',simulation_scope='Only unsynced marker entry removed; journal and identity bytes unchanged')
++ row.update(witness=failed,fsync_calls=fsyncs,intent_bytes=0,modeled_power_loss_restart=state(z),finding='CLOSED: visible marker never substitutes for confirmed durability',simulation_scope='Only unsynced marker entry removed; journal and identity bytes unchanged')
+  # Real syscall-like failure sequence: file fsync EIO, cleanup unlink EACCES.
+  p,s,h=restored('intent-durability-fsync');ip=str(p)+'.reset-intent';realfs=os.fsync;realunlink=os.unlink
+  def failfs(fd):
+@@ -135,7 +135,7 @@
+  with patch.object(os,'fsync',failfs),patch.object(os,'unlink',failunlink):
+   try:h.reset_journal('op','fsync and cleanup failure')
+   except OSError:pass
+- assert h.journal_resets[-1]['intent_durable'] is True
++ assert h.journal_resets[-1]['intent_durable'] is False
+  row['fsync_failure_plus_cleanup_failure']=state(h)
+ 
+ out={}
+--- experiments/20261008-astra-7727/run_primary.py
++++ experiments/20261008-astra-7734/run_primary.py
+@@ -1,6 +1,6 @@
+ import os,sys
+ from runner import E,S,run
+ os.environ["PIP_FIND_LINKS"]="/tmp/hive-astra-7718/20261008-astra-7718/build-prerequisites"
+-run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+"/tmp/hive-astra-7727-pytest"],S)
++run("pytest",[sys.executable,"-m","pytest","tests/","-v","-p","no:cacheprovider","--basetemp="+"/tmp/hive-astra-7734-pytest"],S)
+ for n in ["review7195","review7173","boundary_and_disk","mechanism_probes","probes","older-regressions","independent","new_cases","semantic_7133"]:
+  run(n.replace("_","-"),[sys.executable,str(E/(n+".py"))],E)

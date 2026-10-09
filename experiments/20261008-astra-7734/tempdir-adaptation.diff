@@ -1,0 +1,53 @@
+--- probes.py
++++ probes-final.py
+@@ -21,7 +21,7 @@
+ RESULTS=[]
+ def case(name,fn):
+     try:
+-        with tempfile.TemporaryDirectory(prefix=name+'-',dir=E/'tmp') as tmp:
++        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7734-runtime') as tmp:
+             detail=fn(pathlib.Path(tmp))
+         RESULTS.append({'name':name,'probe':'PASS','detail':detail})
+     except BaseException as ex:
+@@ -759,5 +759,5 @@
+ 
+ CASES=[('A1',fixed_a1),('A2',fixed_a2),('H1',fixed_h1),('H1_H2',h1_h2_interaction),('U1',fixed_u1),('U2_metadata',u2_metadata_now),('U2_shell',u2_shell),('U2_cli',u2_cli),('U3',fixed_u3),('L1',fixed_l1),('L1_normal',worker_normal),('S1',fixed_s1),('P1',fixed_p1),('P2_effect_boundary',fixed_p2_now)]
+ for name,fn in CASES: case(name,fn)
+-(E/'probes-result.json').write_text(json.dumps(RESULTS,indent=2,default=str))
++(E/'probes-result-final.json').write_text(json.dumps(RESULTS,indent=2,default=str))
+ sys.exit(any(r['probe']!='PASS' for r in RESULTS))
+--- older-regressions.py
++++ older-regressions-final.py
+@@ -21,7 +21,7 @@
+ RESULTS=[]
+ def case(name,fn):
+     try:
+-        with tempfile.TemporaryDirectory(prefix=name+'-',dir=E/'tmp') as tmp:
++        with tempfile.TemporaryDirectory(prefix=name+'-',dir='/tmp/hive-astra-7734-runtime') as tmp:
+             detail=fn(pathlib.Path(tmp))
+         RESULTS.append({'name':name,'probe':'PASS','detail':detail})
+     except BaseException as ex:
+@@ -759,5 +759,5 @@
+ 
+ 
+ for name,fn in [("P2_rooted_all_mutators",p2_store_now),("H2_prior_residual",h2_prior_residual_now)]: case(name,fn)
+-(E/"older-regressions.json").write_text(json.dumps(RESULTS,indent=2,default=str))
++(E/"older-regressions-final.json").write_text(json.dumps(RESULTS,indent=2,default=str))
+ sys.exit(any(r["probe"]!="PASS" for r in RESULTS))
+--- independent.py
++++ independent-final.py
+@@ -37,7 +37,7 @@
+ class Exec:
+  def __init__(self,fail=False):self.fail=fail;self.calls=[]
+  def execute_step(self,step,plan,index):self.calls.append(index);return Receipt(plan_id=plan.id,step_index=index,exit_code=1 if self.fail and index==1 else 0)
+-with tempfile.TemporaryDirectory(dir=E/'tmp') as td:
++with tempfile.TemporaryDirectory(dir='/tmp/hive-astra-7734-runtime') as td:
+  t=pathlib.Path(td)
+  for fail in (False,True):
+   app=Appliance(str(t/f'repair-{fail}.db'));app.set_planner(SimplePlanner());x=Exec(fail);app.set_executor(x);app.set_verifier(ExitCodeVerifier());h=HiveAppliance(health_poll_interval=0);h.register_agent(LocalAgentAdapter('a',app));i=IncidentReport(component=str(t/'missing'),symptom='file_missing',severity=Severity.CRITICAL);assert not i.plan_id;app.record_incident(i);h.tick();rs=app.repair(i);h.tick();h.tick();state=h.reducer.state.agents['a'];out={'verified':[r.verified for r in rs],'calls':x.calls,'local_open':len(app.open_incidents()),'hive_open':state.open_incidents,'health':state.health.value,'outcome':app.repair_outcomes[i.id]};assert x.calls==[0,1];assert out['local_open']==out['hive_open']==int(fail);assert out['health']==('failed' if fail else 'healthy');O[f'public_repair_failure_{fail}']=out;app.close()
+@@ -65,4 +65,4 @@
+    paths=[s.get(v.id).local_path for v in (a,b)];assert all(c.folder_manager.contains(p) for p in paths);assert s.delete(a.id) and s.delete(b.id);assert sentinel.read_bytes()==b'untouched'
+   finally:os.chdir(cwd)
+   O[f'production_paths_custom_{custom}']={'root_matches':True,'rejected':admitted,'canonical':stored,'download_results':result,'outside_untouched':True};s.close();c.store.close()
+-(E/'independent.json').write_text(json.dumps(O,indent=2,default=str));print(json.dumps(O,indent=2,default=str))
++(E/'independent-final.json').write_text(json.dumps(O,indent=2,default=str));print(json.dumps(O,indent=2,default=str))

@@ -1,0 +1,13 @@
+{
+  "initial_shell_command": "sh experiments/20261008-astra-7734/commands.sh",
+  "cwd": "/home/openclaw/research-agent/projects/hive-appliance/repos/hive-appliance",
+  "result": "Runner scripts not found because command started outside evidence directory; zero suite/test executions occurred.",
+  "correction": "Invoked sh commands.sh from evidence directory; final command ledger now cd-s to its own directory.",
+  "retained_tempdir_failures": [
+    "probes",
+    "older-regressions",
+    "independent"
+  ],
+  "correction_diff": "tempdir-adaptation.diff",
+  "full_suite_runs": 1
+}
