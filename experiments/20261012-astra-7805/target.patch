@@ -1,0 +1,358 @@
+diff --git a/README.md b/README.md
+index 3a27fb30..b27e56e9 100644
+--- a/README.md
++++ b/README.md
+@@ -109,7 +109,9 @@ directory fsync succeeded; otherwise keep the service stopped and retry.
+ Presence and type checks use `lstat` with errors propagated (only ENOENT is
+ "absent"); only a regular-file marker can be confirmed durable.
+ The journal and its `.id` anchor must be regular files too: a symlink (even a
+-dangling one) or directory fences at startup and is never overwritten. `rebind_plan_owner()` returns a `RebindResult`
++dangling one) or directory fences at startup and is never overwritten.
++These files are always opened non-blocking and type-checked before any read
++or write, so a FIFO swapped in cannot hang the service (Astra 7750). `rebind_plan_owner()` returns a `RebindResult`
+ (`applied` / `refused` / `uncertain`; only `applied` is truthy). If any journal record cannot
+ be verified (torn, edited, reordered, legacy v1-v4 format), the whole journal is
+ fenced: `journal_status()["healthy"]` is False, nothing is replayed and rebinds
+diff --git a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+index 6890fbae..114d8b22 100644
+--- a/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
++++ b/docs/POLICY_MULTI_PLAN_SUPERSESSION.md
+@@ -70,7 +70,7 @@ accident.
+   restore) and `tests/test_astra7195.py::test_policy_*` (local/hive agreement,
+   including health, after every event).
+ 
+-## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741)
++## Hive rebind journal: recovery, fencing and migration (Astra 7638/7656/7678/7694/7701/7708/7718/7727/7734/7741/7750)
+ 
+ - **Configuration.** `HiveAppliance(rebind_journal=PATH)` or the
+   `HIVE_REBIND_JOURNAL` environment variable (an explicit argument wins).
+@@ -176,7 +176,14 @@ accident.
+   `reset_journal()` move such an entry aside intact (`.cleared-<ns>` /
+   `.reset-<ns>`) before writing a regular file. At runtime the journal is
+   opened with `O_NOFOLLOW` and must still be a regular file, otherwise it
+-  fences `changed` (Astra 7741). Limits: if the
++  fences `changed` (Astra 7741). Every open of a journal-namespace file
++  (journal, `.id` anchor, reset-intent marker) is `O_NONBLOCK | O_NOFOLLOW`,
++  `fstat`'d on the descriptor and refused unless it is a regular file before
++  any read or write; blocking mode is restored only after that check, so a
++  FIFO swapped in (at startup, between `lstat` and `open`, during
++  `verify_journal()` or before an append) can never hang the service. A
++  FIFO, directory or symlink swapped in for the journal at runtime fences
++  `changed` and marks the journal unhealthy (Astra 7750). Limits: if the
+   process dies or the error hits before that confirmation, the old journal
+   and `.id` are unchanged on disk, but something may already have changed: a
+   marker, possibly empty or partial, can exist without being durable and may
+@@ -289,5 +296,5 @@ accident.
+   `tests/test_astra7678.py`, `tests/test_astra7694.py`,
+   `tests/test_astra7701.py`, `tests/test_astra7708.py`,
+   `tests/test_astra7718.py`, `tests/test_astra7727.py`,
+-  `tests/test_astra7734.py`, `tests/test_astra7741.py`.
++  `tests/test_astra7734.py`, `tests/test_astra7741.py`, `tests/test_astra7750.py`.
+ 
+diff --git a/hive/reducer.py b/hive/reducer.py
+index 8130bc86..676385bf 100644
+--- a/hive/reducer.py
++++ b/hive/reducer.py
+@@ -114,6 +114,25 @@ class _NotRegularFile(ValueError):
+                          f"({_stat.filemode(mode)})")
+ 
+ 
++def _open_regular_fd(path: str, flags: int, what: str
++                     ) -> "tuple[int, os.stat_result]":
++    """Astra 7750: open a journal-namespace file without ever blocking on it.
++    Opened with O_NONBLOCK | O_NOFOLLOW (a FIFO with no peer cannot hang the
++    open, a symlink fails ELOOP), then fstat'd on the descriptor: anything that
++    is not a regular file raises _NotRegularFile BEFORE any read or write.
++    Blocking mode is restored only after that check.  Returns (fd, fstat)."""
++    fd = os.open(path, flags | os.O_NONBLOCK | getattr(os, "O_NOFOLLOW", 0))
++    try:
++        st = os.fstat(fd)
++        if not _stat.S_ISREG(st.st_mode):
++            raise _NotRegularFile(path, what, st.st_mode)
++        os.set_blocking(fd, True)
++    except BaseException:
++        os.close(fd)
++        raise
++    return fd, st
++
++
+ class HiveReducer:
+     """Processes HiveEvents and maintains HiveState.
+ 
+@@ -404,7 +423,8 @@ class HiveReducer:
+ 
+     @staticmethod
+     def _fsync_dir(path: str) -> None:
+-        dfd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
++        dfd = os.open(os.path.dirname(os.path.abspath(path)),
++                      os.O_RDONLY | os.O_NONBLOCK | getattr(os, "O_DIRECTORY", 0))
+         try:
+             os.fsync(dfd)
+         finally:
+@@ -491,9 +511,12 @@ class HiveReducer:
+                 f"({_stat.filemode(st.st_mode)}); its durability cannot be "
+                 "confirmed. With the service stopped, remove it and retry "
+                 "reset_journal() before any event"), path)
+-        fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
++        try:                                    # Astra 7750: non-blocking
++            fd, fst = _open_regular_fd(path, os.O_RDONLY, "reset-intent marker")
++        except _NotRegularFile as exc:
++            raise OSError(errno.ESTALE, f"reset-intent marker changed while it "
++                          f"was being confirmed ({exc})", path) from exc
+         try:
+-            fst = os.fstat(fd)
+             if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
+                     or fst.st_dev != st.st_dev):
+                 raise OSError(errno.ESTALE, "reset-intent marker changed while "
+@@ -550,13 +573,15 @@ class HiveReducer:
+             return None
+         if not _stat.S_ISREG(st.st_mode):
+             raise _NotRegularFile(path, what, st.st_mode)
+-        try:
+-            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
++        try:                                    # Astra 7750: non-blocking
++            fd, fst = _open_regular_fd(path, os.O_RDONLY, what)
+         except FileNotFoundError as exc:
+             raise OSError(errno.ESTALE, f"{what} vanished between lstat and "
+                           f"open ({exc})", path) from exc
++        except _NotRegularFile as exc:
++            raise OSError(errno.ESTALE, f"{what} changed while it was being "
++                          f"opened ({exc})", path) from exc
+         try:
+-            fst = os.fstat(fd)
+             if (not _stat.S_ISREG(fst.st_mode) or fst.st_ino != st.st_ino
+                     or fst.st_dev != st.st_dev):
+                 raise OSError(errno.ESTALE, f"{what} changed while it was being "
+@@ -919,10 +944,10 @@ class HiveReducer:
+             return True
+         if self._journal_fence is not None:
+             return False
+-        try:
+-            fd = os.open(self._journal_path,
+-                         os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+-        except OSError as exc:
++        try:                                    # Astra 7750: non-blocking
++            fd, _ = _open_regular_fd(self._journal_path, os.O_RDONLY,
++                                     "rebind journal")
++        except (OSError, _NotRegularFile) as exc:
+             self._set_fence("changed", f"journal cannot be opened ({exc})")
+             return False
+         try:
+@@ -943,14 +968,21 @@ class HiveReducer:
+         rec["prev"] = self._journal_tip
+         rec["rec_hash"] = self._rec_hash(rec)
+         data = (json.dumps(rec, sort_keys=True) + "\n").encode("utf-8")
+-        try:
+-            fd = os.open(self._journal_path, os.O_RDWR | os.O_APPEND
+-                         | getattr(os, "O_NOFOLLOW", 0))
++        try:                                    # Astra 7750: non-blocking
++            fd, _ = _open_regular_fd(self._journal_path, os.O_RDWR | os.O_APPEND,
++                                     "rebind journal")
+         except FileNotFoundError as exc:
+             raise _JournalChanged(f"journal file is missing ({exc})") from exc
++        except _NotRegularFile as exc:          # fifo, socket, ...
++            raise _JournalChanged(str(exc)) from exc
+         except OSError as exc:
+-            if exc.errno == errno.ELOOP:            # Astra 7741: now a symlink
+-                raise _JournalChanged(f"journal entry is a symlink ({exc})") from exc
++            # Astra 7741/7750: symlink (ELOOP), directory (EISDIR), fifo with
++            # no reader (ENXIO) or a non-directory parent: the entry was
++            # replaced -> "changed" fence, never a silent healthy refusal
++            if exc.errno in (errno.ELOOP, errno.EISDIR, errno.ENXIO,
++                             errno.ENOTDIR):
++                raise _JournalChanged(f"journal entry was replaced by a "
++                                      f"non-regular file ({exc})") from exc
+             raise
+         try:
+             size, sha = self._verify_on_disk(fd)
+diff --git a/tests/test_astra7638.py b/tests/test_astra7638.py
+index 0b3b767f..a8b4266f 100644
+--- a/tests/test_astra7638.py
++++ b/tests/test_astra7638.py
+@@ -193,7 +193,11 @@ def test_short_or_failed_write_is_clean_refusal(tmp_path):
+     h = run(BASE + [PLAN("p", "i", 1)], journal=str(tmp_path / "j.jsonl"))
+     h._journal_path = str(tmp_path)                   # a directory
+     assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
+-    assert h.journal_status()["healthy"] is True
++    assert h._plan_owner.get("a1:p") is None          # clean refusal
++    # Astra 7750 Low: a directory in place of the journal is a replaced entry
++    # -> "changed" fence and unhealthy (previously reported healthy)
++    st = h.journal_status()
++    assert st["healthy"] is False and st["fence"]["kind"] == "changed"
+ 
+ 
+ # ------------------------------------------------ 4 F-journal-tail
+diff --git a/tests/test_astra7750.py b/tests/test_astra7750.py
+new file mode 100644
+index 00000000..55644e65
+--- /dev/null
++++ b/tests/test_astra7750.py
+@@ -0,0 +1,168 @@
++"""Astra 7750 (docs/ASTRA_REVIEW_7750.md, 4a9b3c5) on 6b750ca.
++1 Med: a FIFO (or other non-regular entry) swapped in for the journal, its .id
++      anchor or the reset-intent marker must never block an open: every open is
++      O_NONBLOCK | O_NOFOLLOW, fstat'd and refused unless a regular file before
++      any read/write (blocking restored only after the check).
++2 Low: a directory swapped in for the journal at runtime sets the "changed"
++      fence and marks the journal unhealthy (like a symlink swap).
++Every test runs under a SIGALRM watchdog so a hang is a failure, not a stall.
++"""
++import contextlib
++import os
++import signal
++
++import pytest
++
++import hive.reducer as hr
++from tests.test_astra7638 import run
++from tests.test_astra7656 import S
++
++LIMIT = 5
++
++
++@contextlib.contextmanager
++def watchdog(sec=LIMIT):
++    def boom(*_):
++        raise TimeoutError(f"hung for more than {sec}s")
++    old = signal.signal(signal.SIGALRM, boom)
++    signal.alarm(sec)
++    try:
++        yield
++    finally:
++        signal.alarm(0)
++        signal.signal(signal.SIGALRM, old)
++
++
++def _fresh(tmp_path, k):
++    d = tmp_path / k
++    d.mkdir()
++    jp = str(d / "rebinds.jsonl")
++    with watchdog():
++        h = run(S, journal=jp)
++    assert h.journal_status()["healthy"] is True and os.path.isfile(jp)
++    return jp, h
++
++
++def _swap(jp, kind):
++    os.replace(jp, jp + ".orig")
++    if kind == "fifo":
++        os.mkfifo(jp)
++    else:
++        os.mkdir(jp)
++
++
++def _fence(h):
++    return h.journal_status()["fence"]
++
++
++@pytest.mark.parametrize("which", ["journal", "anchor"])
++def test_fifo_at_startup_fences_without_hanging(tmp_path, which):
++    jp, _ = _fresh(tmp_path, which)
++    p = jp if which == "journal" else jp + ".id"
++    os.unlink(p)
++    os.mkfifo(p)
++    for _ in range(2):
++        with watchdog():
++            h = run(S, journal=jp)
++        f = _fence(h)
++        assert f["kind"] == "identity" and "not a regular file" in f["error"]
++        assert h.journal_status()["healthy"] is False and h._journal_pending == []
++        assert os.path.exists(p) and not os.path.isfile(p)      # untouched fifo
++    with watchdog():
++        assert h.clear_journal_fence(actor="op", reason="fifo") is True
++        assert run(S, journal=jp).journal_status()["healthy"] is True
++
++
++@pytest.mark.parametrize("which", ["journal", "anchor"])
++def test_fifo_swapped_between_lstat_and_open(tmp_path, monkeypatch, which):
++    jp, _ = _fresh(tmp_path, "race" + which)
++    p = jp if which == "journal" else jp + ".id"
++    real = os.lstat
++    done = [False]
++
++    def lst(q, *a, **k):
++        st = real(q, *a, **k)
++        if os.fspath(q) == p and not done[0]:
++            done[0] = True
++            os.unlink(p)
++            os.mkfifo(p)                    # swapped after lstat, before open
++        return st
++    monkeypatch.setattr(os, "lstat", lst)
++    with watchdog():
++        h = run(S, journal=jp)
++    monkeypatch.undo()
++    assert done[0]
++    f = _fence(h)
++    assert f["kind"] == "unwritable" and "changed while it was being" in f["error"]
++    assert h.journal_status()["healthy"] is False and h._journal_pending == []
++
++
++@pytest.mark.parametrize("kind", ["fifo", "directory"])
++def test_swap_during_verify_journal(tmp_path, kind):
++    jp, h = _fresh(tmp_path, "v" + kind)
++    _swap(jp, kind)
++    with watchdog():
++        assert h.verify_journal() is False
++    assert _fence(h)["kind"] == "changed"
++    assert h.journal_status()["healthy"] is False
++
++
++@pytest.mark.parametrize("kind", ["fifo", "directory"])
++def test_swap_before_append_fences_changed(tmp_path, kind):
++    jp, h = _fresh(tmp_path, "a" + kind)
++    _swap(jp, kind)
++    with watchdog():
++        assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    f = _fence(h)
++    assert f["kind"] == "changed", f
++    assert h.journal_status()["healthy"] is False
++    assert h._plan_owner.get("a1:p") is None            # nothing applied
++    assert os.path.exists(jp) and not os.path.isfile(jp)
++    with watchdog():                                    # later calls refuse too
++        assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++
++
++def test_directory_swap_append_path_alone(tmp_path, monkeypatch):
++    """The append itself (not only verify) must classify EISDIR as changed."""
++    jp, h = _fresh(tmp_path, "dironly")
++    _swap(jp, "directory")
++    monkeypatch.setattr(h, "verify_journal", lambda: True)
++    with watchdog():
++        assert not h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++    assert _fence(h)["kind"] == "changed"
++    assert h.journal_status()["healthy"] is False
++
++
++def test_intent_marker_fifo_is_refused_without_hanging(tmp_path):
++    jp, h = _fresh(tmp_path, "intent")
++    ip = jp + ".reset-intent"
++    os.mkfifo(ip)
++    with watchdog():
++        with pytest.raises((OSError, ValueError)):
++            h._sync_existing_durably(ip)
++
++
++def test_open_regular_fd_refuses_fifo_and_restores_blocking(tmp_path):
++    f = str(tmp_path / "fifo")
++    os.mkfifo(f)
++    with watchdog():
++        with pytest.raises(hr._NotRegularFile):
++            hr._open_regular_fd(f, os.O_RDONLY, "x")
++        with pytest.raises(hr._NotRegularFile):
++            hr._open_regular_fd(f, os.O_RDWR | os.O_APPEND, "x")
++    r = tmp_path / "reg"
++    r.write_bytes(b"abc")
++    fd, st = hr._open_regular_fd(str(r), os.O_RDONLY, "x")
++    try:
++        assert os.get_blocking(fd) is True and st.st_size == 3
++    finally:
++        os.close(fd)
++
++
++def test_healthy_controls_unchanged(tmp_path):
++    jp, h = _fresh(tmp_path, "ok")
++    with watchdog():
++        assert h.verify_journal() is True
++        r = h.rebind_plan_owner("a1", "p", "i", actor="op", reason="t")
++        assert r and r.status == "applied"
++        assert run(S, journal=jp)._plan_owner.get("a1:p") == "i"

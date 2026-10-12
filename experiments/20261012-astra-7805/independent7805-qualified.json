@@ -1,0 +1,114 @@
+[
+  {
+    "case": "append-fifo",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"append-fifo\", \"flags\": [134146], \"real_append_open\": true, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-lodtwb55/journal is FENCED (changed): rebind journal /tmp/hive-astra-7805-runtime/independent7805-lodtwb55/journal exists but is not a regular file (prw-r--r--); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-lodtwb55/journal.fenced-1791821749100402693, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "append-directory",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"append-directory\", \"flags\": [134146], \"real_append_open\": true, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-u6iz5y43/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 21] Is a directory: '/tmp/hive-astra-7805-runtime/independent7805-u6iz5y43/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-u6iz5y43/journal.fenced-1791821749274820634, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "append-symlink",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"append-symlink\", \"flags\": [134146], \"real_append_open\": true, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-nor8t83c/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 40] Too many levels of symbolic links: '/tmp/hive-astra-7805-runtime/independent7805-nor8t83c/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-nor8t83c/journal.fenced-1791821749450804159, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "verify-fifo",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"verify-fifo\", \"flags\": [133120], \"real_append_open\": false, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-4be21ipy/journal is FENCED (changed): journal cannot be opened (rebind journal /tmp/hive-astra-7805-runtime/independent7805-4be21ipy/journal exists but is not a regular file (prw-r--r--)) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-4be21ipy/journal.fenced-1791821749627177782, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "verify-directory",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"verify-directory\", \"flags\": [133120], \"real_append_open\": false, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-zc_i9y9u/journal is FENCED (changed): journal cannot be opened (rebind journal /tmp/hive-astra-7805-runtime/independent7805-zc_i9y9u/journal exists but is not a regular file (drwxr-xr-x)) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-zc_i9y9u/journal.fenced-1791821749801315895, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "verify-symlink",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"verify-symlink\", \"flags\": [133120], \"real_append_open\": false, \"refused\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-as9rixn2/journal is FENCED (changed): journal cannot be opened ([Errno 40] Too many levels of symbolic links: '/tmp/hive-astra-7805-runtime/independent7805-as9rixn2/journal') -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal fence cleared by reviewer (recover nonregular): old journal archived to /tmp/hive-astra-7805-runtime/independent7805-as9rixn2/journal.fenced-1791821749977621384, 0 applied rebind(s) re-journaled\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "errno-EISDIR",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"errno-EISDIR\", \"errno\": 21, \"real_append_path\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-4_eie5g2/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 21] injected append open: '/tmp/hive-astra-7805-runtime/independent7805-4_eie5g2/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "errno-ENXIO",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"errno-ENXIO\", \"errno\": 6, \"real_append_path\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-zlsm5851/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 6] injected append open: '/tmp/hive-astra-7805-runtime/independent7805-zlsm5851/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "errno-ELOOP",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"errno-ELOOP\", \"errno\": 40, \"real_append_path\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-n99ioizm/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 40] injected append open: '/tmp/hive-astra-7805-runtime/independent7805-n99ioizm/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "errno-ENOTDIR",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"errno-ENOTDIR\", \"errno\": 20, \"real_append_path\": true, \"changed\": true, \"restart_held\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-qwwkzudj/journal is FENCED (changed): journal entry was replaced by a non-regular file ([Errno 20] injected append open: '/tmp/hive-astra-7805-runtime/independent7805-qwwkzudj/journal'); rebind a1:p -> i refused (nothing written) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "startup-journal",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"startup-journal\", \"rejected\": true, \"fifo_preserved\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-2joziyh6/journal is FENCED (identity): rebind journal /tmp/hive-astra-7805-runtime/independent7805-2joziyh6/journal exists but is not a regular file (prw-r--r--): it is not followed, not treated as absent and left untouched; nothing is created, adopted or replayed. Inspect it, then call clear_journal_fence() or reset_journal() (both move it aside intact) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "startup-anchor",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"startup-anchor\", \"rejected\": true, \"fifo_preserved\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-lo5udt0g/journal is FENCED (identity): identity anchor /tmp/hive-astra-7805-runtime/independent7805-lo5udt0g/journal.id exists but is not a regular file (prw-r--r--): it is not followed, not treated as absent and left untouched; nothing is created, adopted or replayed. Inspect it, then call clear_journal_fence() or reset_journal() (both move it aside intact) -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "race-journal",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"race-journal\", \"rejected\": true, \"fifo_preserved\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-j169cq05/journal is FENCED (unwritable): rebind journal cannot be created or read ([Errno 116] rebind journal changed while it was being opened (rebind journal /tmp/hive-astra-7805-runtime/independent7805-j169cq05/journal exists but is not a regular file (prw-r--r--)): '/tmp/hive-astra-7805-runtime/independent7805-j169cq05/journal'); no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "race-anchor",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"race-anchor\", \"rejected\": true, \"fifo_preserved\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-5t6t73dx/journal is FENCED (unwritable): rebind journal cannot be created or read ([Errno 116] identity anchor changed while it was being opened (identity anchor /tmp/hive-astra-7805-runtime/independent7805-5t6t73dx/journal.id exists but is not a regular file (prw-r--r--)): '/tmp/hive-astra-7805-runtime/independent7805-5t6t73dx/journal.id'); no journaled rebind is replayed -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nPLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  },
+  {
+    "case": "intent-race-marker",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"intent-race-marker\", \"rejected\": true, \"fifo_preserved\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-jte4qqc8/journal is FENCED (reset_in_progress): reset_journal by reviewer (intent FIFO race) in progress; every pre-reset journaled rebind is discarded -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\nRebind journal /tmp/hive-astra-7805-runtime/independent7805-jte4qqc8/journal is FENCED (reset_failed): reset_journal by reviewer (intent FIFO race) FAILED at step 'confirm existing reset-intent marker': OSError(116, 'reset-intent marker changed while it was being confirmed (reset-intent marker /tmp/hive-astra-7805-runtime/independent7805-jte4qqc8/journal.reset-intent exists but is not a regular file (prw-r--r--))'). Every pre-reset journaled rebind stays discarded (not replayed, not re-journaled by clearance). Durability of the reset-intent marker was NOT confirmed (a marker, possibly empty or partial, is visible now but may not survive a crash). The old journal and .id are unchanged on disk (at most a marker was written), so a restart MAY replay them: keep the service stopped and retry reset_journal() before any replay. -- journal unhealthy, rebinds refused until an operator inspects it and calls clear_journal_fence()\n",
+    "timed_out": false
+  },
+  {
+    "case": "exclusive-create-fifo",
+    "exit_code": 0,
+    "stdout": "{\"case\": \"exclusive-create-fifo\", \"rejected_before_write\": true}\n",
+    "stderr": "PLAN p -> i from a1 held (ownerless plan linked to an open incident): recorded as owner candidate only; use preview_rebind() then rebind_plan_owner()\n",
+    "timed_out": false
+  }
+]

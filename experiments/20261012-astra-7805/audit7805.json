@@ -1,0 +1,72 @@
+{
+  "pin": "a875414ec0281db0a5d5a66b0d12412733f4cbd7",
+  "source_files": 165,
+  "source_export_and_worktree_match_git": true,
+  "os_open_sites": [
+    {
+      "function": "_open_regular_fd",
+      "line": 124,
+      "call": "os.open(path, flags | os.O_NONBLOCK | getattr(os, 'O_NOFOLLOW', 0))"
+    },
+    {
+      "function": "_fsync_dir",
+      "line": 426,
+      "call": "os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY | os.O_NONBLOCK | getattr(os, 'O_DIRECTORY', 0))"
+    },
+    {
+      "function": "_write_file_durably",
+      "line": 461,
+      "call": "os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 384)"
+    }
+  ],
+  "io_sites": [
+    {
+      "function": "_write_all",
+      "line": 453,
+      "call": "os.write(fd, data[off:])"
+    },
+    {
+      "function": "_read_regular",
+      "line": 591,
+      "call": "os.read(fd, 1 << 20)"
+    },
+    {
+      "function": "_verify_on_disk",
+      "line": 926,
+      "call": "os.pread(fd, min(1 << 20, size - off), off)"
+    }
+  ],
+  "helper_callers": [
+    {
+      "function": "_sync_existing_durably",
+      "line": 515,
+      "call": "_open_regular_fd(path, os.O_RDONLY, 'reset-intent marker')"
+    },
+    {
+      "function": "_read_regular",
+      "line": 577,
+      "call": "_open_regular_fd(path, os.O_RDONLY, what)"
+    },
+    {
+      "function": "verify_journal",
+      "line": 948,
+      "call": "_open_regular_fd(self._journal_path, os.O_RDONLY, 'rebind journal')"
+    },
+    {
+      "function": "_journal_write",
+      "line": 972,
+      "call": "_open_regular_fd(self._journal_path, os.O_RDWR | os.O_APPEND, 'rebind journal')"
+    }
+  ],
+  "helper_order_verified": true,
+  "test7638": {
+    "before": "def test_short_or_failed_write_is_clean_refusal(tmp_path):\n    h = run(BASE + [PLAN(\"p\", \"i\", 1)], journal=str(tmp_path / \"j.jsonl\"))\n    h._journal_path = str(tmp_path)                   # a directory\n    assert not h.rebind_plan_owner(\"a1\", \"p\", \"i\", actor=\"op\", reason=\"t\")\n    assert h.journal_status()[\"healthy\"] is True",
+    "after": "def test_short_or_failed_write_is_clean_refusal(tmp_path):\n    h = run(BASE + [PLAN(\"p\", \"i\", 1)], journal=str(tmp_path / \"j.jsonl\"))\n    h._journal_path = str(tmp_path)                   # a directory\n    assert not h.rebind_plan_owner(\"a1\", \"p\", \"i\", actor=\"op\", reason=\"t\")\n    assert h._plan_owner.get(\"a1:p\") is None          # clean refusal\n    # Astra 7750 Low: a directory in place of the journal is a replaced entry\n    # -> \"changed\" fence and unhealthy (previously reported healthy)\n    st = h.journal_status()\n    assert st[\"healthy\"] is False and st[\"fence\"][\"kind\"] == \"changed\"",
+    "setup_and_refusal_unchanged": true,
+    "interpretation": "Legitimate correction: a directory is an integrity/type replacement, not a transient regular-file write error; owner remains unbound. The independent real-path directory witness agrees."
+  },
+  "exceptions": {
+    "exclusive_creation": "O_WRONLY|O_CREAT|O_EXCL creates a new regular file or fails EEXIST on an existing FIFO/symlink/directory before peer wait or write. No helper is required for this open; verified FIFO case. Literal policy every open wording is overbroad, not a durability defect.",
+    "parent_directory": "_fsync_dir uses O_RDONLY|O_NONBLOCK|O_DIRECTORY. Stable trusted ancestor symlinks intentionally allowed; Linux-only qualification."
+  }
+}
