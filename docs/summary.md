@@ -115,7 +115,7 @@ Shared stores, such as the Conversation Store, plug in as `SharedStoreAdapter`s 
 **What the code has** (`hive/`):
 
 - `HiveAppliance` with `register_agent`, `tick`, `execute_action`, `run`/`stop` and `status`/`report`.
-- `HivePlanner` with five rules: restart failed agents, delegate repairs, rebalance resources, `CHECKPOINT_ALL` after a failed checkpoint, and handle stale agents.
+- `HivePlanner` with five rules: restart failed agents, delegate repairs, rebalance resources, checkpoint the healthy agents, and handle stale agents. The fourth rule is named `_rule_checkpoint_failed` (`hive/planner.py:147`), but it does not react to a failed checkpoint. When any agent has failed and at least one healthy agent remains, it emits `CHECKPOINT_ALL` targeting the remaining healthy agents, with reason `agent_failed` (`hive/planner.py:147–155`).
 - `HealthDashboard`, which returns a summary, a text report and trends.
 - `SharedStoreAdapter`.
 
