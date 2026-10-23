@@ -180,9 +180,9 @@ The *integrating service* must also supply credentials, Telegram polling, audien
 **How it is written.**
 
 - The journal starts with a `journal_header` that carries a random `journal_id`. The same id is stored, fsync'd, in an identity anchor file `<journal>.id`. The anchor is created **before** the journal.
-- Each rebind is written as a `rebind_pending` record, then a `rebind_commit` record that names it. Every append is fsync'd, and so is the directory.
+- Each rebind is written as a `rebind_pending` record, then a `rebind_commit` record that names it (`pending_hash`). Each append is written and then the journal file is fsync'd (`_journal_write`, `hive/reducer.py:962`, fsync at `:994`); on a failed write the file is truncated back and fsync'd again (`:998`). An append does **not** fsync the directory. Directory fsyncs (`_fsync_dir`, `:425`) happen only around file creation and namespace operations: creating a new file (`_write_file_durably`, `:458–470`), atomic replace via a temp file (`_replace_durably`, `:632–644`), syncing an existing file (`_sync_existing_durably`, `:527`), moving a non-regular entry aside (`:629`), and in `clear_journal_fence()` when legacy markers are renamed and the reset-intent marker is removed (`:1124`, `:1130`). So a successful journaled rebind costs two file fsyncs (pending, then commit) and no directory fsync.
 - Each record carries `prev` and `rec_hash` (SHA-256), which form a hash chain.
-- Each record also stores the event-stream position (`seq`) and a hash chain over the content of every reduced event. **On restart, the full event stream must be replayed from the beginning.** An entry is re-applied only at exactly that position, and only if the replayed stream hashes the same.
+- Only the `rebind_pending` record stores the event-stream position (`seq`) and the event-stream hash (`stream_digest`) (`hive/reducer.py:1495–1501`). The `journal_header` carries `journal_id`, `ts`, `prev` and `rec_hash` (`:557`), and a `rebind_commit` carries `op_id`, `pending_hash` and `ts` plus the chain fields (`:1507`); neither stores `seq` or the stream hash. `stream_digest` is a hash chain over the content of every reduced event. **On restart, the full event stream must be replayed from the beginning.** A committed rebind is re-applied only at exactly its pending record's `seq`, and only if the replayed stream hashes the same.
 
 **Guarantees, by failure:**
 
@@ -206,7 +206,7 @@ The *integrating service* must also supply credentials, Telegram polling, audien
 - **Rolling back the journal and its `.id` together** (for example, from the same backup) is accepted as healthy, so a discarded authorization could come back. Never restore either file while the hive is in service. If a restore can't be avoided: stop the service, restore both, call `reset_journal()` before any event is reduced, replay the stream, and re-issue the wanted rebinds.
 - **The hashes are not a keyed MAC.** Someone with write access who recomputes them is not detected, so the journal relies on file permissions.
 - **Snapshot or suffix restore** of the event stream is not supported.
-- **Results.** `rebind_plan_owner()` returns a `RebindResult`. Only `"applied"` is truthy, and only it means the commit is durable.
+- **Results.** `rebind_plan_owner()` returns a `RebindResult` (`hive/reducer.py:1434–1450`). Only `"applied"` is truthy. `"applied"` means the commit is durable **only when a journal is configured**: the result is built with `durable=bool(self._journal_path)`. With no journal (volatile mode) a rebind still returns `status="applied"`, truthy, but with `durable=False`; it is not journaled and is lost on restart. Check `durable`, not just truthiness, when durability matters. `"refused"` and `"uncertain"` are falsy.
 
 ---
 
